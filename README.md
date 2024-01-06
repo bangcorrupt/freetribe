@@ -234,10 +234,3 @@ with sysex/binary conversion borrowed from the [Arduino MIDI library](https://gi
 [UGUI](https://github.com/deividAlfa/UGUI) and [micromenu](https://github.com/abcminiuser/micromenu-v2) provide a graphical interface for user applications.
 
 Special thanks to countless stackoverflow users.
-
-## Project layout
-
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
