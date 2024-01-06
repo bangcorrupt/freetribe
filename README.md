@@ -1,4 +1,4 @@
-# Freetribe
+# Introduction
 
 Freetribe is a free, open-source firmware for Electribe 2,
 built from the ground up using original code and open-source projects.
@@ -16,29 +16,29 @@ Some basic examples are provided, showing how to integrate user application code
 The CPU kernel initialises the hardware, processes communication with the outside world
 and controls the Blackfin DSP via a serial command interface.
 
-- **MIDI service**
+#### MIDI Service
 
-  - Serial MIDI input and output via TRS port.
-  - Register callbacks for each type of message received.
-  - Send simple messages such as note and CC.
+- Serial MIDI input and output via TRS port.
+- Register callbacks for each type of message received.
+- Send simple messages such as note and CC.
 
-- **Display service**
+#### Display Service
 
-  - Set or clear a pixel anywhere in the vast 128x64 dot-matrix.
-  - Control backlight RGB (binary).
+- Set or clear a pixel anywhere in the vast 128x64 dot-matrix.
+- Control backlight RGB (binary).
 
-- **Panel service**
+#### Panel Service
 
-  - Register callbacks for all of the panel controls.
-  - Set and toggle LEDs, with brightness control for those with support.
+- Register callbacks for all of the panel controls.
+- Set and toggle LEDs, with brightness control for those with support.
 
-- **System service**
+#### System service
 
-  - Aggregates useful things like print and timing.
+- Aggregates useful things like print and timing.
 
-- **DSP service**
+#### DSP Service
 
-  - Send commands to the Blackfin DSP and receive feedback.
+- Send commands to the Blackfin DSP and receive feedback.
 
 ### DSP Kernel
 
@@ -58,51 +58,51 @@ building up to a more complex application.
 
 Some of these are in progress, most should be possible.
 
-- **High speed DSP control**
+#### High speed DSP Control
 
-  - CPU EMIFA is connected to DSP HostDMA with a 16 bit parallel interface.
-  - (Currently Freetribe uses SPI to control DSP).
+- CPU EMIFA is connected to DSP HostDMA with a 16 bit parallel interface.
+- (Currently Freetribe uses SPI to control DSP).
 
-- **DMA driver**
+#### DMA Driver
 
-  - Implement CPU DMA driver and update device drivers.
+- Implement CPU DMA driver and update device drivers.
 
-- **USB driver**
+#### USB Driver
 
-  - Port TinyUSB.
+- Port TinyUSB.
 
-- **SD card driver**
+#### SD Card Driver
 
-  - Port FatFS.
+- Port FatFS.
 
-- **DSP block processing**
+#### DSP Block Processing
 
-  - Implement block processing using DMA linked descriptors.
+- Implement block processing using DMA linked descriptors.
 
-- **Cache and memory protection**
+#### Cache and Memory Protection
 
-  - Currently everything runs in system mode with no cacheing.
+- Currently everything runs in system mode with no cacheing.
 
-- **Dynamic linking**
+#### Dynamic Linking
 
-  - CPU app and DSP module are currently compiled into the kernels.
-  - Implement as DLL to allow runtime switching of apps/modules/plugins.
+- CPU app and DSP module are currently compiled into the kernels.
+- Implement as DLL to allow runtime switching of apps/modules/plugins.
 
-- **Preemptive scheduling**
+#### Preemptive Scheduling
 
-  - Port FreeRTOS.
+- Port FreeRTOS.
 
-- **MicroPython**
+#### MicroPython
 
-  - As FreeRTOS task.
+- As FreeRTOS task.
 
-- **Sync ports**
+#### Sync Ports
 
-  - Probably debounced GPIO, haven't checked.
+- Probably debounced GPIO, haven't checked.
 
 ## Building
 
-If you're reading this on Github, create a codespace from this repo, then run:
+Create a codespace from the Freetribe Github repo, then run:
 
 ```
 make clean && make
@@ -235,6 +235,9 @@ with sysex/binary conversion borrowed from the [Arduino MIDI library](https://gi
 
 Special thanks to countless stackoverflow users.
 
-## License
+## Project layout
 
-AGPL-3.0-or-later.
+    mkdocs.yml    # The configuration file.
+    docs/
+        index.md  # The documentation homepage.
+        ...       # Other markdown pages, images and other files.
