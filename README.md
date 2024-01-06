@@ -215,7 +215,8 @@ so we can load and execute code without needing a debugger.
 
 Freetribe is free (as in GPL) and always will be.
 If you would like to support my work you are most welcome to become a sponsor.
-Freetribe exists because people sponsored Hacktribe.
+Freetribe exists because people sponsored Hacktribe,
+t really helps keep me motivated and fuelled with coffee.
 
 ## Acknowledgements
 
