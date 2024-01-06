@@ -1,0 +1,17 @@
+Release/
+Debug/
+binary/
+build/
+scripts/
+TODO.txt
+.cache
+*.log
+Session.vim
+*.gdbinit*
+gdb.txt
+compile_commands.json
+*.geany
+*.o
+*.ldr
+*.elf
+*.out

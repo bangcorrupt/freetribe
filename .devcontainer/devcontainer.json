@@ -1,0 +1,1 @@
+{ "dockerComposeFile": "../docker-compose.yaml", "service": "freetribe" }
