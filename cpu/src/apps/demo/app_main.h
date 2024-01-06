@@ -50,8 +50,6 @@ extern "C" {
 
 /*----- Extern function prototypes -----------------------------------*/
 
-void print(char *text);
-
 #ifdef __cplusplus
 }
 #endif

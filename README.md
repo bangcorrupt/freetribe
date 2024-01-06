@@ -1,7 +1,7 @@
 # Freetribe
 
 Freetribe is a free, open-source firmware for Electribe 2.
-Built from the ground up using original code and open-source projects.
+Built from the ground up using original code and open-source projects,
 Freetribe aims to provide a user-friendly API for connecting control input to audio processing.
 
 ## Features
@@ -108,6 +108,8 @@ If you're reading this on Github, create a codespace from this repo, then run:
 make clean && make
 ```
 
+There will be a lot of warnings about incompatible types and implicit declarations, but there should be no errors.
+
 Alternatively, if you have `docker compose` installed on your local machine,
 change to the `freetribe` directory and build the docker image:
 
@@ -139,7 +141,7 @@ but you can probably work it out from the commands in the Dockerfile.
 
 ## Debugging
 
-See the Hacktribe Debrick Guide for more details on getting a debugger attached.
+See the [Hacktribe Debrick Guide](https://github.com/bangcorrupt/hacktribe/wiki/Debrick#rpi-and-openocd) for more details on getting a debugger attached.
 
 ### CPU
 

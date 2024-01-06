@@ -81,7 +81,7 @@ int main(void) {
     while (1) {
 
         if (sport0_frame_received()) {
-            // TODO: Maybe disable interrupts while processing audio. */
+            // TODO: Disable interrupts while processing audio.
             module_process(sport0_get_rx_buffer(), sport0_get_tx_buffer());
 
             sport0_frame_processed();

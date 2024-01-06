@@ -31,7 +31,7 @@ under the terms of the GNU Affero General Public License as published by
 /*
  * @file    svc_cpu.c
  *
- * @brief   Service for communicating weith host CPU.
+ * @brief   Service for communicating with host CPU.
  *
  */
 
@@ -158,9 +158,9 @@ void svc_cpu_task(void) {
 
     default:
         // TODO: Record unhandled state.
-        if (error_check(UNHANDLED_STATE_ERROR) != SUCCESS) { 
-            state = STATE_ERROR; 
-        } 
+        if (error_check(UNHANDLED_STATE_ERROR) != SUCCESS) {
+            state = STATE_ERROR;
+        }
         break;
     }
 }

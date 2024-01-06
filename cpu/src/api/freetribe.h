@@ -62,6 +62,8 @@ extern "C" {
 #include "svc_system.h"
 #include "svc_systick.h"
 
+#include "midi_fsm.h"
+
 #include "knl_main.h"
 #include "usr_main.h"
 
@@ -71,7 +73,25 @@ extern "C" {
 
 /*----- Extern function prototypes -----------------------------------*/
 
+void ft_register_tick_callback(uint32_t divisor, void (*callback)(void));
+
+void ft_register_print_callback(void (*callback)(char *));
 void ft_print(char *text);
+
+void ft_register_midi_callback(event_type event,
+                               midi_event_callback_t callback);
+
+void ft_send_note_on(char chan, char note, char vel);
+void ft_send_note_off(char chan, char note, char vel);
+void ft_send_cc(char chan, char index, char val);
+
+void ft_register_panel_callback(t_panel_event event, void (*callback)());
+void ft_toggle_led(t_led_index led_index);
+
+void ft_set_module_param(uint16_t module_id, uint16_t param_index,
+                         int32_t param_value);
+
+void ft_get_module_param(uint8_t module_id, uint16_t param_index);
 
 #ifdef __cplusplus
 }

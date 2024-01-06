@@ -29,9 +29,9 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /*
- * @file    template.c
+ * @file    freetribe.c
  *
- * @brief   Template for source files.
+ * @brief   Public API for Freetribe applications.
  *
  */
 
@@ -49,7 +49,66 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Extern function implementations ------------------------------*/
 
+// Tick API
+//
+void ft_register_tick_callback(uint32_t divisor, void (*callback)(void)) {
+
+    knl_register_user_tick_callback(divisor, callback);
+}
+
+// Print API
+//
+void ft_register_print_callback(void (*callback)(char *)) {
+
+    svc_system_register_print_callback(callback);
+}
+
 void ft_print(char *text) { svc_midi_send_string(text); }
+
+void ft_register_panel_callback(t_panel_event event, void (*callback)()) {
+
+    svc_panel_register_callback(event, callback);
+}
+
+// MIDI API
+//
+void ft_register_midi_callback(event_type event,
+                               midi_event_callback_t callback) {
+
+    midi_register_event_handler(event, callback);
+}
+
+void ft_send_note_on(char chan, char note, char vel) {
+
+    svc_midi_send_note_on(chan, note, vel);
+}
+
+void ft_send_note_off(char chan, char note, char vel) {
+
+    svc_midi_send_note_off(chan, note, vel);
+}
+
+void ft_send_cc(char chan, char index, char val) {
+
+    svc_midi_send_cc(chan, index, val);
+}
+
+// LED API
+//
+void ft_toggle_led(t_led_index led_index) { svc_panel_toggle_led(led_index); }
+
+// DSP Command API
+//
+void ft_set_module_param(uint16_t module_id, uint16_t param_index,
+                         int32_t param_value) {
+
+    svc_dsp_set_module_param(module_id, param_index, param_value);
+}
+
+void ft_get_module_param(uint8_t module_id, uint16_t param_index) {
+
+    svc_dsp_get_module_param(module_id, param_index);
+}
 
 /*----- Static function implementations ------------------------------*/
 
