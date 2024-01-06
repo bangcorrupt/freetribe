@@ -28,10 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    freetribe.h
  *
- * @brief   Public API for interacting with Freetribe kernel.
+ * @brief   Public API for Freetribe application library.
  *
  */
 
