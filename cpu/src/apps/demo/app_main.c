@@ -112,7 +112,7 @@ t_status app_init(void) {
 }
 
 /**
- * @brief   Run application.  Called continuosly in the main loop.
+ * @brief   Run application.  Called continuously in the main loop.
  *
  * Declared as a weak reference in the Freetribe API,
  * must be implemented by the app developer.
