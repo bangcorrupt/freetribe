@@ -39,7 +39,6 @@ under the terms of the GNU Affero General Public License as published by
  * and printing to the display.  Received MIDI note messages
  * are echoed to the output and a blinking LED is driven by the
  * user tick.  An external library is integrated for GUI management.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/
