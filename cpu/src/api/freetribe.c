@@ -59,8 +59,8 @@ under the terms of the GNU Affero General Public License as published by
  * The kernel systick triggers once per millisecond.
  * Set the divisor greater than 0 to trigger the user tick callback less often.
  *
- * @param   divisor     Ratio of kernel ticks to user ticks.
- * @param   callback    Function to call.
+ * @param[in]   divisor     Ratio of kernel ticks to user ticks.
+ * @param[in]   callback    Function to call.
  *
  */
 void ft_register_tick_callback(uint32_t divisor, void (*callback)(void)) {
@@ -83,7 +83,7 @@ void ft_register_print_callback(void (*callback)(char *)) {
  * String will be encapsulated with 0xf7...0xf0
  * to ensure it passes through receiving MIDI drivers.
  *
- * @param   text    String to be printed.
+ * @param[in]   text    String to be printed.
  *
  */
 void ft_print(char *text) { svc_midi_send_string(text); }
@@ -92,8 +92,8 @@ void ft_print(char *text) { svc_midi_send_string(text); }
 /**
  * @brief   Register a callback for panel control input events.
  *
- * @param   event       Type of event to catch.
- * @param   callback    Function to call.
+ * @param[in]   event       Type of event to catch.
+ * @param[in]   callback    Function to call.
  *
  */
 void ft_register_panel_callback(t_panel_event event, void (*callback)()) {
@@ -107,8 +107,8 @@ void ft_register_panel_callback(t_panel_event event, void (*callback)()) {
 /**
  * @brief   Register a callback MIDI input events.
  *
- * @param   event       Type of event to catch.
- * @param   callback    Function to call.
+ * @param[in]   event       Type of event to catch.
+ * @param[in]   callback    Function to call.
  *
  */
 void ft_register_midi_callback(event_type event,
@@ -120,9 +120,9 @@ void ft_register_midi_callback(event_type event,
 /**
  * @brief   Send MIDI note on message.
  *
- * @param   chan    MIDI channel.
- * @param   note    MIDI note number.
- * @param   vel     MIDI note velocity.
+ * @param[in]   chan    MIDI channel.
+ * @param[in]   note    MIDI note number.
+ * @param[in]   vel     MIDI note velocity.
  *
  */
 void ft_send_note_on(char chan, char note, char vel) {
@@ -133,9 +133,9 @@ void ft_send_note_on(char chan, char note, char vel) {
 /**
  * @brief   Send MIDI note off message.
  *
- * @param   chan    MIDI channel.
- * @param   note    MIDI note number.
- * @param   vel     MIDI note velocity.
+ * @param[in]   chan    MIDI channel.
+ * @param[in]   note    MIDI note number.
+ * @param[in]   vel     MIDI note velocity.
  *
  */
 void ft_send_note_off(char chan, char note, char vel) {
@@ -146,9 +146,9 @@ void ft_send_note_off(char chan, char note, char vel) {
 /**
  * @brief   Send MIDI control change message.
  *
- * @param   chan    MIDI channel.
- * @param   index   MIDI CC number.
- * @param   val     MIDI CC value.
+ * @param[in]   chan    MIDI channel.
+ * @param[in]   index   MIDI CC number.
+ * @param[in]   val     MIDI CC value.
  *
  */
 void ft_send_cc(char chan, char index, char val) {
@@ -161,7 +161,7 @@ void ft_send_cc(char chan, char index, char val) {
 /**
  * @brief   Toggle LED into the opposite state.
  *
- * @param   led_index   Index of LED to toggle.
+ * @param[in]   led_index   Index of LED to toggle.
  *
  */
 void ft_toggle_led(t_led_index led_index) { svc_panel_toggle_led(led_index); }
@@ -171,9 +171,9 @@ void ft_toggle_led(t_led_index led_index) { svc_panel_toggle_led(led_index); }
 /**
  * @brief   Set parameter value in DSP audio module.
  *
- * @param   module_id   Index of module to address.
- * @param   param_index Index of parameter to set.
- * @param   param_value Value of parameter.
+ * @param[in]   module_id   Index of module to address.
+ * @param[in]   param_index Index of parameter to set.
+ * @param[in]   param_value Value of parameter.
  *
  */
 void ft_set_module_param(uint16_t module_id, uint16_t param_index,
@@ -188,8 +188,8 @@ void ft_set_module_param(uint16_t module_id, uint16_t param_index,
  * First register a callback for MODULE_PARAM_VALUE event,
  * then call this to request the data from the DSP.
  *
- * @param   module_id   Index of module to address.
- * @param   param_index Index of parameter to get.
+ * @param[in]   module_id   Index of module to address.
+ * @param[in]   param_index Index of parameter to get.
  *
  */
 void ft_get_module_param(uint8_t module_id, uint16_t param_index) {

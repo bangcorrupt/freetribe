@@ -28,10 +28,17 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    app_main.c
  *
  * @brief   Freetribe demo application.
+ *
+ * Demontsrates using the Freetribe API to handle events,
+ * control the DSP and provide feedback.  Level knob controls
+ * amplitude scaling of audio-passthrough while sending MIDI CC
+ * and printing to the display.  Received MIDI note messages
+ * are echoed to the output and a blinking LED is driven by the
+ * user tick.  An external library is integrated for GUI management.
  *
  */
 
@@ -76,14 +83,45 @@ static char *_build_string(uint8_t value);
 
 /*----- Extern function implementations ------------------------------*/
 
+/**
+ * @brief   Initialise application. Called once when app starts.
+ *
+ * Declared as a weak reference in the Freetribe API,
+ * must be implemented by app developer.  This is a
+ * good place to register callbacks and do any setup
+ * required by external libraries.
+ * In this example, we register callbacks for
+ * MIDI and panel input, then initialise the uGUI
+ * library.  Status is assumed successful.
+ *
+ * @return status   Status code indicating success:
+ *                  - #SUCCESS
+ *                  - #WARNING
+ *                  - #ERROR
+ * @include app_main.c
+ */
 t_status app_init(void) {
+
+    t_status status = ERROR;
 
     _register_callbacks();
     _ui_init();
 
-    return 0;
+    status = SUCCESS;
+
+    return status;
 }
 
+/**
+ * @brief   Run application.  Called continuosly in the main loop.
+ *
+ * Declared as a weak reference in the Freetribe API,
+ * must be implemented by the app developer.
+ * Must not block, as this would block the kernel.
+ * Set flags in event handlers and test them here.
+ * In this example, we test a flag set in the tick
+ * callback and conditionally toggle an LED.
+ */
 void app_run(void) {
 
     if (g_toggle_led) {
@@ -95,6 +133,13 @@ void app_run(void) {
 
 /*----- Static function implementations ------------------------------*/
 
+/**
+ * @brief   Register callbacks for MIDI and panel events.
+ *
+ * When the events occur, the callback functions will be executed.
+ * In this example, we register callbacks for the user tick,
+ * MIDI note on/off and panel knob input.
+ */
 static void _register_callbacks() {
 
     ft_register_tick_callback(USER_TICK_DIV, _user_tick_callback);
@@ -104,6 +149,13 @@ static void _register_callbacks() {
     ft_register_panel_callback(KNOB_EVENT, _knob_callback);
 }
 
+/**
+ * @brief   Initialise the uGUI library.
+ *
+ * uGUI requires a function to print a pixel and
+ * the dimensions of the display.  We also configure
+ * the font and console before filling the screen black.
+ */
 static void _ui_init(void) {
 
     // Initialise uGUI
@@ -117,6 +169,17 @@ static void _ui_init(void) {
     UG_FillScreen(C_BLACK);
 }
 
+/**
+ * @brief   Callback triggered by user tick events.
+ *
+ * The Freetribe kernel systick ISR sets a flag to
+ * trigger the kernel tick callback in the main loop.
+ * The kernel tick callback triggers the user tick
+ * callback at specified subdivisions.
+ * In this example, we count the number of ticks
+ * and when it reaches DEBUG_TICK_DIV we set a
+ * flag to be tested in the app_run function.
+ */
 static void _user_tick_callback(void) {
 
     static uint16_t debug;
@@ -131,14 +194,49 @@ static void _user_tick_callback(void) {
     }
 }
 
+/**
+ * @brief   Callback triggered by MIDI note on events.
+ *
+ * Echo received note on messages to MIDI output.
+ *
+ * @param[in]   chan    MIDI channel.
+ * @param[in]   note    MIDI note number.
+ * @param[in]   vel     MIDI note velocity.
+ */
 static void _note_on_callback(char chan, char note, char vel) {
     ft_send_note_on(chan, note, vel);
 }
 
+/**
+ * @brief   Callback triggered by MIDI note off events.
+ *
+ * Echo received note off messages to MIDI output.
+ *
+ * @param[in]   chan    MIDI channel.
+ * @param[in]   note    MIDI note number.
+ * @param[in]   vel     MIDI note velocity.
+ */
 static void _note_off_callback(char chan, char note, char vel) {
     ft_send_note_off(chan, note, vel);
 }
 
+/**
+ * @brief   Callback triggered by panel knob events.
+ *
+ * Parse knob index and act on value.
+ * Here we send a MIDI CC message on channel 0,
+ * with CC number equal to knob index, for all knobs.
+ * The panel MCU sends 8 bit unsigned values for
+ * knobs, so we right shift by 1 for MIDI CC values.
+ * For the Level knob only, we set parameters 0 and 1
+ * in the DSP audio module.  The DSP expects 32 bit
+ * signed values for module parameters, so we left
+ * shift by 23.  This gives us most of the positive
+ * range (0-0x7f800000) with an efficient operation.
+ *
+ * @param[in]   index   Index of knob.
+ * @param[in]   value   Values of knob.
+ */
 void _knob_callback(uint8_t index, uint8_t value) {
 
     ft_send_cc(0, index, value >> 1);
@@ -154,17 +252,42 @@ void _knob_callback(uint8_t index, uint8_t value) {
     }
 }
 
-// UGUI uses 16 bits per pixel, we are using 1 bpp.
+/**
+ * @brief   Put pixel functon for uGUI library.
+ *
+ * User defined function required by uGUI.
+ * Sets or clears a pixel at the specified coordinates.
+ * uGUI uses 16 bits per pixel, Freetribe expects 1 bit per pixel.
+ *
+ * @param[in]   x   Horizontal position of pixel.
+ * @param[in]   y   Vertical position of pixel.
+ * @param[in]   c   Colour value, in this case 0 or 1.
+ */
 static void _put_pixel(UG_S16 x, UG_S16 y, UG_COLOR c) {
 
     svc_display_put_pixel(x, y, !c);
 }
 
+/**
+ * @brief   Print a string to the uGUI console.
+ *
+ * @param[in]   text    String to print.
+ */
 static void _ui_print(char *text) {
     //
     UG_ConsolePutString(text);
 }
 
+/**
+ * @brief   Utility function to build parameter string.
+ *
+ * Converts integer value of knob to string and
+ * concatenates with parameter name.
+ *
+ * @note    Currently only supports 'Volume' parameter.
+ *
+ * @param[in]   value   Value of parameter.
+ */
 static char *_build_string(uint8_t value) {
 
     char value_string[5];

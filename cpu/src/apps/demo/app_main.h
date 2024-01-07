@@ -28,11 +28,12 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    app_main.h
  *
- * @brief   Public API for app_main.c.
+ * @brief   Public API for Freetribe demo application.
  *
+ * For this example, nothing.
  */
 
 #ifndef APP_MAIN_H

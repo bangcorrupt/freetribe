@@ -3,6 +3,7 @@ Debug/
 binary/
 build/
 scripts/
+docs/
 TODO.txt
 .cache
 *.log

@@ -53,7 +53,6 @@ under the terms of the GNU Affero General Public License as published by
 
 // Maximum positive fract32 value
 #define PARAM_AMP_MAX 0x7fffffff
-/* #define PARAM_SLEW_DEFAULT 0x7ffecccc */
 #define PARAM_SLEW_DEFAULT 0x00010000
 
 // Enumerate parameters.
