@@ -39,6 +39,7 @@ under the terms of the GNU Affero General Public License as published by
  * and printing to the display.  Received MIDI note messages
  * are echoed to the output and a blinking LED is driven by the
  * user tick.  An external library is integrated for GUI management.
+ *
  */
 
 /*----- Includes -----------------------------------------------------*/
@@ -85,7 +86,7 @@ static char *_build_string(uint8_t value);
 /**
  * @brief   Initialise application. Called once when app starts.
  *
- * Declared as a weak reference in the Freetribe API,
+ * Defined as a weak reference in the Freetribe API,
  * must be implemented by app developer.  This is a
  * good place to register callbacks and do any setup
  * required by external libraries.
@@ -114,7 +115,7 @@ t_status app_init(void) {
 /**
  * @brief   Run application.  Called continuously in the main loop.
  *
- * Declared as a weak reference in the Freetribe API,
+ * Defined as a weak reference in the Freetribe API,
  * must be implemented by the app developer.
  * Must not block, as this would block the kernel.
  * Set flags in event handlers and test them here.
@@ -236,6 +237,9 @@ static void _note_off_callback(char chan, char note, char vel) {
  * @param[in]   index   Index of knob.
  * @param[in]   value   Values of knob.
  */
+/// TODO: We are doing too much in the callbacks.
+/// Just copy values to local data structure,
+/// then act in the main loop.
 void _knob_callback(uint8_t index, uint8_t value) {
 
     ft_send_cc(0, index, value >> 1);

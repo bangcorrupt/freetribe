@@ -34,7 +34,6 @@ under the terms of the GNU Affero General Public License as published by
  * @brief   Freetribe application library.
  *
  * A set of wrappers for user applications to access kernel functions.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/
@@ -61,7 +60,6 @@ under the terms of the GNU Affero General Public License as published by
  *
  * @param[in]   divisor     Ratio of kernel ticks to user ticks.
  * @param[in]   callback    Function to call.
- *
  */
 void ft_register_tick_callback(uint32_t divisor, void (*callback)(void)) {
 
@@ -71,7 +69,6 @@ void ft_register_tick_callback(uint32_t divisor, void (*callback)(void)) {
 // Print API
 //
 // TODO: What is going on with print?
-//
 void ft_register_print_callback(void (*callback)(char *)) {
 
     svc_system_register_print_callback(callback);
@@ -88,7 +85,6 @@ void ft_register_print_callback(void (*callback)(char *)) {
  */
 void ft_print(char *text) { svc_midi_send_string(text); }
 
-// TODO: Separate function for each event type.
 /**
  * @brief   Register a callback for panel control input events.
  *
@@ -96,6 +92,7 @@ void ft_print(char *text) { svc_midi_send_string(text); }
  * @param[in]   callback    Function to call.
  *
  */
+// TODO: Separate function for each event type.
 void ft_register_panel_callback(t_panel_event event, void (*callback)()) {
 
     svc_panel_register_callback(event, callback);
@@ -103,7 +100,6 @@ void ft_register_panel_callback(t_panel_event event, void (*callback)()) {
 
 // MIDI API
 //
-// TODO: Separate function for each event type.
 /**
  * @brief   Register a callback MIDI input events.
  *
@@ -111,6 +107,7 @@ void ft_register_panel_callback(t_panel_event event, void (*callback)()) {
  * @param[in]   callback    Function to call.
  *
  */
+// TODO: Separate function for each event type.
 void ft_register_midi_callback(event_type event,
                                midi_event_callback_t callback) {
 
