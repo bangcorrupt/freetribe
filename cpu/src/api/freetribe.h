@@ -28,15 +28,13 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
+/// TODO: This should expose only those functions required by user applications.
+///       For now we just include the service layer directly.
 /**
  * @file    freetribe.h
  *
  * @brief   Public API for Freetribe application library.
- *
  */
-
-// TODO: This should expose only those functions required by user applications.
-//       For now we just include the service layer directly.
 
 #ifndef FREETRIBE_H
 #define FREETRIBE_H
