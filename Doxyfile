@@ -943,15 +943,8 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ./docs/md/index.md \
-                         ./docs/md/features.md \
-                         ./docs/md/getting-started.md \
-                         ./docs/md/support.md \
-                         ./docs/md/acknowledgements.md \
-                         ./docs/md/license.md \
-                         ./docs/md \
-                         ./cpu/src/api/ \
-                         ./cpu/src/apps/demo/ 
+INPUT                =  ./cpu/src/api/ \
+                        ./cpu/src/apps/demo/ 
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -2224,7 +2217,7 @@ MAN_LINKS              = NO
 # captures the structure of the code including all documentation.
 # The default value is: NO.
 
-GENERATE_XML           = NO
+GENERATE_XML           = YES
 
 # The XML_OUTPUT tag is used to specify where the XML pages will be put. If a
 # relative path is entered the value of OUTPUT_DIRECTORY will be put in front of
