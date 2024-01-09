@@ -8,69 +8,72 @@
 
  */
 
-#include "delay.h"
 #include "conversion.h"
+#include "delay.h"
+
 
 // initialize with pointer to audio buffer
-void delay_init(delayLine *dl, fract32 *data, u32 frames) {
-    buffer_init(&(dl->buffer), data, frames);
-    buffer_tapN_init(&(dl->tapWr), &(dl->buffer));
-    bufferTap24_8_init(&(dl->tapRd), &(dl->buffer));
+void delay_init(delayLine* dl, fract32* data, u32 frames) {
+  buffer_init(&(dl->buffer), data, frames);
+  buffer_tapN_init(&(dl->tapWr), &(dl->buffer));
+  bufferTap24_8_init(&(dl->tapRd), &(dl->buffer));
 
-    /*
-    fix32 single_speed;
-    single_speed.i = 1;
-    single_speed.fr = 0;
-    delay_set_rate(&(dl->tapRd), single_speed);
-    delay_set_rate(&(dl->tapWr), single_speed);
-    dl->preLevel = 0;
-    dl->write = 1;
-    */
+
+  /*
+  fix32 single_speed;
+  single_speed.i = 1;
+  single_speed.fr = 0;
+  delay_set_rate(&(dl->tapRd), single_speed);
+  delay_set_rate(&(dl->tapWr), single_speed);
+  dl->preLevel = 0;
+  dl->write = 1;
+  */
 }
 
-fract32 delay_next(delayLine *dl, fract32 in) {
-    // If you return in, we have a delay of zero length - works!
-    // return in;
+fract32 delay_next(delayLine* dl, fract32 in) {
+  //If you return in, we have a delay of zero length - works!
+  //return in;
 
-    buffer_tapN_write(&(dl->tapWr), in);
+  buffer_tapN_write(&(dl->tapWr), in);
 
-    fract32 readVal;
-    readVal = bufferTap24_8_read(&(dl->tapRd));
+  fract32 readVal;
+  readVal = bufferTap24_8_read( &(dl->tapRd) );
 
-    // advance the write phasor
-    // if(dl->runWr) {
-    buffer_tapN_next(&(dl->tapWr));
-    //}
 
-    // advance the read phasor
-    // if(dl->runRd) {
-    bufferTap24_8_next(&(dl->tapRd));
-    //}
+  // advance the write phasor
+  //if(dl->runWr) {
+    buffer_tapN_next( &(dl->tapWr) );
+  //}
 
-    // For now the write head always writes over any contents...
+  // advance the read phasor
+  //if(dl->runRd) {
+    bufferTap24_8_next( &(dl->tapRd) );
+  //}
 
-    // so this is commented
-    /*
-      // figure out what to write
-      if(dl->preLevel == 0) {
-        if(dl->write) {
-          // write and replace
-          buffer_tap_write(&(dl->tapWr), in);
-        }
-      } else if(dl->preLevel < 0) { // consider <0 to be == 1
-        if(dl->write) {
-          // overdub
-          buffer_tap_add(&(dl->tapWr), in);
-        }
-      } else { // prelevel is non-zero, non-full
-        if(dl->write) {
-          // write mix
-          buffer_tap_mix(&(dl->tapWr), in, dl->preLevel);
-        }
-      }
-      */
+//For now the write head always writes over any contents...
 
-    return readVal;
+//so this is commented
+/*
+  // figure out what to write
+  if(dl->preLevel == 0) {
+    if(dl->write) {
+      // write and replace
+      buffer_tap_write(&(dl->tapWr), in);
+    }
+  } else if(dl->preLevel < 0) { // consider <0 to be == 1
+    if(dl->write) {
+      // overdub
+      buffer_tap_add(&(dl->tapWr), in);
+    }
+  } else { // prelevel is non-zero, non-full
+    if(dl->write) {
+      // write mix
+      buffer_tap_mix(&(dl->tapWr), in, dl->preLevel);
+    }
+  }
+  */
+
+  return readVal;
 }
 
 /*
@@ -99,17 +102,15 @@ fract32 delay_next(delayLine *dl, fract32 in) {
 }
 
 */
-void delay_set_delay_24_8(delayLine *dl, s32 subsamples) {
-    // this sets a fractional delay in samples/256
-    bufferTap24_8_syncN(&(dl->tapRd), &(dl->tapWr), subsamples);
+void delay_set_delay_24_8(delayLine* dl, s32 subsamples) {
+  //this sets a fractional delay in samples/256
+  bufferTap24_8_syncN(&(dl->tapRd), &(dl->tapWr), subsamples);
 }
-
 // set delay in samples
-void delay_set_delay_samp(delayLine *dl, s32 samples) {
-    s32 subsamples = samples * 256;
-    bufferTap24_8_syncN(&(dl->tapRd), &(dl->tapWr), subsamples);
+ void delay_set_delay_samp(delayLine* dl, s32 samples) {
+  s32 subsamples = samples * 256;
+  bufferTap24_8_syncN(&(dl->tapRd), &(dl->tapWr), subsamples);
 }
-
 /*
 
 // set erase level
@@ -142,14 +143,12 @@ void delay_set_rate(bufferTap* tap, fix32 rate) {
 }
 */
 
-void delay_set_pos_write_samp(delayLine *dl, u32 samp) {
-    buffer_tapN_set_pos(&(dl->tapWr), samp);
+void delay_set_pos_write_samp(delayLine* dl, u32 samp) {
+  buffer_tapN_set_pos(&(dl->tapWr), samp);
 }
-
-void delay_set_pos_read_samp(delayLine *dl, u32 samp) {
-    bufferTap24_8_set_pos(&(dl->tapRd), samp * 256);
+void delay_set_pos_read_samp(delayLine* dl, u32 samp) {
+  bufferTap24_8_set_pos(&(dl->tapRd), samp*256);
 }
-
 /*
 // set read run flag
  void delay_set_run_read(delayLine* dl, u8 val) {

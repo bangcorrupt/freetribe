@@ -7,14 +7,22 @@
 
  */
 
+#ifdef ARCH_BFIN // bfin
 #include "fract_math.h"
 #include <fract2float_conv.h>
+#else // linux
+
+#include "fract32_emu.h"
+#include "stdio.h"
+#endif
 
 #include "buffer.h"
 #include "conversion.h"
 #include "fix.h"
+#include "fix16_fract.h"
 #include "fix32.h"
 #include "module.h"
+#include "pan.h"
 
 //---------------------------
 //--- static
@@ -25,7 +33,7 @@
 // initialize a (mono) audio buffer at pre-allocated memory
 // give a separate contiguous chunk so we can use an arbitrary size
 // but keep it statically linked at SDRAM
-void buffer_init(audioBuffer *buf, fract32 *data, u32 frames) {
+void buffer_init(audioBuffer *buf, volatile fract32 *data, u32 frames) {
     // u32 i;
     buf->data = data;
     buf->frames = frames;
@@ -183,7 +191,7 @@ fract32 buffer_tapN_read(bufferTapN *tap) {
       b = tap->buf->data[ tap->idx + 1 ];
     }
     tmp = FRACT_FIX16( sub_fr1x32(b, a) );
-    tmp = fix16_mul(tmp, fix16_from_int(tap->divCount));
+    tmp = fix16_mul_fract(tmp, fix16_from_int(tap->divCount));
     return add_fr1x32(a, FIX16_FRACT_TRUNC(tmp));
   }
 #else
@@ -213,9 +221,7 @@ void buffer_tapN_next(bufferTapN *tap) {
     if (tap->divCount >= tap->div) {
         tap->divCount = 0;
         tap->idx += tap->inc;
-        while (tap->idx >= tap->loop) {
-            tap->idx -= tap->loop;
-        }
+        tap->idx %= tap->loop;
     }
 }
 
@@ -231,10 +237,13 @@ void buffer_tapN_set_div(bufferTapN *tap, u32 div) {
 
 // set rate divisor
 void buffer_tapN_set_loop(bufferTapN *tap, u32 loop) {
-    while (loop > (tap->buf->frames - 1)) {
-        loop -= tap->buf->frames;
+    if (loop < 0) {
+        tap->loop = 0;
+    } else if (loop > tap->buf->frames) {
+        tap->loop = tap->buf->frames;
+    } else {
+        tap->loop = loop;
     }
-    tap->loop = loop;
 }
 
 // initialize tap with buffer descriptor
@@ -261,10 +270,7 @@ void buffer_tapN_sync(bufferTapN *tap, bufferTapN *target, u32 samps) {
 
 // set tap position directly (wraps to loop)
 void buffer_tapN_set_pos(bufferTapN *tap, u32 samps) {
-    while (samps > tap->loop) {
-        samps -= tap->loop;
-    }
-    tap->idx = samps;
+    tap->idx = samps % tap->loop;
 }
 
 // copy all params
@@ -314,11 +320,11 @@ extern void bufferTap24_8_init(bufferTap24_8 *tap, audioBuffer *buf) {
     tap->idx = 0;
 }
 
-extern void bufferTap24_8_next(bufferTap24_8 *tap) {
+void bufferTap24_8_next(bufferTap24_8 *tap) {
     tap->idx = (tap->inc + tap->idx + tap->loop) % tap->loop;
 }
 
-extern fract32 bufferTap24_8_read(bufferTap24_8 *tap) {
+fract32 bufferTap24_8_read(bufferTap24_8 *tap) {
     u32 samp1_index = tap->idx;
     u32 samp2_index = (tap->idx + 256 + tap->loop) % tap->loop;
     fract32 samp1 = tap->buf->data[samp1_index / 256];
@@ -327,11 +333,9 @@ extern fract32 bufferTap24_8_read(bufferTap24_8 *tap) {
     return pan_lin_mix(samp1, samp2, inter_sample);
 }
 
-extern void bufferTap24_8_set_rate(bufferTap24_8 *tap, s32 inc) {
-    tap->inc = inc;
-}
+void bufferTap24_8_set_rate(bufferTap24_8 *tap, s32 inc) { tap->inc = inc; }
 
-extern fract32 bufferTap24_8_read_from(bufferTap24_8 *tap, s32 idx) {
+fract32 bufferTap24_8_read_from(bufferTap24_8 *tap, s32 idx) {
     u32 samp1_index = idx;
     u32 samp2_index = (idx + 256 + tap->loop) % tap->loop;
 
@@ -341,42 +345,15 @@ extern fract32 bufferTap24_8_read_from(bufferTap24_8 *tap, s32 idx) {
     return pan_lin_mix(samp1, samp2, inter_sample);
 }
 
-/*
-extern fract32 bufferTap24_8_read_antialias(bufferTap24_8* tap){
-    //FIXME this should happen at the *end* of this subroutine.
-    //Proably this isn't working after all, just taking an average of one
-    //Doesn't work
-    s32 idx = tap->idx;
-    s32 idx_last = tap->idx_last;
-    if (idx_last > idx)
-        idx += tap->loop;
-    s32 num_points = idx - idx_last / 256;
-    if (num_points < 1)
-        num_points = 1;
-    fract32 weight = FR32_MAX / num_points;
-    fract32 result = 0;
-    while (num_points > 0) {
-        result = add_fr1x32( result, mult_fr1x32x32( weight,
-bufferTap24_8_read_from(tap, idx) ) ); idx -= 256; num_points --;
-    }
-    tap->idx_last = tap->idx;
-    return result;
+void bufferTap24_8_set_loop(bufferTap24_8 *tap, s32 loop) { tap->loop = loop; }
 
-}
-*/
-extern void bufferTap24_8_set_loop(bufferTap24_8 *tap, s32 loop) {
-    tap->loop = loop;
-}
-
-extern void bufferTap24_8_syncN(bufferTap24_8 *tap, bufferTapN *target,
-                                s32 offset_subsamples) {
+void bufferTap24_8_syncN(bufferTap24_8 *tap, bufferTapN *target,
+                         s32 offset_subsamples) {
     tap->idx =
         ((256 * target->idx - offset_subsamples) + tap->loop) % tap->loop;
 }
 
-extern void bufferTap24_8_set_pos(bufferTap24_8 *tap, s32 idx) {
-    tap->idx = idx;
-}
+void bufferTap24_8_set_pos(bufferTap24_8 *tap, s32 idx) { tap->idx = idx; }
 
 /* //--------------------------- */
 /* //---- crossfade */
