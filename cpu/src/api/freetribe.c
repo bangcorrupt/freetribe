@@ -77,7 +77,7 @@ void ft_register_tick_callback(uint32_t divisor, void (*callback)(void)) {
  *
  * @return  Current value of delay timer.
  */
-uint32_t ft_delay_get_current(void) {
+uint32_t ft_get_delay_current(void) {
 
 	/// TODO: Refactor delay functions.
 	return delay_get_current_count();
@@ -87,7 +87,7 @@ uint32_t ft_delay_get_current(void) {
 /**
  * @brief   Non-blocking delay from `start_time` for `delay_time`.
  *
- * Use `ft_delay_get_current()` to get the start time, then 
+ * Use `ft_get_delay_current()` to get the start time, then 
  * use this API to test if `delay_time` microseconds have passed.
  *
  * @return  True if at least `delay_time` microseconds have passed since `start_time`.
