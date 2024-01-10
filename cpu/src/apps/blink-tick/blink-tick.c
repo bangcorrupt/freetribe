@@ -71,7 +71,6 @@ static void _tick_callback(void);
  */
 t_status app_init(void) {
 
-
     t_status status = ERROR;
 
     ft_register_tick_callback(USER_TICK_DIV, _tick_callback);
@@ -80,7 +79,7 @@ t_status app_init(void) {
 }
 
 /**
- * @brief   Run the application.
+ * @brief   Run application.
  *
  * Test a flag set in the tick callback 
  * and conditionally toggle an LED.

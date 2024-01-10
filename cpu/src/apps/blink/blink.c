@@ -57,11 +57,6 @@ static uint32_t g_start_time;
 /*----- Extern function implementations ------------------------------*/
 
 /**
- * @brief   Initialise the application.
- *
- * 
- */
-/**
  * @brief   Initialise application.
  *
  * Store the current value of the delay timer in a 

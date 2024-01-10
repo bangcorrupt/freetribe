@@ -51,6 +51,9 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Static function prototypes -----------------------------------*/
 
+void _knob_callback(uint8_t index, uint8_t value); 
+void _button_callback(uint8_t index, bool state); 
+
 /*----- Extern function implementations ------------------------------*/
 
 /**
