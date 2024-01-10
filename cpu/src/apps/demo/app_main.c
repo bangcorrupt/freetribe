@@ -98,7 +98,6 @@ static char *_build_string(uint8_t value);
  *                  - #SUCCESS
  *                  - #WARNING
  *                  - #ERROR
- * @include app_main.c
  */
 t_status app_init(void) {
 
