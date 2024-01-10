@@ -37,12 +37,24 @@ under the terms of the GNU Affero General Public License as published by
  * to toggle an LED at regular intervals.
  */
 
+/*----- Includes -----------------------------------------------------*/
+
 #include "freetribe.h"
+
+/*----- Macros and Definitions ---------------------------------------*/
 
 // 1 second in microseconds.
 #define DELAY_TIME 1000000 
 
+/*----- Static variable definitions ----------------------------------*/
+
 static uint32_t g_start_time; 
+
+/*----- Extern variable definitions ----------------------------------*/
+
+/*----- Static function prototypes -----------------------------------*/
+
+/*----- Extern function implementations ------------------------------*/
 
 /**
  * @brief   Initialise the application.
@@ -77,4 +89,6 @@ void app_run(void) {
     }
 }
 
+/*----- Static function implementations ------------------------------*/
 
+/*----- End of file --------------------------------------------------*/
