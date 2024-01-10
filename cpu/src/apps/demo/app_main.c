@@ -236,7 +236,7 @@ static void _note_off_callback(char chan, char note, char vel) {
  * @param[in]   index   Index of knob.
  * @param[in]   value   Values of knob.
  */
-/// TODO: Are doing too much in the callbacks?
+/// TODO: Are we doing too much in the callbacks?
 /// Maybe just copy values to local data structure,
 /// then act in the main loop.
 void _knob_callback(uint8_t index, uint8_t value) {
