@@ -29,11 +29,11 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    blink.c
+ * @file    blink-tick.c
  *
- * @brief   Minimal example application for Freetribe.
+ * @brief   Example application for Freetribe tick callback.
  *
- * This example uses a non-blocking delay 
+ * This example uses the tick callback 
  * to toggle an LED at regular intervals.
  */
 
@@ -43,29 +43,26 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-// 1 second in microseconds.
-#define DELAY_TIME 1000000 
+#define USER_TICK_DIV 0     // User tick for every systick (~1ms).
+#define LED_TICK_DIV 1000 // Debug tick per 1000 user ticks (~1s).
 
 /*----- Static variable definitions ----------------------------------*/
 
-static uint32_t g_start_time; 
+static bool g_toggle_led = false;
 
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
 
+static void _tick_callback(void);
+
 /*----- Extern function implementations ------------------------------*/
 
 /**
- * @brief   Initialise the application.
- *
- * 
- */
-/**
  * @brief   Initialise application.
  *
- * Store the current value of the delay timer in a 
- * static global variable. Status is assumed successful.
+ * Register a handler for the tick event callback. 
+ * Status is assumed successful.
  *
  * @return status   Status code indicating success:
  *                  - #SUCCESS
@@ -74,32 +71,55 @@ static uint32_t g_start_time;
  */
 t_status app_init(void) {
 
-    // Set start time.
-    g_start_time = ft_get_delay_current();
+
+    t_status status = ERROR;
+
+    ft_register_tick_callback(USER_TICK_DIV, _tick_callback);
 
     return SUCCESS;
 }
 
 /**
- * @brief   Run application.
+ * @brief   Run the application.
  *
- * Test if 1 second has passed  since we last set `start_time`.  
- * If so, toggle an LED and reset `start_time.
+ * Test a flag set in the tick callback 
+ * and conditionally toggle an LED.
  */
 void app_run(void) {
 
-    // Wait for delay.
-    if (ft_delay(g_start_time, DELAY_TIME)) {
-
-        // Toggle LED.
+    if (g_toggle_led) {
         ft_toggle_led(LED_TAP);
 
-        // Reset start time.
-        g_start_time = ft_get_delay_current();
-
+        g_toggle_led = false;
     }
 }
 
 /*----- Static function implementations ------------------------------*/
 
+/**
+ * @brief   Callback triggered by user tick events.
+ *
+ * The Freetribe kernel systick ISR sets a flag to
+ * trigger the kernel tick callback in the main loop.
+ * The kernel tick callback triggers the user tick
+ * callback at specified subdivisions.
+ * In this example, we count the number of ticks
+ * and when it reaches LED_TICK_DIV we set a
+ * flag to be tested in the `app_run()` function.
+ */
+static void _tick_callback(void) {
+
+    static uint16_t led_count;
+
+    if (led_count >= LED_TICK_DIV) {
+
+        g_toggle_led_count = true;
+        led_count = 0;
+
+    } else {
+        led_count++;
+    }
+}
+
 /*----- End of file --------------------------------------------------*/
+

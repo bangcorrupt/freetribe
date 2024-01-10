@@ -24,7 +24,7 @@ under the terms of the GNU Affero General Public License as published by
    You should have received a copy of the GNU General Public License
  along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-                       Copyright bangcorrupt 2023
+                       Copyright bangcorrupt 2024
 
 ----------------------------------------------------------------------*/
 
@@ -56,11 +56,11 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Macros and Definitions ---------------------------------------*/
 
 #define USER_TICK_DIV 0     // User tick for every systick (~1ms).
-#define DEBUG_TICK_DIV 1000 // Debug tick per 1000 user ticks (~1s).
+#define LED_TICK_DIV 1000 // Debug tick per 1000 user ticks (~1s).
 
 /*----- Static variable definitions ----------------------------------*/
 
-volatile static bool g_toggle_led = false;
+static bool g_toggle_led = false;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -70,7 +70,7 @@ UG_GUI gui;
 
 static void _register_callbacks(void);
 
-static void _user_tick_callback(void);
+static void _tick_callback(void);
 static void _knob_callback(uint8_t index, uint8_t value);
 static void _note_on_callback(char, char, char);
 static void _note_off_callback(char, char, char);
@@ -141,7 +141,7 @@ void app_run(void) {
  */
 static void _register_callbacks() {
 
-    ft_register_tick_callback(USER_TICK_DIV, _user_tick_callback);
+    ft_register_tick_callback(USER_TICK_DIV, _tick_callback);
 
     ft_register_midi_callback(EVT_CHAN_NOTE_ON, _note_on_callback);
     ft_register_midi_callback(EVT_CHAN_NOTE_OFF, _note_off_callback);
@@ -176,20 +176,20 @@ static void _ui_init(void) {
  * The kernel tick callback triggers the user tick
  * callback at specified subdivisions.
  * In this example, we count the number of ticks
- * and when it reaches DEBUG_TICK_DIV we set a
- * flag to be tested in the app_run function.
+ * and when it reaches LED_TICK_DIV we set a
+ * flag to be tested in the `app_run()` function.
  */
-static void _user_tick_callback(void) {
+static void _tick_callback(void) {
 
-    static uint16_t debug;
+    static uint16_t led_count;
 
-    if (debug >= DEBUG_TICK_DIV) {
+    if (led_count >= LED_TICK_DIV) {
 
         g_toggle_led = true;
-        debug = 0;
+        led_count = 0;
 
     } else {
-        debug++;
+        led_count++;
     }
 }
 
