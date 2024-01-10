@@ -33,7 +33,7 @@ under the terms of the GNU Affero General Public License as published by
  *
  * @brief   Minimal example application for Freetribe.
  *
- * This simpe example uses a non-blocking delay 
+ * This simple example uses a non-blocking delay 
  * to toggle an LED at regular intervals.
  */
 
@@ -44,6 +44,11 @@ under the terms of the GNU Affero General Public License as published by
 
 static uint32_t g_start_time; 
 
+/**
+ * @brief   Initialise the application.
+ *
+ * Store the current value of the delay timer in a static global variable.
+ */
 t_status app_init(void) {
 
     // Set start time.
@@ -52,6 +57,12 @@ t_status app_init(void) {
     return SUCCESS;
 }
 
+/**
+ * @brief   Run the application.
+ *
+ * Test if 1 second has passed since we last set `start_time.
+ * If so, toggle an LED and reset `start_time.
+ */
 void app_run(void) {
 
     // Wait for delay.
