@@ -137,7 +137,7 @@ void _button_callback(uint8_t index, bool state) {
     //
     // Play button.
     case 0xa:
-	if (value == 1) {
+	if (state == 1) {
 	    g_toggle_led == true;
 	}
         break;
