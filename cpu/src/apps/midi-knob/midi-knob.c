@@ -122,10 +122,10 @@ void _knob_callback(uint8_t index, uint8_t value) {
  * test this flag in the main loop to toggle 
  * an LED each time the button is pressed.
  *
- * @param[in]   index   Index of knob.
- * @param[in]   value   Values of knob.
+ * @param[in]   index   Index of button.
+ * @param[in]   state   State of button.
  */
-void _knob_callback(uint8_t index, uint8_t value) {
+void _button_callback(uint8_t index, bool state) {
 
     switch (index) {
 
