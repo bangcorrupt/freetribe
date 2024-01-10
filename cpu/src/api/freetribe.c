@@ -66,6 +66,37 @@ void ft_register_tick_callback(uint32_t divisor, void (*callback)(void)) {
     knl_register_user_tick_callback(divisor, callback);
 }
 
+// Delay API
+//
+/**
+ * @brief   Get the current cycle count from the delay timer.
+ *
+ * The delay timer runs continuously.  
+ * Use this API to get the current value to use as
+ * start time before calling `ft_delay()`.
+ *
+ * @return  Current value of delay timer.
+ */
+uint32_t ft_delay_get_current(void) {
+
+	/// TODO: Refactor delay functions.
+	return delay_get_current_count();
+}
+
+
+/**
+ * @brief   Non-blocking delay from `start_time` for `delay_time`.
+ *
+ * Use `ft_delay_get_current()` to get the start time, then 
+ * use this API to test if `delay_time` microseconds have passed.
+ *
+ * @return  True if at least `delay_time` microseconds have passed since `start_time`.
+ */
+bool ft_delay(uint32_t start_time, uint32_t delay_time) {
+
+	return delay_us(start_time, delay_time);
+}
+
 // Print API
 //
 // TODO: What is going on with print?
