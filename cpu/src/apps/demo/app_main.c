@@ -139,7 +139,7 @@ void app_run(void) {
  * In this example, we register callbacks for the user tick,
  * MIDI note on/off and panel knob input.
  */
-static void _register_callbacks() {
+static void _register_callbacks(void) {
 
     ft_register_tick_callback(USER_TICK_DIV, _tick_callback);
 
