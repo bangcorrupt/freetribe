@@ -30,10 +30,10 @@ under the terms of the GNU Affero General Public License as published by
 
 /* Original work by monome, modified by bangcorrupt 2023 */
 
-/*
+/**
  * @file    attenuate.c
  *
- * @brief   A very simple template module.
+ * @brief   A basic example module.
  *          Applies attenuation with slew to each input signal.
  *
  */
@@ -51,25 +51,30 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-// Maximum positive fract32 value
-#define PARAM_AMP_MAX 0x7fffffff
-#define PARAM_SLEW_DEFAULT 0x00010000
 
-// Enumerate parameters.
+#define PARAM_AMP_MAX 0x7fffffff        ///< Maximum amplitude scale value.
+#define PARAM_SLEW_DEFAULT 0x00010000   ///< Default parameter slew time.
+
+/**
+ * @brief   Enumeration of module paramters.
+ *
+ * Index of each external parameter of module.
+ *
+ */
 enum params {
-    // Attenuation multiplier values.
-    PARAM_LEVEL0,
-    PARAM_LEVEL1,
-    // Number of parameters.
-    PARAM_COUNT
+
+    PARAM_LEVEL0,   ///< Attenuation multiplier channel 0.
+    PARAM_LEVEL1,   ///< Attenuation multiplier channel 1.
+
+    PARAM_COUNT     ///< Should remain last to return number of paramters.
 };
 
 /*----- Static variable definitions ----------------------------------*/
 
-// Input parameters.
+/// Input parameters for amplitude scaling.
 static fract32 g_level[2];
 
-// Parameter slew filters.
+/// Parameter slew filters.
 static filter_1p_lo g_level_slew[2];
 
 /*----- Extern variable definitions ----------------------------------*/

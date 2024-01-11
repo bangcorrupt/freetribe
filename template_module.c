@@ -46,11 +46,14 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-// Enumerate parameters.
+/**
+ * @brief   Enumeration of module paramters.
+ *
+ * Index of each external parameter of module.
+ */
 enum params {
 
-    // Number of parameters.
-    PARAM_COUNT
+    PARAM_COUNT /// Should remain last to return number of paramters.
 };
 
 /*----- Static variable definitions ----------------------------------*/
