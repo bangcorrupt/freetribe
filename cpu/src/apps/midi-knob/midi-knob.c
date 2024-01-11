@@ -65,9 +65,9 @@ void _button_callback(uint8_t index, bool state);
  * knob and button input. Status is assumed successful.
  *
  * @return status   Status code indicating success:
- *                  - #SUCCESS
- *                  - #WARNING
- *                  - #ERROR
+ *                  - SUCCESS
+ *                  - WARNING
+ *                  - ERROR
  */
 t_status app_init(void) {
 
