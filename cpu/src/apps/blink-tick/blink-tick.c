@@ -33,7 +33,7 @@ under the terms of the GNU Affero General Public License as published by
  *
  * @brief   Example application for Freetribe tick callback.
  *
- * This example uses the tick callback 
+ * This example uses the tick callback
  * to toggle an LED at regular intervals.
  */
 
@@ -43,7 +43,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-#define USER_TICK_DIV 0     // User tick for every systick (~1ms).
+#define USER_TICK_DIV 0   // User tick for every systick (~1ms).
 #define LED_TICK_DIV 1000 // Debug tick per 1000 user ticks (~1s).
 
 /*----- Static variable definitions ----------------------------------*/
@@ -61,7 +61,7 @@ static void _tick_callback(void);
 /**
  * @brief   Initialise application.
  *
- * Register a handler for the tick event callback. 
+ * Register a handler for the tick event callback.
  * Status is assumed successful.
  *
  * @return status   Status code indicating success:
@@ -70,7 +70,6 @@ static void _tick_callback(void);
  *                  - #ERROR
  */
 t_status app_init(void) {
-
 
     t_status status = ERROR;
 
@@ -82,7 +81,7 @@ t_status app_init(void) {
 /**
  * @brief   Run the application.
  *
- * Test a flag set in the tick callback 
+ * Test a flag set in the tick callback
  * and conditionally toggle an LED.
  */
 void app_run(void) {
@@ -113,7 +112,7 @@ static void _tick_callback(void) {
 
     if (led_count >= LED_TICK_DIV) {
 
-        g_toggle_led_count = true;
+        g_toggle_led = true;
         led_count = 0;
 
     } else {
@@ -122,4 +121,3 @@ static void _tick_callback(void) {
 }
 
 /*----- End of file --------------------------------------------------*/
-
