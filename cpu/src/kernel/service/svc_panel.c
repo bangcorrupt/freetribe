@@ -291,8 +291,16 @@ static t_status _panel_parse(uint8_t *msg) {
         break;
 
     case KNOB_EVENT:
-        if (p_knob_callback != NULL) {
-            (p_knob_callback)(msg[1], msg[3]);
+        // In continuous mode, trigger pads use KNOB_EVENT message ID.
+        if (msg[1] >= 0x10) {
+            if (p_trigger_callback != NULL) {
+                (p_trigger_callback)(msg[1], msg[3], (bool)msg[4]);
+            }
+
+        } else {
+            if (p_knob_callback != NULL) {
+                (p_knob_callback)(msg[1], msg[3]);
+            }
         }
         result = SUCCESS;
         break;

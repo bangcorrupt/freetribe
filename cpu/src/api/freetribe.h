@@ -76,6 +76,7 @@ void ft_register_tick_callback(uint32_t divisor, void (*callback)(void));
 uint32_t ft_get_delay_current(void);
 bool ft_delay(uint32_t start_time, uint32_t delay_time);
 
+void ft_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state);
 void ft_register_print_callback(void (*callback)(char *));
 void ft_print(char *text);
 
@@ -88,6 +89,7 @@ void ft_send_cc(char chan, char index, char val);
 
 void ft_register_panel_callback(t_panel_event event, void (*callback)());
 void ft_toggle_led(t_led_index led_index);
+void ft_set_trigger_mode(uint8_t mode);
 
 void ft_set_module_param(uint16_t module_id, uint16_t param_index,
                          int32_t param_value);

@@ -71,7 +71,7 @@ void ft_register_tick_callback(uint32_t divisor, void (*callback)(void)) {
 /**
  * @brief   Get the current cycle count from the delay timer.
  *
- * The delay timer runs continuously.  
+ * The delay timer runs continuously.
  * Use this API to get the current value to use as
  * start time before calling `ft_delay()`.
  *
@@ -79,22 +79,30 @@ void ft_register_tick_callback(uint32_t divisor, void (*callback)(void)) {
  */
 uint32_t ft_get_delay_current(void) {
 
-	/// TODO: Refactor delay functions.
-	return delay_get_current_count();
+    /// TODO: Refactor delay functions.
+    return delay_get_current_count();
 }
-
 
 /**
  * @brief   Non-blocking delay from `start_time` for `delay_time`.
  *
- * Use `ft_get_delay_current()` to get the start time, then 
+ * Use `ft_get_delay_current()` to get the start time, then
  * use this API to test if `delay_time` microseconds have passed.
  *
- * @return  True if at least `delay_time` microseconds have passed since `start_time`.
+ * @return  True if at least `delay_time` microseconds have passed since
+ * `start_time`.
  */
 bool ft_delay(uint32_t start_time, uint32_t delay_time) {
 
-	return delay_us(start_time, delay_time);
+    return delay_us(start_time, delay_time);
+}
+
+// Display API
+//
+//
+void ft_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state) {
+
+    svc_display_put_pixel(pos_x, pos_y, state);
 }
 
 // Print API
@@ -116,6 +124,8 @@ void ft_register_print_callback(void (*callback)(char *)) {
  */
 void ft_print(char *text) { svc_midi_send_string(text); }
 
+// Panel API
+//
 /**
  * @brief   Register a callback for panel control input events.
  *
@@ -128,6 +138,8 @@ void ft_register_panel_callback(t_panel_event event, void (*callback)()) {
 
     svc_panel_register_callback(event, callback);
 }
+
+void ft_set_trigger_mode(uint8_t mode) { svc_panel_set_trigger_mode(mode); }
 
 // MIDI API
 //
