@@ -49,13 +49,11 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "freetribe.h"
 
-#include "app_main.h"
-
 #include "ugui.h"
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-#define USER_TICK_DIV 0     // User tick for every systick (~1ms).
+#define USER_TICK_DIV 0   // User tick for every systick (~1ms).
 #define LED_TICK_DIV 1000 // Debug tick per 1000 user ticks (~1s).
 
 /*----- Static variable definitions ----------------------------------*/
