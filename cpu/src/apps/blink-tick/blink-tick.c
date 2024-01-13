@@ -65,9 +65,9 @@ static void _tick_callback(void);
  * Status is assumed successful.
  *
  * @return status   Status code indicating success:
- *                  - #SUCCESS
- *                  - #WARNING
- *                  - #ERROR
+ *                  - SUCCESS
+ *                  - WARNING
+ *                  - ERROR
  */
 t_status app_init(void) {
 
@@ -79,7 +79,7 @@ t_status app_init(void) {
 }
 
 /**
- * @brief   Run the application.
+ * @brief   Run application.
  *
  * Test a flag set in the tick callback
  * and conditionally toggle an LED.

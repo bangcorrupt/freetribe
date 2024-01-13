@@ -73,6 +73,9 @@ extern "C" {
 
 void ft_register_tick_callback(uint32_t divisor, void (*callback)(void));
 
+uint32_t ft_get_delay_current(void);
+bool ft_delay(uint32_t start_time, uint32_t delay_time);
+
 void ft_register_print_callback(void (*callback)(char *));
 void ft_print(char *text);
 

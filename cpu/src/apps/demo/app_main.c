@@ -93,9 +93,9 @@ static char *_build_string(uint8_t value);
  * library.  Status is assumed successful.
  *
  * @return status   Status code indicating success:
- *                  - #SUCCESS
- *                  - #WARNING
- *                  - #ERROR
+ *                  - SUCCESS
+ *                  - WARNING
+ *                  - ERROR
  */
 t_status app_init(void) {
 
@@ -137,7 +137,7 @@ void app_run(void) {
  * In this example, we register callbacks for the user tick,
  * MIDI note on/off and panel knob input.
  */
-static void _register_callbacks() {
+static void _register_callbacks(void) {
 
     ft_register_tick_callback(USER_TICK_DIV, _tick_callback);
 
@@ -234,7 +234,7 @@ static void _note_off_callback(char chan, char note, char vel) {
  * @param[in]   index   Index of knob.
  * @param[in]   value   Values of knob.
  */
-/// TODO: Are doing too much in the callbacks?
+/// TODO: Are we doing too much in the callbacks?
 /// Maybe just copy values to local data structure,
 /// then act in the main loop.
 void _knob_callback(uint8_t index, uint8_t value) {

@@ -1,4 +1,3 @@
-
 /*----------------------------------------------------------------------
 
                      This file is part of Freetribe
@@ -32,10 +31,12 @@ under the terms of the GNU Affero General Public License as published by
 /**
  * @file    midi-knob.c
  *
- * @brief   Example application for Freetribe user input.
+ * @brief   Example application for Freetribe panel input and MIDI output.
  *
- * This example uses knob and button callbacks
- * to send MIDI CC messages and toggle an LED.
+ * Demonstrates how to receive input from the
+ * control panel and send MIDI CC messages.
+ * Moving the knobs will send CC messages
+ * and pressing the Play button will toggle it's LED.
  */
 
 /*----- Includes -----------------------------------------------------*/
@@ -62,7 +63,13 @@ void _button_callback(uint8_t index, bool state);
 /**
  * @brief   Initialise application.
  *
- * Register callbacks for knob and button input.
+ * In this example, we register callbacks for panel
+ * knob and button input. Status is assumed successful.
+ *
+ * @return status   Status code indicating success:
+ *                  - SUCCESS
+ *                  - WARNING
+ *                  - ERROR
  */
 t_status app_init(void) {
 
@@ -78,7 +85,8 @@ t_status app_init(void) {
 /**
  * @brief   Run application.
  *
- * Test flag to conditionally toggle LED.
+ * In this example, we test a flag set in the panel
+ * button callback and conditionally toggle an LED.
  */
 void app_run(void) {
 
@@ -94,10 +102,14 @@ void app_run(void) {
 /**
  * @brief   Callback triggered by panel knob events.
  *
- * Send a MIDI CC message on channel 0,
- * with CC number equal to knob index, for all knobs.
- * The panel MCU sends 8 bit unsigned values for
- * knobs, so we right shift by 1 for MIDI CC values.
+ * For all knobs, Send a MIDI CC message on channel 0,
+ * with CC number equal to knob index.
+ * The panel MCU sends 8 bit unsigned values in
+ * the range 0...255 for knobs, so we right shift
+ * by 1 for MIDI CC values.
+ *
+ * @param[in]   index   Index of knob.
+ * @param[in]   value   Values of knob.
  */
 void _knob_callback(uint8_t index, uint8_t value) {
 
@@ -107,9 +119,15 @@ void _knob_callback(uint8_t index, uint8_t value) {
 /**
  * @brief   Callback triggered by panel button events.
  *
- *  parse the button index and test the button state.
- *  When the [Play] button is depressed we set a flag  to toggle it's LED.
- *  We ignore when the [Play] button is released.
+ * Parse button index and act on value.
+ * In this example, we set a flag each time
+ * the Play button is depressed. We ignore
+ * when the Play button is released. We  can
+ * test this flag in the main loop to toggle
+ * an LED each time the button is pressed.
+ *
+ * @param[in]   index   Index of button.
+ * @param[in]   state   State of button.
  */
 void _button_callback(uint8_t index, bool state) {
 
@@ -119,6 +137,9 @@ void _button_callback(uint8_t index, bool state) {
         if (state == 1) {
             g_toggle_led = true;
         }
+        break;
+
+    default:
         break;
     }
 }
