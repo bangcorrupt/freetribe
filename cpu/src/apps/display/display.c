@@ -85,7 +85,7 @@ void app_run(void) {
 
     for (i = 0; i < 128; i++) {
 
-        if (i <= g_pad_pressure) {
+        if (i < g_pad_pressure - 3) {
             pixel_state = 1;
         } else {
             pixel_state = 0;
@@ -101,7 +101,7 @@ static void _trigger_callback(uint8_t pad, uint8_t vel, bool state) {
 
     switch (pad) {
 
-    case 0:
+    case 0x11:
         g_pad_pressure = vel;
         break;
 

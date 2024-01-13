@@ -147,6 +147,15 @@ static t_status _kernel_init(void) {
     svc_panel_register_callback(PANEL_ACK_EVENT, _panel_ack_callback);
     svc_panel_register_callback(HELD_BUTTONS_EVENT, _held_buttons_callback);
 
+    // Initialise control panel.
+    svc_panel_task();
+
+    // Initialise DSP.
+    svc_dsp_task();
+
+    // Initialise display.
+    svc_display_task();
+
     return SUCCESS;
 }
 
