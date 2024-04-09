@@ -127,7 +127,7 @@ static t_status _system_init(void) {
     // TODO: Only necessary if flash is locked.
     //
     // Workaround flash write protect.
-    flash_unlock();
+    // flash_unlock();
 
     result = SUCCESS;
 

@@ -30,16 +30,16 @@ BIN=$(PREFIX)objcopy
 
 # C compilation options.
 NEST_INT ?= 0
-OPTIMISE ?= -g -Og
+OPTIMISE ?= -g3 -Og
 CFLAGS :=  $(OPTIMISE) -fdata-sections -ffunction-sections -Wall
 
 # Assembly compilation options.
 ASM_FLAGS := -x assembler-with-cpp
 
 # Linker options.
-LDFLAGS := -e start -u start -u __aeabi_uidiv -u __aeabi_idiv $(LPATH) -lc -lgcc \
+LDFLAGS := -e start -u start -u __aeabi_uidiv -u __aeabi_idiv $(LPATH) -lm -lc -lgcc  \
 					 -T cpu.lds -Map $(BUILD_DIR)/boot.map \
-					 --gc-sections --print-memory-usage --no-warn-rwx-segments
+					 --gc-sections --print-memory-usage --no-warn-rwx-segments 
 # Binary options.
 BIN_FLAGS := -O binary
 

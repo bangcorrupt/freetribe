@@ -29,14 +29,14 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /*
- * @file    svc_display.h
+ * @file    synth_gui.h
  *
- * @brief   Header for svc_display.c.
+ * @brief   Public API for synth example GUI.
  *
  */
 
-#ifndef SVC_DISPLAY_H
-#define SVC_DISPLAY_H
+#ifndef SYNTH_GUI_H
+#define SYNTH_GUI_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,17 +49,20 @@ extern "C" {
 
 /*----- Macros and Definitions ---------------------------------------*/
 
+typedef enum {
+    GUI_MENU_MODULATION,
+
+    GUI_MENU_COUNT
+} e_gui_menu_index;
+
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
 
-void svc_display_task(void);
-void svc_display_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state);
-
-int8_t svc_display_fill_frame(uint16_t x_start, uint16_t y_start,
-                              uint16_t x_end, uint16_t y_end, bool state);
-
-void svc_display_set_contrast(uint8_t contrast);
+bool gui_menu_select(e_gui_menu_index menu);
+void gui_menu_next(e_gui_menu_index menu_index);
+void gui_menu_previous(e_gui_menu_index menu_index);
+e_gui_menu_index gui_menu_current(void);
 
 #ifdef __cplusplus
 }

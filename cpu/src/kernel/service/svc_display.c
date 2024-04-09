@@ -39,6 +39,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "dev_lcd.h"
 
@@ -61,7 +62,8 @@ typedef enum {
 
 /*----- Static variable definitions ----------------------------------*/
 
-static uint8_t g_frame_buffer[FRAME_BUF_LEN];
+static uint8_t g_frame_buffer_a[FRAME_BUF_LEN];
+static uint8_t g_frame_buffer_b[FRAME_BUF_LEN];
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -75,6 +77,11 @@ void svc_display_task(void) {
 
     static t_display_task_state state = STATE_ASSERT_RESET;
     static uint32_t start_time;
+
+    static uint8_t page_index;
+
+    uint8_t *page_buffer_a;
+    uint8_t *page_buffer_b;
 
     switch (state) {
 
@@ -108,20 +115,23 @@ void svc_display_task(void) {
         break;
 
     case STATE_RUN:
-        // TODO: Implement ping-pong frame buffer.
-
-        // Full frame starves system if polling.
-        //      Seems OK when interrupt driven.
-        dev_lcd_set_frame(g_frame_buffer);
-
+        /// TODO: Ping-pong buffer would be better than double buffer.
+        //
         // Send single page per task invocation.
-        //      Implement ping-pong buffer.
-        /* page_buffer = g_frame_buffer + page_index * LCD_COLUMNS; */
-        /* dev_lcd_set_page(page_index++, page_buffer); */
+        page_buffer_a = g_frame_buffer_a + page_index * LCD_COLUMNS;
+        page_buffer_b = g_frame_buffer_b + page_index * LCD_COLUMNS;
 
-        /* if (page_index >= 8) { */
-        /*     page_index = 0; */
-        /* } */
+        if (memcmp(page_buffer_a, page_buffer_b, LCD_COLUMNS)) {
+
+            /// TODO: Is DMA faster?
+            memcpy(page_buffer_b, page_buffer_a, LCD_COLUMNS);
+            dev_lcd_set_page(page_index, page_buffer_b);
+        }
+        page_index++;
+
+        if (page_index >= 8) {
+            page_index = 0;
+        }
         break;
 
     case STATE_ERROR:
@@ -129,7 +139,7 @@ void svc_display_task(void) {
         break;
 
     default:
-        // TODO: Record unhandled state.
+        /// TODO: Record unhandled state.
         if (error_check(UNHANDLED_STATE_ERROR) != SUCCESS) {
             state = STATE_ERROR;
         }
@@ -140,17 +150,52 @@ void svc_display_task(void) {
 void svc_display_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state) {
 
     // Calculate pixel location in buffer.
-    uint16_t column_index = pos_x;
-    uint16_t page_index = pos_y >> 3;
+    // uint16_t column_index = pos_x;
+    // uint16_t page_index = pos_y >> 3;
+    // uint16_t byte_index = column_index + (128 * page_index);
+
+    uint16_t byte_index = pos_x + (128 * (pos_y >> 3));
     uint16_t bit_index = pos_y & 7;
 
-    uint16_t byte_index = column_index + (128 * page_index);
+    // Get current byte from frame buffer.
+    uint8_t byte = g_frame_buffer_a[byte_index];
 
-    // Set pixel to state
-    uint8_t byte = g_frame_buffer[byte_index];
-
-    g_frame_buffer[byte_index] =
+    // Set pixel bit and write to frame buffer.
+    g_frame_buffer_a[byte_index] =
         (byte & ~(1UL << bit_index)) | (state << bit_index);
+
+    /// TODO: Is this any faster?
+    //
+    // Get current byte from frame buffer.
+    // uint8_t *byte = &g_frame_buffer[byte_index];
+    //
+    // if ((*byte & ~(1UL << bit_index)) != (state << bit_index)) {
+    //     // Set pixel bit and write to frame buffer.
+    //     g_frame_buffer[byte_index] =
+    //         (*byte & ~(1UL << bit_index)) | (state << bit_index);
+    // }
+}
+
+int8_t svc_display_fill_frame(uint16_t x_start, uint16_t y_start,
+                              uint16_t x_end, uint16_t y_end, bool state) {
+
+    /// TODO: Handle partial bytes.
+    //
+    uint8_t fill;
+    uint16_t byte_start = x_start + (128 * (y_start >> 3));
+    uint16_t byte_end = x_end + (128 * (y_end >> 3));
+
+    uint16_t length = (byte_end + 1) - byte_start;
+
+    if (state) {
+        fill = 0;
+    } else {
+        fill = 0xff;
+    }
+
+    memset(g_frame_buffer_a + byte_start, fill, length);
+
+    return 0;
 }
 
 void svc_display_set_contrast(uint8_t contrast) {
@@ -162,12 +207,16 @@ void svc_display_set_contrast(uint8_t contrast) {
 
 static t_status _display_init(void) {
 
-    dev_lcd_init();
-    // TODO: frame_buffer_init();
+    uint8_t *page_buffer;
+    uint8_t page_index;
 
-    /* for (int i = 0; i < FRAME_BUF_LEN; i++) { */
-    /*     g_frame_buffer[i] = 0xff; */
-    /* } */
+    dev_lcd_init();
+
+    for (page_index = 0; page_index < 8; page_index++) {
+
+        page_buffer = g_frame_buffer_b + page_index * LCD_COLUMNS;
+        dev_lcd_set_page(page_index, page_buffer);
+    }
 
     return SUCCESS;
 }

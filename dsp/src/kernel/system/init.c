@@ -77,7 +77,7 @@ void pll_init(void) {
 }
 
 void ebiu_init(void) {
-    
+
     // TODO: Do we need this?
     //
     // Straight from the self-test example project

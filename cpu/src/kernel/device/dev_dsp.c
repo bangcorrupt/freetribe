@@ -54,13 +54,13 @@ under the terms of the GNU Affero General Public License as published by
 #define DSP_SPI_DATA_FORMAT 1
 #define DSP_SPI_CHIP_SELECT 2
 
-// TODO: Centralised header for interrupt priorities.
+/// TODO: Centralised header for interrupt priorities.
 //          This should probably be lower priority than UART control input.
 #define DSP_SPI_INT_CHANNEL 5
 
 #define DSP_SPI_TX_BUF_LEN 0x100
 #define DSP_SPI_RX_BUF_LEN 0x100
-/* #define DSP_SPI_WORD_LEN 0x2 */
+// #define DSP_SPI_WORD_LEN 0x2
 
 #define DSP_RESET_BANK 6
 #define DSP_RESET_PIN 10
@@ -113,7 +113,14 @@ void dev_dsp_spi_tx_enqueue(uint8_t *p_byte) {
     } else {
         // Queue message if transmission in progress.
         // Overwrite on overflow?
+        /// TODO: Should catch overflow error and
+        ///       redesign so this does not happen.
+        //
         ring_buffer_put_force(dsp_spi_tx_rbd, p_byte);
+
+        // Block until queue ready.
+        // while (ring_buffer_put(dsp_spi_tx_rbd, p_byte))
+        //     ;
     }
 }
 

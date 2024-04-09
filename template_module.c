@@ -47,13 +47,13 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Macros and Definitions ---------------------------------------*/
 
 /**
- * @brief   Enumeration of module paramters.
+ * @brief   Enumeration of module parameters.
  *
  * Index of each external parameter of module.
  */
 enum params {
 
-    PARAM_COUNT /// Should remain last to return number of paramters.
+    PARAM_COUNT /// Should remain last to return number of parameters.
 };
 
 /*----- Static variable definitions ----------------------------------*/
@@ -68,26 +68,26 @@ enum params {
  * @brief   Initialise module.
  */
 void module_init(void) {
-    
+
     //
 }
 
 /**
- * @brief   Process audio.   
+ * @brief   Process audio.
  *
  * @param[in]   in  Pointer to input buffer.
  * @param[out]  out Pointer to input buffer.
  */
 void module_process(fract32 *in, fract32 *out) {
-// void module_process(fract32 **inputs, fract32 **outputs, uint32_t frames) {
-
+    // void module_process(fract32 **inputs, fract32 **outputs, uint32_t frames)
+    // {
 }
 
 /**
- * @brief   Set parameter.   
+ * @brief   Set parameter.
  *
- * @param[in]   param_index Index of parameter to set. 
- * @param[in]   vallue      Value of parameter. 
+ * @param[in]   param_index Index of parameter to set.
+ * @param[in]   value      Value of parameter.
  */
 void module_set_param(uint16_t param_index, int32_t value) {
 
@@ -99,9 +99,9 @@ void module_set_param(uint16_t param_index, int32_t value) {
 }
 
 /**
- * @brief   Get parameter.   
+ * @brief   Get parameter.
  *
- * @param[in]   param_index Index of parameter to get. 
+ * @param[in]   param_index Index of parameter to get.
  *
  * @return      value       Value of parameter.
  */
@@ -118,7 +118,6 @@ int32_t module_get_param(uint16_t param_index) {
     return value;
 }
 
-
 /**
  * @brief   Get number of parameters.
  *
@@ -130,8 +129,8 @@ uint32_t module_get_param_count(void) { return PARAM_COUNT; }
  * @brief   Get name of parameter at index.
  *
  * @param[in]   param_index     Index pf parameter.
- * @param[out]  text            Buffer to store string. 
- *                              Must provide 'MAX_PARAM_NAME_LENGTH' 
+ * @param[out]  text            Buffer to store string.
+ *                              Must provide 'MAX_PARAM_NAME_LENGTH'
  *                              bytes of storage.
  */
 void module_get_param_name(uint16_t param_index, char *text) {

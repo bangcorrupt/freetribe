@@ -8,6 +8,8 @@ set remote hardware-watchpoint-limit 2
 load build/cpu.elf
 file build/cpu.elf
 set $pc=0x80000000
-b main
+# b knl_init
+b app_init
+# b svc_display_task
 c
 

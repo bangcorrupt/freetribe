@@ -77,6 +77,10 @@ uint32_t ft_get_delay_current(void);
 bool ft_delay(uint32_t start_time, uint32_t delay_time);
 
 void ft_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state);
+
+int8_t ft_fill_frame(uint16_t x_start, uint16_t y_start, uint16_t x_end,
+                     uint16_t y_end, bool state);
+
 void ft_register_print_callback(void (*callback)(char *));
 void ft_print(char *text);
 
@@ -87,8 +91,10 @@ void ft_send_note_on(char chan, char note, char vel);
 void ft_send_note_off(char chan, char note, char vel);
 void ft_send_cc(char chan, char index, char val);
 
-void ft_register_panel_callback(t_panel_event event, void (*callback)());
+/// TODO: Cast void pointers to typedef function pointers.
+void ft_register_panel_callback(t_panel_event event, void *callback);
 void ft_toggle_led(t_led_index led_index);
+void ft_set_led(t_led_index led_index, bool state);
 void ft_set_trigger_mode(uint8_t mode);
 
 void ft_set_module_param(uint16_t module_id, uint16_t param_index,

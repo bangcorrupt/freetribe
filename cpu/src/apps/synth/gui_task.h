@@ -29,14 +29,14 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /*
- * @file    svc_display.h
+ * @file    gui_task.h
  *
- * @brief   Header for svc_display.c.
+ * @brief   Public API for GUI task.
  *
  */
 
-#ifndef SVC_DISPLAY_H
-#define SVC_DISPLAY_H
+#ifndef GUI_TASK_H
+#define GUI_TASK_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,13 +53,13 @@ extern "C" {
 
 /*----- Extern function prototypes -----------------------------------*/
 
-void svc_display_task(void);
-void svc_display_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state);
-
-int8_t svc_display_fill_frame(uint16_t x_start, uint16_t y_start,
-                              uint16_t x_end, uint16_t y_end, bool state);
-
-void svc_display_set_contrast(uint8_t contrast);
+void gui_task(void);
+void gui_print(uint8_t pos_x, uint8_t pos_y, char *text);
+void gui_post(char *text);
+void gui_post_param(char *label, uint8_t value);
+void gui_print_int(uint8_t x_start, uint8_t y_start, uint8_t value);
+void gui_draw_line(uint8_t x_start, uint8_t y_start, uint8_t x_end,
+                   uint8_t y_end, bool colour);
 
 #ifdef __cplusplus
 }

@@ -55,7 +55,7 @@ under the terus of the GNU Affero General Public License as published by
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-#define DISPLAY_TICK_DIV 40
+// #define DISPLAY_TICK_DIV 0
 
 typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } t_kernel_task_state;
 
@@ -94,7 +94,7 @@ void knl_main_task(void) {
         if (error_check(_kernel_init()) == SUCCESS) {
             state = STATE_RUN;
 
-            // TODO: Implement sysex_printf
+            /// TODO: Implement sysex_printf
             svc_system_print("Kernel task initialised.\n");
         }
         // Remain in INIT state until initialisation successful.
@@ -111,7 +111,7 @@ void knl_main_task(void) {
         break;
 
     default:
-        // TODO: Record unhandled state.
+        /// TODO: Record unhandled state.
         if (error_check(UNHANDLED_STATE_ERROR) != SUCCESS) {
             state = STATE_ERROR;
         }
@@ -164,16 +164,17 @@ static void _kernel_run(void) {
     svc_panel_task();
     svc_dsp_task();
     svc_midi_task();
+    svc_display_task();
 
     if (g_user_tick && p_user_tick_callback != NULL) {
         (*p_user_tick_callback)();
         g_user_tick = false;
     }
 
-    if (g_display_update) {
-        svc_display_task();
-        g_display_update = false;
-    }
+    // if (g_display_update) {
+    //     svc_display_task();
+    //     g_display_update = false;
+    // }
 }
 
 static void _systick_callback(uint32_t systick) {
@@ -182,12 +183,12 @@ static void _systick_callback(uint32_t systick) {
     static uint8_t display_update;
 
     // Set flag to run display task.
-    if (display_update >= DISPLAY_TICK_DIV) {
-        g_display_update = true;
-        display_update = 0;
-    } else {
-        display_update++;
-    }
+    // if (display_update >= DISPLAY_TICK_DIV) {
+    //     g_display_update = true;
+    //     display_update = 0;
+    // } else {
+    //     display_update++;
+    // }
 
     // Set flag to run user tick callback.
     if (user_tick >= g_user_tick_div) {

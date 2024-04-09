@@ -169,7 +169,7 @@ typedef enum {
 
 void svc_panel_task(void);
 void svc_panel_enqueue(uint8_t *msg);
-void svc_panel_register_callback(t_panel_event event, void (*callback)());
+void svc_panel_register_callback(t_panel_event event, void *callback);
 void svc_panel_set_trigger_mode(uint8_t mode);
 void svc_panel_set_led(t_led_index led_index, uint8_t brightness);
 void svc_panel_toggle_led(t_led_index led_index);

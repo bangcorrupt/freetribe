@@ -29,41 +29,69 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /*
- * @file    svc_display.h
+ * @file    synth_gui.c
  *
- * @brief   Header for svc_display.c.
+ * @brief   GUI for synth example.
  *
  */
 
-#ifndef SVC_DISPLAY_H
-#define SVC_DISPLAY_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /*----- Includes -----------------------------------------------------*/
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "freetribe.h"
+
+#include "gui_task.h"
+#include "gui_window.h"
+
+#include "synth_gui.h"
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-/*----- Extern variable declarations ---------------------------------*/
+/*----- Static variable definitions ----------------------------------*/
 
-/*----- Extern function prototypes -----------------------------------*/
+static e_gui_menu_index g_gui_menu_current;
 
-void svc_display_task(void);
-void svc_display_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state);
+/*----- Extern variable definitions ----------------------------------*/
 
-int8_t svc_display_fill_frame(uint16_t x_start, uint16_t y_start,
-                              uint16_t x_end, uint16_t y_end, bool state);
+/*----- Static function prototypes -----------------------------------*/
 
-void svc_display_set_contrast(uint8_t contrast);
+/*----- Extern function implementations ------------------------------*/
 
-#ifdef __cplusplus
+bool gui_menu_select(e_gui_menu_index menu_index) {
+
+    bool result = false;
+
+    // if (gui_menu_current() != menu_index) {
+
+    switch (menu_index) {
+
+    case GUI_MENU_MODULATION:
+        gui_post("Modulation\n");
+        result = true;
+        break;
+
+    default:
+        break;
+    }
+    // } else {
+    //     //
+    // }
+    return result;
 }
-#endif
-#endif
+
+e_gui_menu_index gui_menu_current(void) { return g_gui_menu_current; }
+
+void gui_menu_next(e_gui_menu_index menu_index) {
+    //
+}
+
+void gui_menu_previous(e_gui_menu_index menu_index) {
+    //
+}
+
+/*----- Static function implementations ------------------------------*/
 
 /*----- End of file --------------------------------------------------*/

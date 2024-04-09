@@ -44,6 +44,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -58,11 +59,15 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Static variable definitions ----------------------------------*/
 
+static UG_GUI g_gui;
+static UG_DEVICE g_device;
+
 static bool g_toggle_led = false;
 
-/*----- Extern variable definitions ----------------------------------*/
+static uint8_t g_level_knob;
+static bool g_level_knob_changed;
 
-UG_GUI gui;
+/*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
 
@@ -78,6 +83,7 @@ static void _put_pixel(UG_S16 x, UG_S16 y, UG_COLOR c);
 static void _ui_print(char *text);
 
 static char *_build_string(uint8_t value);
+static char *_int_to_string(uint8_t value);
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -121,6 +127,17 @@ t_status app_init(void) {
  */
 void app_run(void) {
 
+    if (g_level_knob_changed) {
+        ft_set_module_param(0, 0, g_level_knob << 23);
+        ft_set_module_param(0, 1, g_level_knob << 23);
+
+        _ui_print("Level: ");
+        _ui_print(_int_to_string(g_level_knob));
+        _ui_print("\n\x00");
+
+        g_level_knob_changed = false;
+    }
+
     if (g_toggle_led) {
         ft_toggle_led(LED_TAP);
 
@@ -155,12 +172,18 @@ static void _register_callbacks(void) {
  */
 static void _ui_init(void) {
 
+    g_device.x_dim = 128;
+    g_device.y_dim = 64;
+    g_device.pset = _put_pixel;
+    /// TODO: How does flush function work?
+
     // Initialise uGUI
-    UG_Init(&gui, _put_pixel, 128, 64);
+    UG_Init(&g_gui, &g_device);
+    UG_DriverRegister(DRIVER_FILL_FRAME, svc_display_fill_frame);
 
     // Configure uGUI
-    UG_FontSelect(&FONT_6X8);
-    UG_ConsoleSetArea(0, 0, 127, 63);
+    UG_FontSelect(FONT_6X8);
+    UG_ConsoleSetArea(0, 1, 127, 63);
     UG_ConsoleSetBackcolor(C_BLACK);
     UG_ConsoleSetForecolor(C_WHITE);
     UG_FillScreen(C_BLACK);
@@ -234,9 +257,8 @@ static void _note_off_callback(char chan, char note, char vel) {
  * @param[in]   index   Index of knob.
  * @param[in]   value   Values of knob.
  */
-/// TODO: Are we doing too much in the callbacks?
-/// Maybe just copy values to local data structure,
-/// then act in the main loop.
+/// TODO: We are doing too much in the callbacks.
+///       Push events to queue and handle in main loop.
 void _knob_callback(uint8_t index, uint8_t value) {
 
     ft_send_cc(0, index, value >> 1);
@@ -245,9 +267,8 @@ void _knob_callback(uint8_t index, uint8_t value) {
 
     // Level knob.
     case 0:
-        ft_set_module_param(0, 0, value << 23);
-        ft_set_module_param(0, 1, value << 23);
-        _ui_print(_build_string(value >> 1));
+        g_level_knob = value;
+        g_level_knob_changed = true;
         break;
     }
 }
@@ -257,7 +278,7 @@ void _knob_callback(uint8_t index, uint8_t value) {
  *
  * User defined function required by uGUI.
  * Sets or clears a pixel at the specified coordinates.
- * uGUI uses 16 bits per pixel, Freetribe expects 1 bit per pixel.
+ * uGUI uses 8 bits per pixel, Freetribe expects 1 bit per pixel.
  *
  * @param[in]   x   Horizontal position of pixel.
  * @param[in]   y   Vertical position of pixel.
@@ -274,6 +295,8 @@ static void _put_pixel(UG_S16 x, UG_S16 y, UG_COLOR c) {
  * @param[in]   text    String to print.
  */
 static void _ui_print(char *text) {
+    /// TODO: This is slow and starves system.
+    ///       How does UG_FILL_AREA driver work?
     //
     UG_ConsolePutString(text);
 }
@@ -288,10 +311,10 @@ static void _ui_print(char *text) {
  *
  * @param[in]   value   Value of parameter.
  */
+/// TODO: Use lookup tables.
 static char *_build_string(uint8_t value) {
 
     char value_string[5];
-
     static char display_string[20];
 
     itoa(value, value_string, 10);
@@ -302,6 +325,15 @@ static char *_build_string(uint8_t value) {
     strncat(display_string, "\n", 1);
 
     return display_string;
+}
+
+static char *_int_to_string(uint8_t value) {
+
+    static char value_string[5];
+
+    itoa(value, value_string, 10);
+
+    return value_string;
 }
 
 /*----- End of file --------------------------------------------------*/

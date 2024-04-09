@@ -165,7 +165,9 @@ void dev_lcd_set_backlight(bool red, bool green, bool blue) {
 
     // LCD Backlight on
     // TODO: Define pin index.
-    per_gpio_set(6, 3, red);          // Set GP6P3: LCD Red
+    //
+    // per_gpio_set(6, 3, red);       // Set GP6P3: LCD Red
+    per_gpio_set_indexed(100, red);   // Set GP6P3: LCD Red
     per_gpio_set_indexed(101, green); // Set GP6P4: LCD Green
     per_gpio_set_indexed(102, blue);  // Set GP6P5: LCD Blue
 
@@ -176,11 +178,12 @@ void dev_lcd_set_backlight(bool red, bool green, bool blue) {
 
 static void _lcd_tx(uint8_t *buffer, uint32_t length) {
 
-    per_spi0_tx(buffer, length);
+    // per_spi0_tx(buffer, length);
 
     // TODO: DMA frame buffer.
     // TODO: Use interrupt until DMA driver ready.
-    // per_spi0_tx_int(buffer, length);
+
+    per_spi0_tx_int(buffer, length);
 }
 
 static void _lcd_mode(t_lcd_mode mode) { per_gpio_set(8, 1, mode); }

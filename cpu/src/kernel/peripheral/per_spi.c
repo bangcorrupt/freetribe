@@ -35,7 +35,9 @@ under the terms of the GNU Affero General Public License as published by
  *
  */
 
-// TODO: Rework similar to UART driver.
+/// TODO: Rework similar to UART driver.
+
+/// TODO: SPI_1 needs mutex to prevent DSP and flash access collision.
 
 /*----- Includes -----------------------------------------------------*/
 
@@ -68,7 +70,7 @@ static void (*_spi1_rx_callback)(void) = NULL;
 
 static bool g_spi_initialised[2];
 
-// TODO: Encapsulate.
+/// TODO: Encapsulate.
 static uint32_t g_spi_base[2] = {SOC_SPI_0_REGS, SOC_SPI_1_REGS};
 
 static uint32_t g_spi_data_format[4] = {SPI_DATA_FORMAT0, SPI_DATA_FORMAT1,
@@ -99,7 +101,7 @@ void per_spi0_init(void) {
         SPI_SPIPC0_SIMOFUN | SPI_SPIPC0_CLKFUN |
         SPI_SPIPC0_SCS0FUN0; // | SPI_SPIPC0_SCS0FUN2;
 
-    // TODO: Can we increase clock speed?
+    /// TODO: Can we increase clock speed?
     //          Factory firmware sets prescaler to 0x1d.
     // SPI0 Data format
     HWREG(SOC_SPI_0_REGS + SPI_SPIFMT(0)) =
@@ -107,7 +109,7 @@ void per_spi0_init(void) {
         (SPI_SPIFMT_PRESCALE & (0x4 << SPI_SPIFMT_PRESCALE_SHIFT)) |
         (SPI_SPIFMT_CHARLEN & 8);
 
-    // TODO: Can we use chip slelect for LCD A0 pin (Command/Data mode).
+    /// TODO: Can we use chip slelect for LCD A0 pin (Command/Data mode).
     // Transfer chip select value.
     /* SPIDat1Config(SOC_SPI_0_REGS, SPI_DATA_FORMAT0 | SPI_CSHOLD, 0x5); */
     SPIDat1Config(SOC_SPI_0_REGS, SPI_DATA_FORMAT0 | SPI_CSHOLD, 0x1);
@@ -239,7 +241,7 @@ void per_spi1_tx(uint8_t *buffer, uint32_t length) {
 
     if (buffer != NULL) {
         while (length--) {
-            // TODO: SPI ENA timeout/error?
+            /// TODO: SPI ENA timeout/error?
             while (per_gpio_get(2, 12))
                 ;
             // Write byte to SPI1
@@ -259,8 +261,8 @@ void per_spi1_tx_int(uint8_t *buffer, uint32_t length) {
     }
 }
 
-// TODO: Support both instances.
-//          See UART driver.
+/// TODO: Support both instances.
+///          See UART driver.
 void per_spi1_transceive_int(uint8_t *tx_buffer, uint8_t *rx_buffer,
                              uint32_t length) {
     //

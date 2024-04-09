@@ -105,6 +105,11 @@ void ft_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state) {
     svc_display_put_pixel(pos_x, pos_y, state);
 }
 
+int8_t ft_fill_frame(uint16_t x_start, uint16_t y_start, uint16_t x_end,
+                     uint16_t y_end, bool state) {
+    return svc_display_fill_frame(x_start, y_start, x_end, y_end, state);
+}
+
 // Print API
 //
 // TODO: What is going on with print?
@@ -134,7 +139,7 @@ void ft_print(char *text) { svc_midi_send_string(text); }
  *
  */
 // TODO: Separate function for each event type.
-void ft_register_panel_callback(t_panel_event event, void (*callback)()) {
+void ft_register_panel_callback(t_panel_event event, void *callback) {
 
     svc_panel_register_callback(event, callback);
 }
@@ -205,6 +210,16 @@ void ft_send_cc(char chan, char index, char val) {
  *
  */
 void ft_toggle_led(t_led_index led_index) { svc_panel_toggle_led(led_index); }
+
+/**
+ * @brief   Set LED.
+ *
+ * @param[in]   led_index   Index of LED to toggle.
+ *
+ */
+void ft_set_led(t_led_index led_index, bool state) {
+    svc_panel_set_led(led_index, state);
+}
 
 // DSP Command API
 //

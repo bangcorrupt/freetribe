@@ -37,6 +37,18 @@ under the terms of the GNU Affero General Public License as published by
 
 // TODO: CPU device driver, command service.
 
+/*----- Includes -----------------------------------------------------*/
+
+#include <stdint.h>
+#include <string.h>
+
+#include "ft_error.h"
+
+#include "per_gpio.h"
+#include "per_spi.h"
+
+#include "module.h"
+
 /*----- Macros and Definitions ---------------------------------------*/
 
 #define MSG_START 0xf0
@@ -68,17 +80,6 @@ enum e_system_msg_id {
     SYSTEM_SET_PORT_STATE,
     SYSTEM_PORT_STATE
 };
-
-/*----- Includes -----------------------------------------------------*/
-
-#include <stdint.h>
-#include <string.h>
-
-#include "ft_error.h"
-
-#include "per_gpio.h"
-
-#include "module.h"
 
 /*----- Static variable definitions ----------------------------------*/
 
@@ -235,7 +236,11 @@ static void _cpu_receive(uint8_t byte) {
         if (count < length) {
             payload[count] = byte;
             count++;
-        } else {
+        }
+        // Handle message before returning,
+        // else it is not handled until first
+        // byte of next message is received.
+        if (count >= length) {
             count = 0;
             _handle_message(msg_type, msg_id, payload, length);
             state = PARSE_START;

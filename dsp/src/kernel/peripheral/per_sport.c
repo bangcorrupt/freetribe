@@ -38,6 +38,7 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Includes -----------------------------------------------------*/
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include <blackfin.h>
 #include <builtins.h>
@@ -73,6 +74,10 @@ volatile static fract32 g_cpu_out[2];
 
 volatile static bool g_sport0_frame_received = false;
 
+static fract32 g_test_buffer[1024];
+
+static uint32_t g_sport_isr_period;
+
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
@@ -80,6 +85,13 @@ volatile static bool g_sport0_frame_received = false;
 static void _sport0_isr(void) __attribute__((interrupt_handler));
 
 /*----- Extern function implementations ------------------------------*/
+int cycles() {
+    volatile long int ret;
+
+    __asm__ __volatile__("%0 = CYCLES;\n\t" : "=&d"(ret) : : "R1");
+
+    return ret;
+}
 
 void sport0_init(void) {
 
@@ -222,6 +234,15 @@ void sport0_frame_processed(void) { g_sport0_frame_received = false; }
 // TODO: Block processing.  For now we process each frame as it arrives.
 __attribute__((interrupt_handler)) static void _sport0_isr(void) {
 
+    static uint16_t i = 0;
+
+    // static uint32_t cycles_this;
+    // static uint32_t cycles_last;
+    //
+    // cycles_this = cycles();
+    // g_sport_isr_period = cycles_this - cycles_last;
+    // cycles_last = cycles_this;
+
     // Clear interrupt status.
     *pDMA3_IRQ_STATUS = DMA_DONE;
     ssync();
@@ -241,6 +262,12 @@ __attribute__((interrupt_handler)) static void _sport0_isr(void) {
     // Send output to codec.
     g_codec_tx_buffer[0] = g_codec_out[0];
     g_codec_tx_buffer[1] = g_codec_out[1];
+
+    g_test_buffer[i++] = g_codec_out[0];
+
+    if (i >= 1024) {
+        i = 0;
+    }
 
     /* // Send output to CPU. */
     /* g_cpu_tx_buffer[0] = g_cpu_out[0]; */

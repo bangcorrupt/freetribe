@@ -66,14 +66,23 @@ typedef enum {
 
 static uint8_t g_led_current_brightness[LED_COUNT] = {0};
 
-static void (*p_button_callback)(uint8_t button, bool state) = NULL;
-static void (*p_encoder_callback)(uint8_t enc, int8_t val) = NULL;
-static void (*p_knob_callback)(uint8_t knob, uint8_t val) = NULL;
-static void (*p_undefined_callback)(void) = NULL;
-static void (*p_trigger_callback)(uint8_t pad, uint8_t vel, bool state) = NULL;
-static void (*p_xy_pad_callback)(uint32_t x_val, uint32_t y_val) = NULL;
-static void (*p_panel_ack_callback)(uint32_t version) = NULL;
-static void (*p_held_buttons_callback)(uint32_t *held_buttons) = NULL;
+typedef void (*t_button_callback)(uint8_t button, bool state);
+typedef void (*t_encoder_callback)(uint8_t enc, int8_t val);
+typedef void (*t_knob_callback)(uint8_t knob, uint8_t val);
+typedef void (*t_undefined_callback)(void);
+typedef void (*t_trigger_callback)(uint8_t pad, uint8_t vel, bool state);
+typedef void (*t_xy_pad_callback)(uint32_t x_val, uint32_t y_val);
+typedef void (*t_panel_ack_callback)(uint32_t version);
+typedef void (*t_held_buttons_callback)(uint32_t *held_buttons);
+
+static t_button_callback p_button_callback = NULL;
+static t_encoder_callback p_encoder_callback = NULL;
+static t_knob_callback p_knob_callback = NULL;
+static t_undefined_callback p_undefined_callback = NULL;
+static t_trigger_callback p_trigger_callback = NULL;
+static t_xy_pad_callback p_xy_pad_callback = NULL;
+static t_panel_ack_callback p_panel_ack_callback = NULL;
+static t_held_buttons_callback p_held_buttons_callback = NULL;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -119,41 +128,41 @@ void svc_panel_task(void) {
     }
 }
 
-void svc_panel_register_callback(t_panel_event event, void (*callback)()) {
+void svc_panel_register_callback(t_panel_event event, void *callback) {
 
     if (callback != NULL) {
         switch (event) {
 
         case BUTTON_EVENT:
-            p_button_callback = callback;
+            p_button_callback = (t_button_callback)callback;
             break;
 
         case ENCODER_EVENT:
-            p_encoder_callback = callback;
+            p_encoder_callback = (t_encoder_callback)callback;
             break;
 
         case KNOB_EVENT:
-            p_knob_callback = callback;
+            p_knob_callback = (t_knob_callback)callback;
             break;
 
         case UNDEFINED_EVENT:
-            p_undefined_callback = callback;
+            p_undefined_callback = (t_undefined_callback)callback;
             break;
 
         case TRIGGER_EVENT:
-            p_trigger_callback = callback;
+            p_trigger_callback = (t_trigger_callback)callback;
             break;
 
         case XY_PAD_EVENT:
-            p_xy_pad_callback = callback;
+            p_xy_pad_callback = (t_xy_pad_callback)callback;
             break;
 
         case PANEL_ACK_EVENT:
-            p_panel_ack_callback = callback;
+            p_panel_ack_callback = (t_panel_ack_callback)callback;
             break;
 
         case HELD_BUTTONS_EVENT:
-            p_held_buttons_callback = callback;
+            p_held_buttons_callback = (t_held_buttons_callback)callback;
             break;
 
         default:

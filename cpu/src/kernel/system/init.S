@@ -156,7 +156,7 @@ Clear_Bss_Section:
 
          LDR   r0, =_bss_start                 @ Start address of BSS
          LDR   r1, =(_bss_end - 0x04)          @ End address of BSS
-         MOV   r2, #0  
+         MOV   r2, #0
 BSS_Loop: 
          STR   r2, [r0], #4                    @ Clear one word in BSS
          CMP   r0, r1
@@ -169,7 +169,7 @@ Paint_Stack_Section:
 
          LDR   r0, =_stack                     @ Start address of Stack
          LDR   r1, =(_bss_end)                 @ End address of BSS
-         LDR   r2, paint  
+         LDR   r2, paint
 Stack_Loop: 
          STR   r2, [r0], #-4                   @ Paint one word in Stack
          CMP   r0, r1

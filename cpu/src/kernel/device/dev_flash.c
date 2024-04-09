@@ -37,7 +37,6 @@ under the terms of the GNU Affero General Public License as published by
 // TODO: Flash access is very slow.
 //          Possible issue with SPI clock.
 
-
 /*----- Includes -----------------------------------------------------*/
 
 #include <stdbool.h>
@@ -60,7 +59,7 @@ under the terms of the GNU Affero General Public License as published by
 #define SPI_FLASH_BASE SPI1_BASE
 #define SPI_FLASH_CS 0x1
 
-// TODO: typedef enum {} t_flash_command;
+/// TODO: typedef enum {} t_flash_command;
 #define WRITE_IN_PROGRESS 0x01
 #define WRITE_ENABLE_LATCH 0x02
 #define PROGRAM_FAIL 0x20
@@ -328,7 +327,7 @@ void _sector_erase(uint32_t sector_addr) {
         ;
 
     if (_read_security() & ERASE_FAIL) {
-        // TODO: Handle error.
+        /// TODO: Handle error.
     }
 }
 
@@ -354,7 +353,7 @@ void _page_program(uint32_t dest, uint8_t *p_src) {
         ;
 
     if (_read_security() & PROGRAM_FAIL) {
-        // TODO: Handle error.
+        /// TODO: Handle error.
     }
 }
 
@@ -384,7 +383,7 @@ uint8_t _read_reg_byte(uint8_t cmd) {
 
 uint16_t _read_reg_short(uint8_t cmd) {
 
-    // TODO: Fix incompatible pointer type.
+    /// TODO: Fix incompatible pointer type.
     uint16_t flash_reg = 0;
 
     _flash_chip_select(true);
@@ -452,11 +451,11 @@ void _erase_spb(void) {
         ;
 
     if (_read_security() & ERASE_FAIL) {
-        // TODO: Handle error.
+        /// TODO: Handle error.
     }
 
     if (_read_security() & PROGRAM_FAIL) {
-        // TODO: Handle error.
+        /// TODO: Handle error.
     }
 }
 
@@ -489,7 +488,7 @@ void _write_disable(void) {
         ;
 }
 
-// TODO: SPI chip select delay.
+/// TODO: SPI chip select delay.
 void _flash_chip_select(bool state) {
 
     if (!state) {
@@ -505,7 +504,7 @@ void _flash_chip_select(bool state) {
 
 void _flash_command(uint8_t cmd) { _flash_tx(&cmd, 1); }
 
-// TODO: Maybe typedef flash_address.
+/// TODO: Maybe typedef flash_address.
 void _flash_address(uint32_t address) {
 
     // Source address array.
@@ -534,9 +533,13 @@ void _flash_address_32bit(uint32_t address) {
 }
 
 void _flash_tx(uint8_t *p_tx, uint32_t len) {
-    per_spi_tx(SPI_FLASH_BASE, p_tx, len);
+    /// TODO: SPI_1 needs mutex to prevent DSP and flash access collision.
+    //
+    // per_spi_tx(SPI_FLASH_BASE, p_tx, len);
 }
 
 void _flash_rx(uint8_t *p_rx, uint32_t len) {
-    per_spi_rx(SPI_FLASH_BASE, p_rx, len);
+    /// TODO: SPI_1 needs mutex to prevent DSP and flash access collision.
+    //
+    // per_spi_rx(SPI_FLASH_BASE, p_rx, len);
 }

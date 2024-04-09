@@ -1,0 +1,3 @@
+[submodule "cpu/src/lib/UGUI"]
+	path = cpu/src/lib/UGUI
+	url = ../UGUI.git

@@ -145,6 +145,7 @@ static void _hardware_init(void) {
     // ADC Reset.
     per_gpio_set_indexed(99, 0); // Clear GP6P2
 
+    // ADC MCLK on ??
     per_gpio_set_indexed(123, 1); // Set GP7P10
 
     // Wait until B8P15 is high.
