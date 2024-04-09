@@ -160,7 +160,6 @@ typedef enum {
 static int32_t g_midi_hz_lut[128];
 static int32_t g_octave_tune_lut[256];
 static int32_t g_filter_res_lut[256];
-static int32_t g_filter_env_depth_lut[256];
 
 static bool g_shift_held;
 static bool g_menu_held;
@@ -201,10 +200,8 @@ t_status app_init(void) {
     int i;
 
     float hz;
-    // for (i = 0; i <= 127; ++i) {
     for (i = 0; i <= 127; i++) {
         /// Initialise pitch to frequency lookup table.
-        // hz = (440.0 / 32) * (pow(2, ((i - 9) / 12.0)));
         hz = freq_12tet_lut[i * 2];
 
         /// TODO: Oscillators in the Aleph DSP library
@@ -216,7 +213,6 @@ t_status app_init(void) {
         hz *= 0.6827421407069484;
 
         // Convert to fix16,
-        // hz *= (1 << 16);
         g_midi_hz_lut[i] = (int32_t)hz;
     }
 
@@ -248,19 +244,6 @@ t_status app_init(void) {
         g_filter_res_lut[i] = res;
     }
 
-    // uint32_t depth;
-    // for (i = 0; i <= 255; i++) {
-    //
-    //     if (i <= 128) {
-    //         depth = i << 24;
-    //
-    //     } else {
-    //         depth = i << 23;
-    //     }
-    //
-    //     g_filter_env_depth_lut[i] = depth;
-    // }
-
     scale_init(&g_scale, DEFAULT_SCALE_NOTES, DEFAULT_SCALE_TONES);
     keyboard_init(&g_kbd, &g_scale);
 
@@ -272,7 +255,6 @@ t_status app_init(void) {
     // Initialise GUI.
     gui_task();
 
-    // gui_post("MonoSynth Example");
     gui_print(4, 4, "MonoSynth Example");
 
     status = SUCCESS;
@@ -325,9 +307,6 @@ void _knob_callback(uint8_t index, uint8_t value) {
                                     integrator_lut[value]);
                 gui_post_param("Fil Atk: ", value);
             }
-            // gui_textbox_set_value(GUI_WINDOW_MAIN, 0, value);
-
-            // gui_print_int(5, 46, value);
         }
 
         break;
