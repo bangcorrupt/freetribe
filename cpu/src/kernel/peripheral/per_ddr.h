@@ -44,6 +44,8 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
+#include <stdint.h>
+
 /*----- Macros and Definitions ---------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
@@ -51,6 +53,7 @@ extern "C" {
 /*----- Extern function prototypes -----------------------------------*/
 void ddr_init(void);
 void ddr_terminate(void);
+uint8_t ddr_memtest(void);
 
 #ifdef __cplusplus
 }

@@ -172,7 +172,9 @@ void start_boot(void) {
 
     _config_cache_mmu();
 
-    // _ddr_memtest();
+    // if (ddr_memtest() != 0) {
+    //     _boot_abort();
+    // }
 
     /* Initialize the vector table with opcodes */
     _copy_vector_table();
@@ -474,7 +476,8 @@ static void _config_cache_mmu() {
 
         // Map start of address space to RAM region.
         //  Allows setting interrupt vector to 0x0 then selecting OC RAM or DDR.
-        //      Probably don't need this if we have kernel running in OC RAM.
+        //      Probably don't need this if we have vector table in ARM RAM.
+        //      Will need this before booting into factory app.
         // page_table[0] = 0xc1e | 0xc0000000;
         // page_table[0] = 0xc1e | 0x80000000;
     }
@@ -491,24 +494,6 @@ static void _config_cache_mmu() {
     CP15ICacheEnable();
 
     CP15DCacheEnable();
-}
-
-static void _ddr_memtest(void) {
-
-    int i;
-    unsigned int *ddr = (unsigned int *)0xc0000000;
-
-    for (i = 0; i < 0x4000000; i += 4) {
-
-        *ddr++ = i;
-    }
-
-    for (i = 0; i < 0x4000000; i += 4) {
-
-        if (*ddr++ != i) {
-            _boot_abort();
-        }
-    }
 }
 
 static void _boot_abort(void) {
