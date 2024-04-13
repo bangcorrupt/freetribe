@@ -63,7 +63,7 @@ static uint8_t *g_spi0_tx_buffer = NULL;
 static uint32_t g_spi0_tx_length = 0;
 
 static uint8_t *g_spi1_tx_buffer = NULL;
-volatile static uint32_t g_spi1_tx_length = 0;
+static uint32_t g_spi1_tx_length = 0;
 
 static uint8_t *g_spi1_rx_buffer = NULL;
 static uint32_t g_spi1_rx_length = 0;
@@ -146,9 +146,6 @@ void per_spi0_init(void) {
 }
 
 void per_spi1_init(void) {
-
-    // Release chip select.
-    // SPIDat1Config(SOC_SPI_1_REGS, SPI_DATA_FORMAT0, 0x1);
 
     // SPI1 in reset.
     SPIReset(SOC_SPI_1_REGS);
