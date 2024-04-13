@@ -58,10 +58,12 @@ under the terms of the GNU Affero General Public License as published by
 //          This should probably be lower priority than UART control input.
 #define DSP_SPI_INT_CHANNEL 5
 
+/// TODO: Centralised header for queue lengths.
 #define DSP_SPI_TX_BUF_LEN 0x100
 #define DSP_SPI_RX_BUF_LEN 0x100
 // #define DSP_SPI_WORD_LEN 0x2
 
+/// TODO: Use indexed GPIO functions for single pin id.
 #define DSP_RESET_BANK 6
 #define DSP_RESET_PIN 10
 
@@ -80,7 +82,8 @@ static char dsp_spi_tx_rbmem[DSP_SPI_TX_BUF_LEN];
 
 static uint8_t g_dsp_spi_rx_byte;
 
-static bool g_dsp_spi_tx_complete = true;
+volatile static bool g_dsp_spi_tx_complete = true;
+volatile static bool g_dsp_spi_rx_complete = true;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -102,12 +105,16 @@ static void _dsp_spi_rx_callback(void);
 void dev_dsp_init(void) {
     //
     _dsp_spi_init();
+
+    /// TODO: EMIFA driver.
+    //
     // _dsp_emifa_init();
 }
 
 void dev_dsp_spi_tx_enqueue(uint8_t *p_byte) {
 
-    if (g_dsp_spi_tx_complete && dev_dsp_spi_enabled()) {
+    if (g_dsp_spi_tx_complete && g_dsp_spi_rx_complete) {
+
         _dsp_spi_tx_byte(p_byte);
 
     } else {
@@ -133,8 +140,9 @@ bool dev_dsp_spi_tx_complete(void) { return g_dsp_spi_tx_complete; }
 
 void dev_dsp_spi_poll(void) { _dsp_spi_rx_byte(); }
 
-// TODO: SPI ENA
-void dev_dsp_per_spi_tx(uint8_t *buffer, uint32_t length) {
+/// TODO: Sort out dev_dsp_spi function name mess.
+//
+void dev_dsp_spi_tx(uint8_t *buffer, uint32_t length) {
 
     per_spi_chip_format(DSP_SPI, DSP_SPI_DATA_FORMAT, DSP_SPI_CHIP_SELECT,
                         true);
@@ -154,11 +162,21 @@ bool dev_dsp_spi_enabled(void) {
     return !per_gpio_get(DSP_SPI_ENA_BANK, DSP_SPI_ENA_PIN);
 }
 
+void dev_dsp_spi_tx_buffer(uint8_t *buffer, uint32_t length) {
+
+    per_spi_chip_format(DSP_SPI, DSP_SPI_DATA_FORMAT, DSP_SPI_CHIP_SELECT,
+                        true);
+
+    per_spi1_tx_int(buffer, length);
+}
+
 /*----- Static function implementations ------------------------------*/
 
-// TODO: Return status code.
+/// TODO: Return status code.
 void _dsp_spi_init(void) {
 
+    /// TODO: SPI1 requires mutex to coordinate flash access.
+    //
     // SPI 1 also used for flash.
     if (!per_spi_initialised(DSP_SPI)) {
         per_spi1_init();
@@ -198,12 +216,17 @@ static void _dsp_spi_rx_enqueue(uint8_t *p_byte) {
 static void _dsp_spi_tx_byte(uint8_t *p_byte) {
 
     g_dsp_spi_tx_complete = false;
+    g_dsp_spi_rx_complete = false;
+
+    per_spi_chip_format(DSP_SPI, DSP_SPI_DATA_FORMAT, DSP_SPI_CHIP_SELECT,
+                        true);
+
     per_spi1_transceive_int(p_byte, &g_dsp_spi_rx_byte, 1);
 }
 
 static void _dsp_spi_rx_byte(void) {
 
-    static uint8_t dummy = 0xbf;
+    uint8_t dummy = 0x00;
 
     // Transmit dummy byte to receive.
     _dsp_spi_tx_byte(&dummy);
@@ -225,6 +248,7 @@ static void _dsp_spi_tx_callback(void) {
 static void _dsp_spi_rx_callback(void) {
 
     _dsp_spi_rx_enqueue(&g_dsp_spi_rx_byte);
+    g_dsp_spi_rx_complete = true;
 }
 
 /*----- End of file --------------------------------------------------*/

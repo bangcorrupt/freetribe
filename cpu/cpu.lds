@@ -15,8 +15,8 @@ MEMORY
 
 SECTIONS
 {
-	. = 0x80000000; 
-	/* . = 0x80005e40; */
+    . = 0x80000000;
+    /* . = 0x80005e40; */
 	. = ALIGN(4);
 
     .rsthand :
@@ -27,39 +27,32 @@ SECTIONS
 	. = ALIGN(4);
 	.text :
 	{
-		
-		*(.text)
+	    *(.text)
 	} > OC_RAM
 
 	. = ALIGN(4);
 
-	.data : 
-	{ 
-		*(.data) 
+	.data :
+	{
+	    *(.data)
 	} > OC_RAM
 	
 	. = ALIGN(4);
 
 	_bss_start = .;
-	.bss : 
-	{ 
-		
-		*(.bss) 
+	.bss :
+	{
+	    *(.bss)
 	} > OC_RAM
 
     . = ALIGN(8);
 
-	_bss_end = .;	
+	_bss_end = .;
 	
 	.stack ALIGN(8) :
 	{
-		/* . += (0x80020000 - _bss_end); */
-		. += 0x1000; 
+	    /* . += (0x80020000 - _bss_end); */
+	    . += 0x1000;
 	} > OC_RAM
 	_stack = .;
-
 }
-
-
-
-	

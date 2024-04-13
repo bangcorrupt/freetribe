@@ -44,6 +44,9 @@ under the terms of the GNU Affero General Public License as published by
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "startup.h"
+
+#include "hal_cp15.h"
 #include "hal_interrupt.h"
 #include "hal_spi.h"
 
@@ -60,7 +63,7 @@ static uint8_t *g_spi0_tx_buffer = NULL;
 static uint32_t g_spi0_tx_length = 0;
 
 static uint8_t *g_spi1_tx_buffer = NULL;
-static uint32_t g_spi1_tx_length = 0;
+volatile static uint32_t g_spi1_tx_length = 0;
 
 static uint8_t *g_spi1_rx_buffer = NULL;
 static uint32_t g_spi1_rx_length = 0;
@@ -102,7 +105,8 @@ void per_spi0_init(void) {
         SPI_SPIPC0_SCS0FUN0; // | SPI_SPIPC0_SCS0FUN2;
 
     /// TODO: Can we increase clock speed?
-    //          Factory firmware sets prescaler to 0x1d.
+    ///          Factory firmware sets prescaler to 0x1d.
+    //
     // SPI0 Data format
     HWREG(SOC_SPI_0_REGS + SPI_SPIFMT(0)) =
         SPI_SPIFMT_PHASE |
@@ -110,6 +114,7 @@ void per_spi0_init(void) {
         (SPI_SPIFMT_CHARLEN & 8);
 
     /// TODO: Can we use chip slelect for LCD A0 pin (Command/Data mode).
+    //
     // Transfer chip select value.
     /* SPIDat1Config(SOC_SPI_0_REGS, SPI_DATA_FORMAT0 | SPI_CSHOLD, 0x5); */
     SPIDat1Config(SOC_SPI_0_REGS, SPI_DATA_FORMAT0 | SPI_CSHOLD, 0x1);
@@ -143,7 +148,7 @@ void per_spi0_init(void) {
 void per_spi1_init(void) {
 
     // Release chip select.
-    SPIDat1Config(SOC_SPI_1_REGS, SPI_DATA_FORMAT0, 0x1);
+    // SPIDat1Config(SOC_SPI_1_REGS, SPI_DATA_FORMAT0, 0x1);
 
     // SPI1 in reset.
     SPIReset(SOC_SPI_1_REGS);
@@ -196,7 +201,9 @@ void per_spi1_init(void) {
     IntSystemEnable(SYS_INT_SPIINT1);
 
     // Set interrupt level for transmit and receive.
-    SPIIntLevelSet(SOC_SPI_1_REGS, SPI_TRANSMIT_INTLVL | SPI_RECV_INTLVL);
+    SPIIntLevelSet(SOC_SPI_1_REGS, SPI_TRANSMIT_INTLVL | SPI_RECV_INTLVL |
+                                       SPI_TIMEOUT_INTLVL |
+                                       SPI_DESYNC_SLAVE_INTLVL);
 
     g_spi_initialised[1] = true;
 }
@@ -237,15 +244,38 @@ void per_spi0_tx_int(uint8_t *buffer, uint32_t length) {
     SPIIntEnable(SOC_SPI_0_REGS, SPI_TRANSMIT_INT);
 }
 
+/// TODO: Non-blocking implementation would be better.
+///         Not a big problem as this function is
+///         only used to boot the DSP.
+//
 void per_spi1_tx(uint8_t *buffer, uint32_t length) {
 
     if (buffer != NULL) {
+        while (SPIIntStatus(SOC_SPI_1_REGS, SPI_RECV_INT))
+            ;
+
         while (length--) {
             /// TODO: SPI ENA timeout/error?
+
             while (per_gpio_get(2, 12))
+                ;
+
+            // Wait until SPI transmit buffer ready.
+            while (!SPIIntStatus(SOC_SPI_1_REGS, SPI_TRANSMIT_INT))
                 ;
             // Write byte to SPI1
             SPITransmitData1(SOC_SPI_1_REGS, *buffer++);
+
+            // Wait until SPI transmit buffer ready.
+            while (!SPIIntStatus(SOC_SPI_1_REGS, SPI_TRANSMIT_INT))
+                ;
+
+            while (per_gpio_get(2, 12))
+                ;
+
+            if (SPIIntStatus(SOC_SPI_1_REGS, SPI_RECV_INT)) {
+                SPIDataReceive(SOC_SPI_1_REGS);
+            }
         }
     }
 }
@@ -257,7 +287,7 @@ void per_spi1_tx_int(uint8_t *buffer, uint32_t length) {
         g_spi1_tx_length = length;
 
         // Enable TX interrupt.
-        SPIIntEnable(SOC_SPI_1_REGS, SPI_TRANSMIT_INT);
+        SPIIntEnable(SOC_SPI_1_REGS, SPI_TRANSMIT_INT | SPI_TIMEOUT_INT);
     }
 }
 
@@ -265,22 +295,25 @@ void per_spi1_tx_int(uint8_t *buffer, uint32_t length) {
 ///          See UART driver.
 void per_spi1_transceive_int(uint8_t *tx_buffer, uint8_t *rx_buffer,
                              uint32_t length) {
-    //
+
     if (tx_buffer != NULL && tx_buffer != NULL && length != 0) {
         g_spi1_tx_buffer = tx_buffer;
         g_spi1_rx_buffer = rx_buffer;
         g_spi1_tx_length = length;
         g_spi1_rx_length = length;
 
-        // Enable TX interrupt.
-        SPIIntEnable(SOC_SPI_1_REGS, SPI_TRANSMIT_INT);
-
-        // Enable RX interrupt.
-        SPIIntEnable(SOC_SPI_1_REGS, SPI_RECV_INT);
+        /// TODO: Error interrupts should be enabled in init function.
+        ///         Should probably always remain enabled.
+        //
+        // Enable interrupts.
+        SPIIntEnable(SOC_SPI_1_REGS, SPI_TRANSMIT_INT | SPI_RECV_INT |
+                                         SPI_TIMEOUT_INT |
+                                         SPI_DESYNC_SLAVE_INT);
     }
 }
 
 void per_spi_chip_select(uint32_t spi_base, uint8_t cs, bool state) {
+    /// TODO: This sets chip select hold mode, does not assert chip select.
 
     if (state) {
         // Assert chip select
@@ -426,6 +459,8 @@ static void _spi1_isr(void) {
     IntSystemStatusClear(SYS_INT_SPIINT1);
 #endif
 
+    /// TODO: Assign int_id in while condition.
+    //
     int_id = SPIInterruptVectorGet(SOC_SPI_1_REGS);
 
     // Handle all pending interrupts.
@@ -440,6 +475,7 @@ static void _spi1_isr(void) {
             if (g_spi1_tx_length--) {
                 // Write byte to SPI0
                 SPITransmitData1(SOC_SPI_1_REGS, *g_spi1_tx_buffer++);
+
                 if (g_spi1_tx_length == 0) {
                     // Disable the Tx interrupt if buffer is empty.
                     SPIIntDisable(SOC_SPI_1_REGS, SPI_TRANSMIT_INT);
@@ -470,7 +506,10 @@ static void _spi1_isr(void) {
 
             break;
 
-            // TODO: case ERROR:
+        // TODO: Interrogate source of error and trigger callback.
+        case SPI_ERR:
+            while (true)
+                ;
 
         default:
             break;

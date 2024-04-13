@@ -71,6 +71,8 @@ void per_spi_chip_format(uint8_t instance, uint8_t data_format,
 
 void per_spi1_register_callback(t_spi_event event, void (*callback)());
 
+void per_spi1_tx_int(uint8_t *buffer, uint32_t length);
+
 void per_spi1_transceive_int(uint8_t *tx_buffer, uint8_t *rx_buffer,
                              uint32_t length);
 
