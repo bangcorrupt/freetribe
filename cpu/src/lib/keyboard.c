@@ -54,7 +54,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Static function prototypes -----------------------------------*/
 
-static void _gen_keymap(t_keyboard *kbd, t_scale *scale);
+static void _gen_scale_map(t_keyboard *kbd, t_scale *scale);
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -73,13 +73,13 @@ void keyboard_init(t_keyboard *kbd, t_scale *scale) {
     kbd->octave = 3;
     kbd->split = 12;
     kbd->scale = scale;
-    _gen_keymap(kbd, kbd->scale);
+    _gen_scale_map(kbd, kbd->scale);
 }
 
 void keyboard_set_scale(t_keyboard *kbd, t_scale *scale) {
 
     kbd->scale = scale;
-    _gen_keymap(kbd, kbd->scale);
+    _gen_scale_map(kbd, kbd->scale);
 }
 
 void keyboard_set_octave(t_keyboard *kbd, uint8_t octave) {
@@ -122,7 +122,7 @@ uint8_t keyboard_map_note(t_keyboard *kbd, uint8_t pad) {
 
 /*----- Static function implementations ------------------------------*/
 
-static void _gen_keymap(t_keyboard *kbd, t_scale *scale) {
+static void _gen_scale_map(t_keyboard *kbd, t_scale *scale) {
 
     uint8_t i;
     uint8_t j = 0;

@@ -80,6 +80,7 @@ under the terms of the GNU Affero General Public License as published by
 #include "hw_types.h"
 #include "soc_AM1808.h"
 
+#include "hal_cp15.h"
 #include "hal_psc.h"
 #include "hal_syscfg.h"
 
@@ -106,9 +107,8 @@ static unsigned int const vecTbl[14] = {0xE59FF018,
                                         (unsigned int)IRQHandler,
                                         (unsigned int)FIQHandler};
 
-// TODO: Collides with stack.
-//       Move to ARM_RAM
-static unsigned int tt_base = 0x8001c000;
+static volatile unsigned int page_table[4 * 1024]
+    __attribute__((aligned(16 * 1024)));
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -130,19 +130,8 @@ static void _pll1_init(unsigned char pllm, unsigned char postdiv,
                        unsigned char div1, unsigned char div2,
                        unsigned char div3);
 
+static void _config_cache_mmu(void);
 static void _boot_abort(void);
-
-// TODO: Should either be static or moved to another module.
-void coproc_init(void);
-void translation_table_init(unsigned int ttb);
-void set_tt_base(unsigned int ttb);
-void set_dac_manager(void);
-void inv_idcache(void);
-void inv_tlb(void);
-void enable_mmu();
-void enable_icache();
-void enable_dcache();
-void system_mode(void);
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -167,7 +156,7 @@ void start_boot(void) {
     /* Disable write-protection for registers of SYSCFG module. */
     SysCfgRegistersUnlock();
 
-    // TODO: Configure Master Priority Control
+    /// TODO: Configure Master Priority Control
 
     _psc0_init();
     _psc1_init();
@@ -180,19 +169,10 @@ void start_boot(void) {
 
     ddr_init();
 
-    // coproc_init();
+    _config_cache_mmu();
 
     /* Initialize the vector table with opcodes */
     _copy_vector_table();
-
-    // TODO: MMU borks RAM.
-    //          Should _copy_vector_table come last?
-    //          Is translation table correct?
-    //
-    /* privileged_mode(); */
-    /* coproc_init(); */
-    /* system_mode(); */
-    /* enable_irq(); */
 
     main();
 
@@ -369,6 +349,8 @@ static void _pll0_init(unsigned char clk_src, unsigned char pllm,
         (0x01 << SYSCFG_CFGCHIP0_PLL_MASTER_LOCK_SHIFT) &
         SYSCFG_CFGCHIP0_PLL_MASTER_LOCK;
 
+    /// TODO: Is this the default value?
+    //
     // Not set in factory firmware.
     // EMIFA driven by PLL0_SYSCLK3
     /* HWREG(SOC_SYSCFG_0_REGS + SYSCFG0_CFGCHIP3) &= CLK_PLL0_SYSCLK3; */
@@ -466,104 +448,70 @@ static void _copy_vector_table(void) {
     }
 }
 
+static void _config_cache_mmu() {
+    int i;
+
+    for (i = 0; i < (4 * 1024); i++) {
+
+        if ((i >= 0xc00 && i < 0xc3f) || (i == 0x800)) {
+
+            // 64 MB DDR and OC RAM cacheable and bufferable.
+            page_table[i] = (i << 0x14) | 0x00000c1e;
+
+            /// TODO: Investigate why.
+            ///         Is there a performance improvement?
+            //
+            // Map second 64MB of DDR address space over actual DDR.
+            // } else if (i >= 0xc40 && i < 0xc7f) {
+            //     page_table[i] = (i - 0x40) * 0x100000 | 0xc12;
+
+        } else {
+            page_table[i] = (i << 0x14) | 0x00000c12;
+        }
+
+        // Map start of address space to RAM region.
+        //  Allows setting interrupt vector to 0x0 then selecting OC RAM or DDR.
+        //      Probably don't need this if we have kernel running in OC RAM.
+        // page_table[0] = 0xc1e | 0xc0000000;
+        // page_table[0] = 0xc1e | 0x80000000;
+    }
+
+    /// TODO: Move Domain Access setting to separate function.
+    CP15TtbSet((unsigned int)page_table);
+
+    CP15ICacheFlush();
+
+    CP15DCacheFlush();
+
+    CP15MMUEnable();
+
+    CP15ICacheEnable();
+
+    CP15DCacheEnable();
+}
+
 static void _boot_abort(void) {
     while (1)
         ;
 }
 
-void privileged_mode(void) { asm("    SWI   458752"); }
+// void privileged_mode(void) { asm("    SWI   458752"); }
+//
+// void system_mode(void) {
+//     asm("    mrs     r0, CPSR\n\t"
+//         "    bic     r0, #0x0F\n\t"
+//         "    orr     r0, #0x10\n\t "
+//         "    msr     CPSR, r0");
+// }
+//
+// void enable_irq(void) {
+//     asm("    mrs r0, CPSR\n\t"
+//         "    bic r0, r0, #0x80\n\t"
+//         "    msr CPSR, r0\n\t");
+// }
 
-void system_mode(void) {
-    asm("    mrs     r0, CPSR\n\t"
-        "    bic     r0, #0x0F\n\t"
-        "    orr     r0, #0x10\n\t "
-        "    msr     CPSR, r0");
-}
-
-void enable_irq(void) {
-    asm("    mrs r0, CPSR\n\t"
-        "    bic r0, r0, #0x80\n\t"
-        "    msr CPSR, r0\n\t");
-}
-
-void coproc_init(void) {
-    enable_icache();
-    translation_table_init(tt_base);
-    set_tt_base(tt_base);
-    set_dac_manager();
-    inv_idcache();
-    inv_tlb();
-    /* enable_mmu(); */
-    enable_icache();
-    enable_dcache();
-}
-
-void translation_table_init(unsigned int ttb) {
-    int i;
-    unsigned int *page_table = ttb;
-
-    for (i = 0; i <= 0xfff; i++) {
-        *(page_table + i * 4) = i << 0x14 | 0xc12;
-    }
-
-    for (i = 0xc00; i <= 0xc3f; i++) {
-        *(page_table + i * 4) = i << 0x14 | 0xc1e;
-    }
-
-    for (i = 0xc40; i <= 0xc7f; i++) {
-        *(page_table + i * 4) = (i - 0x40) * 0x100000 | 0xc12;
-    }
-
-    *page_table = 0xc1e | 0xc0000000;
-
-    *(page_table + 0x800 * 4) = 0x800 << 0x14 | 0xc1e;
-}
-
-void set_tt_base(unsigned int ttb) {
-
-    asm("   mcr p15, #0, %[value], c2, c0, 0" ::[value] "r"(ttb));
-}
-
-void set_dac_manager(void) {
-
-    asm("    mov     r0, #0x3\n\t"
-        "    mcr     p15, #0, r0, c8, c7, #0\n\t");
-}
-
-void inv_idcache(void) {
-    asm("    mov     r0, #0\n\t"
-        "    mcr     p15, #0, r0, c7, c7, #0\n\t");
-}
-
-void inv_tlb(void) {
-    asm("    mov     r0, #0\n\t"
-        "    mcr     p15, #0, r0, c8, c7, #0\n\t");
-}
-
-// ctl should equal 0x107d to enable Icache, Dcache and MMU.
-/* void enable_cache_mmu() { */
-/*     register int *p1 asm("r0") = 0x107d; */
-/*     asm("   mcr p15, #0, %[value], c1, c0, 0\n\t"); */
-/* } */
-
-void enable_mmu(void) {
-    asm("    mrc p15, #0, r0, c1, c0, #0\n\t"
-        "    orr r0, r0, #0x00000001\n\t"
-        "    mcr p15, #0, r0, c1, c0, #0\n\t");
-}
-
-void enable_dcache(void) {
-    asm("    mrc     p15, #0, r0, c1, c0, #0\n\t"
-        "    orr     r0,  r0, #0x00000004\n\t"
-        "    mcr     p15, #0, r0, c1, c0, #0");
-}
-
-void enable_icache(void) {
-    asm("    mrc     p15, #0, r0, c1, c0, #0\n\t"
-        "    orr     r0,  r0, #0x00001000 \n\t"
-        "    mcr     p15, #0, r0, c1, c0, #0 \n\t");
-}
-
+/// TODO: Read and write CPSR.
+//
 /* unsigned int read_cpsr(void) { */
 /*     asm volatile("eor     r3, %1, %1, ror #16\n\t" */
 /*                  "bic     r3, r3, #0x00FF0000\n\t" */

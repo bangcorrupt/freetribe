@@ -247,6 +247,7 @@ void svc_dsp_get_port_state(void) {
 
 /*----- Static function implementations ------------------------------*/
 
+/// TODO: Typdef callback pointers and cast to remove incompatibel type warning.
 void _register_module_callback(uint8_t msg_id, void (*callback)(void)) {
 
     switch (msg_id) {
@@ -277,7 +278,7 @@ void _register_system_callback(uint8_t msg_id, void (*callback)(void)) {
 static void _transmit_message(uint8_t msg_type, uint8_t msg_id,
                               uint8_t *payload, uint8_t length) {
     //
-    const uint8_t msg_start = MSG_START;
+    uint8_t msg_start = MSG_START;
 
     dev_dsp_spi_tx_enqueue(&msg_start);
     dev_dsp_spi_tx_enqueue(&msg_type);
@@ -302,13 +303,18 @@ static t_status _dsp_init(void) {
 
 static void _dsp_boot(void) {
 
-    // TODO: Use queue and interrupt.
+    /// TODO: Use queue and interrupt?
+    ///         SPI hardware ENA max timeout
+    ///         is too short for DSP boot.
+    ///         Requires polling.
     //
     // Transmit LDR to DSP.
-    dev_dsp_per_spi_tx(bfin_ldr, bfin_ldr_len);
+    dev_dsp_spi_tx(bfin_ldr, bfin_ldr_len);
 }
 
-// TODO: Move to separate module.
+/// TODO: Move to protocol separate module.
+///          Maybe this should be userspace?
+//
 static void _dsp_receive(uint8_t byte) {
 
     static t_msg_parse_state state = PARSE_START;
@@ -321,13 +327,13 @@ static void _dsp_receive(uint8_t byte) {
 
     switch (state) {
 
-        // TODO: Handshake.
+        /// TODO: Handshake.
 
     case PARSE_START:
         if (byte == MSG_START) {
             state = PARSE_MSG_TYPE;
         }
-        // TODO: Error handling and reset protocol.
+        /// TODO: Error handling and reset protocol.
         break;
 
     case PARSE_MSG_TYPE:
@@ -388,7 +394,7 @@ static t_status _handle_module_message(uint8_t msg_id, uint8_t *payload,
         break;
     }
 
-    // TODO: Error handling and protocol reset.
+    /// TODO: Error handling and protocol reset.
     if (result == SUCCESS) {
         _dsp_response_received();
     }
@@ -407,7 +413,7 @@ static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
         break;
     }
 
-    // TODO: Error handling and protocol reset.
+    /// TODO: Error handling and protocol reset.
     if (result == SUCCESS) {
         _dsp_response_received();
     }
@@ -415,8 +421,7 @@ static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
     return result;
 }
 
-// TODO: Test payload length.
-
+/// TODO: Test payload length.
 static t_status _handle_module_param_value(uint8_t *payload, uint8_t length) {
 
     if (p_module_param_value_callback != NULL) {
@@ -431,7 +436,6 @@ static t_status _handle_module_param_value(uint8_t *payload, uint8_t length) {
         p_module_param_value_callback(module_id, param_index, param_value);
     }
 
-    // TODO: Error handling and protocol reset.
     return SUCCESS;
 }
 
@@ -446,7 +450,6 @@ static t_status _handle_system_port_state(uint8_t *payload, uint8_t length) {
         p_system_port_state_callback(port_f, port_g, port_h);
     }
 
-    // TODO: Error handling and protocol reset.
     return SUCCESS;
 }
 

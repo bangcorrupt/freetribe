@@ -206,6 +206,8 @@ void CP15DCacheCleanBuff(unsigned int bufPtr, unsigned int size) {
  *  Note : Page Table starting address should be aligned to 16k.
  **/
 void CP15TtbSet(unsigned int ttb) {
+    
+    /// TODO: Move this to separate function and parameterise.
     /* Invalidates all TLBs.Domain access is selected as
      * client by configuring domain access register,
      * in that case access controlled by permission value
