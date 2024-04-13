@@ -131,6 +131,7 @@ static void _pll1_init(unsigned char pllm, unsigned char postdiv,
                        unsigned char div3);
 
 static void _config_cache_mmu(void);
+static void _ddr_memtest(void);
 static void _boot_abort(void);
 
 /*----- Extern function implementations ------------------------------*/
@@ -170,6 +171,8 @@ void start_boot(void) {
     ddr_init();
 
     _config_cache_mmu();
+
+    // _ddr_memtest();
 
     /* Initialize the vector table with opcodes */
     _copy_vector_table();
@@ -488,6 +491,24 @@ static void _config_cache_mmu() {
     CP15ICacheEnable();
 
     CP15DCacheEnable();
+}
+
+static void _ddr_memtest(void) {
+
+    int i;
+    unsigned int *ddr = (unsigned int *)0xc0000000;
+
+    for (i = 0; i < 0x4000000; i += 4) {
+
+        *ddr++ = i;
+    }
+
+    for (i = 0; i < 0x4000000; i += 4) {
+
+        if (*ddr++ != i) {
+            _boot_abort();
+        }
+    }
 }
 
 static void _boot_abort(void) {
