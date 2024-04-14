@@ -1,6 +1,5 @@
 /*
- * ld script for hacktribe bootloader patch
- * 0x1a1c0 bytes total OC-RAM available
+ * Linker script for Freetribe.
  */
 
 OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
@@ -9,7 +8,6 @@ OUTPUT_ARCH(arm)
 MEMORY
 {
     OC_RAM (rwx)    : ORIGIN = 0x80000000, LENGTH = 0x20000
-    /* OC_RAM (rwx)    : ORIGIN = 0x80005e40, LENGTH = 0x1a1c0 */
     ARM_RAM (rwx)   : ORIGIN = 0xFFFF0000, LENGTH = 0x2000
 }
 

@@ -95,59 +95,59 @@ static t_spi g_spi[SPI_INSTANCES];
 
 void per_spi_init(t_spi_config *config) {
 
-    g_spi[config->instance].address = g_base_address[config->instance];
-    g_spi[config->instance].system_int = g_system_interrupt[config->instance];
-    g_spi[config->instance].isr = g_isr_address[config->instance];
-    g_spi[config->instance].tx_buffer = NULL;
-    g_spi[config->instance].tx_length = 0;
-    g_spi[config->instance].rx_buffer = NULL;
-    g_spi[config->instance].rx_length = 0;
-    g_spi[config->instance].tx_callback = NULL;
-    g_spi[config->instance].rx_callback = NULL;
-    g_spi[config->instance].initialised = false;
+    t_spi *spi = &g_spi[config->instance];
+
+    spi->address = g_base_address[config->instance];
+    spi->system_int = g_system_interrupt[config->instance];
+    spi->isr = g_isr_address[config->instance];
+    spi->tx_buffer = NULL;
+    spi->tx_length = 0;
+    spi->rx_buffer = NULL;
+    spi->rx_length = 0;
+    spi->tx_callback = NULL;
+    spi->rx_callback = NULL;
+    spi->initialised = false;
 
     // SPI in reset
-    SPIReset(g_spi[config->instance].address);
+    SPIReset(spi->address);
 
     // SPI out of reset
-    SPIOutOfReset(g_spi[config->instance].address);
+    SPIOutOfReset(spi->address);
 
     // SPI is Master
-    SPIModeConfigure(g_spi[config->instance].address, SPI_MASTER_MODE);
+    SPIModeConfigure(spi->address, SPI_MASTER_MODE);
 
-    SPISetPinControl(g_spi[config->instance].address, SPI_PIN_CTL_FUNC,
-                     config->pin_func);
-
-    // Set valid defaults here, customise for each data format below.
-    SPIClkConfigure(g_spi[config->instance].address, SPI_MODULE_FREQ,
-                    SPI_DEFAULT_FREQ, SPI_DEFAULT_DATA_FORMAT);
+    SPISetPinControl(spi->address, SPI_PIN_CTL_FUNC, config->pin_func);
 
     // Set valid defaults here, customise for each data format below.
-    SPIConfigClkFormat(g_spi[config->instance].address, SPI_DEFAULT_PHASE,
+    SPIClkConfigure(spi->address, SPI_MODULE_FREQ, SPI_DEFAULT_FREQ,
+                    SPI_DEFAULT_DATA_FORMAT);
+
+    // Set valid defaults here, customise for each data format below.
+    SPIConfigClkFormat(spi->address, SPI_DEFAULT_PHASE,
                        SPI_DEFAULT_DATA_FORMAT);
 
-    SPICharLengthSet(g_spi[config->instance].address, SPI_DEFAULT_CHAR_LENGTH,
+    SPICharLengthSet(spi->address, SPI_DEFAULT_CHAR_LENGTH,
                      SPI_DEFAULT_DATA_FORMAT);
 
     // Enable SPI.
-    SPIEnable(g_spi[config->instance].address);
+    SPIEnable(spi->address);
 
     if (config->int_enable) {
         // Set interrupt channel.
-        IntChannelSet(g_spi[config->instance].system_int, config->int_channel);
+        IntChannelSet(spi->system_int, config->int_channel);
 
         // Register the SPI Isr in the Interrupt Vector Table of AINTC.
-        IntRegister(g_spi[config->instance].system_int,
-                    g_spi[config->instance].isr);
+        IntRegister(spi->system_int, spi->isr);
 
         // Enable system interrupt in AINTC.
-        IntSystemEnable(g_spi[config->instance].system_int);
+        IntSystemEnable(spi->system_int);
 
         // Set interrupt level for transmit and receive.
-        SPIIntLevelSet(g_spi[config->instance].address, config->int_level);
+        SPIIntLevelSet(spi->address, config->int_level);
     }
 
-    g_spi[config->instance].initialised = true;
+    spi->initialised = true;
 }
 
 void per_spi_set_data_format(t_spi_format *format) {
