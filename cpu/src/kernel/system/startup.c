@@ -355,6 +355,8 @@ static void _pll0_init(unsigned char clk_src, unsigned char pllm,
         SYSCFG_CFGCHIP0_PLL_MASTER_LOCK;
 
     /// TODO: Is this the default value?
+    ///         Could drive directly from PLL
+    ///         to increase speed.
     //
     // Not set in factory firmware.
     // EMIFA driven by PLL0_SYSCLK3

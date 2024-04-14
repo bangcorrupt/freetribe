@@ -34,8 +34,11 @@ under the terms of the GNU Affero General Public License as published by
  *  @brief  Flash memory device driver.
  */
 
-// TODO: Flash access is very slow.
+/// TODO: Rework to use new SPI driver.
+
+/// TODO: Flash access is very slow.
 //          Possible issue with SPI clock.
+//              Check if fixed now cache enabled.
 
 /*----- Includes -----------------------------------------------------*/
 
@@ -123,7 +126,7 @@ bool _flash_busy(void);
 
 t_status dev_flash_init(void) {
 
-    per_spi1_init(); // Flash
+    // per_spi1_init(); // Flash
 
     return SUCCESS;
 }
@@ -495,6 +498,7 @@ void _flash_chip_select(bool state) {
         delay_cycles(4);
     }
 
+    /// TODO: Use per_spi_chip_format.
     per_spi_chip_select(SPI_FLASH_BASE, SPI_FLASH_CS, state);
 
     if (state) {
