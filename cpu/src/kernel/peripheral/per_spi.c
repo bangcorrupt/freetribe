@@ -35,8 +35,6 @@ under the terms of the GNU Affero General Public License as published by
  *
  */
 
-/// TODO: Rework similar to UART driver.
-
 /// TODO: SPI_1 needs mutex to prevent DSP and flash access collision.
 
 /*----- Includes -----------------------------------------------------*/
@@ -57,201 +55,151 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-/*----- Static variable definitions ----------------------------------*/
+typedef struct {
+    uint32_t address;
+    uint32_t system_int;
+    void (*isr)(void);
 
-static uint8_t *g_spi0_tx_buffer = NULL;
-static uint32_t g_spi0_tx_length = 0;
+    uint8_t *tx_buffer;
+    uint32_t tx_length;
 
-static uint8_t *g_spi1_tx_buffer = NULL;
-volatile static uint32_t g_spi1_tx_length = 0;
+    uint8_t *rx_buffer;
+    uint32_t rx_length;
 
-static uint8_t *g_spi1_rx_buffer = NULL;
-static uint32_t g_spi1_rx_length = 0;
+    void (*tx_callback)(void);
+    void (*rx_callback)(void);
 
-static void (*_spi1_tx_callback)(void) = NULL;
-static void (*_spi1_rx_callback)(void) = NULL;
+    bool initialised;
 
-static bool g_spi_initialised[2];
-
-/// TODO: Encapsulate.
-static uint32_t g_spi_base[2] = {SOC_SPI_0_REGS, SOC_SPI_1_REGS};
-
-static uint32_t g_spi_data_format[4] = {SPI_DATA_FORMAT0, SPI_DATA_FORMAT1,
-                                        SPI_DATA_FORMAT2, SPI_DATA_FORMAT3};
-
-/*----- Extern variable definitions ----------------------------------*/
+} t_spi;
 
 /*----- Static function prototypes -----------------------------------*/
 
 static void _spi0_isr(void);
 static void _spi1_isr(void);
 
+/*----- Static variable definitions ----------------------------------*/
+
+static const uint32_t g_base_address[SPI_INSTANCES] = {SPI0_BASE, SPI1_BASE};
+
+static const uint32_t g_system_interrupt[SPI_INSTANCES] = {SYS_INT_SPIINT0,
+                                                           SYS_INT_SPIINT1};
+
+static const void *g_isr_address[SPI_INSTANCES] = {&_spi0_isr, &_spi1_isr};
+
+static t_spi g_spi[SPI_INSTANCES];
+
+/*----- Extern variable definitions ----------------------------------*/
+
 /*----- Extern function implementations ------------------------------*/
 
-void per_spi0_init(void) {
+void per_spi_init(t_spi_config *config) {
 
-    // SPI0 in reset
-    SPIReset(SOC_SPI_0_REGS);
+    g_spi[config->instance].address = g_base_address[config->instance];
+    g_spi[config->instance].system_int = g_system_interrupt[config->instance];
+    g_spi[config->instance].isr = g_isr_address[config->instance];
+    g_spi[config->instance].tx_buffer = NULL;
+    g_spi[config->instance].tx_length = 0;
+    g_spi[config->instance].rx_buffer = NULL;
+    g_spi[config->instance].rx_length = 0;
+    g_spi[config->instance].tx_callback = NULL;
+    g_spi[config->instance].rx_callback = NULL;
+    g_spi[config->instance].initialised = false;
 
-    // SPI0 out of reset
-    SPIOutOfReset(SOC_SPI_0_REGS);
+    // SPI in reset
+    SPIReset(g_spi[config->instance].address);
 
-    // SPI0 is Master
-    SPIModeConfigure(SOC_SPI_0_REGS, SPI_MASTER_MODE);
+    // SPI out of reset
+    SPIOutOfReset(g_spi[config->instance].address);
 
-    // SPI0 SIMO, CLK and CS0 are SPI functional pins
-    HWREG(SOC_SPI_0_REGS + SPI_SPIPC(0)) =
-        SPI_SPIPC0_SIMOFUN | SPI_SPIPC0_CLKFUN |
-        SPI_SPIPC0_SCS0FUN0; // | SPI_SPIPC0_SCS0FUN2;
+    // SPI is Master
+    SPIModeConfigure(g_spi[config->instance].address, SPI_MASTER_MODE);
 
-    /// TODO: Can we increase clock speed?
-    ///          Factory firmware sets prescaler to 0x1d.
-    //
-    // SPI0 Data format
-    HWREG(SOC_SPI_0_REGS + SPI_SPIFMT(0)) =
-        SPI_SPIFMT_PHASE |
-        (SPI_SPIFMT_PRESCALE & (0x4 << SPI_SPIFMT_PRESCALE_SHIFT)) |
-        (SPI_SPIFMT_CHARLEN & 8);
+    SPISetPinControl(g_spi[config->instance].address, SPI_PIN_CTL_FUNC,
+                     config->pin_func);
 
-    /// TODO: Can we use chip slelect for LCD A0 pin (Command/Data mode).
-    //
-    // Transfer chip select value.
-    /* SPIDat1Config(SOC_SPI_0_REGS, SPI_DATA_FORMAT0 | SPI_CSHOLD, 0x5); */
-    SPIDat1Config(SOC_SPI_0_REGS, SPI_DATA_FORMAT0 | SPI_CSHOLD, 0x1);
+    // Set valid defaults here, customise for each data format below.
+    SPIClkConfigure(g_spi[config->instance].address, SPI_MODULE_FREQ,
+                    SPI_DEFAULT_FREQ, SPI_DEFAULT_DATA_FORMAT);
 
-    /* SPIDelayConfigure(SOC_SPI_0_REGS, 0, 0, 32, 32); */
+    // Set valid defaults here, customise for each data format below.
+    SPIConfigClkFormat(g_spi[config->instance].address, SPI_DEFAULT_PHASE,
+                       SPI_DEFAULT_DATA_FORMAT);
 
-    /* SPICSTimerEnable(SOC_SPI_0_REGS, SPI_DATA_FORMAT0); */
+    SPICharLengthSet(g_spi[config->instance].address, SPI_DEFAULT_CHAR_LENGTH,
+                     SPI_DEFAULT_DATA_FORMAT);
 
-    // Enable SPI0
-    SPIEnable(SOC_SPI_0_REGS);
+    // Enable SPI.
+    SPIEnable(g_spi[config->instance].address);
 
-    // Set interrupt channel 8.
-    IntChannelSet(SYS_INT_SPIINT0, 8);
+    if (config->int_enable) {
+        // Set interrupt channel.
+        IntChannelSet(g_spi[config->instance].system_int, config->int_channel);
 
-    // Register the SPI0Isr in the Interrupt Vector Table of AINTC.
-    IntRegister(SYS_INT_SPIINT0, _spi0_isr);
+        // Register the SPI Isr in the Interrupt Vector Table of AINTC.
+        IntRegister(g_spi[config->instance].system_int,
+                    g_spi[config->instance].isr);
 
-    // Enable system interrupt in AINTC.
-    IntSystemEnable(SYS_INT_SPIINT0);
+        // Enable system interrupt in AINTC.
+        IntSystemEnable(g_spi[config->instance].system_int);
 
-    // Enable transmit interrupt.
-    // Don't enable until transmit function.
-    /* SPIIntEnable(SOC_SPI_0_REGS, SPI_TRANSMIT_INT); */
+        // Set interrupt level for transmit and receive.
+        SPIIntLevelSet(g_spi[config->instance].address, config->int_level);
+    }
 
-    // Set interrupt level for transmit only.
-    SPIIntLevelSet(SOC_SPI_0_REGS, SPI_TRANSMIT_INTLVL);
-
-    g_spi_initialised[0] = true;
+    g_spi[config->instance].initialised = true;
 }
 
-void per_spi1_init(void) {
+void per_spi_set_data_format(t_spi_format *format) {
 
-    // Release chip select.
-    // SPIDat1Config(SOC_SPI_1_REGS, SPI_DATA_FORMAT0, 0x1);
+    SPIClkConfigure(g_base_address[format->instance], SPI_MODULE_FREQ,
+                    format->freq, format->index);
 
-    // SPI1 in reset.
-    SPIReset(SOC_SPI_1_REGS);
+    SPIConfigClkFormat(g_base_address[format->instance], SPI_DEFAULT_PHASE,
+                       format->index);
 
-    // SPI1 out of reset.
-    SPIOutOfReset(SOC_SPI_1_REGS);
+    SPICharLengthSet(g_base_address[format->instance], format->char_length,
+                     format->index);
 
-    // SPI1 is Master.
-    SPIModeConfigure(SOC_SPI_1_REGS, SPI_MASTER_MODE);
+    if (format->ena_timeout) {
+        // Set timeout.
+        SPIDelayConfigure(g_base_address[format->instance], format->ena_timeout,
+                          0, 0, 0);
 
-    // SPI1 SOMI, SIMO, CLK, ENA, CS0 and CS1 are SPI functional pins.
-    HWREG(SOC_SPI_1_REGS + SPI_SPIPC(0)) =
-        SPI_SPIPC0_SOMIFUN | SPI_SPIPC0_SIMOFUN | SPI_SPIPC0_CLKFUN |
-        SPI_SPIPC0_SCS0FUN0 | SPI_SPIPC0_SCS0FUN1 | SPI_SPIPC0_ENAFUN;
-
-    // SPI1 Data format 0 Flash.
-    HWREG(SOC_SPI_1_REGS + SPI_SPIFMT(0)) =
-        SPI_SPIFMT_PHASE |
-        (SPI_SPIFMT_PRESCALE & (0x3 << SPI_SPIFMT_PRESCALE_SHIFT)) |
-        (SPI_SPIFMT_CHARLEN & 8);
-
-    // SPI1 Data format 1 DSP Boot.
-    HWREG(SOC_SPI_1_REGS + SPI_SPIFMT(1)) =
-        SPI_SPIFMT_PHASE |
-        (SPI_SPIFMT_PRESCALE & (0x3 << SPI_SPIFMT_PRESCALE_SHIFT)) |
-        (SPI_SPIFMT_CHARLEN & 8);
-
-    // SPI1 Data format 2 DSP Command.
-    /* HWREG(SOC_SPI_1_REGS + SPI_SPIFMT(2)) = */
-    /*     SPI_SPIFMT_PHASE | */
-    /*     (SPI_SPIFMT_PRESCALE & (0x3 << SPI_SPIFMT_PRESCALE_SHIFT)) | */
-    /*     (SPI_SPIFMT_CHARLEN & 16); */
-
-    // Set timeout.
-    SPIDelayConfigure(g_spi_base[1], 0xff, 0, 0, 0);
-
-    // Enable timeout for data format 1.
-    SPIWaitEnable(g_spi_base[1], SPI_DATA_FORMAT1);
-
-    // Enable SPI1.
-    SPIEnable(SOC_SPI_1_REGS);
-
-    // Set interrupt channel 5.
-    IntChannelSet(SYS_INT_SPIINT1, 5);
-
-    // Register the SPI1Isr in the Interrupt Vector Table of AINTC.
-    IntRegister(SYS_INT_SPIINT1, _spi1_isr);
-
-    // Enable system interrupt in AINTC.
-    IntSystemEnable(SYS_INT_SPIINT1);
-
-    // Set interrupt level for transmit and receive.
-    SPIIntLevelSet(SOC_SPI_1_REGS, SPI_TRANSMIT_INTLVL | SPI_RECV_INTLVL |
-                                       SPI_TIMEOUT_INTLVL |
-                                       SPI_DESYNC_SLAVE_INTLVL);
-
-    g_spi_initialised[1] = true;
+        // Enable timeout for data format.
+        SPIWaitEnable(g_base_address[format->instance], format->index);
+    }
 }
 
 bool per_spi_initialised(uint8_t instance) {
-    //
-    return g_spi_initialised[instance];
+
+    return g_spi[instance].initialised;
 }
 
 // Select data format, set chip select value and hold.
 void per_spi_chip_format(uint8_t instance, uint8_t data_format,
                          uint8_t chip_select, bool cshold) {
 
+    /// TODO: Tidy this up.
     if (cshold) {
-        cshold = SPI_CSHOLD;
+        SPIDat1Config(g_spi[instance].address,
+                      (uint32_t)data_format | SPI_CSHOLD, chip_select);
+    } else {
+        SPIDat1Config(g_spi[instance].address, data_format, chip_select);
     }
-    SPIDat1Config(g_spi_base[instance], g_spi_data_format[data_format] | cshold,
-                  chip_select);
-}
-
-void per_spi0_tx(uint8_t *buffer, uint32_t length) {
-
-    g_spi0_tx_buffer = buffer;
-    g_spi0_tx_length = length;
-
-    while (g_spi0_tx_length--) {
-        // Write byte to SPI0
-        SPITransmitData1(SOC_SPI_0_REGS, *g_spi0_tx_buffer++);
-    }
-}
-
-void per_spi0_tx_int(uint8_t *buffer, uint32_t length) {
-
-    g_spi0_tx_buffer = buffer;
-    g_spi0_tx_length = length;
-
-    // Enable TX interrupt.
-    SPIIntEnable(SOC_SPI_0_REGS, SPI_TRANSMIT_INT);
 }
 
 /// TODO: Non-blocking implementation would be better.
 ///         Not a big problem as this function is
 ///         only used to boot the DSP.
+///             This could be a single byte write,
+///             with GPIO tested in device layer above.
+///
 //
-void per_spi1_tx(uint8_t *buffer, uint32_t length) {
+void per_spi1_tx_wait(uint8_t *buffer, uint32_t length) {
 
     if (buffer != NULL) {
-        while (SPIIntStatus(SOC_SPI_1_REGS, SPI_RECV_INT))
+        while (SPIIntStatus(SPI1_BASE, SPI_RECV_INT))
             ;
 
         while (length--) {
@@ -261,69 +209,55 @@ void per_spi1_tx(uint8_t *buffer, uint32_t length) {
                 ;
 
             // Wait until SPI transmit buffer ready.
-            while (!SPIIntStatus(SOC_SPI_1_REGS, SPI_TRANSMIT_INT))
+            while (!SPIIntStatus(SPI1_BASE, SPI_TRANSMIT_INT))
                 ;
             // Write byte to SPI1
-            SPITransmitData1(SOC_SPI_1_REGS, *buffer++);
+            SPITransmitData1(SPI1_BASE, *buffer++);
 
             // Wait until SPI transmit buffer ready.
-            while (!SPIIntStatus(SOC_SPI_1_REGS, SPI_TRANSMIT_INT))
+            while (!SPIIntStatus(SPI1_BASE, SPI_TRANSMIT_INT))
                 ;
 
             while (per_gpio_get(2, 12))
                 ;
 
-            if (SPIIntStatus(SOC_SPI_1_REGS, SPI_RECV_INT)) {
-                SPIDataReceive(SOC_SPI_1_REGS);
+            if (SPIIntStatus(SPI1_BASE, SPI_RECV_INT)) {
+                SPIDataReceive(SPI1_BASE);
             }
         }
     }
 }
 
-void per_spi1_tx_int(uint8_t *buffer, uint32_t length) {
+void per_spi_tx_int(uint8_t instance, uint8_t *buffer, uint32_t length) {
 
-    if (buffer != NULL && length != 0) {
-        g_spi1_tx_buffer = buffer;
-        g_spi1_tx_length = length;
+    g_spi[instance].tx_buffer = buffer;
+    g_spi[instance].tx_length = length;
 
-        // Enable TX interrupt.
-        SPIIntEnable(SOC_SPI_1_REGS, SPI_TRANSMIT_INT | SPI_TIMEOUT_INT);
-    }
+    // Enable TX interrupt.
+    SPIIntEnable(g_spi[instance].address, SPI_TRANSMIT_INT);
 }
 
-/// TODO: Support both instances.
-///          See UART driver.
-void per_spi1_transceive_int(uint8_t *tx_buffer, uint8_t *rx_buffer,
-                             uint32_t length) {
+void per_spi_trx_int(uint8_t instance, uint8_t *tx_buffer, uint8_t *rx_buffer,
+                     uint32_t length) {
 
     if (tx_buffer != NULL && tx_buffer != NULL && length != 0) {
-        g_spi1_tx_buffer = tx_buffer;
-        g_spi1_rx_buffer = rx_buffer;
-        g_spi1_tx_length = length;
-        g_spi1_rx_length = length;
+        g_spi[instance].tx_buffer = tx_buffer;
+        g_spi[instance].rx_buffer = rx_buffer;
+        g_spi[instance].tx_length = length;
+        g_spi[instance].rx_length = length;
 
         /// TODO: Error interrupts should be enabled in init function.
         ///         Should probably always remain enabled.
         //
         // Enable interrupts.
-        SPIIntEnable(SOC_SPI_1_REGS, SPI_TRANSMIT_INT | SPI_RECV_INT |
-                                         SPI_TIMEOUT_INT |
-                                         SPI_DESYNC_SLAVE_INT);
+        SPIIntEnable(g_spi[instance].address, SPI_TRANSMIT_INT | SPI_RECV_INT |
+                                                  SPI_TIMEOUT_INT |
+                                                  SPI_DESYNC_SLAVE_INT);
     }
 }
 
-void per_spi_chip_select(uint32_t spi_base, uint8_t cs, bool state) {
-    /// TODO: This sets chip select hold mode, does not assert chip select.
-
-    if (state) {
-        // Assert chip select
-        SPIDat1Config(spi_base, (SPI_CSHOLD | SPI_DATA_FORMAT0), cs);
-    } else {
-        // Release chip select
-        SPIDat1Config(spi_base, SPI_DATA_FORMAT0, cs);
-    }
-}
-
+/// TODO: Update to use g_spi structs.
+//
 void per_spi_tx(uint32_t spi_base, uint8_t *p_tx, uint32_t len) {
 
     int i;
@@ -342,6 +276,8 @@ void per_spi_tx(uint32_t spi_base, uint8_t *p_tx, uint32_t len) {
     }
 }
 
+/// TODO: Update to use g_spi structs.
+//
 void per_spi_rx(uint32_t spi_base, uint8_t *p_rx, uint32_t len) {
 
     int i;
@@ -363,16 +299,17 @@ void per_spi_rx(uint32_t spi_base, uint8_t *p_rx, uint32_t len) {
     }
 }
 
-void per_spi1_register_callback(t_spi_event event, void (*callback)()) {
+void per_spi_register_callback(uint8_t instance, t_spi_event event,
+                               void (*callback)()) {
 
     switch (event) {
 
     case SPI_TX_COMPLETE:
-        _spi1_tx_callback = callback;
+        g_spi[instance].tx_callback = callback;
         break;
 
     case SPI_RX_COMPLETE:
-        _spi1_rx_callback = callback;
+        g_spi[instance].rx_callback = callback;
         break;
 
         // case SPI_ERROR:
@@ -384,104 +321,36 @@ void per_spi1_register_callback(t_spi_event event, void (*callback)()) {
 
 /*----- Static function implementations ------------------------------*/
 
-/*
- * @brief   Interrupt Service Routine for SPI0.
- *          - Transmit buffer empty:
- *              - Read from SPI0 Tx buffer and write to SPI0 peripheral.
- *          - Receive buffer full:
- *              - Read from SPI0 peripheral and write to SPI0 Rx buffer.
- */
-static void _spi0_isr(void) {
+static inline void _spi_isr(t_spi *spi) {
 
-    // Cause of SPI0 interrupt.
-    uint8_t int_id = 0;
-
-#if NESTED_INTERRUPTS
-    // System interrupt already cleared in IRQHandler.
-#else
-    // Clears the system interrupt status of SPI0 in AINTC.
-    IntSystemStatusClear(SYS_INT_SPIINT0);
-#endif
-
-    int_id = SPIInterruptVectorGet(SOC_SPI_0_REGS);
-
-    // Handle all pending interrupts.
-    while (int_id) {
-
-        switch (int_id) {
-
-        // Tx interrupt.
-        case SPI_TX_BUF_EMPTY:
-
-            if (g_spi0_tx_length--) {
-                // Write byte to SPI0
-                SPITransmitData1(SOC_SPI_0_REGS, *g_spi0_tx_buffer++);
-
-            } else {
-                // Disable the Tx interrupt if buffer is empty.
-                SPIIntDisable(SOC_SPI_0_REGS, SPI_TRANSMIT_INT);
-
-                // TODO: spi_tx_callback.
-            }
-            break;
-
-            // TODO: No Rx from LCD.
-            //          Is it worth supporting full SPI for expansion?
-            //              Is Rx pin exposed?
-            // Rx interrupt.
-            /* case SPI_RECV_FULL: */
-
-        default:
-            break;
-        }
-        int_id = SPIInterruptVectorGet(SOC_SPI_0_REGS);
-    }
-
-    return;
-}
-
-/*
- * @brief   Interrupt Service Routine for SPI1.
- *          - Transmit buffer empty:
- *              - Read from SPI1 Tx buffer and write to SPI1 peripheral.
- *          - Receive buffer full:
- *              - Read from SPI1 peripheral and write to SPI1 Rx buffer.
- */
-static void _spi1_isr(void) {
-
-    // Cause of SPI1 interrupt.
+    // Cause of SPI interrupt.
     uint8_t int_id = 0;
 
 #if NESTED_INTERRUPTS
     // System interrupt already cleared in IRQHandler.
 #else
     // Clears the system interrupt status of SPI1 in AINTC.
-    IntSystemStatusClear(SYS_INT_SPIINT1);
+    IntSystemStatusClear(spi->system_int);
 #endif
 
-    /// TODO: Assign int_id in while condition.
-    //
-    int_id = SPIInterruptVectorGet(SOC_SPI_1_REGS);
-
     // Handle all pending interrupts.
-    while (int_id) {
+    while ((int_id = SPIInterruptVectorGet(spi->address)) != 0) {
 
         switch (int_id) {
 
         // Tx interrupt.
         case SPI_TX_BUF_EMPTY:
-            // TODO: Test HWAIT/SPI_ENA ?
 
-            if (g_spi1_tx_length--) {
+            if (spi->tx_length--) {
                 // Write byte to SPI0
-                SPITransmitData1(SOC_SPI_1_REGS, *g_spi1_tx_buffer++);
+                SPITransmitData1(spi->address, *spi->tx_buffer++);
 
-                if (g_spi1_tx_length == 0) {
+                if (spi->tx_length == 0) {
                     // Disable the Tx interrupt if buffer is empty.
-                    SPIIntDisable(SOC_SPI_1_REGS, SPI_TRANSMIT_INT);
+                    SPIIntDisable(spi->address, SPI_TRANSMIT_INT);
 
-                    if (_spi1_tx_callback != NULL) {
-                        _spi1_tx_callback();
+                    if (spi->tx_callback != NULL) {
+                        spi->tx_callback();
                     }
                 }
             }
@@ -490,32 +359,37 @@ static void _spi1_isr(void) {
         // Rx interrupt.
         case SPI_RECV_FULL:
 
-            if (g_spi1_rx_length--) {
+            if (spi->rx_length--) {
                 // Read byte from SPI1
-                *g_spi1_rx_buffer++ = SPIDataReceive(SOC_SPI_1_REGS);
+                *spi->rx_buffer++ = SPIDataReceive(spi->address);
 
-                if (g_spi1_rx_length == 0) {
+                if (spi->rx_length == 0) {
                     // Disable the Rx interrupt if buffer full.
-                    SPIIntDisable(SOC_SPI_1_REGS, SPI_RECV_INT);
+                    SPIIntDisable(spi->address, SPI_RECV_INT);
 
-                    if (_spi1_rx_callback != NULL) {
-                        _spi1_rx_callback();
+                    if (spi->rx_callback != NULL) {
+                        spi->rx_callback();
                     }
                 }
             }
-
             break;
 
         // TODO: Interrogate source of error and trigger callback.
         case SPI_ERR:
             while (true)
                 ;
+            break;
 
         default:
             break;
         }
-        int_id = SPIInterruptVectorGet(SOC_SPI_1_REGS);
     }
 
     return;
 }
+
+static void _spi0_isr(void) { _spi_isr(&g_spi[0]); }
+
+static void _spi1_isr(void) { _spi_isr(&g_spi[1]); }
+
+/*----- End of file --------------------------------------------------*/

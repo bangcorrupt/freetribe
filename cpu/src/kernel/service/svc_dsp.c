@@ -309,7 +309,7 @@ static void _dsp_boot(void) {
     ///         Requires polling.
     //
     // Transmit LDR to DSP.
-    dev_dsp_spi_tx(bfin_ldr, bfin_ldr_len);
+    dev_dsp_spi_tx_boot(bfin_ldr, bfin_ldr_len);
 }
 
 /// TODO: Move to protocol separate module.

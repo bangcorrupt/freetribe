@@ -80,6 +80,7 @@ under the terms of the GNU Affero General Public License as published by
 #include "startup.h"
 
 #include "per_ddr.h"
+#include "sys/types.h"
 
 /*----- Macros and Definitions ---------------------------------------*/
 
@@ -218,6 +219,28 @@ void ddr_terminate(void) {
 
     /* CLRZ bit should be low at least for 2ns */
     delay(4);
+}
+
+uint8_t ddr_memtest(void) {
+
+    int i;
+    unsigned int *ddr = (unsigned int *)0xc0000000;
+
+    uint8_t result = 0;
+
+    for (i = 0; i < 0x4000000; i += 4) {
+
+        *ddr++ = i;
+    }
+
+    for (i = 0; i < 0x4000000; i += 4) {
+
+        if (*ddr++ != i) {
+            result = 1;
+        }
+    }
+
+    return result;
 }
 
 /*----- Static function implementations ------------------------------*/

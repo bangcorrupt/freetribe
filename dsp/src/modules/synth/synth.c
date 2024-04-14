@@ -46,6 +46,7 @@ under the terms of the GNU Affero General Public License as published by
 #include "types.h"
 
 #include "env_adsr.h"
+#include "filter_ladder.h"
 #include "filter_svf.h"
 #include "osc_polyblep.h"
 #include "ricks_tricks.h"
@@ -155,6 +156,7 @@ typedef struct {
     fract32 tune;
 
     filter_svf filter;
+    filter_ladder ladder;
     hpf dc_blocker;
 
     fract32 cutoff;
@@ -211,6 +213,7 @@ void MonoSynth_init(t_MonoSynth *synth) {
     env_adsr_init(&synth->pitch_env);
 
     filter_svf_init(&synth->filter);
+    filter_ladder_init(&synth->ladder);
     hpf_init(&synth->dc_blocker);
 }
 
@@ -335,24 +338,29 @@ fract32 MonoSynth_tick(t_MonoSynth *synth) {
     filter_svf_set_coeff(&synth->filter, cutoff);
     filter_svf_set_rq(&synth->filter, synth->res);
 
+    filter_ladder_set_freq(&synth->ladder, cutoff);
+    filter_ladder_set_fb(&synth->ladder, FR32_MAX - synth->res);
+
     // Apply filter.
     switch (synth->filter_type) {
 
     case FILTER_TYPE_LPF:
-        waveform = filter_svf_lpf_next(&synth->filter, waveform);
+        waveform = filter_svf_softclip_asym_lpf_next(&synth->filter, waveform);
         break;
 
     case FILTER_TYPE_BPF:
-        waveform = filter_svf_bpf_next(&synth->filter, waveform);
+        waveform = filter_svf_softclip_asym_bpf_next(&synth->filter, waveform);
         break;
 
     case FILTER_TYPE_HPF:
-        waveform = filter_svf_hpf_next(&synth->filter, waveform);
+        waveform = filter_svf_softclip_asym_hpf_next(&synth->filter, waveform);
+        // waveform = filter_ladder_lpf_asym_os_next(&synth->ladder, waveform);
+        // waveform = filter_ladder_lpf_next(&synth->ladder, waveform);
         break;
 
     default:
         // Default to LPF.
-        waveform = filter_svf_lpf_next(&synth->filter, waveform);
+        waveform = filter_svf_softclip_asym_lpf_next(&synth->filter, waveform);
         break;
     }
 

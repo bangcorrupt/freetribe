@@ -165,6 +165,10 @@ void svc_display_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state) {
         (byte & ~(1UL << bit_index)) | (state << bit_index);
 
     /// TODO: Is this any faster?
+    ///         Are reads and conditionals faster than writes?
+    ///             Is it worth testing if byte differs
+    ///             before writing?
+    ///             (Probably not, if cache enabled.)
     //
     // Get current byte from frame buffer.
     // uint8_t *byte = &g_frame_buffer[byte_index];
@@ -181,17 +185,37 @@ int8_t svc_display_fill_frame(uint16_t x_start, uint16_t y_start,
 
     /// TODO: Handle partial bytes.
     //
+
     uint8_t fill;
+    uint16_t length;
+
+    // uint8_t partial_start = y_start & 7;
+    // uint8_t partial_end = y_end & 7;
+
     uint16_t byte_start = x_start + (128 * (y_start >> 3));
     uint16_t byte_end = x_end + (128 * (y_end >> 3));
-
-    uint16_t length = (byte_end + 1) - byte_start;
 
     if (state) {
         fill = 0;
     } else {
         fill = 0xff;
+        // partial_start = ~partial_start;
+        // partial_end = ~partial_end;
     }
+
+    /// TODO: This does not work.
+    //
+    // if (partial_start) {
+    //     memset(g_frame_buffer_a + byte_start, partial_start, 128 - x_start);
+    //     byte_start += 128;
+    // }
+    //
+    // if (partial_end) {
+    //     byte_end -= 128;
+    //     memset(g_frame_buffer_a + byte_end, partial_end, 128 - x_end);
+    // }
+
+    length = (byte_end + 1) - byte_start;
 
     memset(g_frame_buffer_a + byte_start, fill, length);
 

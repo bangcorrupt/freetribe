@@ -86,15 +86,6 @@ void per_uart_receive_int(uint8_t instance, uint8_t *buffer, uint32_t length);
 
 void per_uart_terminate(uint8_t instance);
 
-// TODO: Refactor and remove.
-void uart0_terminate(void);
-void uart1_init(void);
-char uart1_get_char(void);
-void uart1_put_char(char);
-bool uart1_data_ready(void);
-
-bool uart1_buffer_ready(void);
-
 #ifdef __cplusplus
 }
 #endif

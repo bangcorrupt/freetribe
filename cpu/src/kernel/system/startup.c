@@ -131,6 +131,7 @@ static void _pll1_init(unsigned char pllm, unsigned char postdiv,
                        unsigned char div3);
 
 static void _config_cache_mmu(void);
+static void _ddr_memtest(void);
 static void _boot_abort(void);
 
 /*----- Extern function implementations ------------------------------*/
@@ -170,6 +171,10 @@ void start_boot(void) {
     ddr_init();
 
     _config_cache_mmu();
+
+    // if (ddr_memtest() != 0) {
+    //     _boot_abort();
+    // }
 
     /* Initialize the vector table with opcodes */
     _copy_vector_table();
@@ -350,6 +355,8 @@ static void _pll0_init(unsigned char clk_src, unsigned char pllm,
         SYSCFG_CFGCHIP0_PLL_MASTER_LOCK;
 
     /// TODO: Is this the default value?
+    ///         Could drive directly from PLL
+    ///         to increase speed.
     //
     // Not set in factory firmware.
     // EMIFA driven by PLL0_SYSCLK3
@@ -471,7 +478,8 @@ static void _config_cache_mmu() {
 
         // Map start of address space to RAM region.
         //  Allows setting interrupt vector to 0x0 then selecting OC RAM or DDR.
-        //      Probably don't need this if we have kernel running in OC RAM.
+        //      Probably don't need this if we have vector table in ARM RAM.
+        //      Will need this before booting into factory app.
         // page_table[0] = 0xc1e | 0xc0000000;
         // page_table[0] = 0xc1e | 0x80000000;
     }

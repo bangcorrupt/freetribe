@@ -132,6 +132,17 @@ void SPIPinControl(unsigned int baseAdd, unsigned int idx, unsigned int flag,
     }
 }
 
+void SPISetPinControl(unsigned int baseAdd, unsigned int idx,
+                      unsigned int val) {
+
+    HWREG(baseAdd + SPI_SPIPC(idx)) = val;
+}
+
+unsigned int SPIGetPinControl(unsigned int baseAdd, unsigned int idx) {
+
+    return HWREG(baseAdd + SPI_SPIPC(idx));
+}
+
 /**
  * \brief - Configures SPI CS and ENA Delay in SPIDELAY Register.\n
  *

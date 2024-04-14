@@ -41,8 +41,6 @@ under the terms of the GNU Affero General Public License as published by
 #include <stddef.h>
 #include <stdint.h>
 
-#include "soc_AM1808.h" // Only needed for SPI0_BASE.
-
 #include "per_gpio.h"
 #include "per_spi.h"
 
@@ -52,7 +50,18 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-#define SPI_LCD_BASE SPI0_BASE
+#define LCD_SPI 0
+
+#define LCD_SPI_INT_CHANNEL 8
+#define LCD_SPI_INT_LEVEL SPI_INT_LEVEL_TX
+#define LCD_SPI_PIN_FUNC SPI_PIN_SIMO | SPI_PIN_CLK | SPI_PIN_CS0
+
+#define LCD_SPI_DATA_FORMAT SPI_DATA_FORMAT0
+#define LCD_SPI_FREQ SPI_FREQ_30_MHZ
+#define LCD_SPI_CHAR_LENGTH 8
+
+#define LCD_SPI_CHIP_SELECT 1
+#define LCD_SPI_CSHOLD true
 
 #define LCD_COLUMNS 0x80
 #define LCD_PAGES 0x8
@@ -62,7 +71,7 @@ typedef enum { COMMAND, DATA } t_lcd_mode;
 
 // LCD_PIN_RESET, LCD_PIN_A0
 
-// TODO: HAL for LCD module?
+/// TODO: HAL for LCD module?
 // typedef enum {} t_lcd_command;
 
 /*----- Static variable definitions ----------------------------------*/
@@ -71,7 +80,7 @@ typedef enum { COMMAND, DATA } t_lcd_mode;
 
 /*----- Static function prototypes -----------------------------------*/
 
-// TODO: t_lcd_command.
+/// TODO: t_lcd_command.
 static void _lcd_command(uint8_t command);
 static void _lcd_mode(t_lcd_mode mode);
 static void _lcd_tx(uint8_t *p_tx, uint32_t len);
@@ -81,7 +90,24 @@ static void _lcd_tx(uint8_t *buffer, uint32_t length);
 
 void dev_lcd_init(void) {
 
-    per_spi0_init(); // LCD
+    t_spi_config config = {
+        .instance = LCD_SPI,
+        .int_channel = LCD_SPI_INT_CHANNEL,
+        .int_level = LCD_SPI_INT_LEVEL,
+        .pin_func = LCD_SPI_PIN_FUNC,
+        .int_enable = true,
+    };
+
+    per_spi_init(&config);
+
+    t_spi_format format = {
+        .instance = LCD_SPI,
+        .index = LCD_SPI_DATA_FORMAT,
+        .freq = LCD_SPI_FREQ,
+        .char_length = LCD_SPI_CHAR_LENGTH,
+    };
+
+    per_spi_set_data_format(&format);
 
     _lcd_mode(COMMAND);
 
@@ -163,10 +189,9 @@ void dev_lcd_set_contrast(uint8_t contrast) {
  */
 void dev_lcd_set_backlight(bool red, bool green, bool blue) {
 
-    // LCD Backlight on
-    // TODO: Define pin index.
+    /// TODO: Define pin index.
     //
-    // per_gpio_set(6, 3, red);       // Set GP6P3: LCD Red
+    // LCD Backlight on
     per_gpio_set_indexed(100, red);   // Set GP6P3: LCD Red
     per_gpio_set_indexed(101, green); // Set GP6P4: LCD Green
     per_gpio_set_indexed(102, blue);  // Set GP6P5: LCD Blue
@@ -178,12 +203,12 @@ void dev_lcd_set_backlight(bool red, bool green, bool blue) {
 
 static void _lcd_tx(uint8_t *buffer, uint32_t length) {
 
-    // per_spi0_tx(buffer, length);
-
     // TODO: DMA frame buffer.
-    // TODO: Use interrupt until DMA driver ready.
 
-    per_spi0_tx_int(buffer, length);
+    per_spi_chip_format(LCD_SPI, LCD_SPI_DATA_FORMAT, LCD_SPI_CHIP_SELECT,
+                        LCD_SPI_CSHOLD);
+
+    per_spi_tx_int(LCD_SPI, buffer, length);
 }
 
 static void _lcd_mode(t_lcd_mode mode) { per_gpio_set(8, 1, mode); }

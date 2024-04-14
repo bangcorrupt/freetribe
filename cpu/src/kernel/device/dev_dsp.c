@@ -58,10 +58,21 @@ under the terms of the GNU Affero General Public License as published by
 //          This should probably be lower priority than UART control input.
 #define DSP_SPI_INT_CHANNEL 5
 
+#define DSP_SPI_INT_LEVEL SPI_INT_LEVEL_TX_RX_TIMEOUT_DESYNC
+
+#define DSP_SPI_PIN_FUNC                                                       \
+    SPI_PIN_SOMI | SPI_PIN_SIMO | SPI_PIN_CLK | SPI_PIN_ENA | SPI_PIN_CS0 |    \
+        SPI_PIN_CS1
+
+#define DSP_SPI_FREQ SPI_FREQ_37_5_MHZ
+#define DSP_SPI_CHAR_LENGTH 8
+#define DSP_SPI_ENA_TIMEOUT 0xff
+
+#define DSP_SPI_CSHOLD true
+
 /// TODO: Centralised header for queue lengths.
 #define DSP_SPI_TX_BUF_LEN 0x100
 #define DSP_SPI_RX_BUF_LEN 0x100
-// #define DSP_SPI_WORD_LEN 0x2
 
 /// TODO: Use indexed GPIO functions for single pin id.
 #define DSP_RESET_BANK 6
@@ -142,12 +153,12 @@ void dev_dsp_spi_poll(void) { _dsp_spi_rx_byte(); }
 
 /// TODO: Sort out dev_dsp_spi function name mess.
 //
-void dev_dsp_spi_tx(uint8_t *buffer, uint32_t length) {
+void dev_dsp_spi_tx_boot(uint8_t *buffer, uint32_t length) {
 
     per_spi_chip_format(DSP_SPI, DSP_SPI_DATA_FORMAT, DSP_SPI_CHIP_SELECT,
-                        true);
+                        DSP_SPI_CSHOLD);
 
-    per_spi1_tx(buffer, length);
+    per_spi1_tx_wait(buffer, length);
 }
 
 // True puts DSP in reset.
@@ -162,14 +173,6 @@ bool dev_dsp_spi_enabled(void) {
     return !per_gpio_get(DSP_SPI_ENA_BANK, DSP_SPI_ENA_PIN);
 }
 
-void dev_dsp_spi_tx_buffer(uint8_t *buffer, uint32_t length) {
-
-    per_spi_chip_format(DSP_SPI, DSP_SPI_DATA_FORMAT, DSP_SPI_CHIP_SELECT,
-                        true);
-
-    per_spi1_tx_int(buffer, length);
-}
-
 /*----- Static function implementations ------------------------------*/
 
 /// TODO: Return status code.
@@ -179,8 +182,27 @@ void _dsp_spi_init(void) {
     //
     // SPI 1 also used for flash.
     if (!per_spi_initialised(DSP_SPI)) {
-        per_spi1_init();
+
+        t_spi_config config = {
+            .instance = DSP_SPI,
+            .int_channel = DSP_SPI_INT_CHANNEL,
+            .int_level = DSP_SPI_INT_LEVEL,
+            .pin_func = DSP_SPI_PIN_FUNC,
+            .int_enable = true,
+        };
+
+        per_spi_init(&config);
     }
+
+    t_spi_format format = {
+        .instance = DSP_SPI,
+        .index = DSP_SPI_DATA_FORMAT,
+        .freq = DSP_SPI_FREQ,
+        .char_length = DSP_SPI_CHAR_LENGTH,
+        .ena_timeout = DSP_SPI_ENA_TIMEOUT,
+    };
+
+    per_spi_set_data_format(&format);
 
     // Tx ring buffer attributes.
     rb_attr_t tx_attr = {sizeof(dsp_spi_tx_rbmem[0]),
@@ -195,10 +217,12 @@ void _dsp_spi_init(void) {
         ring_buffer_init(&dsp_spi_rx_rbd, &rx_attr) == 0) {
 
         // Register Tx callback.
-        per_spi1_register_callback(SPI_TX_COMPLETE, _dsp_spi_tx_callback);
+        per_spi_register_callback(DSP_SPI, SPI_TX_COMPLETE,
+                                  _dsp_spi_tx_callback);
 
         // Register Rx callback.
-        per_spi1_register_callback(SPI_RX_COMPLETE, _dsp_spi_rx_callback);
+        per_spi_register_callback(DSP_SPI, SPI_RX_COMPLETE,
+                                  _dsp_spi_rx_callback);
     }
 }
 
@@ -219,9 +243,9 @@ static void _dsp_spi_tx_byte(uint8_t *p_byte) {
     g_dsp_spi_rx_complete = false;
 
     per_spi_chip_format(DSP_SPI, DSP_SPI_DATA_FORMAT, DSP_SPI_CHIP_SELECT,
-                        true);
+                        DSP_SPI_CSHOLD);
 
-    per_spi1_transceive_int(p_byte, &g_dsp_spi_rx_byte, 1);
+    per_spi_trx_int(DSP_SPI, p_byte, &g_dsp_spi_rx_byte, 1);
 }
 
 static void _dsp_spi_rx_byte(void) {

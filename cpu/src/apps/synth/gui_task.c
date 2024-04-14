@@ -239,6 +239,7 @@ static t_status _init(void) {
         UG_FontSelect(FONT_6X8);
         // UG_ConsoleSetArea(4, 4, 123, 12);
         UG_ConsoleSetArea(4, 32, 123, 40);
+        // UG_ConsoleSetArea(4, 27, 123, 40);
         UG_ConsoleSetBackcolor(C_BLACK);
         UG_ConsoleSetForecolor(C_WHITE);
         UG_FillScreen(C_BLACK);

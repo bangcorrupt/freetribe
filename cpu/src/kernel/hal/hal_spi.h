@@ -207,6 +207,10 @@ void SPIModeConfigure(unsigned int baseAdd, unsigned int flag);
 void SPIPinControl(unsigned int baseAdd, unsigned int idx, unsigned int flag,
                    unsigned int *val);
 
+void SPISetPinControl(unsigned int baseAdd, unsigned int idx, unsigned int val);
+
+unsigned int SPIGetPinControl(unsigned int baseAdd, unsigned int idx);
+
 void SPIDelayConfigure(unsigned int baseAdd, unsigned int c2edelay,
                        unsigned int t2edelay, unsigned int t2cdelay,
                        unsigned int c2tdelay);
