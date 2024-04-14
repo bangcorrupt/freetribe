@@ -44,6 +44,18 @@ extern void filter_ladder_init (filter_ladder* f) {
 
 }
 
+/// TODO: What is the correct way to set cutoff and resonance?
+//
+void filter_ladder_set_freq(filter_ladder *f, fract32 freq) {
+
+    f->alpha = lpf_freq_calc(freq);
+}
+
+void filter_ladder_set_fb(filter_ladder *f, fract32 feedback) {
+
+    f->feedback = feedback;
+}
+
 // LTI version of 4-stage ladder topology
 extern fract32 filter_ladder_lpf_next (filter_ladder* f, fract32 in) {
   int i;
