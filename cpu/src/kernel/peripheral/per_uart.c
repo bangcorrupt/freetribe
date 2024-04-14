@@ -226,15 +226,13 @@ static inline void _uart_isr(t_uart *uart) {
     IntSystemStatusClear(uart->system_int);
 #endif
 
+    // Get highest priority pending interrupt.
+    uint8_t int_id;
+
     uint8_t tx_fifo_level = 0;
 
-    /// TODO: Assign int_id in while condition.
-    //
-    // Get highest priority pending interrupt.
-    uint8_t int_id = UARTIntStatus(uart->address);
-
     // Clear all pending interrupts.
-    while (int_id) {
+    while ((int_id = UARTIntStatus(uart->address))) {
         switch (int_id) {
 
         // Tx interrupt.
@@ -257,7 +255,6 @@ static inline void _uart_isr(t_uart *uart) {
                 }
             }
             tx_fifo_level = 0;
-            // TODO: Maybe disable interrupt if buffer already empty.
             break;
 
         case UART_INTID_CTI:
@@ -281,7 +278,6 @@ static inline void _uart_isr(t_uart *uart) {
                     }
                 }
             }
-            /// TODO: Disable interrupt if triggered when no rx buffer?
             break;
 
         // Error interrupt.
@@ -297,8 +293,6 @@ static inline void _uart_isr(t_uart *uart) {
         default:
             break;
         }
-        // Check for pending interrupt.
-        int_id = UARTIntStatus(uart->address);
     }
     return;
 }

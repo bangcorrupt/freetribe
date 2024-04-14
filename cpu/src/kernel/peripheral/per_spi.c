@@ -334,7 +334,7 @@ static inline void _spi_isr(t_spi *spi) {
 #endif
 
     // Handle all pending interrupts.
-    while ((int_id = SPIInterruptVectorGet(spi->address)) != 0) {
+    while ((int_id = SPIInterruptVectorGet(spi->address))) {
 
         switch (int_id) {
 
