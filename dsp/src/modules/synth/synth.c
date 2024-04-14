@@ -353,10 +353,9 @@ fract32 MonoSynth_tick(t_MonoSynth *synth) {
         break;
 
     case FILTER_TYPE_HPF:
-        // waveform = filter_svf_softclip_asym_hpf_next(&synth->filter,
-        // waveform);
+        waveform = filter_svf_softclip_asym_hpf_next(&synth->filter, waveform);
         // waveform = filter_ladder_lpf_asym_os_next(&synth->ladder, waveform);
-        waveform = filter_ladder_lpf_next(&synth->ladder, waveform);
+        // waveform = filter_ladder_lpf_next(&synth->ladder, waveform);
         break;
 
     default:
