@@ -244,6 +244,9 @@ void per_spi0_tx_int(uint8_t *buffer, uint32_t length) {
 /// TODO: Non-blocking implementation would be better.
 ///         Not a big problem as this function is
 ///         only used to boot the DSP.
+///             This could be a single byte write,
+///             with GPIO tested in device layer above.
+///
 //
 void per_spi1_tx(uint8_t *buffer, uint32_t length) {
 
