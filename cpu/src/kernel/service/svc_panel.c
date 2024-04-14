@@ -120,7 +120,7 @@ void svc_panel_task(void) {
         break;
 
     default:
-        // TODO: Record unhandled state.
+        /// TODO: Record unhandled state.
         if (error_check(UNHANDLED_STATE_ERROR) != SUCCESS) {
             state = STATE_ERROR;
         }
@@ -232,7 +232,7 @@ void svc_panel_set_led(t_led_index led_index, uint8_t brightness) {
 /**
  * Toggle LED.
  */
-// TODO: Toggle to specific brightness.
+/// TODO: Toggle to specific brightness.
 void svc_panel_toggle_led(t_led_index led_index) {
 
     uint8_t mcu_msg[5] = {0, 0, 0, 0, 0};
@@ -266,7 +266,7 @@ static t_status _panel_init(void) {
 
     // Block until MCU acknowledges.
     // System is not useful without MCU running.
-    // TODO: Non blocking / Timeout error?.
+    /// TODO: Non blocking / Timeout error?.
     while (dev_mcu_rx_dequeue(panel_msg) != SUCCESS)
         ;
 
@@ -362,7 +362,7 @@ static t_status _panel_parse(uint8_t *msg) {
             p_held_buttons_callback(held_buttons);
         }
 
-        // TODO: Clear state?
+        /// TODO: Clear state?
         /* held_buttons[0] = 0; */
         /* held_buttons[1] = 0; */
 
@@ -370,7 +370,7 @@ static t_status _panel_parse(uint8_t *msg) {
         break;
 
     default:
-        // TODO: Handle unknown msg_id.
+        /// TODO: Handle unknown msg_id.
         result = WARNING;
         break;
     }

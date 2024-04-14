@@ -66,83 +66,87 @@ typedef struct {
     void (*tx_callback)(void);
     void (*rx_callback)(void);
 
-} t_uart_handle;
-
-/*----- Static variable definitions ----------------------------------*/
-
-static t_uart_handle h_uart[UART_INSTANCES];
-
-/*----- Extern variable definitions ----------------------------------*/
+} t_uart;
 
 /*----- Static function prototypes -----------------------------------*/
 
-static void _uart_isr(t_uart_handle *h_uart);
+static void _uart_isr(t_uart *g_uart);
 static void _uart0_isr(void);
 static void _uart1_isr(void);
 
-static uint32_t _uart_get_base_address(uint8_t instance);
-static uint32_t _uart_get_system_interrupt(uint8_t instance);
-static uint32_t _uart_get_isr_address(uint8_t instance);
+/*----- Static variable definitions ----------------------------------*/
+
+static const uint32_t g_base_address[UART_INSTANCES] = {SOC_UART_0_REGS,
+                                                        SOC_UART_1_REGS};
+
+static const uint32_t g_system_interrupt[UART_INSTANCES] = {SYS_INT_UARTINT0,
+                                                            SYS_INT_UARTINT1};
+
+static const void *g_isr_address[UART_INSTANCES] = {&_uart0_isr, &_uart1_isr};
+
+static t_uart g_uart[UART_INSTANCES];
+
+/*----- Extern variable definitions ----------------------------------*/
 
 /*----- Extern function implementations ------------------------------*/
 
 void per_uart_init(t_uart_config *config) {
 
-    t_uart_handle uart = {.address = _uart_get_base_address(config->instance),
-                          .system_int =
-                              _uart_get_system_interrupt(config->instance),
-                          .tx_buffer = NULL,
-                          .tx_length = 0,
-                          .rx_buffer = NULL,
-                          .rx_length = 0,
-                          .tx_callback = NULL,
-                          .rx_callback = NULL};
+    g_uart[config->instance].address = g_base_address[config->instance];
+    g_uart[config->instance].system_int = g_system_interrupt[config->instance];
+    g_uart[config->instance].tx_buffer = NULL;
+    g_uart[config->instance].tx_length = 0;
+    g_uart[config->instance].rx_buffer = NULL;
+    g_uart[config->instance].rx_length = 0;
+    g_uart[config->instance].tx_callback = NULL;
+    g_uart[config->instance].rx_callback = NULL;
 
-    UARTConfigSetExpClk(uart.address, 150000000, config->baud,
-                        UART_LCR_WLS_8BITS, config->oversample);
+    UARTConfigSetExpClk(g_uart[config->instance].address, 150000000,
+                        config->baud, UART_LCR_WLS_8BITS, config->oversample);
 
-    // TODO: This only supports 1 byte Rx FIFO.
+    /// TODO: This only supports 1 byte Rx FIFO.
+    //
     if (config->fifo_enable) {
         // FIFO enable.
-        UARTFIFOEnable(uart.address);
+        UARTFIFOEnable(g_uart[config->instance].address);
         // Set Rx FIFO trigger level 1 byte.
-        UARTFIFOLevelSet(uart.address, UART_RX_TRIG_LEVEL_1);
+        UARTFIFOLevelSet(g_uart[config->instance].address,
+                         UART_RX_TRIG_LEVEL_1);
     }
 
     if (config->int_enable) {
         // Set interrupt channel.
-        IntChannelSet(uart.system_int, config->int_channel);
+        IntChannelSet(g_uart[config->instance].system_int, config->int_channel);
 
         // Registers ISR in Interrupt Vector Table.
-        IntRegister(uart.system_int, _uart_get_isr_address(config->instance));
+        IntRegister(g_uart[config->instance].system_int,
+                    g_isr_address[config->instance]);
 
         // Enable system interrupt in AINTC.
-        IntSystemEnable(uart.system_int);
+        IntSystemEnable(g_uart[config->instance].system_int);
     }
 
     // Enable UART.
-    UARTEnable(uart.address);
-
-    h_uart[config->instance] = uart;
+    UARTEnable(g_uart[config->instance].address);
 }
 
 void per_uart_terminate(uint8_t instance) {
 
     // Empty FIFO.
     while ((UART_THR_TSR_EMPTY | UART_THR_EMPTY) !=
-           (HWREG(h_uart[instance].address + UART_LSR) &
+           (HWREG(g_uart[instance].address + UART_LSR) &
             (UART_THR_TSR_EMPTY | UART_THR_EMPTY)))
         ;
 
     // Disable UART.
-    UARTDisable(h_uart[instance].address);
+    UARTDisable(g_uart[instance].address);
 }
 
 void per_uart_transmit(uint8_t instance, uint8_t *buffer, uint32_t length) {
 
     if (buffer != NULL) {
         while (length--) {
-            UARTCharPut(h_uart[instance].address, *buffer++);
+            UARTCharPut(g_uart[instance].address, *buffer++);
         }
     }
 }
@@ -151,7 +155,7 @@ void per_uart_receive(uint8_t instance, uint8_t *buffer, uint32_t length) {
 
     if (buffer != NULL) {
         while (length--) {
-            *buffer++ = UARTCharGet(h_uart[instance].address);
+            *buffer++ = UARTCharGet(g_uart[instance].address);
         }
     }
 }
@@ -159,22 +163,22 @@ void per_uart_receive(uint8_t instance, uint8_t *buffer, uint32_t length) {
 void per_uart_transmit_int(uint8_t instance, uint8_t *buffer, uint32_t length) {
 
     if ((buffer != NULL) && (length != 0)) {
-        h_uart[instance].tx_buffer = buffer;
-        h_uart[instance].tx_length = length;
+        g_uart[instance].tx_buffer = buffer;
+        g_uart[instance].tx_length = length;
 
         // Enable Tx interrupt.
-        UARTIntEnable(h_uart[instance].address, UART_INT_TX_EMPTY);
+        UARTIntEnable(g_uart[instance].address, UART_INT_TX_EMPTY);
     }
 }
 
 void per_uart_receive_int(uint8_t instance, uint8_t *buffer, uint32_t length) {
 
     if ((buffer != NULL) && (length != 0)) {
-        h_uart[instance].rx_buffer = buffer;
-        h_uart[instance].rx_length = length;
+        g_uart[instance].rx_buffer = buffer;
+        g_uart[instance].rx_length = length;
 
         // Enable Rx interrupt.
-        UARTIntEnable(SOC_UART_0_REGS, UART_INT_RXDATA_CTI);
+        UARTIntEnable(g_uart[instance].address, UART_INT_RXDATA_CTI);
     }
 }
 
@@ -183,11 +187,11 @@ void per_uart_register_callback(uint8_t instance, t_uart_event event,
 
     switch (event) {
     case UART_TX_COMPLETE:
-        h_uart[instance].tx_callback = callback;
+        g_uart[instance].tx_callback = callback;
         break;
 
     case UART_RX_COMPLETE:
-        h_uart[instance].rx_callback = callback;
+        g_uart[instance].rx_callback = callback;
         break;
 
         // case UART_ERROR:
@@ -198,27 +202,6 @@ void per_uart_register_callback(uint8_t instance, t_uart_event event,
 }
 
 /*----- Static function implementations ------------------------------*/
-
-static uint32_t _uart_get_system_interrupt(uint8_t instance) {
-
-    const uint32_t system_interrupt[UART_INSTANCES] = {SYS_INT_UARTINT0,
-                                                       SYS_INT_UARTINT1};
-    return system_interrupt[instance];
-}
-
-static uint32_t _uart_get_base_address(uint8_t instance) {
-
-    const uint32_t base_address[UART_INSTANCES] = {SOC_UART_0_REGS,
-                                                   SOC_UART_1_REGS};
-    return base_address[instance];
-}
-
-static uint32_t _uart_get_isr_address(uint8_t instance) {
-
-    const uint32_t isr_address[UART_INSTANCES] = {_uart0_isr, _uart1_isr};
-
-    return isr_address[instance];
-}
 
 // TODO: Implement DMA and higher level MCU device driver.
 //          5 byte message buffer.
@@ -234,7 +217,7 @@ static uint32_t _uart_get_isr_address(uint8_t instance) {
  *          - Receiver line error:
  *              - Clear byte from RBR if receiver line error has occured.
  */
-static inline void _uart_isr(t_uart_handle *uart) {
+static inline void _uart_isr(t_uart *uart) {
 
 #if NESTED_INTERRUPTS
     // System interrupt already cleared in IRQHandler.
@@ -245,6 +228,8 @@ static inline void _uart_isr(t_uart_handle *uart) {
 
     uint8_t tx_fifo_level = 0;
 
+    /// TODO: Assign int_id in while condition.
+    //
     // Get highest priority pending interrupt.
     uint8_t int_id = UARTIntStatus(uart->address);
 
@@ -276,7 +261,8 @@ static inline void _uart_isr(t_uart_handle *uart) {
             break;
 
         case UART_INTID_CTI:
-            // TODO: Log character timeout.
+            /// TODO: Log character timeout.
+            //
             // No break, fall through Rx case.
 
         // Rx interrupt.
@@ -295,13 +281,13 @@ static inline void _uart_isr(t_uart_handle *uart) {
                     }
                 }
             }
-            // TODO: Disable interrupt if triggered when no rx buffer?
+            /// TODO: Disable interrupt if triggered when no rx buffer?
             break;
 
         // Error interrupt.
         case UART_INTID_RX_LINE_STAT:
 
-            // TODO: Error callback.
+            /// TODO: Error callback.
             while (UARTRxErrorGet(uart->address)) {
                 // Read a byte from the RBR if RBR has data.
                 UARTCharGetNonBlocking(uart->address);
@@ -317,8 +303,8 @@ static inline void _uart_isr(t_uart_handle *uart) {
     return;
 }
 
-static void _uart0_isr(void) { _uart_isr(&h_uart[0]); }
+static void _uart0_isr(void) { _uart_isr(&g_uart[0]); }
 
-static void _uart1_isr(void) { _uart_isr(&h_uart[1]); }
+static void _uart1_isr(void) { _uart_isr(&g_uart[1]); }
 
 /*----- End of file --------------------------------------------------*/
