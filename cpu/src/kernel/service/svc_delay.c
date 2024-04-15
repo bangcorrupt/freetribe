@@ -117,6 +117,7 @@ void delay_block_us(uint32_t time) {
     }
 }
 
+/// TODO: Still borkd.
 bool delay_us(uint32_t *start_count, uint32_t delay_time) {
 
     static uint32_t elapsed_cycles = 0;
