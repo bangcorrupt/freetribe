@@ -120,6 +120,9 @@ void _register_system_callback(uint8_t msg_id, void (*callback)(void));
 void svc_dsp_task(void) {
 
     static t_dsp_task_state state = STATE_INIT;
+
+    static t_delay_state reset_delay;
+
     static uint32_t start_time;
 
     static uint8_t dsp_byte;
@@ -138,24 +141,37 @@ void svc_dsp_task(void) {
 
         dev_dsp_reset(true);
 
-        start_time = delay_get_current_count();
+        /// TODO: Function to set up delay parameters.
+        //
+        reset_delay.start_time = delay_get_current_count();
+        reset_delay.delay_time = 2100;
+        reset_delay.elapsed_cycles = 0;
+        reset_delay.elapsed_us = 0;
+        reset_delay.expired = false;
+
         state = STATE_RELEASE_RESET;
         break;
 
     case STATE_RELEASE_RESET:
         // Hold in reset for 2.1 ms.
-        if (delay_us(&start_time, 2100)) {
+
+        if (delay_us(&reset_delay)) {
 
             dev_dsp_reset(false);
 
-            start_time = delay_get_current_count();
+            reset_delay.start_time = delay_get_current_count();
+            reset_delay.delay_time = 1000;
+            reset_delay.elapsed_cycles = 0;
+            reset_delay.elapsed_us = 0;
+            reset_delay.expired = false;
+
             state = STATE_BOOT;
         }
         break;
 
     case STATE_BOOT:
         // Wait 1 ms after reset released.
-        if (delay_us(&start_time, 1000) && dev_dsp_spi_enabled()) {
+        if (delay_us(&reset_delay) && dev_dsp_spi_enabled()) {
 
             _dsp_boot();
             state = STATE_WAIT_READY;

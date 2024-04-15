@@ -76,7 +76,8 @@ static t_status _display_init(void);
 void svc_display_task(void) {
 
     static t_display_task_state state = STATE_ASSERT_RESET;
-    static uint32_t start_time;
+
+    static t_delay_state reset_delay;
 
     static uint8_t page_index;
 
@@ -89,16 +90,26 @@ void svc_display_task(void) {
 
         dev_lcd_reset(true);
 
-        start_time = delay_get_current_count();
+        reset_delay.start_time = delay_get_current_count();
+        reset_delay.delay_time = 5;
+        reset_delay.elapsed_cycles = 0;
+        reset_delay.elapsed_us = 0;
+        reset_delay.expired = false;
+
         state = STATE_RELEASE_RESET;
         break;
 
     case STATE_RELEASE_RESET:
         // Hold in reset for 5 us.
-        if (delay_us(&start_time, 5)) {
+        if (delay_us(&reset_delay)) {
             dev_lcd_reset(false);
 
-            start_time = delay_get_current_count();
+            reset_delay.start_time = delay_get_current_count();
+            reset_delay.delay_time = 5;
+            reset_delay.elapsed_cycles = 0;
+            reset_delay.elapsed_us = 0;
+            reset_delay.expired = false;
+
             state = STATE_INIT;
         }
         break;
@@ -106,7 +117,7 @@ void svc_display_task(void) {
     // Initialise LCD task.
     case STATE_INIT:
         // Wait 5 us after reset released.
-        if (delay_us(&start_time, 5)) {
+        if (delay_us(&reset_delay)) {
 
             if (error_check(_display_init()) == SUCCESS) {
                 state = STATE_RUN;

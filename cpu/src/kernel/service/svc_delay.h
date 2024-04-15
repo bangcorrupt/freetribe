@@ -49,12 +49,21 @@ extern "C" {
 
 /*----- Macros and Definitions ---------------------------------------*/
 
+typedef struct {
+    uint32_t start_time;
+    uint32_t delay_time;
+    uint32_t elapsed_cycles;
+    uint32_t elapsed_us;
+    bool expired;
+} t_delay_state;
+
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
 
 void delay_init(void);
-bool delay_us(uint32_t *start_count, uint32_t delay_time);
+bool delay_us(t_delay_state *state);
+/* bool delay_us(uint32_t *start_count, uint32_t delay_time); */
 void delay_block_us(uint32_t time);
 void delay_block_ms(uint32_t time);
 uint32_t delay_get_current_count(void);
