@@ -174,20 +174,21 @@ void svc_dsp_task(void) {
         if (delay_us(&reset_delay) && dev_dsp_spi_enabled()) {
 
             _dsp_boot();
-            state = STATE_WAIT_READY;
-        }
-        break;
-
-    case STATE_WAIT_READY:
-        // Wait until DSP SPI command service is running.
-
-        if (!g_dsp_ready) {
-            dev_dsp_spi_poll();
-
-        } else {
+            // state = STATE_WAIT_READY;
             state = STATE_RUN;
         }
         break;
+
+        // case STATE_WAIT_READY:
+        //     // Wait until DSP SPI command service is running.
+        //
+        //     if (!g_dsp_ready) {
+        //         dev_dsp_spi_poll();
+        //
+        //     } else {
+        //         state = STATE_RUN;
+        //     }
+        //     break;
 
     case STATE_RUN:
 
