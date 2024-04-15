@@ -39,6 +39,7 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Includes -----------------------------------------------------*/
 
 #include "freetribe.h"
+#include "svc_delay.h"
 
 /*----- Macros and Definitions ---------------------------------------*/
 
@@ -92,10 +93,7 @@ uint32_t ft_get_delay_current(void) {
  * @return  True if at least `delay_time` microseconds have passed since
  * `start_time`.
  */
-bool ft_delay(uint32_t *start_time, uint32_t delay_time) {
-
-    return delay_us(start_time, delay_time);
-}
+bool ft_delay(t_delay_state *state) { return delay_us(state); }
 
 // Display API
 //

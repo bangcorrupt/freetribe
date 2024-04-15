@@ -117,44 +117,82 @@ void delay_block_us(uint32_t time) {
     }
 }
 
-bool delay_us(uint32_t *start_count, uint32_t delay_time) {
+/// TODO: Still borkd.
+// bool delay_us(uint32_t *start_count, uint32_t delay_time) {
+//
+//     static uint32_t elapsed_cycles = 0;
+//     static uint32_t elapsed_us = 0;
+//
+//     uint32_t current_count = 0;
+//     uint32_t delta = 0;
+//
+//     bool expired = false;
+//
+//     if (elapsed_us < delay_time) {
+//
+//         current_count = delay_get_current_count();
+//
+//         if (current_count >= *start_count) {
+//             delta = current_count - *start_count;
+//
+//         } else {
+//             delta = (DELAY_PERIOD - *start_count) + current_count + 1;
+//         }
+//
+//         elapsed_cycles += delta;
+//
+//         // TODO: Optimise.
+//         while (elapsed_cycles >= CYCLES_PER_US) {
+//             elapsed_us++;
+//             elapsed_cycles -= CYCLES_PER_US;
+//         }
+//
+//         *start_count = current_count;
+//
+//     } else {
+//         elapsed_us = 0;
+//         elapsed_cycles = 0;
+//         expired = true;
+//     }
+//
+//     return expired;
+// }
+//
 
-    static uint32_t elapsed_cycles = 0;
-    static uint32_t elapsed_us = 0;
+bool delay_us(t_delay_state *state) {
 
     uint32_t current_count = 0;
     uint32_t delta = 0;
 
-    bool expired = false;
-
-    if (elapsed_us < delay_time) {
+    if (state->elapsed_us < state->delay_time) {
 
         current_count = delay_get_current_count();
 
-        if (current_count >= *start_count) {
-            delta = current_count - *start_count;
+        if (current_count >= state->start_time) {
+            delta = current_count - state->start_time;
 
         } else {
-            delta = (DELAY_PERIOD - *start_count) + current_count + 1;
+            delta = (DELAY_PERIOD - state->start_time) + current_count + 1;
         }
 
-        elapsed_cycles += delta;
+        state->elapsed_cycles += delta;
 
-        // TODO: Optimise.
-        while (elapsed_cycles >= CYCLES_PER_US) {
-            elapsed_us++;
-            elapsed_cycles -= CYCLES_PER_US;
+        /// TODO: Optimise.
+        //
+        while (state->elapsed_cycles >= CYCLES_PER_US) {
+            state->elapsed_us++;
+            state->elapsed_cycles -= CYCLES_PER_US;
         }
 
-        *start_count = current_count;
+        state->start_time = current_count;
 
     } else {
-        elapsed_us = 0;
-        elapsed_cycles = 0;
-        expired = true;
+        state->elapsed_us = 0;
+        state->elapsed_cycles = 0;
+        state->expired = true;
     }
 
-    return expired;
+    return state->expired;
 }
 
 void delay_block_ms(uint32_t time) { delay_block_us(time * 1000); }
