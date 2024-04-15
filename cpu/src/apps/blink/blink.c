@@ -33,7 +33,7 @@ under the terms of the GNU Affero General Public License as published by
  *
  * @brief   Minimal example application for Freetribe.
  *
- * This example uses a non-blocking delay 
+ * This example uses a non-blocking delay
  * to toggle an LED at regular intervals.
  */
 
@@ -44,11 +44,11 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Macros and Definitions ---------------------------------------*/
 
 // 1 second in microseconds.
-#define DELAY_TIME 1000000 
+#define DELAY_TIME 1000000
 
 /*----- Static variable definitions ----------------------------------*/
 
-static uint32_t g_start_time; 
+static uint32_t g_start_time;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -59,7 +59,7 @@ static uint32_t g_start_time;
 /**
  * @brief   Initialise application.
  *
- * Store the current value of the delay timer in a 
+ * Store the current value of the delay timer in a
  * static global variable. Status is assumed successful.
  *
  * @return status   Status code indicating success:
@@ -78,11 +78,12 @@ t_status app_init(void) {
 /**
  * @brief   Run application.
  *
- * Test if 1 second has passed  since we last set `start_time`.  
+ * Test if 1 second has passed  since we last set `start_time`.
  * If so, toggle an LED and reset `start_time`.
  */
 void app_run(void) {
 
+    /// TODO:  Update to use new delay_state.
     // Wait for delay.
     if (ft_delay(g_start_time, DELAY_TIME)) {
 
@@ -91,7 +92,6 @@ void app_run(void) {
 
         // Reset start time.
         g_start_time = ft_get_delay_current();
-
     }
 }
 
