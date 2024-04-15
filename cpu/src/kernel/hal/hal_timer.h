@@ -174,6 +174,8 @@ extern "C" {
 /*
 ** Prototypes for the APIs
 */
+extern void TimerEmulationModeSet(unsigned int baseAddr, unsigned int emuMode);
+
 extern unsigned int TimerCompareGet(unsigned int baseAddr,
                                     unsigned int regIndex);
 extern unsigned int TimerOUTStatusGet(unsigned int baseAddr,

@@ -54,8 +54,10 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Extern function implementations ------------------------------*/
 
-// TODO: This only supports Timer12, which is fine for our use case.
-//       Maybe pass by reference and/or return handle.
+/// TODO: This only supports Timer12, which is fine for our use case.
+//
+/// TODO: ISR should be part of this peripheral driver,
+///         Register callback from device driver above.
 //
 void timer_init(t_timer_config config) {
 

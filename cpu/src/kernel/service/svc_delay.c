@@ -37,7 +37,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
-// TODO: Integrate into svc_system.
+/// TODO: This should be at device layer.
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -117,7 +117,7 @@ void delay_block_us(uint32_t time) {
     }
 }
 
-bool delay_us(uint32_t start_count, uint32_t delay_time) {
+bool delay_us(uint32_t *start_count, uint32_t delay_time) {
 
     static uint32_t elapsed_cycles = 0;
     static uint32_t elapsed_us = 0;
@@ -131,11 +131,11 @@ bool delay_us(uint32_t start_count, uint32_t delay_time) {
 
         current_count = delay_get_current_count();
 
-        if (current_count >= start_count) {
-            delta = current_count - start_count;
+        if (current_count >= *start_count) {
+            delta = current_count - *start_count;
 
         } else {
-            delta = (DELAY_PERIOD - start_count) + current_count + 1;
+            delta = (DELAY_PERIOD - *start_count) + current_count + 1;
         }
 
         elapsed_cycles += delta;
@@ -146,7 +146,7 @@ bool delay_us(uint32_t start_count, uint32_t delay_time) {
             elapsed_cycles -= CYCLES_PER_US;
         }
 
-        start_count = current_count;
+        *start_count = current_count;
 
     } else {
         elapsed_us = 0;

@@ -92,7 +92,7 @@ uint32_t ft_get_delay_current(void) {
  * @return  True if at least `delay_time` microseconds have passed since
  * `start_time`.
  */
-bool ft_delay(uint32_t start_time, uint32_t delay_time) {
+bool ft_delay(uint32_t *start_time, uint32_t delay_time) {
 
     return delay_us(start_time, delay_time);
 }
