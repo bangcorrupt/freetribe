@@ -76,6 +76,8 @@ enum e_module_msg_id {
 };
 
 enum e_system_msg_id {
+    SYSTEM_CHECK_READY,
+    SYSTEM_READY,
     SYSTEM_GET_PORT_STATE,
     SYSTEM_SET_PORT_STATE,
     SYSTEM_PORT_STATE
@@ -111,6 +113,8 @@ static t_status _handle_module_set_param_value(uint8_t *payload,
 
 static t_status _handle_module_get_param_name(uint8_t *payload, uint8_t length);
 
+static t_status _handle_system_check_ready(void);
+
 static t_status _handle_system_get_port_state(void);
 static t_status _handle_system_set_port_state(uint8_t *payload, uint8_t length);
 
@@ -122,6 +126,7 @@ static t_status _respond_module_param_name(uint16_t module_id,
                                            uint16_t param_index,
                                            char *param_name);
 
+static t_status _respond_system_check_ready(void);
 static t_status _respond_system_port_state(uint16_t port_f, uint16_t port_g,
                                            uint16_t port_h);
 
@@ -187,6 +192,8 @@ static void _transmit_message(uint8_t msg_type, uint8_t msg_id,
 static t_status _cpu_init(void) {
 
     t_status result = TASK_INIT_ERROR;
+
+    _transmit_message(MSG_TYPE_SYSTEM, SYSTEM_READY, NULL, 0);
 
     // TODO: Handhsake.
 
@@ -300,6 +307,9 @@ static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
     uint8_t result = ERROR;
     switch (msg_id) {
 
+    case SYSTEM_CHECK_READY:
+        result = _handle_system_check_ready();
+
     case SYSTEM_GET_PORT_STATE:
         result = _handle_system_get_port_state();
         break;
@@ -375,6 +385,21 @@ static t_status _handle_module_get_param_name(uint8_t *payload,
     return SUCCESS;
 }
 
+static t_status _handle_system_check_ready(void) {
+
+    /// TODO: Handshake / Test...
+    _respond_system_check_ready();
+
+    return SUCCESS;
+}
+
+static t_status _respond_system_check_ready(void) {
+
+    _transmit_message(MSG_TYPE_SYSTEM, SYSTEM_READY, NULL, 0);
+
+    return SUCCESS;
+}
+
 static t_status _handle_system_get_port_state(void) {
 
     uint16_t port_f = per_gpio_get_port(PORT_F);
@@ -395,8 +420,8 @@ static t_status _respond_module_param_value(uint16_t module_id,
                          param_index & 0xff, (param_index >> 8) & 0xff,
                          param_value & 0xff, (param_value >> 8 & 0xff)};
 
-    _transmit_message(MSG_TYPE_MODULE, MODULE_PARAM_VALUE, sizeof(payload),
-                      payload);
+    _transmit_message(MSG_TYPE_MODULE, MODULE_PARAM_VALUE, payload,
+                      sizeof(payload));
 
     return SUCCESS;
 }
@@ -422,8 +447,8 @@ static t_status _respond_module_param_name(uint16_t module_id,
     // Ensure null termination.
     payload[payload_length - 1] = '\0';
 
-    _transmit_message(MSG_TYPE_MODULE, MODULE_PARAM_NAME, sizeof(payload),
-                      payload);
+    _transmit_message(MSG_TYPE_MODULE, MODULE_PARAM_NAME, payload,
+                      sizeof(payload));
 
     return SUCCESS;
 }
@@ -435,8 +460,8 @@ static t_status _respond_system_port_state(uint16_t port_f, uint16_t port_g,
                          port_g & 0xff, (port_g >> 8) & 0xff,
                          port_h & 0xff, (port_h >> 8) & 0xff};
 
-    _transmit_message(MSG_TYPE_SYSTEM, SYSTEM_PORT_STATE, sizeof(payload),
-                      payload);
+    _transmit_message(MSG_TYPE_SYSTEM, SYSTEM_PORT_STATE, payload,
+                      sizeof(payload));
 
     return SUCCESS;
 }

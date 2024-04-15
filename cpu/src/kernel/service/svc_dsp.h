@@ -45,6 +45,7 @@ extern "C" {
 /*----- Includes -----------------------------------------------------*/
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "ft_error.h"
 
@@ -63,6 +64,8 @@ enum e_module_msg_id {
 };
 
 enum e_system_msg_id {
+    SYSTEM_CHECK_READY,
+    SYSTEM_READY,
     SYSTEM_GET_PORT_STATE,
     SYSTEM_SET_PORT_STATE,
     SYSTEM_PORT_STATE

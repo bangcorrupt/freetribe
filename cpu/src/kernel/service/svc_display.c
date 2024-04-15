@@ -95,7 +95,7 @@ void svc_display_task(void) {
 
     case STATE_RELEASE_RESET:
         // Hold in reset for 5 us.
-        if (delay_us(start_time, 5)) {
+        if (delay_us(&start_time, 5)) {
             dev_lcd_reset(false);
 
             start_time = delay_get_current_count();
@@ -106,7 +106,7 @@ void svc_display_task(void) {
     // Initialise LCD task.
     case STATE_INIT:
         // Wait 5 us after reset released.
-        if (delay_us(start_time, 5)) {
+        if (delay_us(&start_time, 5)) {
 
             if (error_check(_display_init()) == SUCCESS) {
                 state = STATE_RUN;

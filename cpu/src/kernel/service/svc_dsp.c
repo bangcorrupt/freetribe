@@ -42,6 +42,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "dev_dsp.h"
 
+#include "ft_error.h"
 #include "svc_delay.h"
 #include "svc_dsp.h"
 
@@ -58,6 +59,7 @@ typedef enum {
     STATE_ASSERT_RESET,
     STATE_RELEASE_RESET,
     STATE_BOOT,
+    STATE_WAIT_READY,
     STATE_RUN,
     STATE_ERROR
 } t_dsp_task_state;
@@ -73,6 +75,8 @@ typedef enum {
 /*----- Static variable definitions ----------------------------------*/
 
 static uint32_t g_pending_response;
+
+static bool g_dsp_ready;
 
 static void (*p_module_param_value_callback)(uint16_t module_id,
                                              uint16_t param_index,
@@ -106,6 +110,7 @@ static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
 
 static t_status _handle_module_param_value(uint8_t *payload, uint8_t length);
 static t_status _handle_system_port_state(uint8_t *payload, uint8_t length);
+static t_status _handle_system_ready(void);
 
 void _register_module_callback(uint8_t msg_id, void (*callback)(void));
 void _register_system_callback(uint8_t msg_id, void (*callback)(void));
@@ -139,7 +144,7 @@ void svc_dsp_task(void) {
 
     case STATE_RELEASE_RESET:
         // Hold in reset for 2.1 ms.
-        if (delay_us(start_time, 2100)) {
+        if (delay_us(&start_time, 2100)) {
 
             dev_dsp_reset(false);
 
@@ -150,9 +155,20 @@ void svc_dsp_task(void) {
 
     case STATE_BOOT:
         // Wait 1 ms after reset released.
-        if (delay_us(start_time, 1000) && dev_dsp_spi_enabled()) {
+        if (delay_us(&start_time, 1000) && dev_dsp_spi_enabled()) {
 
             _dsp_boot();
+            state = STATE_WAIT_READY;
+        }
+        break;
+
+    case STATE_WAIT_READY:
+        // Wait until DSP SPI command service is running.
+
+        if (!g_dsp_ready) {
+            dev_dsp_spi_poll();
+
+        } else {
             state = STATE_RUN;
         }
         break;
@@ -245,7 +261,19 @@ void svc_dsp_get_port_state(void) {
     _transmit_message(msg_type, msg_id, NULL, 0);
 }
 
+bool svc_dsp_ready(void) { return g_dsp_ready; }
+
 /*----- Static function implementations ------------------------------*/
+
+void _check_ready(void) {
+
+    const uint8_t msg_type = MSG_TYPE_SYSTEM;
+    const uint8_t msg_id = SYSTEM_CHECK_READY;
+
+    _dsp_response_required();
+
+    _transmit_message(msg_type, msg_id, NULL, 0);
+}
 
 /// TODO: Typdef callback pointers and cast to remove incompatibel type warning.
 void _register_module_callback(uint8_t msg_id, void (*callback)(void)) {
@@ -408,6 +436,10 @@ static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
     uint8_t result = ERROR;
     switch (msg_id) {
 
+    case SYSTEM_READY:
+        result = _handle_system_ready();
+        break;
+
     case SYSTEM_PORT_STATE:
         result = _handle_system_port_state(payload, length);
         break;
@@ -435,6 +467,13 @@ static t_status _handle_module_param_value(uint8_t *payload, uint8_t length) {
 
         p_module_param_value_callback(module_id, param_index, param_value);
     }
+
+    return SUCCESS;
+}
+
+static t_status _handle_system_ready(void) {
+
+    g_dsp_ready = true;
 
     return SUCCESS;
 }

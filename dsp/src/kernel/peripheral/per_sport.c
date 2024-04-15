@@ -78,6 +78,8 @@ static fract32 g_test_buffer[1024];
 
 static uint32_t g_sport_isr_period;
 
+static uint32_t g_cpu_test = 0xaaaaaa;
+
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
@@ -98,7 +100,9 @@ void sport0_init(void) {
     // TODO: Do we need secondary enabled?
 
     // Configure SPORT0 Rx.
+    // Clock Falling Edge, Receive Frame Sync, Data Format Sign Extend.
     *pSPORT0_RCR1 = RCKFE | RFSR | DTYPE_SIGX;
+    // Rx Stereo Frame Sync Enable, Rx Secondary Enable, Rx Word Length 32 bit.
     *pSPORT0_RCR2 = RSFSE | RXSE | SLEN(0x1f);
 
     // Configure SPORT0 Tx.
@@ -255,23 +259,31 @@ __attribute__((interrupt_handler)) static void _sport0_isr(void) {
 
     // TODO: Is CPU MCASP clock actually connected?
 
-    /* // Get input from CPU. */
-    /* g_cpu_in[0] = g_cpu_rx_buffer[0]; */
-    /* g_cpu_in[1] = g_cpu_rx_buffer[1]; */
+    // Get input from CPU.
+    g_cpu_in[0] = g_cpu_rx_buffer[0];
+    g_cpu_in[1] = g_cpu_rx_buffer[1];
 
     // Send output to codec.
     g_codec_tx_buffer[0] = g_codec_out[0];
     g_codec_tx_buffer[1] = g_codec_out[1];
 
-    g_test_buffer[i++] = g_codec_out[0];
+    // g_test_buffer[i++] = g_codec_out[0];
+    //
+    // if (i >= 1024) {
+    //     i = 0;
+    // }
 
-    if (i >= 1024) {
-        i = 0;
+    // Send test value to CPU.
+    g_cpu_tx_buffer[0] = g_cpu_test++;
+    g_cpu_tx_buffer[1] = g_cpu_test++;
+
+    if (g_cpu_test >= 0xffffff) {
+        g_cpu_test = 0xaaaaaa;
     }
 
-    /* // Send output to CPU. */
-    /* g_cpu_tx_buffer[0] = g_cpu_out[0]; */
-    /* g_cpu_tx_buffer[1] = g_cpu_out[1]; */
+    // Send output to CPU.
+    // g_cpu_tx_buffer[0] = g_cpu_out[0];
+    // g_cpu_tx_buffer[1] = g_cpu_out[1];
 
     g_sport0_frame_received = true;
 }
