@@ -38,6 +38,7 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Includes -----------------------------------------------------*/
 
 /// TODO: This should be at device layer.
+///         Prefix function names.
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -67,6 +68,8 @@ static bool g_delay_ready = false;
 
 /*----- Extern function implementations ------------------------------*/
 
+/// TODO: Init functions should return status code.
+//
 void delay_init(void) {
 
     t_timer_config delay_cfg = {.base_addr = DELAY_TIMER,
@@ -133,8 +136,6 @@ bool delay_us(t_delay_state *state) {
     uint32_t current_count = 0;
     uint32_t delta = 0;
 
-    bool expired = false;
-
     if (state->elapsed_us < state->delay_time) {
 
         current_count = delay_get_current_count();
@@ -160,10 +161,21 @@ bool delay_us(t_delay_state *state) {
     } else {
         state->elapsed_us = 0;
         state->elapsed_cycles = 0;
-        expired = true;
+        state->expired = true;
     }
 
-    return expired;
+    /// TODO: Do we need 'expired' in the struct as well as return value?
+    //
+    return state->expired;
+}
+
+void delay_start(t_delay_state *state, uint32_t time) {
+
+    state->start_time = delay_get_current_count();
+    state->delay_time = time;
+    state->elapsed_cycles = 0;
+    state->elapsed_us = 0;
+    state->expired = false;
 }
 
 void delay_block_ms(uint32_t time) { delay_block_us(time * 1000); }

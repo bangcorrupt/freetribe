@@ -141,11 +141,7 @@ void svc_dsp_task(void) {
 
         /// TODO: Function to set up delay parameters.
         //
-        reset_delay.start_time = delay_get_current_count();
-        reset_delay.delay_time = 2100;
-        // reset_delay.elapsed_cycles = 0;
-        // reset_delay.elapsed_us = 0;
-        // reset_delay.expired = false;
+        delay_start(&reset_delay, 2100);
 
         state = STATE_RELEASE_RESET;
         break;
@@ -157,11 +153,7 @@ void svc_dsp_task(void) {
 
             dev_dsp_reset(false);
 
-            reset_delay.start_time = delay_get_current_count();
-            reset_delay.delay_time = 1000;
-            // reset_delay.elapsed_cycles = 0;
-            // reset_delay.elapsed_us = 0;
-            // reset_delay.expired = false;
+            delay_start(&reset_delay, 1000);
 
             state = STATE_BOOT;
         }
