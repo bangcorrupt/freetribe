@@ -123,8 +123,6 @@ void svc_dsp_task(void) {
 
     static t_delay_state reset_delay;
 
-    static uint32_t start_time;
-
     static uint8_t dsp_byte;
 
     switch (state) {
@@ -145,9 +143,9 @@ void svc_dsp_task(void) {
         //
         reset_delay.start_time = delay_get_current_count();
         reset_delay.delay_time = 2100;
-        reset_delay.elapsed_cycles = 0;
-        reset_delay.elapsed_us = 0;
-        reset_delay.expired = false;
+        // reset_delay.elapsed_cycles = 0;
+        // reset_delay.elapsed_us = 0;
+        // reset_delay.expired = false;
 
         state = STATE_RELEASE_RESET;
         break;
@@ -161,9 +159,9 @@ void svc_dsp_task(void) {
 
             reset_delay.start_time = delay_get_current_count();
             reset_delay.delay_time = 1000;
-            reset_delay.elapsed_cycles = 0;
-            reset_delay.elapsed_us = 0;
-            reset_delay.expired = false;
+            // reset_delay.elapsed_cycles = 0;
+            // reset_delay.elapsed_us = 0;
+            // reset_delay.expired = false;
 
             state = STATE_BOOT;
         }

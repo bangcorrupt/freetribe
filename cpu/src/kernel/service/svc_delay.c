@@ -159,10 +159,19 @@ void delay_block_us(uint32_t time) {
 // }
 //
 
+/// TODO: I think this only works if called at least once per second.
+///         This should be ok for most reasonable use cases.
+///             Could maybe increase DELAY_PERIOD to allow
+///             more time before overflow if needed.
+///         May cause issues when debugging,
+///         check timer emulation mode.
+//
 bool delay_us(t_delay_state *state) {
 
     uint32_t current_count = 0;
     uint32_t delta = 0;
+
+    bool expired = false;
 
     if (state->elapsed_us < state->delay_time) {
 
@@ -189,10 +198,10 @@ bool delay_us(t_delay_state *state) {
     } else {
         state->elapsed_us = 0;
         state->elapsed_cycles = 0;
-        state->expired = true;
+        expired = true;
     }
 
-    return state->expired;
+    return expired;
 }
 
 void delay_block_ms(uint32_t time) { delay_block_us(time * 1000); }
