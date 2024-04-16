@@ -161,8 +161,12 @@ void delay_block_us(uint32_t time) {
 
 /// TODO: I think this only works if called at least once per second.
 ///         This should be ok for most reasonable use cases.
-///             Could maybe increase DELAY_PERIOD to allow
-///             more time before overflow if needed.
+///
+///         Could maybe increase DELAY_PERIOD to allow
+///         more time before overflow if needed.
+///
+///         Check if timer peripheral has overflow flag.
+///
 ///         May cause issues when debugging,
 ///         check timer emulation mode.
 //
