@@ -139,8 +139,6 @@ void svc_dsp_task(void) {
 
         dev_dsp_reset(true);
 
-        /// TODO: Function to set up delay parameters.
-        //
         delay_start(&reset_delay, 2100);
 
         state = STATE_RELEASE_RESET;
