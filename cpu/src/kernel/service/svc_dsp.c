@@ -146,7 +146,6 @@ void svc_dsp_task(void) {
 
     case STATE_RELEASE_RESET:
         // Hold in reset for 2.1 ms.
-
         if (delay_us(&reset_delay)) {
 
             dev_dsp_reset(false);
