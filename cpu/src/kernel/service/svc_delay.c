@@ -169,8 +169,6 @@ bool delay_us(t_delay_state *state) {
         }
     }
 
-    /// TODO: Do we need 'expired' in the struct as well as return value?
-    //
     return state->expired;
 }
 
