@@ -80,17 +80,17 @@ void dev_board_init(void) {
 
     per_aintc_init();
 
-    // TODO: Move blocking delay to device layer.
+    /// TODO: Move blocking delay to device layer.
     delay_init();
 
     per_gpio_init();
 
     _hardware_init();
 
-    // TODO: Move up to svc_system.
+    /// TODO: Move up to svc_system.
     dev_lcd_set_backlight(true, true, true);
 
-    // TODO: Move up to svc_system.
+    /// TODO: Move up to svc_system.
     dev_flash_init();
 }
 
@@ -128,8 +128,8 @@ void dev_board_terminate(void) {
  */
 static void _hardware_init(void) {
 
-    // TODO: What does each pin represent?
-    //       Refactor to use GPIO peripheral driver.
+    /// TODO: What does each pin represent?
+    ///       Refactor to use GPIO peripheral driver.
 
     // MCU out of reset.
     per_gpio_set_indexed(105, 1); // Set GP6P8
@@ -139,29 +139,31 @@ static void _hardware_init(void) {
     // Only red lights if not set.
     per_gpio_set_indexed(126, 1); // Set GP7P13
 
-    // 60us in factory firmware.
     delay_block_us(60);
 
     // ADC Reset.
     per_gpio_set_indexed(99, 0); // Clear GP6P2
-
+    //
     // ADC MCLK on ??
     per_gpio_set_indexed(123, 1); // Set GP7P10
 
+    /// TODO: Timeout error.
+    //
     // Wait until B8P15 is high.
-    // TODO: Timeout error.
     while (!per_gpio_get_indexed(144))
         ;
 
-    // 10us in factory firmware.
     delay_block_us(10);
 
     per_gpio_set_indexed(124, 1); // Set GP7P11
 
+    /// TODO: What is this for?
+    //
     // This is set during boot, then toggles continuously while app running.
     per_gpio_set(6, 11, 1); // Set GP6P11
 
-    // TODO: What are these for?
+    /// TODO: What are these for?
+    //
     // per_gpio_set(6, 9, 1);  // Set GP6P9
     // per_gpio_set(6, 12, 1); // Set GP6P12
 }
@@ -172,13 +174,11 @@ static void _hardware_terminate(void) {
     per_gpio_set_indexed(103, 0); // Set GP6P6
     per_gpio_set_indexed(126, 0); // Set GP7P13
 
-    // Should be 60 us
     delay_block_us(60);
 
     per_gpio_set_indexed(99, 0);  // Set GP6P2
     per_gpio_set_indexed(123, 0); // Set GP7P10
 
-    // Should be 10 us
     delay_block_us(10);
 }
 

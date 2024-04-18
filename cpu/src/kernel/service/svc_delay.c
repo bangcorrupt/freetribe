@@ -136,32 +136,37 @@ bool delay_us(t_delay_state *state) {
     uint32_t current_count = 0;
     uint32_t delta = 0;
 
-    if (state->elapsed_us < state->delay_time) {
+    /// TODO: Test state->expired.
 
-        current_count = delay_get_current_count();
+    if (!state->expired) {
 
-        if (current_count >= state->start_time) {
-            delta = current_count - state->start_time;
+        if (state->elapsed_us < state->delay_time) {
+
+            current_count = delay_get_current_count();
+
+            if (current_count >= state->start_time) {
+                delta = current_count - state->start_time;
+
+            } else {
+                delta = (DELAY_PERIOD - state->start_time) + current_count + 1;
+            }
+
+            state->elapsed_cycles += delta;
+
+            /// TODO: Optimise.
+            //
+            while (state->elapsed_cycles >= CYCLES_PER_US) {
+                state->elapsed_us++;
+                state->elapsed_cycles -= CYCLES_PER_US;
+            }
+
+            state->start_time = current_count;
 
         } else {
-            delta = (DELAY_PERIOD - state->start_time) + current_count + 1;
+            state->elapsed_us = 0;
+            state->elapsed_cycles = 0;
+            state->expired = true;
         }
-
-        state->elapsed_cycles += delta;
-
-        /// TODO: Optimise.
-        //
-        while (state->elapsed_cycles >= CYCLES_PER_US) {
-            state->elapsed_us++;
-            state->elapsed_cycles -= CYCLES_PER_US;
-        }
-
-        state->start_time = current_count;
-
-    } else {
-        state->elapsed_us = 0;
-        state->elapsed_cycles = 0;
-        state->expired = true;
     }
 
     /// TODO: Do we need 'expired' in the struct as well as return value?

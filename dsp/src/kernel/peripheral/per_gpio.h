@@ -59,6 +59,7 @@ enum e_port { PORT_F, PORT_G, PORT_H };
 
 void per_gpio_init(void);
 uint16_t per_gpio_get_port(uint8_t port);
+void per_gpio_set_port(uint8_t port, uint16_t value);
 
 #ifdef __cplusplus
 }

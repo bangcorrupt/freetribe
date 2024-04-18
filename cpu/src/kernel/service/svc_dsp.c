@@ -43,6 +43,7 @@ under the terms of the GNU Affero General Public License as published by
 #include "dev_dsp.h"
 
 #include "ft_error.h"
+
 #include "svc_delay.h"
 #include "svc_dsp.h"
 
@@ -59,6 +60,7 @@ typedef enum {
     STATE_ASSERT_RESET,
     STATE_RELEASE_RESET,
     STATE_BOOT,
+    STATE_CHECK_READY,
     STATE_WAIT_READY,
     STATE_RUN,
     STATE_ERROR
@@ -92,6 +94,7 @@ static void (*p_system_port_state_callback)(uint16_t port_f, uint16_t port_g,
 static t_status _dsp_init(void);
 static void _dsp_boot(void);
 static void _dsp_receive(uint8_t byte);
+static void _dsp_check_ready(void);
 
 static void _dsp_response_required(void);
 static void _dsp_response_received(void);
@@ -161,26 +164,35 @@ void svc_dsp_task(void) {
         if (delay_us(&reset_delay) && dev_dsp_spi_enabled()) {
 
             _dsp_boot();
-            // state = STATE_WAIT_READY;
+            // state = STATE_CHECK_READY;
             state = STATE_RUN;
         }
         break;
 
-        /// TODO: Wait for ENA, then send check_ready and wait for reply.
-        //
-        // case STATE_WAIT_READY:
-        //     // Wait until DSP SPI command service is running.
-        //
-        //     if (!g_dsp_ready) {
-        //         dev_dsp_spi_poll();
-        //
-        //     } else {
-        //         state = STATE_RUN;
-        //     }
-        //     break;
+    // case STATE_CHECK_READY:
+    //     // Wait for ENA, then send check_ready and wait for reply.
+    //
+    //     /// TODO: This won't work.
+    //     ///     If DSP is not ready it will not receive this message.
+    //     //
+    //     if (dev_dsp_spi_enabled()) {
+    //
+    //         _dsp_check_ready();
+    //         state = STATE_WAIT_READY;
+    //     }
+    //     break;
+    //
+    // case STATE_WAIT_READY:
+    //     // Wait until DSP SPI command service is running.
+    //     if (!g_dsp_ready) {
+    //         dev_dsp_spi_poll();
+    //
+    //     } else {
+    //         state = STATE_RUN;
+    //     }
+    //     break;
 
     case STATE_RUN:
-
         // Handle received bytes.
         if (dev_dsp_spi_rx_dequeue(&dsp_byte) == SUCCESS) {
             _dsp_receive(dsp_byte);
@@ -271,7 +283,7 @@ bool svc_dsp_ready(void) { return g_dsp_ready; }
 
 /*----- Static function implementations ------------------------------*/
 
-void _check_ready(void) {
+void _dsp_check_ready(void) {
 
     const uint8_t msg_type = MSG_TYPE_SYSTEM;
     const uint8_t msg_id = SYSTEM_CHECK_READY;
@@ -281,7 +293,8 @@ void _check_ready(void) {
     _transmit_message(msg_type, msg_id, NULL, 0);
 }
 
-/// TODO: Typdef callback pointers and cast to remove incompatible type warning.
+/// TODO: Typdef callback pointers and cast to remove incompatible type
+/// warning.
 void _register_module_callback(uint8_t msg_id, void (*callback)(void)) {
 
     switch (msg_id) {
