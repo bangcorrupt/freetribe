@@ -202,9 +202,6 @@ void per_spi_chip_format(uint8_t instance, uint8_t data_format,
 ///             This could be a single byte write,
 ///             with GPIO tested in device layer above.
 ///
-/// TODO: This hangs reading GPIO when optimised with -O2.
-///         Is it this or is power up timing wrong?
-//
 //
 void per_spi1_tx_wait(uint8_t *buffer, uint32_t length) {
 
