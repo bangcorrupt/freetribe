@@ -137,13 +137,13 @@ static t_status _kernel_init(void) {
     // Initialise MIDI early to catch kernel print.
     svc_midi_task();
     svc_system_register_print_callback(_print_callback);
-
+    //
     svc_system_print("Hardware initialised.\n");
 
     // Initialise timers.
     systick_init();
     systick_register_callback(_systick_callback);
-
+    //
     svc_panel_register_callback(PANEL_ACK_EVENT, _panel_ack_callback);
     svc_panel_register_callback(HELD_BUTTONS_EVENT, _held_buttons_callback);
 
@@ -165,12 +165,12 @@ static void _kernel_run(void) {
     svc_dsp_task();
     svc_midi_task();
     svc_display_task();
-
+    //
     if (g_user_tick && p_user_tick_callback != NULL) {
         (*p_user_tick_callback)();
         g_user_tick = false;
     }
-
+    //
     // if (g_display_update) {
     //     svc_display_task();
     //     g_display_update = false;

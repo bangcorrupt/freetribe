@@ -80,6 +80,9 @@ static uint32_t g_sport_isr_period;
 
 static uint32_t g_cpu_test = 0xaaaaaa;
 
+static bool g_codec_output_set = false;
+static bool g_codec_tx_set = false;
+
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
@@ -238,7 +241,7 @@ void sport0_frame_processed(void) { g_sport0_frame_received = false; }
 // TODO: Block processing.  For now we process each frame as it arrives.
 __attribute__((interrupt_handler)) static void _sport0_isr(void) {
 
-    static uint16_t i = 0;
+    // static uint16_t i = 0;
 
     // static uint32_t cycles_this;
     // static uint32_t cycles_last;
@@ -260,8 +263,8 @@ __attribute__((interrupt_handler)) static void _sport0_isr(void) {
     // TODO: Is CPU MCASP clock actually connected?
 
     // Get input from CPU.
-    g_cpu_in[0] = g_cpu_rx_buffer[0];
-    g_cpu_in[1] = g_cpu_rx_buffer[1];
+    // g_cpu_in[0] = g_cpu_rx_buffer[0];
+    // g_cpu_in[1] = g_cpu_rx_buffer[1];
 
     // Send output to codec.
     g_codec_tx_buffer[0] = g_codec_out[0];
@@ -274,16 +277,26 @@ __attribute__((interrupt_handler)) static void _sport0_isr(void) {
     // }
 
     // Send test value to CPU.
-    g_cpu_tx_buffer[0] = g_cpu_test++;
-    g_cpu_tx_buffer[1] = g_cpu_test++;
-
-    if (g_cpu_test >= 0xffffff) {
-        g_cpu_test = 0xaaaaaa;
-    }
+    // g_cpu_tx_buffer[0] = g_cpu_test++;
+    // g_cpu_tx_buffer[1] = g_cpu_test++;
+    //
+    // if (g_cpu_test >= 0xffffff) {
+    //     g_cpu_test = 0xaaaaaa;
+    // }
 
     // Send output to CPU.
     // g_cpu_tx_buffer[0] = g_cpu_out[0];
     // g_cpu_tx_buffer[1] = g_cpu_out[1];
+
+    if (g_codec_tx_buffer[0] != 0 || g_codec_tx_buffer[1] != 0) {
+
+        g_codec_tx_set = true;
+    }
+
+    if (g_codec_out[0] != 0 || g_codec_out[1] != 0) {
+
+        g_codec_output_set = true;
+    }
 
     g_sport0_frame_received = true;
 }

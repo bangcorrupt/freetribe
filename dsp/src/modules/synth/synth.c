@@ -422,6 +422,9 @@ void module_process(fract32 *in, fract32 *out) {
 
     fract32 waveform;
 
+    // module_set_param(PARAM_GATE, 1);
+    // module_set_param(PARAM_VEL, 127 << 23);
+
     waveform = MonoSynth_tick(&g_voice);
 
     // Set output.

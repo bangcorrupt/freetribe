@@ -78,7 +78,7 @@ typedef enum {
 
 static uint32_t g_pending_response;
 
-static bool g_dsp_ready;
+static bool g_dsp_ready = false;
 
 static void (*p_module_param_value_callback)(uint16_t module_id,
                                              uint16_t param_index,
@@ -148,6 +148,7 @@ void svc_dsp_task(void) {
         break;
 
     case STATE_RELEASE_RESET:
+
         // Hold in reset for 2.1 ms.
         if (delay_us(&reset_delay)) {
 
@@ -164,33 +165,34 @@ void svc_dsp_task(void) {
         if (delay_us(&reset_delay) && dev_dsp_spi_enabled()) {
 
             _dsp_boot();
+            // g_dsp_ready = true;
             // state = STATE_CHECK_READY;
             state = STATE_RUN;
         }
         break;
 
-    // case STATE_CHECK_READY:
-    //     // Wait for ENA, then send check_ready and wait for reply.
-    //
-    //     /// TODO: This won't work.
-    //     ///     If DSP is not ready it will not receive this message.
-    //     //
-    //     if (dev_dsp_spi_enabled()) {
-    //
-    //         _dsp_check_ready();
-    //         state = STATE_WAIT_READY;
-    //     }
-    //     break;
-    //
-    // case STATE_WAIT_READY:
-    //     // Wait until DSP SPI command service is running.
-    //     if (!g_dsp_ready) {
-    //         dev_dsp_spi_poll();
-    //
-    //     } else {
-    //         state = STATE_RUN;
-    //     }
-    //     break;
+        // case STATE_CHECK_READY:
+        //     // Wait for ENA, then send check_ready and wait for reply.
+        //
+        //     /// TODO: This won't work.
+        //     ///     If DSP is not ready it will not receive this message.
+        //     //
+        //     if (dev_dsp_spi_enabled()) {
+        //
+        //         _dsp_check_ready();
+        //         state = STATE_WAIT_READY;
+        //     }
+        //     break;
+        //
+        // case STATE_WAIT_READY:
+        //     // Wait until DSP SPI command service is running.
+        //     if (!g_dsp_ready) {
+        //         dev_dsp_spi_poll();
+        //
+        //     } else {
+        //         state = STATE_RUN;
+        //     }
+        //     break;
 
     case STATE_RUN:
         // Handle received bytes.
@@ -203,6 +205,7 @@ void svc_dsp_task(void) {
             // TODO: Can we use GPIO to signal?
             dev_dsp_spi_poll();
         }
+        g_dsp_ready = true;
         break;
 
     case STATE_ERROR:
@@ -482,7 +485,7 @@ static t_status _handle_module_param_value(uint8_t *payload, uint8_t length) {
         uint16_t param_index = (payload[3] << 8) | payload[2];
 
         uint32_t param_value = (payload[7] << 24) | (payload[6] << 16) |
-                               (payload[5 << 8]) | payload[4];
+                               (payload[5] << 8) | payload[4];
 
         p_module_param_value_callback(module_id, param_index, param_value);
     }
@@ -492,7 +495,7 @@ static t_status _handle_module_param_value(uint8_t *payload, uint8_t length) {
 
 static t_status _handle_system_ready(void) {
 
-    g_dsp_ready = true;
+    // g_dsp_ready = true;
 
     return SUCCESS;
 }

@@ -27,15 +27,16 @@ BIN := $(BFIN_TOOLCHAIN)$(PREFIX)objcopy
 CPU := bf527
 
 # C compilation options
-OPTIMISE ?= -g -O0
-CFLAGS := -mcpu=$(CPU) $(OPTIMISE) -fdata-sections -ffunction-sections -Wall 
+# DSP_OPTIMISE ?= -g -O0
+DSP_OPTIMISE = -g -O0
+CFLAGS := -mcpu=$(CPU) $(DSP_OPTIMISE) -fdata-sections -ffunction-sections -Wall 
 # Assembly compilation options
 ASM_FLAGS := -x assembler-with-cpp
 
 # Passed to gcc, not ld.
 LDFLAGS := $(LPATH)  -lm -lbfdsp -lbffastfp \
 				-T dsp.lds -Xlinker -Map -Xlinker $(BUILD_DIR)/boot.map \
-				-Wl,--gc-sections
+				-Wl,--gc-sections 
 
 LDRFLAGS := --bits 8 --bmode spi_slave --verbose
 

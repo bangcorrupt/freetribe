@@ -31,7 +31,7 @@ BIN=$(PREFIX)objcopy
 # C compilation options.
 NEST_INT ?= 0
 OPTIMISE ?= -g3 -Og
-CFLAGS :=  $(OPTIMISE) -fdata-sections -ffunction-sections -Wall
+CFLAGS :=  $(OPTIMISE) -fdata-sections -ffunction-sections -fstack-usage -Wstack-usage=128 -Wall
 
 # Assembly compilation options.
 ASM_FLAGS := -x assembler-with-cpp

@@ -51,6 +51,8 @@ under the terms of the GNU Affero General Public License as published by
 #include "per_gpio.h"
 #include "per_spi.h"
 
+#include "hal_gpio.h"
+
 #include "ring_buffer.h"
 
 /*----- Macros and Definitions ---------------------------------------*/
@@ -162,6 +164,11 @@ void per_spi_set_data_format(t_spi_format *format) {
                      format->index);
 
     if (format->ena_timeout) {
+
+        /// TODO: Timings apply to all data formats,
+        ///         so should be set in init function,
+        ///         them enabled individually here.
+        //
         // Set timeout.
         SPIDelayConfigure(g_base_address[format->instance], format->ena_timeout,
                           0, 0, 0);
@@ -195,6 +202,9 @@ void per_spi_chip_format(uint8_t instance, uint8_t data_format,
 ///             This could be a single byte write,
 ///             with GPIO tested in device layer above.
 ///
+/// TODO: This hangs reading GPIO when optimised with -O2.
+///         Is it this or is power up timing wrong?
+//
 //
 void per_spi1_tx_wait(uint8_t *buffer, uint32_t length) {
 
@@ -376,6 +386,7 @@ static inline void _spi_isr(t_spi *spi) {
 
         // TODO: Interrogate source of error and trigger callback.
         case SPI_ERR:
+
             while (true)
                 ;
             break;

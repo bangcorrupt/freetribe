@@ -51,7 +51,8 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Macros and Definitions ---------------------------------------*/
 
 #define DSP_SPI SPI_1
-#define DSP_SPI_DATA_FORMAT 1
+#define DSP_SPI_BOOT_DATA_FORMAT 1
+#define DSP_SPI_COMMAND_DATA_FORMAT 2
 #define DSP_SPI_CHIP_SELECT 2
 
 /// TODO: Centralised header for interrupt priorities.
@@ -64,7 +65,10 @@ under the terms of the GNU Affero General Public License as published by
     SPI_PIN_SOMI | SPI_PIN_SIMO | SPI_PIN_CLK | SPI_PIN_ENA | SPI_PIN_CS0 |    \
         SPI_PIN_CS1
 
-#define DSP_SPI_FREQ SPI_FREQ_37_5_MHZ
+#define DSP_SPI_BOOT_FREQ SPI_FREQ_50_MHZ
+#define DSP_SPI_COMMAND_FREQ SPI_FREQ_50_MHZ
+// #define DSP_SPI_COMMAND_FREQ SPI_FREQ_37_5_MHZ
+// #define DSP_SPI_COMMAND_FREQ SPI_FREQ_30_MHZ
 #define DSP_SPI_CHAR_LENGTH 8
 #define DSP_SPI_ENA_TIMEOUT 0xff
 
@@ -155,7 +159,7 @@ void dev_dsp_spi_poll(void) { _dsp_spi_rx_byte(); }
 //
 void dev_dsp_spi_tx_boot(uint8_t *buffer, uint32_t length) {
 
-    per_spi_chip_format(DSP_SPI, DSP_SPI_DATA_FORMAT, DSP_SPI_CHIP_SELECT,
+    per_spi_chip_format(DSP_SPI, DSP_SPI_BOOT_DATA_FORMAT, DSP_SPI_CHIP_SELECT,
                         DSP_SPI_CSHOLD);
 
     per_spi1_tx_wait(buffer, length);
@@ -194,15 +198,25 @@ void _dsp_spi_init(void) {
         per_spi_init(&config);
     }
 
-    t_spi_format format = {
+    t_spi_format boot_format = {
         .instance = DSP_SPI,
-        .index = DSP_SPI_DATA_FORMAT,
-        .freq = DSP_SPI_FREQ,
+        .index = DSP_SPI_BOOT_DATA_FORMAT,
+        .freq = DSP_SPI_BOOT_FREQ,
         .char_length = DSP_SPI_CHAR_LENGTH,
         .ena_timeout = DSP_SPI_ENA_TIMEOUT,
     };
 
-    per_spi_set_data_format(&format);
+    per_spi_set_data_format(&boot_format);
+
+    t_spi_format command_format = {
+        .instance = DSP_SPI,
+        .index = DSP_SPI_COMMAND_DATA_FORMAT,
+        .freq = DSP_SPI_COMMAND_FREQ,
+        .char_length = DSP_SPI_CHAR_LENGTH,
+        .ena_timeout = DSP_SPI_ENA_TIMEOUT,
+    };
+
+    per_spi_set_data_format(&command_format);
 
     // Tx ring buffer attributes.
     rb_attr_t tx_attr = {sizeof(dsp_spi_tx_rbmem[0]),
@@ -239,13 +253,19 @@ static void _dsp_spi_rx_enqueue(uint8_t *p_byte) {
 
 static void _dsp_spi_tx_byte(uint8_t *p_byte) {
 
+    while (!dev_dsp_spi_enabled())
+        ;
+
     g_dsp_spi_tx_complete = false;
     g_dsp_spi_rx_complete = false;
 
-    per_spi_chip_format(DSP_SPI, DSP_SPI_DATA_FORMAT, DSP_SPI_CHIP_SELECT,
-                        DSP_SPI_CSHOLD);
+    per_spi_chip_format(DSP_SPI, DSP_SPI_COMMAND_DATA_FORMAT,
+                        DSP_SPI_CHIP_SELECT, DSP_SPI_CSHOLD);
 
     per_spi_trx_int(DSP_SPI, p_byte, &g_dsp_spi_rx_byte, 1);
+
+    // while (!dev_dsp_spi_enabled())
+    //     ;
 }
 
 static void _dsp_spi_rx_byte(void) {

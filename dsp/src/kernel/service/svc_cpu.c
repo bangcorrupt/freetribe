@@ -193,7 +193,7 @@ static t_status _cpu_init(void) {
 
     t_status result = TASK_INIT_ERROR;
 
-    _transmit_message(MSG_TYPE_SYSTEM, SYSTEM_READY, NULL, 0);
+    // _transmit_message(MSG_TYPE_SYSTEM, SYSTEM_READY, NULL, 0);
 
     // TODO: Handhsake.
 
