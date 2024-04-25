@@ -73,6 +73,7 @@ under the terms of the GNU Affero General Public License as published by
 #define DSP_SPI_ENA_TIMEOUT 0xff
 
 #define DSP_SPI_CSHOLD true
+#define DSP_SPI_COMMAND_CSHOLD true
 
 /// TODO: Centralised header for queue lengths.
 #define DSP_SPI_TX_BUF_LEN 0x100
@@ -138,11 +139,11 @@ void dev_dsp_spi_tx_enqueue(uint8_t *p_byte) {
         /// TODO: Should catch overflow error and
         ///       redesign so this does not happen.
         //
-        ring_buffer_put_force(dsp_spi_tx_rbd, p_byte);
+        // ring_buffer_put_force(dsp_spi_tx_rbd, p_byte);
 
         // Block until queue ready.
-        // while (ring_buffer_put(dsp_spi_tx_rbd, p_byte))
-        //     ;
+        while (ring_buffer_put(dsp_spi_tx_rbd, p_byte))
+            ;
     }
 }
 
@@ -203,7 +204,7 @@ void _dsp_spi_init(void) {
         .index = DSP_SPI_BOOT_DATA_FORMAT,
         .freq = DSP_SPI_BOOT_FREQ,
         .char_length = DSP_SPI_CHAR_LENGTH,
-        .ena_timeout = DSP_SPI_ENA_TIMEOUT,
+        // .ena_timeout = DSP_SPI_ENA_TIMEOUT,
     };
 
     per_spi_set_data_format(&boot_format);
@@ -253,19 +254,19 @@ static void _dsp_spi_rx_enqueue(uint8_t *p_byte) {
 
 static void _dsp_spi_tx_byte(uint8_t *p_byte) {
 
-    while (!dev_dsp_spi_enabled())
-        ;
+    // while (!dev_dsp_spi_enabled())
+    //     ;
 
     g_dsp_spi_tx_complete = false;
     g_dsp_spi_rx_complete = false;
 
     per_spi_chip_format(DSP_SPI, DSP_SPI_COMMAND_DATA_FORMAT,
-                        DSP_SPI_CHIP_SELECT, DSP_SPI_CSHOLD);
+                        DSP_SPI_CHIP_SELECT, DSP_SPI_COMMAND_CSHOLD);
 
     per_spi_trx_int(DSP_SPI, p_byte, &g_dsp_spi_rx_byte, 1);
 
-    // while (!dev_dsp_spi_enabled())
-    //     ;
+    while (!dev_dsp_spi_enabled())
+        ;
 }
 
 static void _dsp_spi_rx_byte(void) {

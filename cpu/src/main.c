@@ -62,9 +62,9 @@ under the terms of the GNU Affero General Public License as published by
  */
 int main(void) {
 
-    // while (!svc_dsp_ready()) {
-    //     knl_main_task();
-    // }
+    while (!svc_dsp_ready()) {
+        knl_main_task();
+    }
 
     /// TODO: Implement scheduler.
     while (true) {

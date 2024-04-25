@@ -172,9 +172,16 @@ void per_spi_set_data_format(t_spi_format *format) {
         // Set timeout.
         SPIDelayConfigure(g_base_address[format->instance], format->ena_timeout,
                           0, 0, 0);
+        // SPIDelayConfigure(g_base_address[format->instance], 0x40, 0x40, 0,
+        // 0);
 
         // Enable timeout for data format.
         SPIWaitEnable(g_base_address[format->instance], format->index);
+
+        // Enable chip select delays.
+        // SPICSTimerEnable(g_base_address[format->instance], format->index);
+        // //
+        // SPIWdelaySet(g_base_address[format->instance], 0x3f, format->index);
     }
 }
 
@@ -189,8 +196,15 @@ void per_spi_chip_format(uint8_t instance, uint8_t data_format,
 
     /// TODO: Tidy this up.
     if (cshold) {
+        // if (data_format == 2) {
+        //     SPIDat1Config(g_spi[instance].address,
+        //                   (uint32_t)data_format | SPI_CSHOLD |
+        //                       SPI_DELCOUNT_ENABLE,
+        //                   chip_select);
+        // } else {
         SPIDat1Config(g_spi[instance].address,
                       (uint32_t)data_format | SPI_CSHOLD, chip_select);
+        // }
     } else {
         SPIDat1Config(g_spi[instance].address, data_format, chip_select);
     }
@@ -349,7 +363,7 @@ static inline void _spi_isr(t_spi *spi) {
         case SPI_TX_BUF_EMPTY:
 
             if (spi->tx_length--) {
-                // Write byte to SPI0
+                // Write byte to SPI
                 SPITransmitData1(spi->address, *spi->tx_buffer++);
 
                 if (spi->tx_length == 0) {
@@ -367,7 +381,7 @@ static inline void _spi_isr(t_spi *spi) {
         case SPI_RECV_FULL:
 
             if (spi->rx_length--) {
-                // Read byte from SPI1
+                // Read byte from SPI
                 *spi->rx_buffer++ = SPIDataReceive(spi->address);
 
                 if (spi->rx_length == 0) {
@@ -386,6 +400,7 @@ static inline void _spi_isr(t_spi *spi) {
 
             while (true)
                 ;
+
             break;
 
         default:
