@@ -265,6 +265,9 @@ static void _dsp_spi_tx_byte(uint8_t *p_byte) {
 
     per_spi_trx_int(DSP_SPI, p_byte, &g_dsp_spi_rx_byte, 1);
 
+    /// TODO: Make this non-blocking.
+    ///         Maybe use GPIO interrupt to set flag.
+    //
     while (!dev_dsp_spi_enabled())
         ;
 }
