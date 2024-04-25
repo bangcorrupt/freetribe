@@ -254,8 +254,8 @@ static void _dsp_spi_rx_enqueue(uint8_t *p_byte) {
 
 static void _dsp_spi_tx_byte(uint8_t *p_byte) {
 
-    // while (!dev_dsp_spi_enabled())
-    //     ;
+    while (!dev_dsp_spi_enabled())
+        ;
 
     g_dsp_spi_tx_complete = false;
     g_dsp_spi_rx_complete = false;
