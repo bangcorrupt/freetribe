@@ -86,6 +86,11 @@ under the terms of the GNU Affero General Public License as published by
 #define DSP_SPI_ENA_BANK 2
 #define DSP_SPI_ENA_PIN 12
 
+typedef enum {
+    TRANSFER_WAIT_ENA,
+    TRANSFER_RUN,
+} e_transfer_state;
+
 /*----- Static variable definitions ----------------------------------*/
 
 // DSP SPI RX ring buffer.
@@ -96,10 +101,11 @@ static char dsp_spi_rx_rbmem[DSP_SPI_RX_BUF_LEN];
 static rbd_t dsp_spi_tx_rbd;
 static char dsp_spi_tx_rbmem[DSP_SPI_TX_BUF_LEN];
 
-static uint8_t g_dsp_spi_rx_byte;
+static uint8_t g_tx_byte;
+static uint8_t g_rx_byte;
 
-volatile static bool g_dsp_spi_tx_complete = true;
-volatile static bool g_dsp_spi_rx_complete = true;
+volatile static bool g_tx_complete = true;
+volatile static bool g_rx_complete = true;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -129,22 +135,22 @@ void dev_dsp_init(void) {
 
 void dev_dsp_spi_tx_enqueue(uint8_t *p_byte) {
 
-    if (g_dsp_spi_tx_complete && g_dsp_spi_rx_complete) {
+    // if (g_dsp_spi_tx_complete && g_dsp_spi_rx_complete) {
+    //
+    //     _dsp_spi_tx_byte(p_byte);
+    //
+    // } else {
+    // Queue message if transmission in progress.
+    // Overwrite on overflow?
+    /// TODO: Should catch overflow error and
+    ///       redesign so this does not happen.
+    //
+    ring_buffer_put_force(dsp_spi_tx_rbd, p_byte);
 
-        _dsp_spi_tx_byte(p_byte);
-
-    } else {
-        // Queue message if transmission in progress.
-        // Overwrite on overflow?
-        /// TODO: Should catch overflow error and
-        ///       redesign so this does not happen.
-        //
-        ring_buffer_put_force(dsp_spi_tx_rbd, p_byte);
-
-        // Block until queue ready.
-        // while (ring_buffer_put(dsp_spi_tx_rbd, p_byte))
-        //     ;
-    }
+    // Block until queue ready.
+    // while (ring_buffer_put(dsp_spi_tx_rbd, p_byte))
+    //     ;
+    // }
 }
 
 int dev_dsp_spi_rx_dequeue(uint8_t *p_byte) {
@@ -176,6 +182,26 @@ void dev_dsp_reset(bool state) {
 bool dev_dsp_spi_enabled(void) {
     //
     return !per_gpio_get(DSP_SPI_ENA_BANK, DSP_SPI_ENA_PIN);
+}
+
+void dev_dsp_transfer_run(void) {
+
+    static e_transfer_state state = TRANSFER_WAIT_ENA;
+
+    switch (state) {
+
+    case TRANSFER_WAIT_ENA:
+        if (dev_dsp_spi_enabled()) {
+            _dsp_spi_tx_byte(&g_tx_byte);
+        }
+        break;
+
+    case TRANSFER_RUN:
+        break;
+
+    default:
+        break;
+    }
 }
 
 /*----- Static function implementations ------------------------------*/
