@@ -84,13 +84,14 @@ static t_FilterSVF *g_svf;
  */
 void module_init(void) {
 
-    // Aleph_init(&g_aleph, SAMPLERATE, g_mempool, MEMPOOL_SIZE, NULL);
-    //
-    // FilterSVF_init(g_svf, &g_aleph);
-    //
-    // // FilterSVF_set_coeff(g_svf, 0xf00000);
+    Aleph_init(&g_aleph, SAMPLERATE, g_mempool, MEMPOOL_SIZE, NULL);
+
+    FilterSVF_init(g_svf, &g_aleph);
+
+    // FilterSVF_set_coeff(g_svf, 0xf00000);
     // FilterSVF_set_coeff(g_svf, 0x326f6abb);
-    // FilterSVF_set_rq(g_svf, FR32_MAX);
+    FilterSVF_set_coeff(g_svf, 0x126f6abb);
+    FilterSVF_set_rq(g_svf, FR32_MAX);
 }
 
 /**
@@ -103,9 +104,9 @@ void module_process(fract32 *in, fract32 *out) {
     // void module_process(fract32 **inputs, fract32 **outputs, uint32_t frames)
     // {
 
-    // *out = FilterSVF_softclip_asym_lpf_next(g_svf, *in);
-    out[0] = in[0];
-    out[1] = in[0];
+    *out = FilterSVF_softclip_asym_lpf_next(g_svf, *in);
+    // out[0] = in[0];
+    // out[1] = in[0];
 }
 
 /**

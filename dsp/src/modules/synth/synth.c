@@ -49,6 +49,7 @@ under the terms of the GNU Affero General Public License as published by
 #include "filter_ladder.h"
 #include "filter_svf.h"
 #include "osc_polyblep.h"
+#include "phasor.h"
 #include "ricks_tricks.h"
 
 #include "module.h"
@@ -149,8 +150,8 @@ typedef enum {
 } e_filter_type;
 
 typedef struct {
-    phasor oscillator_a;
-    phasor oscillator_b;
+    t_Phasor oscillator_a;
+    t_Phasor oscillator_b;
 
     fract32 freq;
     fract32 tune;
@@ -173,9 +174,9 @@ typedef struct {
     fract32 filter_env_depth;
     fract32 pitch_env_depth;
 
-    phasor amp_lfo;
-    phasor filter_lfo;
-    phasor pitch_lfo;
+    t_Phasor amp_lfo;
+    t_Phasor filter_lfo;
+    t_Phasor pitch_lfo;
 
     fract32 amp_lfo_depth;
     fract32 amp_lfo_speed;
@@ -201,12 +202,12 @@ static t_MonoSynth g_voice;
 
 void MonoSynth_init(t_MonoSynth *synth) {
 
-    phasor_init(&synth->oscillator_a);
-    phasor_init(&synth->oscillator_b);
+    Phasor_init(&synth->oscillator_a);
+    Phasor_init(&synth->oscillator_b);
 
-    phasor_init(&synth->amp_lfo);
-    phasor_init(&synth->filter_lfo);
-    phasor_init(&synth->pitch_lfo);
+    Phasor_init(&synth->amp_lfo);
+    Phasor_init(&synth->filter_lfo);
+    Phasor_init(&synth->pitch_lfo);
 
     env_adsr_init(&synth->amp_env);
     env_adsr_init(&synth->filter_env);
@@ -240,7 +241,7 @@ fract32 MonoSynth_tick(t_MonoSynth *synth) {
     fract32 cutoff;
 
     // Calculate pitch LFO.
-    pitch_lfo = osc(phasor_next(&synth->pitch_lfo));
+    pitch_lfo = osc(Phasor_next(&synth->pitch_lfo));
 
     // Scale pitch LFO depth.
     pitch_lfo = mult_fr1x32x32(pitch_lfo, synth->pitch_lfo_depth);
@@ -252,7 +253,7 @@ fract32 MonoSynth_tick(t_MonoSynth *synth) {
     pitch_env = mult_fr1x32x32(pitch_env, synth->pitch_env_depth);
 
     // Calculate amp LFO.
-    amp_lfo = osc(phasor_next(&synth->amp_lfo));
+    amp_lfo = osc(Phasor_next(&synth->amp_lfo));
 
     // Scale amp LFO depth.
     amp_lfo = mult_fr1x32x32(amp_lfo, synth->amp_lfo_depth);
@@ -261,7 +262,7 @@ fract32 MonoSynth_tick(t_MonoSynth *synth) {
     amp_env = mult_fr1x32x32(env_adsr_next(&synth->amp_env), synth->vel);
 
     // Calculate filter LFO.
-    filter_lfo = osc(phasor_next(&synth->filter_lfo));
+    filter_lfo = osc(Phasor_next(&synth->filter_lfo));
 
     // Scale filter LFO depth.
     filter_lfo = mult_fr1x32x32(filter_lfo, synth->filter_lfo_depth);
@@ -286,33 +287,33 @@ fract32 MonoSynth_tick(t_MonoSynth *synth) {
     switch (synth->osc_type) {
 
     case OSC_TYPE_SINE:
-        waveform_a = sine_polyblep(phasor_next(&synth->oscillator_a));
-        waveform_b = sine_polyblep(phasor_next(&synth->oscillator_b));
+        waveform_a = sine_polyblep(Phasor_next(&synth->oscillator_a));
+        waveform_b = sine_polyblep(Phasor_next(&synth->oscillator_b));
         break;
 
     case OSC_TYPE_TRI:
-        waveform_a = triangle_polyblep(phasor_next(&synth->oscillator_a));
-        waveform_b = triangle_polyblep(phasor_next(&synth->oscillator_b));
+        waveform_a = triangle_polyblep(Phasor_next(&synth->oscillator_a));
+        waveform_b = triangle_polyblep(Phasor_next(&synth->oscillator_b));
         break;
 
     case OSC_TYPE_SAW:
-        waveform_a = saw_polyblep(phasor_next(&synth->oscillator_a),
+        waveform_a = saw_polyblep(Phasor_next(&synth->oscillator_a),
                                   synth->oscillator_a.freq);
-        waveform_b = saw_polyblep(phasor_next(&synth->oscillator_b),
+        waveform_b = saw_polyblep(Phasor_next(&synth->oscillator_b),
                                   synth->oscillator_b.freq);
         break;
 
     case OSC_TYPE_SQUARE:
-        waveform_a = square_polyblep(phasor_next(&synth->oscillator_a),
+        waveform_a = square_polyblep(Phasor_next(&synth->oscillator_a),
                                      synth->oscillator_a.freq);
-        waveform_b = square_polyblep(phasor_next(&synth->oscillator_b),
+        waveform_b = square_polyblep(Phasor_next(&synth->oscillator_b),
                                      synth->oscillator_b.freq);
         break;
 
     default:
         // Default to sine.
-        waveform_a = sine_polyblep(phasor_next(&synth->oscillator_a));
-        waveform_b = sine_polyblep(phasor_next(&synth->oscillator_b));
+        waveform_a = sine_polyblep(Phasor_next(&synth->oscillator_a));
+        waveform_b = sine_polyblep(Phasor_next(&synth->oscillator_b));
         break;
     }
 
