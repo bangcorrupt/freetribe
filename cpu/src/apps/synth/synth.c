@@ -179,9 +179,9 @@ static void _encoder_callback(uint8_t index, uint8_t value);
 static void _button_callback(uint8_t index, bool state);
 static void _trigger_callback(uint8_t pad, uint8_t vel, bool state);
 
-void _set_filter_type(uint8_t filter_type);
-void _set_mod_depth(uint32_t mod_depth);
-void _set_mod_speed(uint32_t mod_speed);
+static void _set_filter_type(uint8_t filter_type);
+static void _set_mod_depth(uint32_t mod_depth);
+static void _set_mod_speed(uint32_t mod_speed);
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -274,7 +274,7 @@ void app_run(void) { gui_task(); }
  * @param[in]   index   Index of knob.
  * @param[in]   value   Values of knob.
  */
-void _knob_callback(uint8_t index, uint8_t value) {
+static void _knob_callback(uint8_t index, uint8_t value) {
 
     uint16_t param;
 
@@ -364,61 +364,13 @@ void _knob_callback(uint8_t index, uint8_t value) {
     }
 }
 
-void _set_mod_depth(uint32_t mod_depth) {
-
-    switch (g_mod_type) {
-
-    case MOD_AMP_LFO:
-        ft_set_module_param(0, PARAM_AMP_LFO_DEPTH, mod_depth);
-        gui_post_param("A.LFO Dpt: ", mod_depth >> 23);
-        break;
-
-    case MOD_FILTER_LFO:
-        ft_set_module_param(0, PARAM_FILTER_LFO_DEPTH, mod_depth);
-        gui_post_param("F.LFO Dpt: ", mod_depth >> 23);
-        break;
-
-    case MOD_PITCH_LFO:
-        ft_set_module_param(0, PARAM_PITCH_LFO_DEPTH, mod_depth);
-        gui_post_param("P.LFO Dpt: ", mod_depth >> 23);
-        break;
-
-    default:
-        break;
-    }
-}
-
-void _set_mod_speed(uint32_t mod_speed) {
-
-    switch (g_mod_type) {
-
-    case MOD_AMP_LFO:
-        ft_set_module_param(0, PARAM_AMP_LFO_SPEED, mod_speed);
-        gui_post_param("A.LFO Spd: ", mod_speed >> 13);
-        break;
-
-    case MOD_FILTER_LFO:
-        ft_set_module_param(0, PARAM_FILTER_LFO_SPEED, mod_speed);
-        gui_post_param("F.LFO Spd: ", mod_speed >> 13);
-        break;
-
-    case MOD_PITCH_LFO:
-        ft_set_module_param(0, PARAM_PITCH_LFO_SPEED, mod_speed);
-        gui_post_param("P.LFO Spd: ", mod_speed >> 13);
-        break;
-
-    default:
-        break;
-    }
-}
-
 /**
  * @brief   Callback triggered by panel encoder events.
  *
  * @param[in]   index   Index of encoder.
  * @param[in]   value   Values of encoder.
  */
-void _encoder_callback(uint8_t index, uint8_t value) {
+static void _encoder_callback(uint8_t index, uint8_t value) {
 
     static uint8_t pitch = DEFAULT_CUTOFF;
     static int8_t osc_type = DEFAULT_OSC_TYPE;
@@ -525,7 +477,7 @@ static void _trigger_callback(uint8_t pad, uint8_t vel, bool state) {
  * @param[in]   index   Index of button.
  * @param[in]   state   State of button.
  */
-void _button_callback(uint8_t index, bool state) {
+static void _button_callback(uint8_t index, bool state) {
 
     switch (index) {
 
@@ -567,7 +519,7 @@ void _button_callback(uint8_t index, bool state) {
     }
 }
 
-void _set_filter_type(uint8_t filter_type) {
+static void _set_filter_type(uint8_t filter_type) {
 
     switch (filter_type) {
 
@@ -596,6 +548,54 @@ void _set_filter_type(uint8_t filter_type) {
         break;
     }
     gui_post_param("Fil Type: ", filter_type);
+}
+
+static void _set_mod_depth(uint32_t mod_depth) {
+
+    switch (g_mod_type) {
+
+    case MOD_AMP_LFO:
+        ft_set_module_param(0, PARAM_AMP_LFO_DEPTH, mod_depth);
+        gui_post_param("A.LFO Dpt: ", mod_depth >> 23);
+        break;
+
+    case MOD_FILTER_LFO:
+        ft_set_module_param(0, PARAM_FILTER_LFO_DEPTH, mod_depth);
+        gui_post_param("F.LFO Dpt: ", mod_depth >> 23);
+        break;
+
+    case MOD_PITCH_LFO:
+        ft_set_module_param(0, PARAM_PITCH_LFO_DEPTH, mod_depth);
+        gui_post_param("P.LFO Dpt: ", mod_depth >> 23);
+        break;
+
+    default:
+        break;
+    }
+}
+
+static void _set_mod_speed(uint32_t mod_speed) {
+
+    switch (g_mod_type) {
+
+    case MOD_AMP_LFO:
+        ft_set_module_param(0, PARAM_AMP_LFO_SPEED, mod_speed);
+        gui_post_param("A.LFO Spd: ", mod_speed >> 13);
+        break;
+
+    case MOD_FILTER_LFO:
+        ft_set_module_param(0, PARAM_FILTER_LFO_SPEED, mod_speed);
+        gui_post_param("F.LFO Spd: ", mod_speed >> 13);
+        break;
+
+    case MOD_PITCH_LFO:
+        ft_set_module_param(0, PARAM_PITCH_LFO_SPEED, mod_speed);
+        gui_post_param("P.LFO Spd: ", mod_speed >> 13);
+        break;
+
+    default:
+        break;
+    }
 }
 
 /*----- End of file --------------------------------------------------*/

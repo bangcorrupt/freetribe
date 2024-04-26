@@ -117,7 +117,8 @@ void spi_init(void) {
 
     // 8 bit, MSB first, non-dma rx mode.
     // Interrupt when SPI_RDBR is full.
-    /* *pSPI_CTL = CPHA | SZ | EMISO; */
+    // *pSPI_CTL = CPOL | CPHA | SZ | EMISO;
+    // *pSPI_CTL = CPOL | SZ | EMISO;
     *pSPI_CTL = SZ | EMISO;
     ssync();
 

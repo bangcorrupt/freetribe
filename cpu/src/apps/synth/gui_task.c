@@ -73,7 +73,7 @@ typedef struct {
     uint8_t x_end;
     uint8_t y_end;
     bool colour;
-    char text[GUI_MAX_STRING_LEN];
+    char text[GUI_MAX_STRING_LEN + 1];
 } t_gui_event;
 
 /*----- Static variable definitions ----------------------------------*/

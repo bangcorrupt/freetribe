@@ -202,7 +202,7 @@ void SPIDefaultCSSet(unsigned int baseAdd, unsigned char dcsval) {
  *         SPI_CSHOLD            - To Hold the CS line active after data
  *Transfer untill new data and Control information is loaded.\n
  *
- *         SPI_DELAY_COUNTER_ENA - Enables Delay Counter.\n
+ *         SPI_DELCOUNT_ENABLE - Enables Delay Counter.\n
  *
  *         SPI_DATA_FORMAT0      - To select DataFormat Register 0.\n
  *         SPI_DATA_FORMAT1      - To select DataFormat Register 1.\n
