@@ -162,37 +162,12 @@ void svc_dsp_task(void) {
 
     case STATE_BOOT:
         // Wait 1 ms after reset released.
-        if (delay_us(&reset_delay) && dev_dsp_spi_enabled()) {
+        if (delay_us(&reset_delay)) {
 
             _dsp_boot();
-            // g_dsp_ready = true;
-            // state = STATE_CHECK_READY;
             state = STATE_RUN;
         }
         break;
-
-        // case STATE_CHECK_READY:
-        //     // Wait for ENA, then send check_ready and wait for reply.
-        //
-        //     /// TODO: This won't work.
-        //     ///     If DSP is not ready it will not receive this message.
-        //     //
-        //     if (dev_dsp_spi_enabled()) {
-        //
-        //         _dsp_check_ready();
-        //         state = STATE_WAIT_READY;
-        //     }
-        //     break;
-        //
-        // case STATE_WAIT_READY:
-        //     // Wait until DSP SPI command service is running.
-        //     if (!g_dsp_ready) {
-        //         dev_dsp_spi_poll();
-        //
-        //     } else {
-        //         state = STATE_RUN;
-        //     }
-        //     break;
 
     case STATE_RUN:
         // Handle received bytes.
