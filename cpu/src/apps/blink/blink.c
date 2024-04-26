@@ -33,22 +33,24 @@ under the terms of the GNU Affero General Public License as published by
  *
  * @brief   Minimal example application for Freetribe.
  *
- * This example uses a non-blocking delay 
+ * This example uses a non-blocking delay
  * to toggle an LED at regular intervals.
  */
 
 /*----- Includes -----------------------------------------------------*/
 
 #include "freetribe.h"
+#include "svc_delay.h"
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-// 1 second in microseconds.
-#define DELAY_TIME 1000000 
+// 0.5 seconds in microseconds.
+#define DELAY_TIME 500000
 
 /*----- Static variable definitions ----------------------------------*/
 
-static uint32_t g_start_time; 
+// static uint32_t g_start_time;
+static t_delay_state g_blink_delay;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -59,7 +61,7 @@ static uint32_t g_start_time;
 /**
  * @brief   Initialise application.
  *
- * Store the current value of the delay timer in a 
+ * Store the current value of the delay timer in a
  * static global variable. Status is assumed successful.
  *
  * @return status   Status code indicating success:
@@ -70,7 +72,7 @@ static uint32_t g_start_time;
 t_status app_init(void) {
 
     // Set start time.
-    g_start_time = ft_get_delay_current();
+    delay_start(&g_blink_delay, DELAY_TIME);
 
     return SUCCESS;
 }
@@ -78,20 +80,21 @@ t_status app_init(void) {
 /**
  * @brief   Run application.
  *
- * Test if 1 second has passed  since we last set `start_time`.  
+ * Test if 1 second has passed  since we last set `start_time`.
  * If so, toggle an LED and reset `start_time`.
  */
 void app_run(void) {
 
+    /// TODO:  Update to use new delay_state.
     // Wait for delay.
-    if (ft_delay(g_start_time, DELAY_TIME)) {
+    // if (ft_delay(g_start_time, DELAY_TIME)) {
+    if (ft_delay(&g_blink_delay)) {
 
         // Toggle LED.
         ft_toggle_led(LED_TAP);
 
         // Reset start time.
-        g_start_time = ft_get_delay_current();
-
+        delay_start(&g_blink_delay, DELAY_TIME);
     }
 }
 

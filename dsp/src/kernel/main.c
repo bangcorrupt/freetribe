@@ -61,7 +61,7 @@ int main(void) {
 
     *pPORTGIO_SET = HWAIT;
 
-    // TODO: Move to initcode, before main.
+    /// TODO: Move to initcode, before main.
     pll_init();
     ebiu_init();
 
@@ -81,7 +81,7 @@ int main(void) {
     while (1) {
 
         if (sport0_frame_received()) {
-            // TODO: Maybe disable interrupts while processing audio. */
+            /// TODO: Maybe disable interrupts while processing audio.
             module_process(sport0_get_rx_buffer(), sport0_get_tx_buffer());
 
             sport0_frame_processed();

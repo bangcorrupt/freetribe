@@ -35,7 +35,7 @@ under the terms of the GNU Affero General Public License as published by
  *
  */
 
-// TODO: Separate modules for SPI and EMIFA.
+/// TODO: Separate modules for SPI and EMIFA.
 
 /*----- Includes -----------------------------------------------------*/
 
@@ -51,7 +51,8 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Macros and Definitions ---------------------------------------*/
 
 #define DSP_SPI SPI_1
-#define DSP_SPI_DATA_FORMAT 1
+#define DSP_SPI_BOOT_DATA_FORMAT 1
+#define DSP_SPI_COMMAND_DATA_FORMAT 2
 #define DSP_SPI_CHIP_SELECT 2
 
 /// TODO: Centralised header for interrupt priorities.
@@ -64,11 +65,15 @@ under the terms of the GNU Affero General Public License as published by
     SPI_PIN_SOMI | SPI_PIN_SIMO | SPI_PIN_CLK | SPI_PIN_ENA | SPI_PIN_CS0 |    \
         SPI_PIN_CS1
 
-#define DSP_SPI_FREQ SPI_FREQ_37_5_MHZ
+#define DSP_SPI_BOOT_FREQ SPI_FREQ_50_MHZ
+#define DSP_SPI_COMMAND_FREQ SPI_FREQ_50_MHZ
+// #define DSP_SPI_COMMAND_FREQ SPI_FREQ_37_5_MHZ
+// #define DSP_SPI_COMMAND_FREQ SPI_FREQ_30_MHZ
 #define DSP_SPI_CHAR_LENGTH 8
 #define DSP_SPI_ENA_TIMEOUT 0xff
 
 #define DSP_SPI_CSHOLD true
+#define DSP_SPI_COMMAND_CSHOLD true
 
 /// TODO: Centralised header for queue lengths.
 #define DSP_SPI_TX_BUF_LEN 0x100
@@ -91,6 +96,7 @@ static char dsp_spi_rx_rbmem[DSP_SPI_RX_BUF_LEN];
 static rbd_t dsp_spi_tx_rbd;
 static char dsp_spi_tx_rbmem[DSP_SPI_TX_BUF_LEN];
 
+static uint8_t g_dsp_spi_tx_byte;
 static uint8_t g_dsp_spi_rx_byte;
 
 volatile static bool g_dsp_spi_tx_complete = true;
@@ -111,6 +117,8 @@ static void _dsp_spi_rx_byte(void);
 static void _dsp_spi_tx_callback(void);
 static void _dsp_spi_rx_callback(void);
 
+bool _dsp_spi_enabled(void);
+
 /*----- Extern function implementations ------------------------------*/
 
 void dev_dsp_init(void) {
@@ -124,22 +132,15 @@ void dev_dsp_init(void) {
 
 void dev_dsp_spi_tx_enqueue(uint8_t *p_byte) {
 
-    if (g_dsp_spi_tx_complete && g_dsp_spi_rx_complete) {
+    /// TODO: Should catch overflow error and
+    ///       redesign so this does not happen.
+    //
+    // Overwrite on overflow.
+    ring_buffer_put_force(dsp_spi_tx_rbd, p_byte);
 
-        _dsp_spi_tx_byte(p_byte);
-
-    } else {
-        // Queue message if transmission in progress.
-        // Overwrite on overflow?
-        /// TODO: Should catch overflow error and
-        ///       redesign so this does not happen.
-        //
-        ring_buffer_put_force(dsp_spi_tx_rbd, p_byte);
-
-        // Block until queue ready.
-        // while (ring_buffer_put(dsp_spi_tx_rbd, p_byte))
-        //     ;
-    }
+    // Block until queue ready.
+    // while (ring_buffer_put(dsp_spi_tx_rbd, p_byte))
+    //     ;
 }
 
 int dev_dsp_spi_rx_dequeue(uint8_t *p_byte) {
@@ -151,11 +152,11 @@ bool dev_dsp_spi_tx_complete(void) { return g_dsp_spi_tx_complete; }
 
 void dev_dsp_spi_poll(void) { _dsp_spi_rx_byte(); }
 
-/// TODO: Sort out dev_dsp_spi function name mess.
+/// TODO: Sort out dev_dsp_spi function names.
 //
 void dev_dsp_spi_tx_boot(uint8_t *buffer, uint32_t length) {
 
-    per_spi_chip_format(DSP_SPI, DSP_SPI_DATA_FORMAT, DSP_SPI_CHIP_SELECT,
+    per_spi_chip_format(DSP_SPI, DSP_SPI_BOOT_DATA_FORMAT, DSP_SPI_CHIP_SELECT,
                         DSP_SPI_CSHOLD);
 
     per_spi1_tx_wait(buffer, length);
@@ -167,10 +168,24 @@ void dev_dsp_reset(bool state) {
     per_gpio_set(DSP_RESET_BANK, DSP_RESET_PIN, !state);
 }
 
+/// TODO: Use GPIO interrupt to set flag.
+//
 // Return true if SPI enabled.
-bool dev_dsp_spi_enabled(void) {
+bool _dsp_spi_enabled(void) {
     //
     return !per_gpio_get(DSP_SPI_ENA_BANK, DSP_SPI_ENA_PIN);
+}
+
+void dev_dsp_spi_transfer(void) {
+
+    if (_dsp_spi_enabled()) {
+
+        if ((g_dsp_spi_rx_complete && g_dsp_spi_tx_complete) &&
+            _dsp_spi_tx_dequeue(&g_dsp_spi_tx_byte) == 0) {
+
+            _dsp_spi_tx_byte(&g_dsp_spi_tx_byte);
+        }
+    }
 }
 
 /*----- Static function implementations ------------------------------*/
@@ -194,15 +209,23 @@ void _dsp_spi_init(void) {
         per_spi_init(&config);
     }
 
-    t_spi_format format = {
+    t_spi_format boot_format = {
         .instance = DSP_SPI,
-        .index = DSP_SPI_DATA_FORMAT,
-        .freq = DSP_SPI_FREQ,
+        .index = DSP_SPI_BOOT_DATA_FORMAT,
+        .freq = DSP_SPI_BOOT_FREQ,
         .char_length = DSP_SPI_CHAR_LENGTH,
-        .ena_timeout = DSP_SPI_ENA_TIMEOUT,
     };
 
-    per_spi_set_data_format(&format);
+    per_spi_set_data_format(&boot_format);
+
+    t_spi_format command_format = {
+        .instance = DSP_SPI,
+        .index = DSP_SPI_COMMAND_DATA_FORMAT,
+        .freq = DSP_SPI_COMMAND_FREQ,
+        .char_length = DSP_SPI_CHAR_LENGTH,
+    };
+
+    per_spi_set_data_format(&command_format);
 
     // Tx ring buffer attributes.
     rb_attr_t tx_attr = {sizeof(dsp_spi_tx_rbmem[0]),
@@ -242,8 +265,8 @@ static void _dsp_spi_tx_byte(uint8_t *p_byte) {
     g_dsp_spi_tx_complete = false;
     g_dsp_spi_rx_complete = false;
 
-    per_spi_chip_format(DSP_SPI, DSP_SPI_DATA_FORMAT, DSP_SPI_CHIP_SELECT,
-                        DSP_SPI_CSHOLD);
+    per_spi_chip_format(DSP_SPI, DSP_SPI_COMMAND_DATA_FORMAT,
+                        DSP_SPI_CHIP_SELECT, DSP_SPI_COMMAND_CSHOLD);
 
     per_spi_trx_int(DSP_SPI, p_byte, &g_dsp_spi_rx_byte, 1);
 }
@@ -256,18 +279,7 @@ static void _dsp_spi_rx_byte(void) {
     _dsp_spi_tx_byte(&dummy);
 }
 
-static void _dsp_spi_tx_callback(void) {
-    //
-    static uint8_t tx_byte;
-
-    // Send next queued byte.
-    if (_dsp_spi_tx_dequeue(&tx_byte) == 0) {
-        _dsp_spi_tx_byte(&tx_byte);
-
-    } else {
-        g_dsp_spi_tx_complete = true;
-    }
-}
+static void _dsp_spi_tx_callback(void) { g_dsp_spi_tx_complete = true; }
 
 static void _dsp_spi_rx_callback(void) {
 

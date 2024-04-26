@@ -130,6 +130,7 @@ void per_spi_register_callback(uint8_t instance, t_spi_event event,
 void per_spi_tx(uint32_t, uint8_t *, uint32_t);
 void per_spi_rx(uint32_t, uint8_t *, uint32_t);
 
+void per_spi1_tx_wait(uint8_t *buffer, uint32_t length);
 #ifdef __cplusplus
 }
 #endif

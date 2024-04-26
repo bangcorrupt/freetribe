@@ -94,6 +94,17 @@ void GPIODirModeSet(unsigned int baseAdd, unsigned int pinNumber,
     }
 }
 
+/*
+ * Set pin direction for entire register.
+ *
+ * Value of pinDirs is written directly to register.
+ */
+void GPIODirModeSetReg(unsigned int baseAdd, unsigned int regNumber,
+                       unsigned int pinDirs) {
+
+    HWREG(baseAdd + GPIO_DIR(regNumber)) = pinDirs;
+}
+
 /**
  * \brief  This function gets the direction of a pin which has been configured
  *         as an input or an output pin.

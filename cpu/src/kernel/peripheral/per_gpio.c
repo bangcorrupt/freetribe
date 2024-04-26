@@ -70,7 +70,7 @@ under the terms of the GNU Affero General Public License as published by
 void per_gpio_init(void) {
 
     // Set pin direction and state.
-    // TODO: Refactor to use HAL functions.
+    /// TODO: Refactor to use HAL functions.
 
     // SPI1 CS0 CS1 outputs, set.
     //      Is this necessary if using pins in SPI mode?
@@ -93,7 +93,7 @@ void per_gpio_init(void) {
     HWREG(SOC_GPIO_0_REGS + GPIO_DIR(4)) = 0x0000fffd;
 }
 
-// TODO: Refactor to always use indexed access.
+/// TODO: Refactor to always use indexed access.
 //          Allows #define PIN_NAME and avoids multiple conversions.
 
 bool per_gpio_get(uint8_t bank, uint8_t pin) {

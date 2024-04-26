@@ -63,7 +63,7 @@ typedef struct {
 
 void delay_init(void);
 bool delay_us(t_delay_state *state);
-/* bool delay_us(uint32_t *start_count, uint32_t delay_time); */
+void delay_start(t_delay_state *state, uint32_t time);
 void delay_block_us(uint32_t time);
 void delay_block_ms(uint32_t time);
 uint32_t delay_get_current_count(void);

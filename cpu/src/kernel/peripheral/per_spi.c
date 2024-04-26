@@ -51,6 +51,8 @@ under the terms of the GNU Affero General Public License as published by
 #include "per_gpio.h"
 #include "per_spi.h"
 
+#include "hal_gpio.h"
+
 #include "ring_buffer.h"
 
 /*----- Macros and Definitions ---------------------------------------*/
@@ -161,14 +163,7 @@ void per_spi_set_data_format(t_spi_format *format) {
     SPICharLengthSet(g_base_address[format->instance], format->char_length,
                      format->index);
 
-    if (format->ena_timeout) {
-        // Set timeout.
-        SPIDelayConfigure(g_base_address[format->instance], format->ena_timeout,
-                          0, 0, 0);
-
-        // Enable timeout for data format.
-        SPIWaitEnable(g_base_address[format->instance], format->index);
-    }
+    /// TODO: Investigate SPI timings using logic analyser.
 }
 
 bool per_spi_initialised(uint8_t instance) {
@@ -181,6 +176,7 @@ void per_spi_chip_format(uint8_t instance, uint8_t data_format,
                          uint8_t chip_select, bool cshold) {
 
     /// TODO: Tidy this up.
+    //
     if (cshold) {
         SPIDat1Config(g_spi[instance].address,
                       (uint32_t)data_format | SPI_CSHOLD, chip_select);
@@ -342,7 +338,7 @@ static inline void _spi_isr(t_spi *spi) {
         case SPI_TX_BUF_EMPTY:
 
             if (spi->tx_length--) {
-                // Write byte to SPI0
+                // Write byte to SPI
                 SPITransmitData1(spi->address, *spi->tx_buffer++);
 
                 if (spi->tx_length == 0) {
@@ -360,7 +356,7 @@ static inline void _spi_isr(t_spi *spi) {
         case SPI_RECV_FULL:
 
             if (spi->rx_length--) {
-                // Read byte from SPI1
+                // Read byte from SPI
                 *spi->rx_buffer++ = SPIDataReceive(spi->address);
 
                 if (spi->rx_length == 0) {
@@ -376,8 +372,10 @@ static inline void _spi_isr(t_spi *spi) {
 
         // TODO: Interrogate source of error and trigger callback.
         case SPI_ERR:
+
             while (true)
                 ;
+
             break;
 
         default:

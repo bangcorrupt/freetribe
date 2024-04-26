@@ -42,6 +42,10 @@ under the terms of the GNU Affero General Public License as published by
 #include "knl_main.h"
 #include "usr_main.h"
 
+#include "svc_dsp.h"
+
+#include "svc_delay.h"
+
 /*----- Macros and Definitions ---------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
@@ -58,7 +62,11 @@ under the terms of the GNU Affero General Public License as published by
  */
 int main(void) {
 
-    // TODO: Implement scheduler.
+    while (!svc_dsp_ready()) {
+        knl_main_task();
+    }
+
+    /// TODO: Implement scheduler.
     while (true) {
 
         knl_main_task();

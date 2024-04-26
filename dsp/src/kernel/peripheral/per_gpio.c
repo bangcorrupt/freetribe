@@ -49,6 +49,7 @@ under the terms of the GNU Affero General Public License as published by
 #define PFMUX_SPORT 0x0555
 #define PGMUX_SPISSEL 0x0002
 #define PGMUX_UART 0x0020
+// #define PGMUX_SPORT_SCLK 0x0140
 #define PGMUX_HOSTDP 0x2800
 #define PHMUX_HOSTDP 0x002a
 
@@ -74,6 +75,7 @@ void per_gpio_init(void) {
     *pPORTH_MUX = PHMUX_HOSTDP;
     ssync();
 
+    // GPIO mode.
     *pPORTF_FER = PFFER_SPORT;
     *pPORTG_FER = PGFER_SPI | PGFER_UART | PGFER_HOSTDP;
     *pPORTH_FER = PHFER_HOSTDP;
@@ -85,6 +87,7 @@ void per_gpio_init(void) {
     // p0, p7, p9, p10 are outputs.
     *pPORTGIO_DIR = HWAIT | UART0_TX | PG9 | PG10;
 
+    *pPORTGIO_SET = HWAIT | UART0_TX;
     ssync();
 }
 
@@ -122,6 +125,20 @@ uint16_t per_gpio_get_port(uint8_t port) {
 }
 
 void per_gpio_set_port(uint8_t port, uint16_t value) {
+
+    switch (port) {
+
+    case PORT_F:
+        *pPORTFIO = value;
+        break;
+
+    case PORT_G:
+        *pPORTGIO = value;
+        break;
+
+    default:
+        break;
+    }
 
     //
 }

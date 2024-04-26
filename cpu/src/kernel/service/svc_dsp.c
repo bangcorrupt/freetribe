@@ -43,6 +43,7 @@ under the terms of the GNU Affero General Public License as published by
 #include "dev_dsp.h"
 
 #include "ft_error.h"
+
 #include "svc_delay.h"
 #include "svc_dsp.h"
 
@@ -59,6 +60,7 @@ typedef enum {
     STATE_ASSERT_RESET,
     STATE_RELEASE_RESET,
     STATE_BOOT,
+    STATE_CHECK_READY,
     STATE_WAIT_READY,
     STATE_RUN,
     STATE_ERROR
@@ -76,7 +78,7 @@ typedef enum {
 
 static uint32_t g_pending_response;
 
-static bool g_dsp_ready;
+static bool g_dsp_ready = false;
 
 static void (*p_module_param_value_callback)(uint16_t module_id,
                                              uint16_t param_index,
@@ -92,6 +94,7 @@ static void (*p_system_port_state_callback)(uint16_t port_f, uint16_t port_g,
 static t_status _dsp_init(void);
 static void _dsp_boot(void);
 static void _dsp_receive(uint8_t byte);
+static void _dsp_check_ready(void);
 
 static void _dsp_response_required(void);
 static void _dsp_response_received(void);
@@ -123,8 +126,6 @@ void svc_dsp_task(void) {
 
     static t_delay_state reset_delay;
 
-    static uint32_t start_time;
-
     static uint8_t dsp_byte;
 
     switch (state) {
@@ -141,29 +142,19 @@ void svc_dsp_task(void) {
 
         dev_dsp_reset(true);
 
-        /// TODO: Function to set up delay parameters.
-        //
-        reset_delay.start_time = delay_get_current_count();
-        reset_delay.delay_time = 2100;
-        reset_delay.elapsed_cycles = 0;
-        reset_delay.elapsed_us = 0;
-        reset_delay.expired = false;
+        delay_start(&reset_delay, 2100);
 
         state = STATE_RELEASE_RESET;
         break;
 
     case STATE_RELEASE_RESET:
-        // Hold in reset for 2.1 ms.
 
+        // Hold in reset for 2.1 ms.
         if (delay_us(&reset_delay)) {
 
             dev_dsp_reset(false);
 
-            reset_delay.start_time = delay_get_current_count();
-            reset_delay.delay_time = 1000;
-            reset_delay.elapsed_cycles = 0;
-            reset_delay.elapsed_us = 0;
-            reset_delay.expired = false;
+            delay_start(&reset_delay, 1000);
 
             state = STATE_BOOT;
         }
@@ -171,27 +162,14 @@ void svc_dsp_task(void) {
 
     case STATE_BOOT:
         // Wait 1 ms after reset released.
-        if (delay_us(&reset_delay) && dev_dsp_spi_enabled()) {
+        if (delay_us(&reset_delay)) {
 
             _dsp_boot();
-            // state = STATE_WAIT_READY;
             state = STATE_RUN;
         }
         break;
 
-        // case STATE_WAIT_READY:
-        //     // Wait until DSP SPI command service is running.
-        //
-        //     if (!g_dsp_ready) {
-        //         dev_dsp_spi_poll();
-        //
-        //     } else {
-        //         state = STATE_RUN;
-        //     }
-        //     break;
-
     case STATE_RUN:
-
         // Handle received bytes.
         if (dev_dsp_spi_rx_dequeue(&dsp_byte) == SUCCESS) {
             _dsp_receive(dsp_byte);
@@ -202,6 +180,10 @@ void svc_dsp_task(void) {
             // TODO: Can we use GPIO to signal?
             dev_dsp_spi_poll();
         }
+
+        dev_dsp_spi_transfer();
+
+        g_dsp_ready = true;
         break;
 
     case STATE_ERROR:
@@ -234,14 +216,14 @@ void svc_dsp_register_callback(uint8_t msg_type, uint8_t msg_id,
     }
 }
 
-// TODO: Move to separate module.
+/// TODO: Move to separate module.
 void svc_dsp_set_module_param(uint16_t module_id, uint16_t param_index,
                               int32_t param_value) {
 
     const uint8_t msg_type = MSG_TYPE_MODULE;
     const uint8_t msg_id = MODULE_SET_PARAM_VALUE;
 
-    // TODO: Struct / static allocation?
+    /// TODO: Union struct / static allocation?
     uint8_t payload[] = {
         (module_id & 0xff),         (module_id >> 8) & 0xff,
         (param_index & 0xff),       (param_index >> 8) & 0xff,
@@ -264,7 +246,7 @@ void svc_dsp_get_module_param(uint8_t module_id, uint16_t param_index) {
     _transmit_message(msg_type, msg_id, payload, sizeof(payload));
 }
 
-// TODO: svc_dsp_get_module_param_count
+/// TODO: svc_dsp_get_module_param_count
 //       svc_dsp_get_module_param_name
 
 // Request state of Port F, Port G, Port H GPIO.
@@ -282,7 +264,7 @@ bool svc_dsp_ready(void) { return g_dsp_ready; }
 
 /*----- Static function implementations ------------------------------*/
 
-void _check_ready(void) {
+void _dsp_check_ready(void) {
 
     const uint8_t msg_type = MSG_TYPE_SYSTEM;
     const uint8_t msg_id = SYSTEM_CHECK_READY;
@@ -292,7 +274,8 @@ void _check_ready(void) {
     _transmit_message(msg_type, msg_id, NULL, 0);
 }
 
-/// TODO: Typdef callback pointers and cast to remove incompatibel type warning.
+/// TODO: Typdef callback pointers and cast to remove incompatible type
+/// warning.
 void _register_module_callback(uint8_t msg_id, void (*callback)(void)) {
 
     switch (msg_id) {
@@ -319,7 +302,7 @@ void _register_system_callback(uint8_t msg_id, void (*callback)(void)) {
     }
 }
 
-// TODO: Return status.
+/// TODO: Return status.
 static void _transmit_message(uint8_t msg_type, uint8_t msg_id,
                               uint8_t *payload, uint8_t length) {
     //
@@ -474,13 +457,13 @@ static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
 static t_status _handle_module_param_value(uint8_t *payload, uint8_t length) {
 
     if (p_module_param_value_callback != NULL) {
-        // TODO: Union struct for message parsing.
+        /// TODO: Union struct for message parsing.
         uint16_t module_id = (payload[1] << 8) | payload[0];
 
         uint16_t param_index = (payload[3] << 8) | payload[2];
 
         uint32_t param_value = (payload[7] << 24) | (payload[6] << 16) |
-                               (payload[5 << 8]) | payload[4];
+                               (payload[5] << 8) | payload[4];
 
         p_module_param_value_callback(module_id, param_index, param_value);
     }
@@ -490,7 +473,7 @@ static t_status _handle_module_param_value(uint8_t *payload, uint8_t length) {
 
 static t_status _handle_system_ready(void) {
 
-    g_dsp_ready = true;
+    // g_dsp_ready = true;
 
     return SUCCESS;
 }
@@ -509,13 +492,10 @@ static t_status _handle_system_port_state(uint8_t *payload, uint8_t length) {
     return SUCCESS;
 }
 
-static void _dsp_response_required(void) {
-    //
-    g_pending_response++;
-}
+static void _dsp_response_required(void) { g_pending_response++; }
 
 static void _dsp_response_received(void) {
-    //
+
     if (g_pending_response > 0) {
         g_pending_response--;
     }

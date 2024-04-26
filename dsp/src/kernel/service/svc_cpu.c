@@ -177,7 +177,7 @@ void svc_cpu_task(void) {
 static void _transmit_message(uint8_t msg_type, uint8_t msg_id,
                               uint8_t *payload, uint8_t length) {
     //
-    const uint8_t msg_start = MSG_START;
+    uint8_t msg_start = MSG_START;
 
     per_spi_tx_enqueue(&msg_start);
     per_spi_tx_enqueue(&msg_type);
@@ -193,7 +193,7 @@ static t_status _cpu_init(void) {
 
     t_status result = TASK_INIT_ERROR;
 
-    _transmit_message(MSG_TYPE_SYSTEM, SYSTEM_READY, NULL, 0);
+    // _transmit_message(MSG_TYPE_SYSTEM, SYSTEM_READY, NULL, 0);
 
     // TODO: Handhsake.
 
@@ -387,8 +387,9 @@ static t_status _handle_module_get_param_name(uint8_t *payload,
 
 static t_status _handle_system_check_ready(void) {
 
-    /// TODO: Handshake / Test...
-    _respond_system_check_ready();
+    /// TODO: Should initiate from CPU, then reply.
+    //
+    /// _respond_system_check_ready();
 
     return SUCCESS;
 }
