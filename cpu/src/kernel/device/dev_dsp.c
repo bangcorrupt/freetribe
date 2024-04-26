@@ -139,11 +139,11 @@ void dev_dsp_spi_tx_enqueue(uint8_t *p_byte) {
         /// TODO: Should catch overflow error and
         ///       redesign so this does not happen.
         //
-        // ring_buffer_put_force(dsp_spi_tx_rbd, p_byte);
+        ring_buffer_put_force(dsp_spi_tx_rbd, p_byte);
 
         // Block until queue ready.
-        while (ring_buffer_put(dsp_spi_tx_rbd, p_byte))
-            ;
+        // while (ring_buffer_put(dsp_spi_tx_rbd, p_byte))
+        //     ;
     }
 }
 
