@@ -60,6 +60,7 @@ void dev_dsp_spi_poll(void);
 void dev_dsp_spi_tx_boot(uint8_t *buffer, uint32_t length);
 void dev_dsp_reset(bool state);
 bool dev_dsp_spi_enabled(void);
+void dev_dsp_spi_transfer(void);
 
 #ifdef __cplusplus
 }

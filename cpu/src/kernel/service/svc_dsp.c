@@ -205,6 +205,9 @@ void svc_dsp_task(void) {
             // TODO: Can we use GPIO to signal?
             dev_dsp_spi_poll();
         }
+
+        dev_dsp_spi_transfer();
+
         g_dsp_ready = true;
         break;
 
