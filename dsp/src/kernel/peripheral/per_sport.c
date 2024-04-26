@@ -288,15 +288,15 @@ __attribute__((interrupt_handler)) static void _sport0_isr(void) {
     // g_cpu_tx_buffer[0] = g_cpu_out[0];
     // g_cpu_tx_buffer[1] = g_cpu_out[1];
 
-    if (g_codec_tx_buffer[0] != 0 || g_codec_tx_buffer[1] != 0) {
-
-        g_codec_tx_set = true;
-    }
-
-    if (g_codec_out[0] != 0 || g_codec_out[1] != 0) {
-
-        g_codec_output_set = true;
-    }
+    // if (g_codec_tx_buffer[0] != 0 || g_codec_tx_buffer[1] != 0) {
+    //
+    //     g_codec_tx_set = true;
+    // }
+    //
+    // if (g_codec_out[0] != 0 || g_codec_out[1] != 0) {
+    //
+    //     g_codec_output_set = true;
+    // }
 
     g_sport0_frame_received = true;
 }
