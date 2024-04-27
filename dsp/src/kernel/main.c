@@ -87,7 +87,7 @@ int main(void) {
             sport0_frame_processed();
         }
 
-        // svc_cpu_task();
+        svc_cpu_task();
     }
 }
 

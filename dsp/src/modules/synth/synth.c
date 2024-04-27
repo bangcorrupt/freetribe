@@ -45,12 +45,16 @@ under the terms of the GNU Affero General Public License as published by
 #include "fract_math.h"
 #include "types.h"
 
-#include "env_adsr.h"
-#include "filter_ladder.h"
+#include "aleph.h"
+
+// #include "env_adsr.h"
+// #include "filter_ladder.h"
 #include "filter_svf.h"
 #include "osc_polyblep.h"
 #include "phasor.h"
 #include "ricks_tricks.h"
+#include "ugens/filter.h" // Prefix path to prevent name conflict.
+#include "ugens/waveform.h"
 
 #include "module.h"
 
@@ -59,6 +63,9 @@ under the terms of the GNU Affero General Public License as published by
 #include "synth.h"
 
 /*----- Macros and Definitions ---------------------------------------*/
+
+#define SAMPLERATE 48000
+#define MEMPOOL_SIZE 0x4000
 
 /// TODO: Struct for parameter type.
 ///         scaler,
@@ -150,15 +157,16 @@ typedef enum {
 } e_filter_type;
 
 typedef struct {
-    t_Phasor oscillator_a;
-    t_Phasor oscillator_b;
+
+    Waveform waveform_a;
+    Waveform waveform_b;
 
     fract32 freq;
     fract32 tune;
 
-    filter_svf filter;
-    filter_ladder ladder;
-    hpf dc_blocker;
+    FilterSVF filter;
+    // filter_ladder ladder;
+    t_HPF dc_blocker;
 
     fract32 cutoff;
     fract32 res;
@@ -166,24 +174,24 @@ typedef struct {
     fract32 vel;
     fract32 amp_level;
 
-    env_adsr amp_env;
-    env_adsr pitch_env;
-    env_adsr filter_env;
+    // env_adsr amp_env;
+    // env_adsr pitch_env;
+    // env_adsr filter_env;
 
-    fract32 amp_env_depth;
-    fract32 filter_env_depth;
-    fract32 pitch_env_depth;
-
-    t_Phasor amp_lfo;
-    t_Phasor filter_lfo;
-    t_Phasor pitch_lfo;
-
-    fract32 amp_lfo_depth;
-    fract32 amp_lfo_speed;
-    fract32 filter_lfo_depth;
-    fract32 filter_lfo_speed;
-    fract32 pitch_lfo_depth;
-    fract32 pitch_lfo_speed;
+    // fract32 amp_env_depth;
+    // fract32 filter_env_depth;
+    // fract32 pitch_env_depth;
+    //
+    // t_Phasor amp_lfo;
+    // t_Phasor filter_lfo;
+    // t_Phasor pitch_lfo;
+    //
+    // fract32 amp_lfo_depth;
+    // fract32 amp_lfo_speed;
+    // fract32 filter_lfo_depth;
+    // fract32 filter_lfo_speed;
+    // fract32 pitch_lfo_depth;
+    // fract32 pitch_lfo_speed;
 
     e_osc_type osc_type;
     e_filter_type filter_type;
@@ -192,7 +200,10 @@ typedef struct {
 
 /*----- Static variable definitions ----------------------------------*/
 
+static t_Aleph g_aleph;
 static t_MonoSynth g_voice;
+
+static char g_mempool[MEMPOOL_SIZE];
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -202,20 +213,21 @@ static t_MonoSynth g_voice;
 
 void MonoSynth_init(t_MonoSynth *synth) {
 
-    Phasor_init(&synth->oscillator_a);
-    Phasor_init(&synth->oscillator_b);
+    Waveform_init(&synth->waveform_a, &g_aleph);
 
-    Phasor_init(&synth->amp_lfo);
-    Phasor_init(&synth->filter_lfo);
-    Phasor_init(&synth->pitch_lfo);
+    // Waveform_init(&synth->waveform_b, &g_aleph);
 
-    env_adsr_init(&synth->amp_env);
-    env_adsr_init(&synth->filter_env);
-    env_adsr_init(&synth->pitch_env);
+    // Phasor_init(&synth->amp_lfo);
+    // Phasor_init(&synth->filter_lfo);
+    // Phasor_init(&synth->pitch_lfo);
 
-    filter_svf_init(&synth->filter);
-    filter_ladder_init(&synth->ladder);
-    hpf_init(&synth->dc_blocker);
+    // env_adsr_init(&synth->amp_env);
+    // env_adsr_init(&synth->filter_env);
+    // env_adsr_init(&synth->pitch_env);
+
+    FilterSVF_init(&synth->filter, &g_aleph);
+    // filter_ladder_init(&synth->ladder);
+    // HPF_init(&synth->dc_blocker);
 }
 
 void MonoSynth_set_freq(t_MonoSynth *synth) {
@@ -241,135 +253,119 @@ fract32 MonoSynth_tick(t_MonoSynth *synth) {
     fract32 cutoff;
 
     // Calculate pitch LFO.
-    pitch_lfo = osc(Phasor_next(&synth->pitch_lfo));
+    // pitch_lfo = osc(Phasor_next(&synth->pitch_lfo));
+    //
+    // // Scale pitch LFO depth.
+    // pitch_lfo = mult_fr1x32x32(pitch_lfo, synth->pitch_lfo_depth);
+    //
+    // // Calculate pitch envelope.
+    // pitch_env = env_adsr_next(&synth->pitch_env);
+    //
+    // // Scale pitch envelope depth.
+    // pitch_env = mult_fr1x32x32(pitch_env, synth->pitch_env_depth);
+    //
+    // // Calculate amp LFO.
+    // amp_lfo = osc(Phasor_next(&synth->amp_lfo));
+    //
+    // // Scale amp LFO depth.
+    // amp_lfo = mult_fr1x32x32(amp_lfo, synth->amp_lfo_depth);
+    //
+    // // Calculate amplitude envelope.
+    // amp_env = mult_fr1x32x32(env_adsr_next(&synth->amp_env), synth->vel);
+    //
+    // // Calculate filter LFO.
+    // filter_lfo = osc(Phasor_next(&synth->filter_lfo));
+    //
+    // // Scale filter LFO depth.
+    // filter_lfo = mult_fr1x32x32(filter_lfo, synth->filter_lfo_depth);
+    //
+    // // Calculate filter envelope.
+    // filter_env = env_adsr_next(&synth->filter_env);
+    //
+    // // Scale filter envelope depth.
+    // filter_env = mult_fr1x32x32(filter_env, synth->filter_env_depth);
 
-    // Scale pitch LFO depth.
-    pitch_lfo = mult_fr1x32x32(pitch_lfo, synth->pitch_lfo_depth);
+    // // Apply pitch envelope.
+    // freq = add_fr1x32(pitch_env, synth->freq);
+    // freq = synth->freq;
+    //
+    // // Apply pitch LFO.
+    // freq = add_fr1x32(freq, mult_fr1x32x32(freq, pitch_lfo));
 
-    // Calculate pitch envelope.
-    pitch_env = env_adsr_next(&synth->pitch_env);
-
-    // Scale pitch envelope depth.
-    pitch_env = mult_fr1x32x32(pitch_env, synth->pitch_env_depth);
-
-    // Calculate amp LFO.
-    amp_lfo = osc(Phasor_next(&synth->amp_lfo));
-
-    // Scale amp LFO depth.
-    amp_lfo = mult_fr1x32x32(amp_lfo, synth->amp_lfo_depth);
-
-    // Calculate amplitude envelope.
-    amp_env = mult_fr1x32x32(env_adsr_next(&synth->amp_env), synth->vel);
-
-    // Calculate filter LFO.
-    filter_lfo = osc(Phasor_next(&synth->filter_lfo));
-
-    // Scale filter LFO depth.
-    filter_lfo = mult_fr1x32x32(filter_lfo, synth->filter_lfo_depth);
-
-    // Calculate filter envelope.
-    filter_env = env_adsr_next(&synth->filter_env);
-
-    // Scale filter envelope depth.
-    filter_env = mult_fr1x32x32(filter_env, synth->filter_env_depth);
-
-    // Apply pitch envelope.
-    freq = add_fr1x32(pitch_env, synth->freq);
-
-    // Apply pitch LFO.
-    freq = add_fr1x32(freq, mult_fr1x32x32(freq, pitch_lfo));
-
-    // Set oscillator frequency.
-    synth->oscillator_a.freq = freq;
-    synth->oscillator_b.freq = fix16_mul_fract(freq, synth->tune);
+    // // Set oscillator frequency.
+    // synth->oscillator_a.freq = freq;
+    // synth->oscillator_a.freq = freq;
+    // synth->oscillator_b.freq = fix16_mul_fract(freq, synth->tune);
 
     // Generate waveforms.
-    switch (synth->osc_type) {
 
-    case OSC_TYPE_SINE:
-        waveform_a = sine_polyblep(Phasor_next(&synth->oscillator_a));
-        waveform_b = sine_polyblep(Phasor_next(&synth->oscillator_b));
-        break;
+    freq = synth->freq;
 
-    case OSC_TYPE_TRI:
-        waveform_a = triangle_polyblep(Phasor_next(&synth->oscillator_a));
-        waveform_b = triangle_polyblep(Phasor_next(&synth->oscillator_b));
-        break;
+    Waveform_set_shape(&synth->waveform_a, synth->osc_type);
+    // Waveform_set_shape(&synth->waveform_b, synth->osc_type);
 
-    case OSC_TYPE_SAW:
-        waveform_a = saw_polyblep(Phasor_next(&synth->oscillator_a),
-                                  synth->oscillator_a.freq);
-        waveform_b = saw_polyblep(Phasor_next(&synth->oscillator_b),
-                                  synth->oscillator_b.freq);
-        break;
+    Waveform_set_freq(&synth->waveform_a, freq);
+    // Waveform_set_freq(&synth->waveform_b, freq);
 
-    case OSC_TYPE_SQUARE:
-        waveform_a = square_polyblep(Phasor_next(&synth->oscillator_a),
-                                     synth->oscillator_a.freq);
-        waveform_b = square_polyblep(Phasor_next(&synth->oscillator_b),
-                                     synth->oscillator_b.freq);
-        break;
-
-    default:
-        // Default to sine.
-        waveform_a = sine_polyblep(Phasor_next(&synth->oscillator_a));
-        waveform_b = sine_polyblep(Phasor_next(&synth->oscillator_b));
-        break;
-    }
+    waveform_a = Waveform_next(&synth->waveform_a);
+    // waveform_b = Waveform_next(&synth->waveform_b);
 
     // Sum waveforms.
-    waveform = add_fr1x32(waveform_a, waveform_b);
+    // waveform = add_fr1x32(waveform_a, waveform_b);
+    waveform = waveform_a;
 
     // Bitshift gain.
-    waveform = shl_fr1x32(waveform, 15);
+    // waveform = shl_fr1x32(waveform, 15);
 
-    // Apply amp envelope.
-    waveform = mult_fr1x32x32(waveform, amp_env);
-
-    // Apply amp LFO.
-    waveform = add_fr1x32(waveform, mult_fr1x32x32(waveform, amp_lfo));
-
-    // Apply filter envelope.
-    cutoff = add_fr1x32(filter_env, synth->cutoff);
-
-    // Apply filter LFO.
-    cutoff = add_fr1x32(cutoff, mult_fr1x32x32(cutoff, filter_lfo));
+    // // Apply amp envelope.
+    // waveform = mult_fr1x32x32(waveform, amp_env);
+    //
+    // // Apply amp LFO.
+    // waveform = add_fr1x32(waveform, mult_fr1x32x32(waveform, amp_lfo));
+    //
+    // // Apply filter envelope.
+    // cutoff = add_fr1x32(filter_env, synth->cutoff);
+    //
+    // // Apply filter LFO.
+    // cutoff = add_fr1x32(cutoff, mult_fr1x32x32(cutoff, filter_lfo));
 
     // Set filter cutoff and resonance.
-    filter_svf_set_coeff(&synth->filter, cutoff);
-    filter_svf_set_rq(&synth->filter, synth->res);
+    // FilterSVF_set_coeff(&synth->filter, cutoff);
+    FilterSVF_set_coeff(&synth->filter, synth->cutoff);
+    FilterSVF_set_rq(&synth->filter, synth->res);
 
-    filter_ladder_set_freq(&synth->ladder, cutoff);
-    filter_ladder_set_fb(&synth->ladder, FR32_MAX - synth->res);
+    // filter_ladder_set_freq(&synth->ladder, cutoff);
+    // filter_ladder_set_fb(&synth->ladder, FR32_MAX - synth->res);
 
     // Apply filter.
     switch (synth->filter_type) {
 
     case FILTER_TYPE_LPF:
-        waveform = filter_svf_softclip_asym_lpf_next(&synth->filter, waveform);
+        waveform = FilterSVF_softclip_asym_lpf_next(&synth->filter, waveform);
         break;
 
     case FILTER_TYPE_BPF:
-        waveform = filter_svf_softclip_asym_bpf_next(&synth->filter, waveform);
+        waveform = FilterSVF_softclip_asym_bpf_next(&synth->filter, waveform);
         break;
 
     case FILTER_TYPE_HPF:
-        waveform = filter_svf_softclip_asym_hpf_next(&synth->filter, waveform);
-        // waveform = filter_ladder_lpf_asym_os_next(&synth->ladder, waveform);
+        waveform = FilterSVF_softclip_asym_hpf_next(&synth->filter, waveform);
+        // waveform = filter_ladder_lpf_asym_os_next(&synth->ladder,
+        // waveform);
         // waveform = filter_ladder_lpf_next(&synth->ladder, waveform);
         break;
 
     default:
         // Default to LPF.
-        waveform = filter_svf_softclip_asym_lpf_next(&synth->filter, waveform);
+        waveform = FilterSVF_softclip_asym_lpf_next(&synth->filter, waveform);
         break;
     }
 
     // Scale amplitude by level.
-    waveform = mult_fr1x32x32(waveform, synth->amp_level);
+    // waveform = mult_fr1x32x32(waveform, synth->amp_level);
 
     // Block DC.
-    waveform = dc_block(&synth->dc_blocker, waveform);
+    // waveform = HPF_dc_block(&synth->dc_blocker, waveform);
 
     return waveform;
 }
@@ -378,6 +374,8 @@ fract32 MonoSynth_tick(t_MonoSynth *synth) {
  * @brief   Initialise module.
  */
 void module_init(void) {
+
+    Aleph_init(&g_aleph, SAMPLERATE, g_mempool, MEMPOOL_SIZE, NULL);
 
     MonoSynth_init(&g_voice);
 
@@ -389,28 +387,30 @@ void module_init(void) {
     module_set_param(PARAM_CUTOFF, 0x326f6abb);
     module_set_param(PARAM_RES, FR32_MAX);
 
-    module_set_param(PARAM_AMP_ENV_ATTACK, DEFAULT_AMP_ENV_ATTACK);
-    module_set_param(PARAM_AMP_ENV_DECAY, DEFAULT_AMP_ENV_DECAY);
-    module_set_param(PARAM_AMP_ENV_SUSTAIN, DEFAULT_AMP_ENV_SUSTAIN);
+    g_voice.freq = 220 << 16;
 
-    module_set_param(PARAM_FILTER_ENV_ATTACK, DEFAULT_FILTER_ENV_ATTACK);
-    module_set_param(PARAM_FILTER_ENV_DECAY, DEFAULT_FILTER_ENV_DECAY);
-    module_set_param(PARAM_FILTER_ENV_SUSTAIN, DEFAULT_FILTER_ENV_SUSTAIN);
-
-    module_set_param(PARAM_PITCH_ENV_ATTACK, DEFAULT_PITCH_ENV_ATTACK);
-    module_set_param(PARAM_PITCH_ENV_DECAY, DEFAULT_PITCH_ENV_DECAY);
-    module_set_param(PARAM_PITCH_ENV_SUSTAIN, DEFAULT_PITCH_ENV_SUSTAIN);
-
-    module_set_param(PARAM_PITCH_ENV_DEPTH, DEFAULT_PITCH_ENV_DEPTH);
-
-    module_set_param(PARAM_AMP_LFO_DEPTH, DEFAULT_AMP_LFO_DEPTH);
-    module_set_param(PARAM_AMP_LFO_SPEED, DEFAULT_AMP_LFO_SPEED);
-
-    module_set_param(PARAM_FILTER_LFO_DEPTH, DEFAULT_FILTER_LFO_DEPTH);
-    module_set_param(PARAM_FILTER_LFO_SPEED, DEFAULT_FILTER_LFO_SPEED);
-
-    module_set_param(PARAM_PITCH_LFO_DEPTH, DEFAULT_PITCH_LFO_DEPTH);
-    module_set_param(PARAM_PITCH_LFO_SPEED, DEFAULT_PITCH_LFO_SPEED);
+    // module_set_param(PARAM_AMP_ENV_ATTACK, DEFAULT_AMP_ENV_ATTACK);
+    // module_set_param(PARAM_AMP_ENV_DECAY, DEFAULT_AMP_ENV_DECAY);
+    // module_set_param(PARAM_AMP_ENV_SUSTAIN, DEFAULT_AMP_ENV_SUSTAIN);
+    //
+    // module_set_param(PARAM_FILTER_ENV_ATTACK, DEFAULT_FILTER_ENV_ATTACK);
+    // module_set_param(PARAM_FILTER_ENV_DECAY, DEFAULT_FILTER_ENV_DECAY);
+    // module_set_param(PARAM_FILTER_ENV_SUSTAIN, DEFAULT_FILTER_ENV_SUSTAIN);
+    //
+    // module_set_param(PARAM_PITCH_ENV_ATTACK, DEFAULT_PITCH_ENV_ATTACK);
+    // module_set_param(PARAM_PITCH_ENV_DECAY, DEFAULT_PITCH_ENV_DECAY);
+    // module_set_param(PARAM_PITCH_ENV_SUSTAIN, DEFAULT_PITCH_ENV_SUSTAIN);
+    //
+    // module_set_param(PARAM_PITCH_ENV_DEPTH, DEFAULT_PITCH_ENV_DEPTH);
+    //
+    // module_set_param(PARAM_AMP_LFO_DEPTH, DEFAULT_AMP_LFO_DEPTH);
+    // module_set_param(PARAM_AMP_LFO_SPEED, DEFAULT_AMP_LFO_SPEED);
+    //
+    // module_set_param(PARAM_FILTER_LFO_DEPTH, DEFAULT_FILTER_LFO_DEPTH);
+    // module_set_param(PARAM_FILTER_LFO_SPEED, DEFAULT_FILTER_LFO_SPEED);
+    //
+    // module_set_param(PARAM_PITCH_LFO_DEPTH, DEFAULT_PITCH_LFO_DEPTH);
+    // module_set_param(PARAM_PITCH_LFO_SPEED, DEFAULT_PITCH_LFO_SPEED);
 }
 
 /**
@@ -427,6 +427,9 @@ void module_process(fract32 *in, fract32 *out) {
     // module_set_param(PARAM_VEL, 127 << 23);
 
     waveform = MonoSynth_tick(&g_voice);
+
+    // waveform = saw_polyblep(Phasor_next(&g_voice.oscillator_a),
+    // g_voice.freq); waveform = shl_fr1x32(waveform, 16);
 
     // Set output.
     out[0] = waveform;
@@ -461,78 +464,78 @@ void module_set_param(uint16_t param_index, int32_t value) {
         }
         break;
 
-    case PARAM_GATE:
-        if (value) {
-            /// TODO: LFO phase reset parameter.
-            g_voice.amp_lfo.phase = 0;
-            g_voice.filter_lfo.phase = 0;
-            g_voice.pitch_lfo.phase = 0;
+        // case PARAM_GATE:
+        //     if (value) {
+        //         /// TODO: LFO phase reset parameter.
+        //         g_voice.amp_lfo.phase = 0;
+        //         g_voice.filter_lfo.phase = 0;
+        //         g_voice.pitch_lfo.phase = 0;
+        //
+        //         env_adsr_press(&g_voice.amp_env);
+        //         env_adsr_press(&g_voice.filter_env);
+        //         env_adsr_press(&g_voice.pitch_env);
+        //     } else {
+        //         env_adsr_release(&g_voice.amp_env);
+        //         env_adsr_release(&g_voice.filter_env);
+        //         env_adsr_release(&g_voice.pitch_env);
+        //     }
+        //     break;
 
-            env_adsr_press(&g_voice.amp_env);
-            env_adsr_press(&g_voice.filter_env);
-            env_adsr_press(&g_voice.pitch_env);
-        } else {
-            env_adsr_release(&g_voice.amp_env);
-            env_adsr_release(&g_voice.filter_env);
-            env_adsr_release(&g_voice.pitch_env);
-        }
-        break;
-
-    case PARAM_AMP_ENV_ATTACK:
-        g_voice.amp_env.attackTime = value;
-        break;
-
-    case PARAM_AMP_ENV_DECAY:
-        g_voice.amp_env.decayTime = value;
-        break;
-
-    case PARAM_AMP_ENV_SUSTAIN:
-        g_voice.amp_env.sustainLevel = value;
-        break;
-
-    case PARAM_AMP_ENV_RELEASE:
-        g_voice.amp_env.releaseTime = value;
-        break;
-
-    case PARAM_FILTER_ENV_ATTACK:
-        g_voice.filter_env.attackTime = value;
-        break;
-
-    case PARAM_FILTER_ENV_DECAY:
-        g_voice.filter_env.decayTime = value;
-        break;
-
-    case PARAM_FILTER_ENV_SUSTAIN:
-        g_voice.filter_env.sustainLevel = value;
-        break;
-
-    case PARAM_FILTER_ENV_RELEASE:
-        g_voice.filter_env.releaseTime = value;
-        break;
-
-    case PARAM_FILTER_ENV_DEPTH:
-        g_voice.filter_env_depth = value;
-        break;
-
-    case PARAM_PITCH_ENV_ATTACK:
-        g_voice.pitch_env.attackTime = value;
-        break;
-
-    case PARAM_PITCH_ENV_DECAY:
-        g_voice.pitch_env.decayTime = value;
-        break;
-
-    case PARAM_PITCH_ENV_SUSTAIN:
-        g_voice.pitch_env.sustainLevel = value;
-        break;
-
-    case PARAM_PITCH_ENV_RELEASE:
-        g_voice.pitch_env.releaseTime = value;
-        break;
-
-    case PARAM_PITCH_ENV_DEPTH:
-        g_voice.pitch_env_depth = value;
-        break;
+        // case PARAM_AMP_ENV_ATTACK:
+        //     g_voice.amp_env.attackTime = value;
+        //     break;
+        //
+        // case PARAM_AMP_ENV_DECAY:
+        //     g_voice.amp_env.decayTime = value;
+        //     break;
+        //
+        // case PARAM_AMP_ENV_SUSTAIN:
+        //     g_voice.amp_env.sustainLevel = value;
+        //     break;
+        //
+        // case PARAM_AMP_ENV_RELEASE:
+        //     g_voice.amp_env.releaseTime = value;
+        //     break;
+        //
+        // case PARAM_FILTER_ENV_ATTACK:
+        //     g_voice.filter_env.attackTime = value;
+        //     break;
+        //
+        // case PARAM_FILTER_ENV_DECAY:
+        //     g_voice.filter_env.decayTime = value;
+        //     break;
+        //
+        // case PARAM_FILTER_ENV_SUSTAIN:
+        //     g_voice.filter_env.sustainLevel = value;
+        //     break;
+        //
+        // case PARAM_FILTER_ENV_RELEASE:
+        //     g_voice.filter_env.releaseTime = value;
+        //     break;
+        //
+        // case PARAM_FILTER_ENV_DEPTH:
+        //     g_voice.filter_env_depth = value;
+        //     break;
+        //
+        // case PARAM_PITCH_ENV_ATTACK:
+        //     g_voice.pitch_env.attackTime = value;
+        //     break;
+        //
+        // case PARAM_PITCH_ENV_DECAY:
+        //     g_voice.pitch_env.decayTime = value;
+        //     break;
+        //
+        // case PARAM_PITCH_ENV_SUSTAIN:
+        //     g_voice.pitch_env.sustainLevel = value;
+        //     break;
+        //
+        // case PARAM_PITCH_ENV_RELEASE:
+        //     g_voice.pitch_env.releaseTime = value;
+        //     break;
+        //
+        // case PARAM_PITCH_ENV_DEPTH:
+        //     g_voice.pitch_env_depth = value;
+        //     break;
 
     case PARAM_CUTOFF:
         g_voice.cutoff = value;
@@ -550,32 +553,32 @@ void module_set_param(uint16_t param_index, int32_t value) {
         g_voice.filter_type = value;
         break;
 
-    case PARAM_AMP_LFO_DEPTH:
-        g_voice.amp_lfo_depth = value;
-        break;
-
-    case PARAM_AMP_LFO_SPEED:
-        g_voice.amp_lfo_speed = value;
-        g_voice.amp_lfo.freq = value;
-        break;
-
-    case PARAM_FILTER_LFO_DEPTH:
-        g_voice.filter_lfo_depth = value;
-        break;
-
-    case PARAM_FILTER_LFO_SPEED:
-        g_voice.filter_lfo_speed = value;
-        g_voice.filter_lfo.freq = value;
-        break;
-
-    case PARAM_PITCH_LFO_DEPTH:
-        g_voice.pitch_lfo_depth = value;
-        break;
-
-    case PARAM_PITCH_LFO_SPEED:
-        g_voice.pitch_lfo_speed = value;
-        g_voice.pitch_lfo.freq = value;
-        break;
+        // case PARAM_AMP_LFO_DEPTH:
+        //     g_voice.amp_lfo_depth = value;
+        //     break;
+        //
+        // case PARAM_AMP_LFO_SPEED:
+        //     g_voice.amp_lfo_speed = value;
+        //     g_voice.amp_lfo.freq = value;
+        //     break;
+        //
+        // case PARAM_FILTER_LFO_DEPTH:
+        //     g_voice.filter_lfo_depth = value;
+        //     break;
+        //
+        // case PARAM_FILTER_LFO_SPEED:
+        //     g_voice.filter_lfo_speed = value;
+        //     g_voice.filter_lfo.freq = value;
+        //     break;
+        //
+        // case PARAM_PITCH_LFO_DEPTH:
+        //     g_voice.pitch_lfo_depth = value;
+        //     break;
+        //
+        // case PARAM_PITCH_LFO_SPEED:
+        //     g_voice.pitch_lfo_speed = value;
+        //     g_voice.pitch_lfo.freq = value;
+        //     break;
 
     default:
         break;
