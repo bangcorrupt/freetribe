@@ -79,6 +79,11 @@ under the terms of the GNU Affero General Public License as published by
 #define DEFAULT_SCALE_TONES 12
 #define DEFAULT_SCALE_MODE 0
 
+#define PARAM_MAX (PARAM_COUNT - 1)
+#define FILTER_TYPE_MAX (FILTER_TYPE_COUNT - 1)
+#define MOD_TYPE_MAX (MOD_TYPE_COUNT - 1)
+#define OSC_TYPE_MAX (OSC_TYPE_COUNT - 1)
+
 // #define DEFAULT_AMP_ENV_ATTACK SLEW_10MS
 // #define DEFAULT_AMP_ENV_DECAY SLEW_1S
 // #define DEFAULT_AMP_ENV_SUSTAIN FR32_MAX
@@ -105,6 +110,7 @@ typedef enum {
     PARAM_AMP_ENV_DECAY,
     PARAM_AMP_ENV_SUSTAIN,
     PARAM_AMP_ENV_RELEASE,
+    PARAM_AMP_ENV_DEPTH,
     PARAM_FILTER_ENV_DEPTH,
     PARAM_FILTER_ENV_ATTACK,
     PARAM_FILTER_ENV_DECAY,
@@ -401,13 +407,13 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
 
         if (value == 0x01) {
             osc_type++;
-            if (osc_type > 3) {
+            if (osc_type > OSC_TYPE_MAX) {
                 osc_type = 0;
             }
         } else {
             osc_type--;
             if (osc_type < 0) {
-                osc_type = 3;
+                osc_type = OSC_TYPE_MAX;
             }
         }
         ft_set_module_param(0, PARAM_OSC_TYPE, osc_type);
@@ -427,13 +433,13 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
         } else {
             if (value == 0x01) {
                 mod_type++;
-                if (mod_type >= MOD_TYPE_COUNT) {
+                if (mod_type > MOD_TYPE_MAX) {
                     mod_type = 0;
                 }
             } else {
                 mod_type--;
                 if (mod_type < 0) {
-                    mod_type = MOD_TYPE_COUNT;
+                    mod_type = MOD_TYPE_MAX;
                 }
             }
             g_mod_type = mod_type;
