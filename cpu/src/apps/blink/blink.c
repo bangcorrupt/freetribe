@@ -49,7 +49,6 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Static variable definitions ----------------------------------*/
 
-// static uint32_t g_start_time;
 static t_delay_state g_blink_delay;
 
 /*----- Extern variable definitions ----------------------------------*/
@@ -61,8 +60,8 @@ static t_delay_state g_blink_delay;
 /**
  * @brief   Initialise application.
  *
- * Store the current value of the delay timer in a
- * static global variable. Status is assumed successful.
+ * Initialise a delay.
+ * Status is assumed successful.
  *
  * @return status   Status code indicating success:
  *                  - SUCCESS
@@ -71,7 +70,7 @@ static t_delay_state g_blink_delay;
  */
 t_status app_init(void) {
 
-    // Set start time.
+    // Initialise delay.
     delay_start(&g_blink_delay, DELAY_TIME);
 
     return SUCCESS;
@@ -80,14 +79,12 @@ t_status app_init(void) {
 /**
  * @brief   Run application.
  *
- * Test if 1 second has passed  since we last set `start_time`.
- * If so, toggle an LED and reset `start_time`.
+ * Test if 0.5 seconds have passed  since we started the delay.
+ * If so, toggle an LED and restart delay.
  */
 void app_run(void) {
 
-    /// TODO:  Update to use new delay_state.
     // Wait for delay.
-    // if (ft_delay(g_start_time, DELAY_TIME)) {
     if (ft_delay(&g_blink_delay)) {
 
         // Toggle LED.

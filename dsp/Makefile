@@ -29,6 +29,7 @@ CPU := bf527
 # C compilation options
 # DSP_OPTIMISE ?= -g -O0
 DSP_OPTIMISE = -g -O3
+# DSP_OPTIMISE = -g -O0
 CFLAGS := -mcpu=$(CPU) $(DSP_OPTIMISE) -fdata-sections -ffunction-sections -Wall 
 # Assembly compilation options
 ASM_FLAGS := -x assembler-with-cpp
