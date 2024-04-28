@@ -10,8 +10,12 @@ file build/cpu.elf
 set $pc=0x80000000
 # b start_boot
 # b _kernel_init
+<<<<<<< HEAD
 b _dsp_boot
 # b app_init
 # b svc_display_task
+=======
+b app_init
+>>>>>>> dev
 c
 

@@ -370,6 +370,7 @@ void module_init(void) {
     MonoSynth_init(&g_voice);
 
     /// TODO: Define defaults.
+    //
     module_set_param(PARAM_AMP_LEVEL, FR32_MAX);
     module_set_param(PARAM_OSC_TYPE, 2);
     module_set_param(PARAM_FREQ, 220 << 16);
