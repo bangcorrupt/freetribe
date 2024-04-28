@@ -160,8 +160,7 @@ typedef enum {
 
 typedef struct {
 
-    Waveform waveform_a;
-    Waveform waveform_b;
+    WaveformDual waveform;
 
     fract32 freq;
     fract32 tune;
@@ -192,7 +191,7 @@ typedef struct {
     fract32 filter_lfo_depth;
     fract32 pitch_lfo_depth;
 
-    e_osc_type osc_type;
+    e_Waveform_shape wave_shape;
     e_filter_type filter_type;
 
 } t_MonoSynth;
@@ -212,8 +211,7 @@ static char g_mempool[MEMPOOL_SIZE];
 
 void MonoSynth_init(t_MonoSynth *synth) {
 
-    Waveform_init(&synth->waveform_a, &g_aleph);
-    Waveform_init(&synth->waveform_b, &g_aleph);
+    WaveformDual_init(&synth->waveform, &g_aleph);
 
     Oscillator_init(&synth->amp_lfo, &g_aleph);
     Oscillator_init(&synth->filter_lfo, &g_aleph);
@@ -237,8 +235,6 @@ fract32 MonoSynth_tick(t_MonoSynth *synth) {
 
     fract32 waveform;
 
-    fract32 waveform_a;
-    fract32 waveform_b;
     fract32 freq;
 
     fract32 amp_lfo;
@@ -294,19 +290,15 @@ fract32 MonoSynth_tick(t_MonoSynth *synth) {
     freq = add_fr1x32(freq, mult_fr1x32x32(freq, pitch_lfo));
 
     // Set oscillator frequency.
-    Waveform_set_freq(&synth->waveform_a, freq);
-    Waveform_set_freq(&synth->waveform_b, fix16_mul_fract(freq, synth->tune));
+    WaveformDual_set_freq(&synth->waveform, synth->freq,
+                          fix16_mul_fract(freq, synth->tune));
 
     // Generate waveforms.
-    Waveform_set_shape(&synth->waveform_a, synth->osc_type);
-    Waveform_set_shape(&synth->waveform_b, synth->osc_type);
+    WaveformDual_set_shape(&synth->waveform, synth->wave_shape,
+                           synth->wave_shape);
 
     // Shift right to prevent clipping.
-    waveform_a = shr_fr1x32(Waveform_next(&synth->waveform_a), 1);
-    waveform_b = shr_fr1x32(Waveform_next(&synth->waveform_b), 1);
-
-    // Sum waveforms.
-    waveform = add_fr1x32(waveform_a, waveform_b);
+    waveform = shr_fr1x32(WaveformDual_next(&synth->waveform), 1);
 
     // Apply amp envelope.
     waveform = mult_fr1x32x32(waveform, amp_env);
@@ -524,7 +516,7 @@ void module_set_param(uint16_t param_index, int32_t value) {
         break;
 
     case PARAM_OSC_TYPE:
-        g_voice.osc_type = value;
+        g_voice.wave_shape = value;
         break;
 
     case PARAM_FILTER_TYPE:
