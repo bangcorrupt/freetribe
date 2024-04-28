@@ -44,19 +44,11 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-<<<<<<< HEAD
-// 1 second in microseconds.
-=======
 // 0.5 seconds in microseconds.
->>>>>>> dev
 #define DELAY_TIME 500000
 
 /*----- Static variable definitions ----------------------------------*/
 
-<<<<<<< HEAD
-// static uint32_t g_start_time;
-=======
->>>>>>> dev
 static t_delay_state g_blink_delay;
 
 /*----- Extern variable definitions ----------------------------------*/
@@ -68,13 +60,8 @@ static t_delay_state g_blink_delay;
 /**
  * @brief   Initialise application.
  *
-<<<<<<< HEAD
- * Store the current value of the delay timer in a
- * static global variable. Status is assumed successful.
-=======
  * Initialise a delay.
  * Status is assumed successful.
->>>>>>> dev
  *
  * @return status   Status code indicating success:
  *                  - SUCCESS
@@ -83,12 +70,7 @@ static t_delay_state g_blink_delay;
  */
 t_status app_init(void) {
 
-<<<<<<< HEAD
-    // Set start time.
-    // g_start_time = ft_get_delay_current();
-=======
     // Initialise delay.
->>>>>>> dev
     delay_start(&g_blink_delay, DELAY_TIME);
 
     return SUCCESS;
@@ -97,32 +79,18 @@ t_status app_init(void) {
 /**
  * @brief   Run application.
  *
-<<<<<<< HEAD
- * Test if 1 second has passed  since we last set `start_time`.
- * If so, toggle an LED and reset `start_time`.
-=======
  * Test if 0.5 seconds have passed  since we started the delay.
  * If so, toggle an LED and restart delay.
->>>>>>> dev
  */
 void app_run(void) {
 
-    /// TODO:  Update to use new delay_state.
     // Wait for delay.
-<<<<<<< HEAD
-    // if (ft_delay(g_start_time, DELAY_TIME)) {
-=======
->>>>>>> dev
     if (ft_delay(&g_blink_delay)) {
 
         // Toggle LED.
         ft_toggle_led(LED_TAP);
 
         // Reset start time.
-<<<<<<< HEAD
-        // g_start_time = ft_get_delay_current();
-=======
->>>>>>> dev
         delay_start(&g_blink_delay, DELAY_TIME);
     }
 }

@@ -378,8 +378,6 @@ void module_init(void) {
     module_set_param(PARAM_CUTOFF, 0x326f6abb);
     module_set_param(PARAM_RES, FR32_MAX);
 
-    g_voice.freq = 220 << 16;
-
     module_set_param(PARAM_AMP_ENV_ATTACK, DEFAULT_AMP_ENV_ATTACK);
     module_set_param(PARAM_AMP_ENV_DECAY, DEFAULT_AMP_ENV_DECAY);
     module_set_param(PARAM_AMP_ENV_SUSTAIN, DEFAULT_AMP_ENV_SUSTAIN);
