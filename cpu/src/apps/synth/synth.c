@@ -147,8 +147,8 @@ typedef enum {
 
 typedef enum {
     FILTER_TYPE_LPF,
-    FILTER_TYPE_BPF,
     FILTER_TYPE_HPF,
+    FILTER_TYPE_BPF,
 
     FILTER_TYPE_COUNT
 } e_filter_type;

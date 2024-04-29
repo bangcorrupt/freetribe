@@ -36,15 +36,6 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
-#include <stdbool.h>
-#include <stdint.h>
-
-#include "fix.h"
-#include "fix16.h"
-#include "fix16_fract.h"
-#include "fract_math.h"
-#include "types.h"
-
 #include "aleph.h"
 
 #include "ugens/monosynth.h"
@@ -144,8 +135,8 @@ typedef enum {
 
 typedef enum {
     FILTER_TYPE_LPF,
-    FILTER_TYPE_BPF,
     FILTER_TYPE_HPF,
+    FILTER_TYPE_BPF,
 
     FILTER_TYPE_COUNT
 } e_filter_type;
@@ -245,6 +236,8 @@ void module_set_param(uint16_t param_index, int32_t value) {
         g_amp_level = value;
         break;
 
+        /// TODO: Envelope depth modulation input.
+        //
         // case PARAM_VEL:
         //     if (value) {
         //         g_velocity = value;
