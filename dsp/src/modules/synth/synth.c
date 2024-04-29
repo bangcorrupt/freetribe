@@ -144,7 +144,7 @@ typedef enum {
 /*----- Static variable definitions ----------------------------------*/
 
 static t_Aleph g_aleph;
-static MonoSynth g_synth;
+static Aleph_MonoSynth g_synth;
 
 static fract32 g_amp_level;
 static fract32 g_velocity;
@@ -164,7 +164,7 @@ void module_init(void) {
 
     Aleph_init(&g_aleph, SAMPLERATE, g_mempool, MEMPOOL_SIZE, NULL);
 
-    MonoSynth_init(&g_synth, &g_aleph);
+    Aleph_MonoSynth_init(&g_synth, &g_aleph);
 
     /// TODO: Define defaults.
     //
@@ -204,7 +204,7 @@ void module_process(fract32 *in, fract32 *out) {
 
     fract32 output;
 
-    output = MonoSynth_next(&g_synth);
+    output = Aleph_MonoSynth_next(&g_synth);
 
     // Scale amplitude by level.
     output = mult_fr1x32x32(output, g_amp_level);
@@ -225,11 +225,11 @@ void module_set_param(uint16_t param_index, int32_t value) {
     switch (param_index) {
 
     case PARAM_FREQ:
-        MonoSynth_set_freq(&g_synth, value);
+        Aleph_MonoSynth_set_freq(&g_synth, value);
         break;
 
     case PARAM_TUNE:
-        MonoSynth_set_freq_offset(&g_synth, value);
+        Aleph_MonoSynth_set_freq_offset(&g_synth, value);
         break;
 
     case PARAM_AMP_LEVEL:
@@ -241,118 +241,118 @@ void module_set_param(uint16_t param_index, int32_t value) {
         // case PARAM_VEL:
         //     if (value) {
         //         g_velocity = value;
-        //         MonoSynth_set_amp_env_depth(
+        //         Aleph_MonoSynth_set_amp_env_depth(
         //             &g_synth, mult_fr1x32x32(g_synth->amp_env_depth,
         //             g_velocity));
         //     }
         //     break;
 
     case PARAM_GATE:
-        MonoSynth_set_gate(&g_synth, value);
-        MonoSynth_set_gate(&g_synth, value);
-        MonoSynth_set_gate(&g_synth, value);
+        Aleph_MonoSynth_set_gate(&g_synth, value);
+        Aleph_MonoSynth_set_gate(&g_synth, value);
+        Aleph_MonoSynth_set_gate(&g_synth, value);
         break;
 
     case PARAM_AMP_ENV_ATTACK:
-        MonoSynth_set_amp_env_attack(&g_synth, value);
+        Aleph_MonoSynth_set_amp_env_attack(&g_synth, value);
         break;
 
     case PARAM_AMP_ENV_DECAY:
-        MonoSynth_set_amp_env_decay(&g_synth, value);
+        Aleph_MonoSynth_set_amp_env_decay(&g_synth, value);
         break;
 
     case PARAM_AMP_ENV_SUSTAIN:
-        MonoSynth_set_amp_env_sustain(&g_synth, value);
+        Aleph_MonoSynth_set_amp_env_sustain(&g_synth, value);
         break;
 
     case PARAM_AMP_ENV_RELEASE:
-        MonoSynth_set_amp_env_release(&g_synth, value);
+        Aleph_MonoSynth_set_amp_env_release(&g_synth, value);
         break;
 
     case PARAM_AMP_ENV_DEPTH:
-        MonoSynth_set_amp_env_depth(&g_synth, value);
-        // MonoSynth_set_amp_env_depth(
+        Aleph_MonoSynth_set_amp_env_depth(&g_synth, value);
+        // Aleph_MonoSynth_set_amp_env_depth(
         //     &g_synth, mult_fr1x32x32(g_synth->amp_env_depth, g_velocity));
         break;
 
     case PARAM_FILTER_ENV_ATTACK:
-        MonoSynth_set_filter_env_attack(&g_synth, value);
+        Aleph_MonoSynth_set_filter_env_attack(&g_synth, value);
         break;
 
     case PARAM_FILTER_ENV_DECAY:
-        MonoSynth_set_filter_env_decay(&g_synth, value);
+        Aleph_MonoSynth_set_filter_env_decay(&g_synth, value);
         break;
 
     case PARAM_FILTER_ENV_SUSTAIN:
-        MonoSynth_set_filter_env_sustain(&g_synth, value);
+        Aleph_MonoSynth_set_filter_env_sustain(&g_synth, value);
         break;
 
     case PARAM_FILTER_ENV_RELEASE:
-        MonoSynth_set_filter_env_release(&g_synth, value);
+        Aleph_MonoSynth_set_filter_env_release(&g_synth, value);
         break;
 
     case PARAM_FILTER_ENV_DEPTH:
-        MonoSynth_set_filter_env_depth(&g_synth, value);
+        Aleph_MonoSynth_set_filter_env_depth(&g_synth, value);
         break;
 
     case PARAM_PITCH_ENV_ATTACK:
-        MonoSynth_set_pitch_env_attack(&g_synth, value);
+        Aleph_MonoSynth_set_pitch_env_attack(&g_synth, value);
         break;
 
     case PARAM_PITCH_ENV_DECAY:
-        MonoSynth_set_pitch_env_decay(&g_synth, value);
+        Aleph_MonoSynth_set_pitch_env_decay(&g_synth, value);
         break;
 
     case PARAM_PITCH_ENV_SUSTAIN:
-        MonoSynth_set_pitch_env_sustain(&g_synth, value);
+        Aleph_MonoSynth_set_pitch_env_sustain(&g_synth, value);
         break;
 
     case PARAM_PITCH_ENV_RELEASE:
-        MonoSynth_set_pitch_env_release(&g_synth, value);
+        Aleph_MonoSynth_set_pitch_env_release(&g_synth, value);
         break;
 
     case PARAM_PITCH_ENV_DEPTH:
-        MonoSynth_set_pitch_env_depth(&g_synth, value);
+        Aleph_MonoSynth_set_pitch_env_depth(&g_synth, value);
         break;
 
     case PARAM_CUTOFF:
-        MonoSynth_set_cutoff(&g_synth, value);
+        Aleph_MonoSynth_set_cutoff(&g_synth, value);
         break;
 
     case PARAM_RES:
-        MonoSynth_set_res(&g_synth, value);
+        Aleph_MonoSynth_set_res(&g_synth, value);
         break;
 
     case PARAM_OSC_TYPE:
-        MonoSynth_set_shape(&g_synth, value);
+        Aleph_MonoSynth_set_shape(&g_synth, value);
         break;
 
     case PARAM_FILTER_TYPE:
-        MonoSynth_set_filter_type(&g_synth, value);
+        Aleph_MonoSynth_set_filter_type(&g_synth, value);
         break;
 
     case PARAM_AMP_LFO_DEPTH:
-        MonoSynth_set_amp_lfo_depth(&g_synth, value);
+        Aleph_MonoSynth_set_amp_lfo_depth(&g_synth, value);
         break;
     //
     case PARAM_AMP_LFO_SPEED:
-        MonoSynth_set_amp_lfo_freq(&g_synth, value);
+        Aleph_MonoSynth_set_amp_lfo_freq(&g_synth, value);
         break;
 
     case PARAM_FILTER_LFO_DEPTH:
-        MonoSynth_set_filter_lfo_depth(&g_synth, value);
+        Aleph_MonoSynth_set_filter_lfo_depth(&g_synth, value);
         break;
 
     case PARAM_FILTER_LFO_SPEED:
-        MonoSynth_set_filter_lfo_freq(&g_synth, value);
+        Aleph_MonoSynth_set_filter_lfo_freq(&g_synth, value);
         break;
 
     case PARAM_PITCH_LFO_DEPTH:
-        MonoSynth_set_pitch_lfo_depth(&g_synth, value);
+        Aleph_MonoSynth_set_pitch_lfo_depth(&g_synth, value);
         break;
 
     case PARAM_PITCH_LFO_SPEED:
-        MonoSynth_set_pitch_lfo_freq(&g_synth, value);
+        Aleph_MonoSynth_set_pitch_lfo_freq(&g_synth, value);
         break;
 
     default:
