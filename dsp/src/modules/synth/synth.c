@@ -38,7 +38,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "aleph.h"
 
-#include "ugens/monosynth.h"
+#include "aleph_monosynth.h"
 
 #include "module.h"
 
@@ -124,32 +124,15 @@ typedef enum {
     PARAM_COUNT
 } e_param;
 
-typedef enum {
-    OSC_TYPE_SINE,
-    OSC_TYPE_TRI,
-    OSC_TYPE_SAW,
-    OSC_TYPE_SQUARE,
-
-    OSC_TYPE_COUNT
-} e_osc_type;
-
-typedef enum {
-    FILTER_TYPE_LPF,
-    FILTER_TYPE_HPF,
-    FILTER_TYPE_BPF,
-
-    FILTER_TYPE_COUNT
-} e_filter_type;
-
 /*----- Static variable definitions ----------------------------------*/
 
 static t_Aleph g_aleph;
+static char g_mempool[MEMPOOL_SIZE];
+
 static Aleph_MonoSynth g_synth;
 
 static fract32 g_amp_level;
 static fract32 g_velocity;
-
-static char g_mempool[MEMPOOL_SIZE];
 
 /*----- Extern variable definitions ----------------------------------*/
 
