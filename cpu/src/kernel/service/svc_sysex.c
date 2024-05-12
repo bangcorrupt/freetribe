@@ -94,7 +94,9 @@ t_sysex_parse_result sysex_parse(uint8_t *msg, uint32_t length) {
             break;
 
         case PARSE_PRODUCT_ID:
-            product_id = *msg++ << 16 | *msg++ << 8 | *msg++;
+            product_id = *msg++ << 16;
+            product_id |= *msg++ << 8;
+            product_id |= *msg++;
 
             length -= 2;
 

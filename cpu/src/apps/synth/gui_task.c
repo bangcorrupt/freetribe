@@ -159,7 +159,7 @@ void gui_print(uint8_t x_start, uint8_t y_start, char *text) {
     event.y_start = y_start;
 
     /// TODO: This is jank.
-    uint32_t length = (uint32_t)fmin(GUI_MAX_STRING_LEN, strlen(text));
+    uint32_t length = (uint32_t)fmin(GUI_MAX_STRING_LEN, strlen(text)) + 1;
 
     strncpy(event.text, text, length);
 
