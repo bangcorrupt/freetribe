@@ -40,12 +40,15 @@
  */
 
 /* HW Macros and Peripheral Defines */
+
 #include "hw_types.h"
 #include "hw_usb.h"
 
 #include "hal_cp15.h"
 #include "hal_cppi41dma.h"
 #include "hal_usb.h"
+
+#include "hal_debug.h"
 
 /*****************************************************************************
 **                 STATIC FUNCTIONs

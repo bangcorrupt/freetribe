@@ -7,7 +7,7 @@ TARGET_BIN := cpu.bin
 
 # Library paths.
 LIB_C ?= /usr/arm-none-eabi/lib
-LIB_GCC ?= ${LIB_PATH}/lib/gcc/arm-none-eabi/13.2.0/
+LIB_GCC ?= ${LIB_PATH}/lib/gcc/arm-none-eabi/14.1.0/
 
 LPATH := -L"${LIB_C}" \
       	 -L"${LIB_GCC}"
