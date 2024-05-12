@@ -57,7 +57,10 @@ void Menu_EnterCurrentItem(void) {
     if ((CurrentMenuItem == &NULL_MENU) || (CurrentMenuItem == NULL))
         return;
 
-    void (*EnterCallback)(void) = &CurrentMenuItem->EnterCallback;
+    /// TODO: Test and fix this typecast.
+    ///         Maybe typedef EnterCallback function pointer.
+    void (*EnterCallback)(void) =
+        (void (*)(void))(&CurrentMenuItem->EnterCallback);
 
     if (EnterCallback)
         EnterCallback();

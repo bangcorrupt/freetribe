@@ -106,10 +106,10 @@ extern "C" {
  * events she is interested in; other events will be dispatched to a null
  * handler implements within the library.
  */
-typedef void (*midi_event_callback_t)(char chan, char data1, char data2);
+typedef void (*t_midi_event_callback)(char chan, char data1, char data2);
 
 // Separate callback definition for system exclusive messages.
-typedef void (*midi_sysex_callback_t)(char *msg, unsigned long length);
+typedef void (*t_midi_sysex_callback)(char *msg, unsigned long length);
 
 /*
  * Error codes returned by library functions.
@@ -176,7 +176,7 @@ t_status midi_init_fsm();
  * @param cb Function to invoke upon receipt of the MIDI event.
  * @return Status code indicating (see above for comments.)
  */
-t_status midi_register_event_handler(event_type evt, midi_event_callback_t cb);
+t_status midi_register_event_handler(event_type evt, t_midi_event_callback cb);
 
 /**
  * @brief Register an event callback for system exclusive messages.
@@ -186,7 +186,7 @@ t_status midi_register_event_handler(event_type evt, midi_event_callback_t cb);
  * @return Status code indicating (see above for comments.)
  *
  */
-t_status midi_register_sysex_handler(midi_sysex_callback_t cb);
+t_status midi_register_sysex_handler(t_midi_sysex_callback cb);
 
 /**
  * Processes a byte arriving via the MIDI input of the device. This function

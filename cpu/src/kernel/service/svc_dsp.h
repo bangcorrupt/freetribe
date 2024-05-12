@@ -78,7 +78,7 @@ enum e_system_msg_id {
 void svc_dsp_task(void);
 
 void svc_dsp_register_callback(uint8_t msg_type, uint8_t msg_id,
-                               void (*callback)(void));
+                               void *callback);
 
 void svc_dsp_set_module_param(uint16_t module_id, uint16_t param_index,
                               int32_t param_value);

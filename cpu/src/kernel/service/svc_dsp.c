@@ -80,12 +80,15 @@ static uint32_t g_pending_response;
 
 static bool g_dsp_ready = false;
 
-static void (*p_module_param_value_callback)(uint16_t module_id,
-                                             uint16_t param_index,
-                                             int32_t param_value) = NULL;
+typedef void (*t_module_param_value_callback)(uint16_t module_id,
+                                              uint16_t param_index,
+                                              int32_t param_value);
 
-static void (*p_system_port_state_callback)(uint16_t port_f, uint16_t port_g,
-                                            uint16_t port_h) = NULL;
+typedef void (*t_system_port_state_callback)(uint16_t port_f, uint16_t port_g,
+                                             uint16_t port_h);
+
+static t_module_param_value_callback p_module_param_value_callback;
+static t_system_port_state_callback p_system_port_state_callback;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -115,8 +118,8 @@ static t_status _handle_module_param_value(uint8_t *payload, uint8_t length);
 static t_status _handle_system_port_state(uint8_t *payload, uint8_t length);
 static t_status _handle_system_ready(void);
 
-void _register_module_callback(uint8_t msg_id, void (*callback)(void));
-void _register_system_callback(uint8_t msg_id, void (*callback)(void));
+void _register_module_callback(uint8_t msg_id, void *callback);
+void _register_system_callback(uint8_t msg_id, void *callback);
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -200,7 +203,7 @@ void svc_dsp_task(void) {
 }
 
 void svc_dsp_register_callback(uint8_t msg_type, uint8_t msg_id,
-                               void (*callback)(void)) {
+                               void *callback) {
     //
     switch (msg_type) {
     case MSG_TYPE_MODULE:
@@ -274,14 +277,12 @@ void _dsp_check_ready(void) {
     _transmit_message(msg_type, msg_id, NULL, 0);
 }
 
-/// TODO: Typdef callback pointers and cast to remove incompatible type
-/// warning.
-void _register_module_callback(uint8_t msg_id, void (*callback)(void)) {
+void _register_module_callback(uint8_t msg_id, void *callback) {
 
     switch (msg_id) {
 
     case MODULE_PARAM_VALUE:
-        p_module_param_value_callback = callback;
+        p_module_param_value_callback = (t_module_param_value_callback)callback;
         break;
 
     default:
@@ -289,12 +290,12 @@ void _register_module_callback(uint8_t msg_id, void (*callback)(void)) {
     }
 }
 
-void _register_system_callback(uint8_t msg_id, void (*callback)(void)) {
+void _register_system_callback(uint8_t msg_id, void *callback) {
 
     switch (msg_id) {
 
     case SYSTEM_PORT_STATE:
-        p_system_port_state_callback = callback;
+        p_system_port_state_callback = (t_system_port_state_callback)callback;
         break;
 
     default:
