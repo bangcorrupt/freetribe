@@ -37,7 +37,9 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
+#include <math.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -156,7 +158,10 @@ void gui_print(uint8_t x_start, uint8_t y_start, char *text) {
     event.x_start = x_start;
     event.y_start = y_start;
 
-    strncpy(event.text, text, GUI_MAX_STRING_LEN);
+    /// TODO: This is jank.
+    uint32_t length = (uint32_t)fmin(GUI_MAX_STRING_LEN, strlen(text));
+
+    strncpy(event.text, text, length);
 
     ring_buffer_put_force(g_gui_rbd, &event);
 }
@@ -165,6 +170,7 @@ void gui_print_int(uint8_t x_start, uint8_t y_start, uint8_t value) {
 
     static char text[4];
     itoa(value, text, 10);
+    text[3] = 0x00;
 
     gui_print(x_start, y_start, "   ");
 
