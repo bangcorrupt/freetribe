@@ -12,6 +12,7 @@ TARGET_BIN := bfin.ldr
 
 BUILD_DIR := ./build
 SRC_DIR := ./src
+LIB_DIR := ./lib
 MODULE_DIR ?= $(SRC_DIR)/modules/$(MODULE)
 
 # Defining the cross compiler tool prefix
@@ -48,7 +49,8 @@ SRCS := $(shell find $(SRC_DIR)  \( -name '*.cpp' -or -name '*.c' -or -name '*.S
 
 # Add libs, excluding libfixmath root directory.
 SRCS += $(shell find $(LIB_DIR)  \( -name '*.cpp' -or -name '*.c' -or -name '*.S' \) \
-		-not -path "$(LIB_DIR)/aleph-dsp/lib/libfixmath/*")
+		-not -path "$(LIB_DIR)/aleph-dsp/lib/libfixmath/*" \
+		-not -path "$(LIB_DIR)/aleph-dsp/test/*")
 
 # Add libfixmath src directory.
 SRCS += $(shell find $(LIB_DIR)/aleph-dsp/lib/libfixmath/libfixmath  -name '*.cpp' -or \
