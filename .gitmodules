@@ -1,6 +1,0 @@
-[submodule "cpu/src/lib/UGUI"]
-	path = cpu/src/lib/UGUI
-	url = ../UGUI.git
-[submodule "dsp/src/lib/aleph-dsp"]
-	path = dsp/src/lib/aleph-dsp
-	url = ../aleph-dsp.git
