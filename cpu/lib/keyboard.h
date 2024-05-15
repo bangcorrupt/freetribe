@@ -28,15 +28,15 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
- * @file    svc_dsp.h
+/**
+ * @file    keyboard.h
  *
- * @brief   Public API for communicating with DSP.
+ * @brief   Public API for keyboard module.
  *
  */
 
-#ifndef SVC_DSP_H
-#define SVC_DSP_H
+#ifndef KEYBOARD_H
+#define KEYBOARD_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,53 +44,41 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
-#include <stdbool.h>
 #include <stdint.h>
-
-#include "ft_error.h"
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-// TODO: Move protocol definition to common module.
-//       Union struct for message.
-enum e_message_type { MSG_TYPE_MODULE, MSG_TYPE_SYSTEM };
+#define NOTES_IONIAN 2741
+#define NOTES_AEOLIAN 1453
+#define NOTES_PHRYGIAN_DOMINANT 1459
+#define NOTES_MINOR_BLUES 1257
 
-enum e_module_msg_id {
-    MODULE_GET_PARAM_VALUE,
-    MODULE_SET_PARAM_VALUE,
-    MODULE_PARAM_VALUE,
-    MODULE_GET_PARAM_NAME,
-    MODULE_PARAM_NAME
-};
+typedef struct {
+    uint32_t notes;
+    uint8_t tones;
+    uint8_t mode;
+} t_scale;
 
-enum e_system_msg_id {
-    SYSTEM_CHECK_READY,
-    SYSTEM_READY,
-    SYSTEM_GET_PORT_STATE,
-    SYSTEM_SET_PORT_STATE,
-    SYSTEM_PORT_STATE
-};
+typedef struct {
+    t_scale *scale;
+    uint8_t octave;
+    uint8_t split;
+    uint8_t repeat;
+    uint8_t map[32];
+} t_keyboard;
 
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
 
-void svc_dsp_task(void);
-
-void svc_dsp_register_callback(uint8_t msg_type, uint8_t msg_id,
-                               void *callback);
-
-void svc_dsp_set_module_param(uint16_t module_id, uint16_t param_index,
-                              int32_t param_value);
-
-void svc_dsp_get_module_param(uint8_t module_id, uint16_t param_index);
-
-void svc_dsp_get_port_state(void);
-bool svc_dsp_ready(void);
+void keyboard_init(t_keyboard *kbd, t_scale *scale);
+void keyboard_set_scale(t_keyboard *kbd, t_scale *scale);
+uint8_t keyboard_map_note(t_keyboard *kbd, uint8_t pad);
+void scale_init(t_scale *scale, uint32_t notes, uint8_t tones);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* SVC_DSP_H */
+#endif
 
 /*----- End of file --------------------------------------------------*/

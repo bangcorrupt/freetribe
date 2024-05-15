@@ -386,16 +386,15 @@ uint8_t _read_reg_byte(uint8_t cmd) {
 
 uint16_t _read_reg_short(uint8_t cmd) {
 
-    /// TODO: Fix incompatible pointer type.
-    uint16_t flash_reg = 0;
+    uint8_t flash_reg[2] = {0};
 
     _flash_chip_select(true);
     _flash_command(cmd);
 
-    _flash_rx(&flash_reg, 2);
+    _flash_rx(&flash_reg[0], 2);
     _flash_chip_select(false);
 
-    return flash_reg;
+    return (flash_reg[0] << 8) | flash_reg[1];
 }
 
 uint8_t _read_status(void) { return _read_reg_byte(FLASH_READ_STATUS); }
@@ -499,7 +498,7 @@ void _flash_chip_select(bool state) {
     }
 
     /// TODO: Use per_spi_chip_format.
-    per_spi_chip_select(SPI_FLASH_BASE, SPI_FLASH_CS, state);
+    // per_spi_chip_select(SPI_FLASH_BASE, SPI_FLASH_CS, state);
 
     if (state) {
         delay_cycles(4);

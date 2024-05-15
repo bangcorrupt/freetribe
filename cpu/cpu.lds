@@ -48,8 +48,8 @@ SECTIONS
 	
 	.stack ALIGN(8) :
 	{
-	    . += (0x80020000 - _bss_end); 
-	    /* . += 0x1000; */
+	    /* . += (0x80020000 - _bss_end); */
+	     . += 0x1000; 
 	} > OC_RAM
 	_stack = .;
 }

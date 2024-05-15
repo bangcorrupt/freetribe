@@ -155,7 +155,7 @@ void ft_set_trigger_mode(uint8_t mode) { svc_panel_set_trigger_mode(mode); }
  */
 // TODO: Separate function for each event type.
 void ft_register_midi_callback(event_type event,
-                               midi_event_callback_t callback) {
+                               t_midi_event_callback callback) {
 
     midi_register_event_handler(event, callback);
 }

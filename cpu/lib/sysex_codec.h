@@ -29,14 +29,14 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /*
- * @file    svc_dsp.h
+ * @file    sysex_codec.h
  *
- * @brief   Public API for communicating with DSP.
+ * @brief   Header for sysex_codec.c.
  *
  */
 
-#ifndef SVC_DSP_H
-#define SVC_DSP_H
+#ifndef SYSEX_CODEC_H
+#define SYSEX_CODEC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,53 +44,22 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
-#include <stdbool.h>
 #include <stdint.h>
 
-#include "ft_error.h"
-
 /*----- Macros and Definitions ---------------------------------------*/
-
-// TODO: Move protocol definition to common module.
-//       Union struct for message.
-enum e_message_type { MSG_TYPE_MODULE, MSG_TYPE_SYSTEM };
-
-enum e_module_msg_id {
-    MODULE_GET_PARAM_VALUE,
-    MODULE_SET_PARAM_VALUE,
-    MODULE_PARAM_VALUE,
-    MODULE_GET_PARAM_NAME,
-    MODULE_PARAM_NAME
-};
-
-enum e_system_msg_id {
-    SYSTEM_CHECK_READY,
-    SYSTEM_READY,
-    SYSTEM_GET_PORT_STATE,
-    SYSTEM_SET_PORT_STATE,
-    SYSTEM_PORT_STATE
-};
 
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
+uint32_t sysex_encode(const uint8_t *in_data, uint8_t *out_sysex,
+                      uint32_t in_length);
 
-void svc_dsp_task(void);
-
-void svc_dsp_register_callback(uint8_t msg_type, uint8_t msg_id,
-                               void *callback);
-
-void svc_dsp_set_module_param(uint16_t module_id, uint16_t param_index,
-                              int32_t param_value);
-
-void svc_dsp_get_module_param(uint8_t module_id, uint16_t param_index);
-
-void svc_dsp_get_port_state(void);
-bool svc_dsp_ready(void);
+uint32_t sysex_decode(const uint8_t *in_sysex, uint8_t *out_data,
+                      uint32_t in_length);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* SVC_DSP_H */
+#endif
 
 /*----- End of file --------------------------------------------------*/
