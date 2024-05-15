@@ -191,11 +191,10 @@ static unsigned long g_sysex_byte_count;
 static unsigned long g_message_counter = 0;
 
 // Callback table.
-static midi_event_callback_t g_callbacks[EVT_MAX] = {0};
+static t_midi_event_callback g_callbacks[EVT_MAX] = {0};
 
-// System exclusinve callback.
-static midi_sysex_callback_t (*g_sysex_callback)(char *data,
-                                                 unsigned long length);
+// System exclusive callback.
+static t_midi_sysex_callback g_sysex_callback;
 
 // The null event callback is used by default for all events.
 static void null_event_cb(char channel, char a, char b) {
@@ -486,7 +485,7 @@ t_status midi_init_fsm() {
     return 0;
 }
 
-t_status midi_register_event_handler(event_type evt, midi_event_callback_t cb) {
+t_status midi_register_event_handler(event_type evt, t_midi_event_callback cb) {
     // System exclusive callback uses separate function.
     if (cb && evt != EVT_SYS_EXCLUSIVE) {
         g_callbacks[evt] = cb;
@@ -498,7 +497,7 @@ t_status midi_register_event_handler(event_type evt, midi_event_callback_t cb) {
 }
 
 // Register callback for system exclusive messages.
-t_status midi_register_sysex_handler(midi_sysex_callback_t cb) {
+t_status midi_register_sysex_handler(t_midi_sysex_callback cb) {
     if (cb) {
         g_sysex_callback = cb;
     } else {

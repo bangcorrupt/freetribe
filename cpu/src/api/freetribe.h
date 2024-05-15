@@ -85,7 +85,7 @@ void ft_register_print_callback(void (*callback)(char *));
 void ft_print(char *text);
 
 void ft_register_midi_callback(event_type event,
-                               midi_event_callback_t callback);
+                               t_midi_event_callback callback);
 
 void ft_send_note_on(char chan, char note, char vel);
 void ft_send_note_off(char chan, char note, char vel);

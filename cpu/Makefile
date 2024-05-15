@@ -7,7 +7,7 @@ TARGET_BIN := cpu.bin
 
 # Library paths.
 LIB_C ?= /usr/arm-none-eabi/lib
-LIB_GCC ?= ${LIB_PATH}/lib/gcc/arm-none-eabi/13.2.0/
+LIB_GCC ?= ${LIB_PATH}/lib/gcc/arm-none-eabi/14.1.0/
 
 LPATH := -L"${LIB_C}" \
       	 -L"${LIB_GCC}"
@@ -17,6 +17,7 @@ INC_DIRS := $(NEWLIB)
 
 BUILD_DIR := ./build
 SRC_DIR := ./src
+LIB_DIR := ./lib
 APP_DIR ?= $(SRC_DIR)/apps/$(APP)
 
 # Defining the cross compiler tool prefix.
@@ -31,7 +32,9 @@ BIN=$(PREFIX)objcopy
 # C compilation options.
 NEST_INT ?= 0
 OPTIMISE ?= -g3 -Og
-CFLAGS :=  $(OPTIMISE) -fdata-sections -ffunction-sections -fstack-usage -Wstack-usage=128 -Wall
+# OPTIMISE ?= -O3
+CPU ?= arm926ej-s
+CFLAGS := -mcpu=$(CPU) $(OPTIMISE)  -fdata-sections -ffunction-sections -fanalyzer -fstack-usage -Wstack-usage=128 -Wall
 
 # Assembly compilation options.
 ASM_FLAGS := -x assembler-with-cpp
@@ -50,6 +53,10 @@ BIN_FLAGS := -O binary
 # but we want to send the * directly to the find command.
 SRCS := $(shell find $(SRC_DIR)  \( -name '*.cpp' -or -name '*.c' -or -name '*.S' \) \
 		-not -path "$(SRC_DIR)/apps/*")
+
+
+SRCS += $(shell find $(LIB_DIR)  -name '*.cpp' -or -name '*.c' -or -name '*.S')
+
 SRCS += $(shell find $(APP_DIR)  -name '*.cpp' -or -name '*.c' -or -name '*.S')
 
 # Prepends BUILD_DIR and appends .o to every src file.
@@ -62,6 +69,10 @@ DEPS := $(OBJS:.o=.d)
 
 # Every folder in ./src will need to be passed to GCC so that it can find header files.
 INC_DIRS += $(shell find $(SRC_DIR) -type d -not -path "$(SRC_DIR)/apps/*" )
+
+
+INC_DIRS += $(shell find $(LIB_DIR) -type d)
+
 INC_DIRS += $(shell find $(APP_DIR) -type d)
 
 # Add a prefix to INC_DIRS. So moduleA would become -ImoduleA. GCC understands this -I flag.

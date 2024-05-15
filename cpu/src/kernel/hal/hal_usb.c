@@ -51,6 +51,8 @@
 #include "hal_interrupt.h"
 #include "hal_usb.h"
 
+#include "hal_debug.h"
+
 /* Amount to shift the RX interrupt sources by in the flags used in the
  * interrupt calls. */
 #ifndef DEPRECATED

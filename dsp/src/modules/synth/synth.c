@@ -36,27 +36,9 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
-#include <stdbool.h>
-#include <stdint.h>
-
-#include "fix.h"
-#include "fix16.h"
-#include "fix16_fract.h"
-#include "fract_math.h"
-#include "types.h"
-
 #include "aleph.h"
 
-// #include "env_adsr.h"
-// #include "filter_ladder.h"
-#include "filter_svf.h"
-#include "osc_polyblep.h"
-#include "phasor.h"
-#include "ricks_tricks.h"
-#include "ugens/env_adsr.h"
-#include "ugens/filter.h" // Prefix path to prevent name conflict.
-#include "ugens/oscillator.h"
-#include "ugens/waveform.h"
+#include "aleph_monosynth.h"
 
 #include "module.h"
 
@@ -116,6 +98,7 @@ typedef enum {
     PARAM_AMP_ENV_DECAY,
     PARAM_AMP_ENV_SUSTAIN,
     PARAM_AMP_ENV_RELEASE,
+    PARAM_AMP_ENV_DEPTH,
     PARAM_FILTER_ENV_DEPTH,
     PARAM_FILTER_ENV_ATTACK,
     PARAM_FILTER_ENV_DECAY,
@@ -141,224 +124,21 @@ typedef enum {
     PARAM_COUNT
 } e_param;
 
-typedef enum {
-    OSC_TYPE_SINE,
-    OSC_TYPE_TRI,
-    OSC_TYPE_SAW,
-    OSC_TYPE_SQUARE,
-
-    OSC_TYPE_COUNT
-} e_osc_type;
-
-typedef enum {
-    FILTER_TYPE_LPF,
-    FILTER_TYPE_BPF,
-    FILTER_TYPE_HPF,
-
-    FILTER_TYPE_COUNT
-} e_filter_type;
-
-typedef struct {
-
-    Waveform waveform_a;
-    Waveform waveform_b;
-
-    fract32 freq;
-    fract32 tune;
-
-    FilterSVF filter;
-    // filter_ladder ladder;
-    HPF dc_blocker;
-
-    fract32 cutoff;
-    fract32 res;
-
-    fract32 vel;
-    fract32 amp_level;
-
-    EnvADSR amp_env;
-    EnvADSR pitch_env;
-    EnvADSR filter_env;
-
-    fract32 amp_env_depth;
-    fract32 filter_env_depth;
-    fract32 pitch_env_depth;
-
-    Oscillator amp_lfo;
-    Oscillator filter_lfo;
-    Oscillator pitch_lfo;
-
-    fract32 amp_lfo_depth;
-    fract32 filter_lfo_depth;
-    fract32 pitch_lfo_depth;
-
-    e_osc_type osc_type;
-    e_filter_type filter_type;
-
-} t_MonoSynth;
-
 /*----- Static variable definitions ----------------------------------*/
 
 static t_Aleph g_aleph;
-static t_MonoSynth g_voice;
-
 static char g_mempool[MEMPOOL_SIZE];
+
+static Aleph_MonoSynth g_synth;
+
+static fract32 g_amp_level;
+static fract32 g_velocity;
 
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
 
 /*----- Extern function implementations ------------------------------*/
-
-void MonoSynth_init(t_MonoSynth *synth) {
-
-    Waveform_init(&synth->waveform_a, &g_aleph);
-    Waveform_init(&synth->waveform_b, &g_aleph);
-
-    Oscillator_init(&synth->amp_lfo, &g_aleph);
-    Oscillator_init(&synth->filter_lfo, &g_aleph);
-    Oscillator_init(&synth->pitch_lfo, &g_aleph);
-
-    EnvADSR_init(&synth->amp_env, &g_aleph);
-    EnvADSR_init(&synth->filter_env, &g_aleph);
-    EnvADSR_init(&synth->pitch_env, &g_aleph);
-
-    FilterSVF_init(&synth->filter, &g_aleph);
-    HPF_init(&synth->dc_blocker, &g_aleph);
-
-    // filter_ladder_init(&synth->ladder);
-}
-
-void MonoSynth_set_freq(t_MonoSynth *synth) {
-    //
-}
-
-fract32 MonoSynth_tick(t_MonoSynth *synth) {
-
-    fract32 waveform;
-
-    fract32 waveform_a;
-    fract32 waveform_b;
-    fract32 freq;
-
-    fract32 amp_lfo;
-    fract32 filter_lfo;
-    fract32 pitch_lfo;
-
-    fract32 amp_env;
-    fract32 filter_env;
-    fract32 pitch_env;
-
-    fract32 cutoff;
-
-    // Calculate pitch LFO.
-    pitch_lfo = Oscillator_next(&synth->pitch_lfo);
-
-    // Scale pitch LFO depth.
-    pitch_lfo = mult_fr1x32x32(pitch_lfo, synth->pitch_lfo_depth);
-
-    // Calculate pitch envelope.
-    pitch_env = EnvADSR_next(&synth->pitch_env);
-
-    // Scale pitch envelope depth.
-    pitch_env = mult_fr1x32x32(pitch_env, synth->pitch_env_depth);
-
-    // Calculate amp LFO.
-    amp_lfo = Oscillator_next(&synth->amp_lfo);
-
-    // Scale amp LFO depth.
-    amp_lfo = mult_fr1x32x32(amp_lfo, synth->amp_lfo_depth);
-
-    // Calculate amplitude envelope.
-    amp_env = EnvADSR_next(&synth->amp_env);
-
-    // Scale amplitude envelope by velocity.
-    amp_env = mult_fr1x32x32(amp_env, synth->vel);
-
-    // Calculate filter LFO.
-    filter_lfo = Oscillator_next(&synth->filter_lfo);
-
-    // Scale filter LFO depth.
-    filter_lfo = mult_fr1x32x32(filter_lfo, synth->filter_lfo_depth);
-
-    // Calculate filter envelope.
-    filter_env = EnvADSR_next(&synth->filter_env);
-
-    // Scale filter envelope depth.
-    filter_env = mult_fr1x32x32(filter_env, synth->filter_env_depth);
-
-    // Apply pitch envelope.
-    freq = add_fr1x32(pitch_env, synth->freq);
-
-    // Apply pitch LFO.
-    freq = add_fr1x32(freq, mult_fr1x32x32(freq, pitch_lfo));
-
-    // Set oscillator frequency.
-    Waveform_set_freq(&synth->waveform_a, freq);
-    Waveform_set_freq(&synth->waveform_b, fix16_mul_fract(freq, synth->tune));
-
-    // Generate waveforms.
-    Waveform_set_shape(&synth->waveform_a, synth->osc_type);
-    Waveform_set_shape(&synth->waveform_b, synth->osc_type);
-
-    // Shift right to prevent clipping.
-    waveform_a = shr_fr1x32(Waveform_next(&synth->waveform_a), 1);
-    waveform_b = shr_fr1x32(Waveform_next(&synth->waveform_b), 1);
-
-    // Sum waveforms.
-    waveform = add_fr1x32(waveform_a, waveform_b);
-
-    // Apply amp envelope.
-    waveform = mult_fr1x32x32(waveform, amp_env);
-
-    // Apply amp LFO.
-    waveform = add_fr1x32(waveform, mult_fr1x32x32(waveform, amp_lfo));
-
-    // Apply filter envelope.
-    cutoff = add_fr1x32(filter_env, synth->cutoff);
-
-    // Apply filter LFO.
-    cutoff = add_fr1x32(cutoff, mult_fr1x32x32(cutoff, filter_lfo));
-
-    // Set filter cutoff and resonance.
-    FilterSVF_set_coeff(&synth->filter, cutoff);
-    FilterSVF_set_rq(&synth->filter, synth->res);
-
-    // filter_ladder_set_freq(&synth->ladder, cutoff);
-    // filter_ladder_set_fb(&synth->ladder, FR32_MAX - synth->res);
-
-    // Apply filter.
-    switch (synth->filter_type) {
-
-    case FILTER_TYPE_LPF:
-        waveform = FilterSVF_softclip_asym_lpf_next(&synth->filter, waveform);
-        break;
-
-    case FILTER_TYPE_BPF:
-        waveform = FilterSVF_softclip_asym_bpf_next(&synth->filter, waveform);
-        break;
-
-    case FILTER_TYPE_HPF:
-        waveform = FilterSVF_softclip_asym_hpf_next(&synth->filter, waveform);
-        // waveform = filter_ladder_lpf_asym_os_next(&synth->ladder,
-        // waveform);
-        // waveform = filter_ladder_lpf_next(&synth->ladder, waveform);
-        break;
-
-    default:
-        // Default to LPF.
-        waveform = FilterSVF_softclip_asym_lpf_next(&synth->filter, waveform);
-        break;
-    }
-
-    // Scale amplitude by level.
-    waveform = mult_fr1x32x32(waveform, synth->amp_level);
-
-    // Block DC.
-    waveform = HPF_dc_block2(&synth->dc_blocker, waveform);
-
-    return waveform;
-}
 
 /**
  * @brief   Initialise module.
@@ -367,10 +147,11 @@ void module_init(void) {
 
     Aleph_init(&g_aleph, SAMPLERATE, g_mempool, MEMPOOL_SIZE, NULL);
 
-    MonoSynth_init(&g_voice);
+    Aleph_MonoSynth_init(&g_synth, &g_aleph);
 
     /// TODO: Define defaults.
     //
+
     module_set_param(PARAM_AMP_LEVEL, FR32_MAX);
     module_set_param(PARAM_OSC_TYPE, 2);
     module_set_param(PARAM_FREQ, 220 << 16);
@@ -407,7 +188,10 @@ void module_process(fract32 *in, fract32 *out) {
 
     fract32 output;
 
-    output = MonoSynth_tick(&g_voice);
+    output = Aleph_MonoSynth_next(&g_synth);
+
+    // Scale amplitude by level.
+    output = mult_fr1x32x32(output, g_amp_level);
 
     // Set output.
     out[0] = output;
@@ -425,134 +209,134 @@ void module_set_param(uint16_t param_index, int32_t value) {
     switch (param_index) {
 
     case PARAM_FREQ:
-        g_voice.freq = value;
+        Aleph_MonoSynth_set_freq(&g_synth, value);
         break;
 
     case PARAM_TUNE:
-        g_voice.tune = value;
+        Aleph_MonoSynth_set_freq_offset(&g_synth, value);
         break;
 
     case PARAM_AMP_LEVEL:
-        g_voice.amp_level = value;
+        g_amp_level = value;
         break;
 
-    case PARAM_VEL:
-        if (value) {
-            g_voice.vel = value;
-        }
-        break;
+        /// TODO: Envelope depth modulation input.
+        //
+        // case PARAM_VEL:
+        //     if (value) {
+        //         g_velocity = value;
+        //         Aleph_MonoSynth_set_amp_env_depth(
+        //             &g_synth, mult_fr1x32x32(g_synth->amp_env_depth,
+        //             g_velocity));
+        //     }
+        //     break;
 
     case PARAM_GATE:
-        if (value) {
-            /// TODO: LFO phase reset parameter.
-            // g_voice.amp_lfo.phase = 0;
-            // g_voice.filter_lfo.phase = 0;
-            // g_voice.pitch_lfo.phase = 0;
-
-            EnvADSR_press(&g_voice.amp_env);
-            EnvADSR_press(&g_voice.filter_env);
-            EnvADSR_press(&g_voice.pitch_env);
-        } else {
-            EnvADSR_release(&g_voice.amp_env);
-            EnvADSR_release(&g_voice.filter_env);
-            EnvADSR_release(&g_voice.pitch_env);
-        }
+        Aleph_MonoSynth_set_gate(&g_synth, value);
+        Aleph_MonoSynth_set_gate(&g_synth, value);
+        Aleph_MonoSynth_set_gate(&g_synth, value);
         break;
 
     case PARAM_AMP_ENV_ATTACK:
-        EnvADSR_set_attack(&g_voice.amp_env, value);
+        Aleph_MonoSynth_set_amp_env_attack(&g_synth, value);
         break;
 
     case PARAM_AMP_ENV_DECAY:
-        EnvADSR_set_decay(&g_voice.amp_env, value);
+        Aleph_MonoSynth_set_amp_env_decay(&g_synth, value);
         break;
 
     case PARAM_AMP_ENV_SUSTAIN:
-        EnvADSR_set_sustain(&g_voice.amp_env, value);
+        Aleph_MonoSynth_set_amp_env_sustain(&g_synth, value);
         break;
 
     case PARAM_AMP_ENV_RELEASE:
-        EnvADSR_set_release(&g_voice.amp_env, value);
+        Aleph_MonoSynth_set_amp_env_release(&g_synth, value);
+        break;
+
+    case PARAM_AMP_ENV_DEPTH:
+        Aleph_MonoSynth_set_amp_env_depth(&g_synth, value);
+        // Aleph_MonoSynth_set_amp_env_depth(
+        //     &g_synth, mult_fr1x32x32(g_synth->amp_env_depth, g_velocity));
         break;
 
     case PARAM_FILTER_ENV_ATTACK:
-        EnvADSR_set_attack(&g_voice.filter_env, value);
+        Aleph_MonoSynth_set_filter_env_attack(&g_synth, value);
         break;
 
     case PARAM_FILTER_ENV_DECAY:
-        EnvADSR_set_decay(&g_voice.filter_env, value);
+        Aleph_MonoSynth_set_filter_env_decay(&g_synth, value);
         break;
 
     case PARAM_FILTER_ENV_SUSTAIN:
-        EnvADSR_set_sustain(&g_voice.filter_env, value);
+        Aleph_MonoSynth_set_filter_env_sustain(&g_synth, value);
         break;
 
     case PARAM_FILTER_ENV_RELEASE:
-        EnvADSR_set_release(&g_voice.filter_env, value);
+        Aleph_MonoSynth_set_filter_env_release(&g_synth, value);
         break;
 
     case PARAM_FILTER_ENV_DEPTH:
-        g_voice.filter_env_depth = value;
+        Aleph_MonoSynth_set_filter_env_depth(&g_synth, value);
         break;
 
     case PARAM_PITCH_ENV_ATTACK:
-        EnvADSR_set_attack(&g_voice.pitch_env, value);
+        Aleph_MonoSynth_set_pitch_env_attack(&g_synth, value);
         break;
 
     case PARAM_PITCH_ENV_DECAY:
-        EnvADSR_set_decay(&g_voice.pitch_env, value);
+        Aleph_MonoSynth_set_pitch_env_decay(&g_synth, value);
         break;
 
     case PARAM_PITCH_ENV_SUSTAIN:
-        EnvADSR_set_sustain(&g_voice.pitch_env, value);
+        Aleph_MonoSynth_set_pitch_env_sustain(&g_synth, value);
         break;
 
     case PARAM_PITCH_ENV_RELEASE:
-        EnvADSR_set_release(&g_voice.pitch_env, value);
+        Aleph_MonoSynth_set_pitch_env_release(&g_synth, value);
         break;
 
     case PARAM_PITCH_ENV_DEPTH:
-        g_voice.pitch_env_depth = value;
+        Aleph_MonoSynth_set_pitch_env_depth(&g_synth, value);
         break;
 
     case PARAM_CUTOFF:
-        g_voice.cutoff = value;
+        Aleph_MonoSynth_set_cutoff(&g_synth, value);
         break;
 
     case PARAM_RES:
-        g_voice.res = value;
+        Aleph_MonoSynth_set_res(&g_synth, value);
         break;
 
     case PARAM_OSC_TYPE:
-        g_voice.osc_type = value;
+        Aleph_MonoSynth_set_shape(&g_synth, value);
         break;
 
     case PARAM_FILTER_TYPE:
-        g_voice.filter_type = value;
+        Aleph_MonoSynth_set_filter_type(&g_synth, value);
         break;
 
     case PARAM_AMP_LFO_DEPTH:
-        g_voice.amp_lfo_depth = value;
+        Aleph_MonoSynth_set_amp_lfo_depth(&g_synth, value);
         break;
     //
     case PARAM_AMP_LFO_SPEED:
-        Oscillator_set_freq(&g_voice.amp_lfo, value);
+        Aleph_MonoSynth_set_amp_lfo_freq(&g_synth, value);
         break;
 
     case PARAM_FILTER_LFO_DEPTH:
-        g_voice.filter_lfo_depth = value;
+        Aleph_MonoSynth_set_filter_lfo_depth(&g_synth, value);
         break;
 
     case PARAM_FILTER_LFO_SPEED:
-        Oscillator_set_freq(&g_voice.filter_lfo, value);
+        Aleph_MonoSynth_set_filter_lfo_freq(&g_synth, value);
         break;
 
     case PARAM_PITCH_LFO_DEPTH:
-        g_voice.pitch_lfo_depth = value;
+        Aleph_MonoSynth_set_pitch_lfo_depth(&g_synth, value);
         break;
 
     case PARAM_PITCH_LFO_SPEED:
-        Oscillator_set_freq(&g_voice.pitch_lfo, value);
+        Aleph_MonoSynth_set_pitch_lfo_freq(&g_synth, value);
         break;
 
     default:

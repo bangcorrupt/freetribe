@@ -40,6 +40,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
+#include <stdint.h>
 #include <string.h>
 
 #include "svc_sysex.h"
@@ -93,7 +94,9 @@ t_sysex_parse_result sysex_parse(uint8_t *msg, uint32_t length) {
             break;
 
         case PARSE_PRODUCT_ID:
-            product_id = *msg++ << 16 | *msg++ << 8 | *msg++;
+            product_id = *msg++ << 16;
+            product_id |= *msg++ << 8;
+            product_id |= *msg++;
 
             length -= 2;
 
@@ -129,8 +132,8 @@ t_sysex_parse_result _parse_msg_body(uint8_t *msg, uint32_t msg_length) {
 
     t_sysex_parse_result result = SYSEX_PARSE_ERROR;
 
-    static uint32_t write_address = 0;
-    static uint32_t write_length = 0;
+    static uint8_t *write_address;
+    static uint32_t write_length;
 
     t_msg_id msg_id = *msg++;
 
@@ -141,9 +144,11 @@ t_sysex_parse_result _parse_msg_body(uint8_t *msg, uint32_t msg_length) {
         if (msg_length) {
             sysex_decode(msg, g_decode_buffer, msg_length);
 
-            // TODO: Helper function for pack/unpack int.
-            write_address = g_decode_buffer[0] | g_decode_buffer[1] << 8 |
-                            g_decode_buffer[2] << 16 | g_decode_buffer[3] << 24;
+            // TODO: Helper macro to pack/unpack int.
+            write_address =
+                (uint8_t *)(g_decode_buffer[0] | g_decode_buffer[1] << 8 |
+                            g_decode_buffer[2] << 16 |
+                            g_decode_buffer[3] << 24);
 
             write_length = g_decode_buffer[4] | g_decode_buffer[5] << 8 |
                            g_decode_buffer[6] << 16 | g_decode_buffer[7] << 24;
