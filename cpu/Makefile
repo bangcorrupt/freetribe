@@ -17,6 +17,7 @@ INC_DIRS := $(NEWLIB)
 
 BUILD_DIR := ./build
 SRC_DIR := ./src
+LIB_DIR := ./lib
 APP_DIR ?= $(SRC_DIR)/apps/$(APP)
 
 # Defining the cross compiler tool prefix.
@@ -52,6 +53,8 @@ BIN_FLAGS := -O binary
 # but we want to send the * directly to the find command.
 SRCS := $(shell find $(SRC_DIR)  \( -name '*.cpp' -or -name '*.c' -or -name '*.S' \) \
 		-not -path "$(SRC_DIR)/apps/*")
+
+
 SRCS += $(shell find $(APP_DIR)  -name '*.cpp' -or -name '*.c' -or -name '*.S')
 
 # Prepends BUILD_DIR and appends .o to every src file.
@@ -64,6 +67,8 @@ DEPS := $(OBJS:.o=.d)
 
 # Every folder in ./src will need to be passed to GCC so that it can find header files.
 INC_DIRS += $(shell find $(SRC_DIR) -type d -not -path "$(SRC_DIR)/apps/*" )
+
+
 INC_DIRS += $(shell find $(APP_DIR) -type d)
 
 # Add a prefix to INC_DIRS. So moduleA would become -ImoduleA. GCC understands this -I flag.
