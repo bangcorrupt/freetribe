@@ -207,7 +207,7 @@ t_status app_init(void) {
 
     float hz;
     for (i = 0; i <= 127; i++) {
-        /// Initialise pitch to frequency lookup table.
+        // Initialise pitch to frequency lookup table.
         hz = freq_12tet_lut[i * 2];
 
         /// TODO: Oscillators in the Aleph DSP library
@@ -215,6 +215,7 @@ t_status app_init(void) {
         ///       It's probably user error, maybe
         ///       samplerate. As a workaround, we
         ///       scale the frequency here to compensate.
+        ///       Should multiplication be fixed point?
         //
         hz *= 0.6827421407069484;
 
@@ -222,9 +223,9 @@ t_status app_init(void) {
         g_midi_hz_lut[i] = (int32_t)hz;
     }
 
-    /// TODO: Should be log?
+    /// TODO: Should be log.
     //
-    /// Initialise pitch mod lookup table.
+    // Initialise pitch mod lookup table.
     float tune;
     for (i = 0; i <= 255; i++) {
 
