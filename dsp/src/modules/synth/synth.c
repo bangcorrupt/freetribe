@@ -233,8 +233,6 @@ void module_set_param(uint16_t param_index, int32_t value) {
 
     case PARAM_GATE:
         Aleph_MonoSynth_set_gate(&g_synth, value);
-        Aleph_MonoSynth_set_gate(&g_synth, value);
-        Aleph_MonoSynth_set_gate(&g_synth, value);
         break;
 
     case PARAM_AMP_ENV_ATTACK:
