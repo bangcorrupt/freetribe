@@ -6,4 +6,4 @@
 	url = ../aleph-dsp.git
 [submodule "cpu/lib/LEAF"]
 	path = cpu/lib/LEAF
-	url = git@github.com:bangcorrupt/LEAF.git
+	url = ../LEAF.git
