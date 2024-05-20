@@ -159,7 +159,6 @@ void module_init(void) {
     Aleph_PolySynth_init(&g_module.synth, &g_aleph, POLYSYNTH_NUM_VOICES);
 
     /// TODO: Define defaults.
-    //
 
     module_set_param(PARAM_AMP_LEVEL, FR32_MAX);
     module_set_param(PARAM_OSC_TYPE, 2);
