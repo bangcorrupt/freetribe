@@ -54,6 +54,10 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros and Definitions ---------------------------------------*/
 
+#define CONTROL_RATE (1000)
+#define MEMPOOL_SIZE (0x1000)
+#define POLY_VOICE_COUNT (16)
+
 #define KNOB_LEVEL 0x00
 #define KNOB_PITCH 0x02
 #define KNOB_RES 0x03
@@ -179,6 +183,11 @@ static e_mod_type g_mod_type;
 static t_keyboard g_kbd;
 static t_scale g_scale;
 
+static LEAF g_leaf;
+static char g_mempool[MEMPOOL_SIZE];
+
+static tSimplePoly g_poly;
+
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
@@ -253,6 +262,10 @@ t_status app_init(void) {
 
         g_filter_res_lut[i] = res;
     }
+
+    LEAF_init(&g_leaf, CONTROL_RATE, g_mempool, MEMPOOL_SIZE, NULL);
+
+    tSimplePoly_init(&g_poly, POLY_VOICE_COUNT, &g_leaf);
 
     scale_init(&g_scale, DEFAULT_SCALE_NOTES, DEFAULT_SCALE_TONES);
     keyboard_init(&g_kbd, &g_scale);
