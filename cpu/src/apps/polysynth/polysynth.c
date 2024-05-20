@@ -102,6 +102,7 @@ under the terms of the GNU Affero General Public License as published by
 // #define DEFAULT_PITCH_LFO_SPEED FIX16_ONE
 
 typedef enum {
+    PARAM_VOICE_INDEX,
     PARAM_FREQ,
     PARAM_GATE,
     PARAM_VEL,
