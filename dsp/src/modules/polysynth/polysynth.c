@@ -48,10 +48,10 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-#define SAMPLERATE 48000
-#define MEMPOOL_SIZE 0x4000
+#define SAMPLERATE (48000)
+#define MEMPOOL_SIZE (0x4000)
 
-#define POLYSYNTH_NUM_VOICES 16
+#define POLYSYNTH_NUM_VOICES (2)
 
 /// TODO: Struct for parameter type.
 ///         scaler,
@@ -162,7 +162,7 @@ void module_init(void) {
 
     module_set_param(PARAM_AMP_LEVEL, FR32_MAX);
     module_set_param(PARAM_OSC_TYPE, 2);
-    module_set_param(PARAM_FREQ, 220 << 16);
+    // module_set_param(PARAM_FREQ, 220 << 16);
     module_set_param(PARAM_TUNE, FIX16_ONE);
     module_set_param(PARAM_CUTOFF, 0x326f6abb);
     module_set_param(PARAM_RES, FR32_MAX);

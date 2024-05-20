@@ -39,6 +39,10 @@ under the terms of the GNU Affero General Public License as published by
 
 #include <blackfin.h>
 #include <builtins.h>
+#include <stdint.h>
+
+#include "cdefBF52x_base.h"
+#include "gcc.h"
 
 #include "init.h"
 #include "module.h"
@@ -51,11 +55,30 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Static variable definitions ----------------------------------*/
 
+static uint32_t g_saved_imask0;
+static uint32_t g_saved_imask1;
+
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
 
 /*----- Extern function implementations ------------------------------*/
+
+void disable_interrupts(void) {
+
+    g_saved_imask0 = *pSIC_IMASK0;
+    g_saved_imask1 = *pSIC_IMASK1;
+    *pSIC_IMASK0 = 0;
+    *pSIC_IMASK1 = 0;
+    ssync();
+}
+
+void enable_interrupts(void) {
+
+    *pSIC_IMASK0 = g_saved_imask0;
+    *pSIC_IMASK1 = g_saved_imask1;
+    ssync();
+}
 
 int main(void) {
 
@@ -81,10 +104,15 @@ int main(void) {
     while (1) {
 
         if (sport0_frame_received()) {
+
+            disable_interrupts();
+
             /// TODO: Maybe disable interrupts while processing audio.
             module_process(sport0_get_rx_buffer(), sport0_get_tx_buffer());
 
             sport0_frame_processed();
+
+            enable_interrupts();
         }
 
         svc_cpu_task();

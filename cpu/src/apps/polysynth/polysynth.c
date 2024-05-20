@@ -57,7 +57,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #define CONTROL_RATE (1000)
 #define MEMPOOL_SIZE (0x1000)
-#define POLY_VOICE_COUNT (16)
+#define POLY_VOICE_COUNT (2)
 
 #define KNOB_LEVEL 0x00
 #define KNOB_PITCH 0x02
