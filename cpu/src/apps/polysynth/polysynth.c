@@ -470,30 +470,6 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
     }
 }
 
-// static void _trigger_callback(uint8_t pad, uint8_t vel, bool state) {
-//     /// TODO: Use MIDI note stack from LEAF.
-//
-//     int32_t freq;
-//     static uint8_t note_count;
-//
-//     if (state) {
-//         note_count++;
-//         // freq = g_midi_hz_lut[pad + 32];
-//         freq = g_midi_hz_lut[keyboard_map_note(&g_kbd, pad)];
-//         ft_set_module_param(0, PARAM_FREQ, freq);
-//
-//         if (note_count) {
-//             ft_set_module_param(0, PARAM_VEL, vel << 23);
-//             ft_set_module_param(0, PARAM_GATE, (bool)note_count);
-//         }
-//     } else {
-//         note_count--;
-//         if (!note_count) {
-//             ft_set_module_param(0, PARAM_VEL, vel << 23);
-//             ft_set_module_param(0, PARAM_GATE, (bool)note_count);
-//         }
-//     }
-// }
 static void _trigger_callback(uint8_t pad, uint8_t vel, bool state) {
 
     int32_t freq;
