@@ -50,6 +50,8 @@ under the terms of the GNU Affero General Public License as published by
 #include "gui_window.h"
 #include "synth_gui.h"
 
+#include "leaf.h"
+
 /*----- Macros and Definitions ---------------------------------------*/
 
 #define KNOB_LEVEL 0x00

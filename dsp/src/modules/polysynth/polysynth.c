@@ -44,8 +44,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "utils.h"
 
-#include "synth.h"
-#include <stdint.h>
+// #include "polysynth.h"
 
 /*----- Macros and Definitions ---------------------------------------*/
 
