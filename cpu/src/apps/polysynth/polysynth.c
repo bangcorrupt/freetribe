@@ -472,6 +472,8 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
 
 static void _trigger_callback(uint8_t pad, uint8_t vel, bool state) {
 
+    /// TODO: Polyphonic velocity.
+
     int32_t freq;
     uint8_t note;
     uint8_t voice;

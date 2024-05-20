@@ -215,6 +215,8 @@ void module_process(fract32 *in, fract32 *out) {
  */
 void module_set_param(uint16_t param_index, int32_t value) {
 
+    /// TODO: Polyphonic velocity.
+
     int i;
 
     switch (param_index) {
