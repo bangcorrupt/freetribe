@@ -228,14 +228,14 @@ void sport1_init(void) {
     ssync();
 }
 
-fract32 *sport0_get_rx_buffer(void) { return g_codec_in; }
+inline fract32 *sport0_get_rx_buffer(void) { return g_codec_in; }
 
-fract32 *sport0_get_tx_buffer(void) { return g_codec_out; }
+inline fract32 *sport0_get_tx_buffer(void) { return g_codec_out; }
 
 /// TODO: DMA ping-pong block buffer.
-bool sport0_frame_received(void) { return g_sport0_frame_received; }
+inline bool sport0_frame_received(void) { return g_sport0_frame_received; }
 
-void sport0_frame_processed(void) { g_sport0_frame_received = false; }
+inline void sport0_frame_processed(void) { g_sport0_frame_received = false; }
 
 /// TODO: Block processing.  For now we process each frame as it arrives.
 __attribute__((interrupt_handler)) static void _sport0_isr(void) {
