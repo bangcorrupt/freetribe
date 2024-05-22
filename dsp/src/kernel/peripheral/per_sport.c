@@ -87,16 +87,6 @@ static void _sport0_isr(void) __attribute__((interrupt_handler));
 
 /*----- Extern function implementations ------------------------------*/
 
-/// TODO: Move to separate module.
-//
-int cycles() {
-    volatile long int ret;
-
-    __asm__ __volatile__("%0 = CYCLES;\n\t" : "=&d"(ret) : : "R1");
-
-    return ret;
-}
-
 void sport0_init(void) {
 
     /// TODO: Do we need secondary enabled?
