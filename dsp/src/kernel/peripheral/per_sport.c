@@ -87,6 +87,8 @@ static void _sport0_isr(void) __attribute__((interrupt_handler));
 
 /*----- Extern function implementations ------------------------------*/
 
+/// TODO: Move to separate module.
+//
 int cycles() {
     volatile long int ret;
 
@@ -97,7 +99,7 @@ int cycles() {
 
 void sport0_init(void) {
 
-    // TODO: Do we need secondary enabled?
+    /// TODO: Do we need secondary enabled?
 
     // Configure SPORT0 Rx.
     // Clock Falling Edge, Receive Frame Sync, Data Format Sign Extend.
@@ -110,7 +112,7 @@ void sport0_init(void) {
     *pSPORT0_TCR2 = TSFSE | TXSE | SLEN(0x1f);
     ssync();
 
-    // TODO: DMA linked descriptor mode.
+    /// TODO: DMA linked descriptor mode.
 
     // SPORT0 Rx DMA.
     *pDMA3_PERIPHERAL_MAP = PMAP_SPORT0RX;
@@ -172,7 +174,7 @@ void sport0_init(void) {
 
 void sport1_init(void) {
 
-    // TODO: Do we need secondary enabled?
+    /// TODO: Do we need secondary enabled?
 
     // Configure SPORT1 Rx.
     *pSPORT1_RCR1 = RCKFE | RFSR | DTYPE_SIGX;
@@ -183,7 +185,7 @@ void sport1_init(void) {
     *pSPORT1_TCR2 = TSFSE | TXSE | SLEN(0x1f);
     ssync();
 
-    // TODO: DMA linked descriptor mode.
+    /// TODO: DMA linked descriptor mode.
 
     // SPORT1 Rx DMA.
     *pDMA5_PERIPHERAL_MAP = PMAP_SPORT1RX;
@@ -226,16 +228,16 @@ void sport1_init(void) {
     ssync();
 }
 
-fract32 *sport0_get_rx_buffer(void) { return &g_codec_in[0]; }
+fract32 *sport0_get_rx_buffer(void) { return g_codec_in; }
 
-fract32 *sport0_get_tx_buffer(void) { return &g_codec_out[0]; }
+fract32 *sport0_get_tx_buffer(void) { return g_codec_out; }
 
-// TODO: DMA ping-pong block buffer.
+/// TODO: DMA ping-pong block buffer.
 bool sport0_frame_received(void) { return g_sport0_frame_received; }
 
 void sport0_frame_processed(void) { g_sport0_frame_received = false; }
 
-// TODO: Block processing.  For now we process each frame as it arrives.
+/// TODO: Block processing.  For now we process each frame as it arrives.
 __attribute__((interrupt_handler)) static void _sport0_isr(void) {
 
     // static uint16_t i = 0;
@@ -251,13 +253,13 @@ __attribute__((interrupt_handler)) static void _sport0_isr(void) {
     *pDMA3_IRQ_STATUS = DMA_DONE;
     ssync();
 
-    // TODO: DMA ping-pong block buffer.
+    /// TODO: DMA ping-pong block buffer.
 
     // Get input from codec.
     g_codec_in[0] = g_codec_rx_buffer[0];
     g_codec_in[1] = g_codec_rx_buffer[1];
 
-    // TODO: Is CPU MCASP clock actually connected?
+    /// TODO: Is CPU MCASP clock actually connected?
 
     // Get input from CPU.
     // g_cpu_in[0] = g_cpu_rx_buffer[0];
