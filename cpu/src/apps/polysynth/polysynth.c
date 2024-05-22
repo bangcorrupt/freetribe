@@ -56,7 +56,8 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Macros and Definitions ---------------------------------------*/
 
 #define CONTROL_RATE (1000)
-#define MEMPOOL_SIZE (0x1000)
+// #define MEMPOOL_SIZE (0x1000)
+#define MEMPOOL_SIZE (0x4000)
 #define POLY_VOICE_COUNT (2)
 
 #define KNOB_LEVEL 0x00
@@ -476,28 +477,36 @@ static void _trigger_callback(uint8_t pad, uint8_t vel, bool state) {
 
     int32_t freq;
     uint8_t note;
-    uint8_t voice;
+    int32_t voice;
 
     note = keyboard_map_note(&g_kbd, pad);
 
     if (state) {
 
-        freq = g_midi_hz_lut[note];
         voice = tSimplePoly_noteOn(&g_poly, note, vel);
 
-        ft_set_module_param(0, PARAM_VOICE_INDEX, voice);
+        if (voice >= 0) {
 
-        ft_set_module_param(0, PARAM_FREQ, freq);
-        // ft_set_module_param(0, PARAM_VEL, vel << 23);
-        ft_set_module_param(0, PARAM_GATE, state);
+            freq = g_midi_hz_lut[note];
+
+            ft_set_module_param(0, PARAM_VOICE_INDEX, voice);
+
+            ft_set_module_param(0, PARAM_FREQ, freq);
+            // ft_set_module_param(0, PARAM_VEL, vel << 23);
+            ft_set_module_param(0, PARAM_GATE, state);
+        }
 
     } else {
+
         voice = tSimplePoly_noteOff(&g_poly, note);
 
-        ft_set_module_param(0, PARAM_VOICE_INDEX, voice);
+        if (voice >= 0) {
 
-        // ft_set_module_param(0, PARAM_VEL, vel << 23);
-        ft_set_module_param(0, PARAM_GATE, state);
+            ft_set_module_param(0, PARAM_VOICE_INDEX, voice);
+
+            // ft_set_module_param(0, PARAM_VEL, vel << 23);
+            ft_set_module_param(0, PARAM_GATE, state);
+        }
     }
 }
 

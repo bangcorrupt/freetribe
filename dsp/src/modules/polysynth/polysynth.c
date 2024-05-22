@@ -130,7 +130,7 @@ typedef enum {
 typedef struct {
 
     Aleph_PolySynth synth;
-    uint8_t voice_index;
+    int32_t voice_index;
     fract32 amp_level;
     fract32 velocity;
 

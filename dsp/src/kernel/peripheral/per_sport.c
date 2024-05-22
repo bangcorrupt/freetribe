@@ -45,6 +45,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "per_sport.h"
 
+#include "knl_profile.h"
+
 /*----- Macros and Definitions ---------------------------------------*/
 
 /// TODO: Add this to defBF52x_base.h and rebuild toolchain.
@@ -77,7 +79,7 @@ static fract32 g_cpu_out[2];
 
 volatile static bool g_sport0_frame_received = false;
 
-static uint32_t g_sport_isr_period;
+static uint32_t g_sport_isr_period[CYCLE_LOG_LENGTH];
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -230,14 +232,20 @@ inline void sport0_frame_processed(void) { g_sport0_frame_received = false; }
 /// TODO: Block processing.  For now we process each frame as it arrives.
 __attribute__((interrupt_handler)) static void _sport0_isr(void) {
 
-    // static uint16_t i = 0;
+    static int i = 0;
 
-    // static uint32_t cycles_this;
-    // static uint32_t cycles_last;
-    //
-    // cycles_this = cycles();
-    // g_sport_isr_period = cycles_this - cycles_last;
-    // cycles_last = cycles_this;
+    static uint32_t cycles_this;
+    static uint32_t cycles_last;
+
+    cycles_this = cycles();
+
+    g_sport_isr_period[i] = cycles_this - cycles_last;
+
+    cycles_last = cycles_this;
+
+    if (i >= CYCLE_LOG_LENGTH) {
+        i = 0;
+    }
 
     // Clear interrupt status.
     *pDMA3_IRQ_STATUS = DMA_DONE;
