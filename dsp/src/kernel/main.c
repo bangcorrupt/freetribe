@@ -69,6 +69,7 @@ static uint32_t g_saved_imask;
 inline void disable_interrupts(void) {
 
     g_saved_imask = *pIMASK;
+    *pIMASK = 0;
     ssync();
 }
 
