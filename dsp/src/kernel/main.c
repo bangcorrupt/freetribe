@@ -55,8 +55,10 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Static variable definitions ----------------------------------*/
 
-static uint32_t g_saved_imask0;
-static uint32_t g_saved_imask1;
+static uint32_t g_saved_imask;
+
+// static uint32_t g_saved_imask0;
+// static uint32_t g_saved_imask1;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -64,19 +66,15 @@ static uint32_t g_saved_imask1;
 
 /*----- Extern function implementations ------------------------------*/
 
-void disable_interrupts(void) {
+inline void disable_interrupts(void) {
 
-    g_saved_imask0 = *pSIC_IMASK0;
-    g_saved_imask1 = *pSIC_IMASK1;
-    *pSIC_IMASK0 = 0;
-    *pSIC_IMASK1 = 0;
+    g_saved_imask = *pIMASK;
     ssync();
 }
 
-void enable_interrupts(void) {
+inline void enable_interrupts(void) {
 
-    *pSIC_IMASK0 = g_saved_imask0;
-    *pSIC_IMASK1 = g_saved_imask1;
+    *pIMASK = g_saved_imask;
     ssync();
 }
 

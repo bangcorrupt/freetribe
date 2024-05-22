@@ -84,6 +84,7 @@ static uint32_t g_sport_isr_period;
 static void _sport0_isr(void) __attribute__((interrupt_handler));
 
 /*----- Extern function implementations ------------------------------*/
+
 int cycles() {
     volatile long int ret;
 
