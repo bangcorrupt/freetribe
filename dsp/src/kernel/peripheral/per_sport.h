@@ -51,9 +51,6 @@ extern "C" {
 
 /*----- Extern variable declarations ---------------------------------*/
 
-extern fract32 in[2];
-extern fract32 out[2];
-
 /*----- Extern function prototypes -----------------------------------*/
 
 void sport0_init(void);

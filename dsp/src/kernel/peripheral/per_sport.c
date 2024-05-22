@@ -53,25 +53,27 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Static variable definitions ----------------------------------*/
 
+/// TODO: Do buffers need to be volatile?
+
 // SPORT0 DMA transmit buffer
-volatile static fract32 g_codec_tx_buffer[2];
+static fract32 g_codec_tx_buffer[2];
 // SPORT0 DMA receive buffer
-volatile static fract32 g_codec_rx_buffer[2];
+static fract32 g_codec_rx_buffer[2];
 
 // SPORT1 DMA transmit buffer
-volatile static int32_t g_cpu_tx_buffer[2];
+static int32_t g_cpu_tx_buffer[2];
 // SPORT1 DMA receive buffer
-volatile static int32_t g_cpu_rx_buffer[2];
+static int32_t g_cpu_rx_buffer[2];
 
 // 2 channels of input from ADC.
-volatile static fract32 g_codec_in[2];
+static fract32 g_codec_in[2];
 // 2 channels of output to DAC.
-volatile static fract32 g_codec_out[2];
+static fract32 g_codec_out[2];
 
 // 2 channels of input from CPU.
-volatile static fract32 g_cpu_in[2];
+static fract32 g_cpu_in[2];
 // 2 channels of output to CPU.
-volatile static fract32 g_cpu_out[2];
+static fract32 g_cpu_out[2];
 
 volatile static bool g_sport0_frame_received = false;
 
@@ -224,9 +226,9 @@ void sport1_init(void) {
     ssync();
 }
 
-fract32 *sport0_get_rx_buffer(void) { return &g_codec_in; }
+fract32 *sport0_get_rx_buffer(void) { return &g_codec_in[0]; }
 
-fract32 *sport0_get_tx_buffer(void) { return &g_codec_out; }
+fract32 *sport0_get_tx_buffer(void) { return &g_codec_out[0]; }
 
 // TODO: DMA ping-pong block buffer.
 bool sport0_frame_received(void) { return g_sport0_frame_received; }
