@@ -130,7 +130,7 @@ typedef enum {
 typedef struct {
 
     Aleph_PolySynth synth;
-    int32_t voice_index;
+    uint8_t voice_index;
     fract32 amp_level;
     fract32 velocity;
 
@@ -216,12 +216,11 @@ void module_set_param(uint16_t param_index, int32_t value) {
 
     /// TODO: Polyphonic velocity.
 
-    int i;
-
     switch (param_index) {
 
     case PARAM_VOICE_INDEX:
-        g_module.voice_index = value;
+        g_module.voice_index = (uint8_t)(value & 0xff);
+        break;
 
     case PARAM_FREQ:
         Aleph_PolySynth_set_voice_freq(&g_module.synth, g_module.voice_index,
@@ -250,12 +249,11 @@ void module_set_param(uint16_t param_index, int32_t value) {
     case PARAM_GATE:
         Aleph_PolySynth_set_voice_gate(&g_module.synth, g_module.voice_index,
                                        value);
+        // Aleph_PolySynth_set_gate(&g_module.synth, value);
         break;
 
     case PARAM_AMP_ENV_ATTACK:
-        for (i = 0; i < POLYSYNTH_NUM_VOICES; i++) {
-            Aleph_PolySynth_set_amp_env_attack(&g_module.synth, value);
-        }
+        Aleph_PolySynth_set_amp_env_attack(&g_module.synth, value);
         break;
 
     case PARAM_AMP_ENV_DECAY:
