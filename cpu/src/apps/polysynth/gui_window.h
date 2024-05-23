@@ -29,14 +29,14 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /*
- * @file    per_sport.h
+ * @file    gui_window.h
  *
- * @brief   Public API for BF523 SPORT peripheral driver.
+ * @brief   Public API for Freetribe GUI window management.
  *
  */
 
-#ifndef PER_SPORT_H
-#define PER_SPORT_H
+#ifndef GUI_WINDOW_H
+#define GUI_WINDOW_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,25 +44,29 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
-#include "types.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /*----- Macros and Definitions ---------------------------------------*/
+
+typedef enum {
+    GUI_WINDOW_MAIN,
+
+    GUI_WINDOW_COUNT
+} e_gui_window_index;
 
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
+void gui_window_main_init(void);
+void gui_window_main_show(void);
 
-void sport0_init(void);
-bool sport0_frame_received(void);
-void sport0_frame_processed(void);
-
-fract32 *sport0_get_rx_buffer(void);
-fract32 *sport0_get_tx_buffer(void);
+void gui_textbox_set_value(e_gui_window_index window_index,
+                           uint8_t textbox_index, uint8_t value);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* PER_SPORT_H */
+#endif
 
 /*----- End of file --------------------------------------------------*/

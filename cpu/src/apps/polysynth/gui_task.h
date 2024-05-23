@@ -29,14 +29,14 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /*
- * @file    per_sport.h
+ * @file    gui_task.h
  *
- * @brief   Public API for BF523 SPORT peripheral driver.
+ * @brief   Public API for GUI task.
  *
  */
 
-#ifndef PER_SPORT_H
-#define PER_SPORT_H
+#ifndef GUI_TASK_H
+#define GUI_TASK_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,8 +44,8 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
-#include "types.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /*----- Macros and Definitions ---------------------------------------*/
 
@@ -53,16 +53,17 @@ extern "C" {
 
 /*----- Extern function prototypes -----------------------------------*/
 
-void sport0_init(void);
-bool sport0_frame_received(void);
-void sport0_frame_processed(void);
-
-fract32 *sport0_get_rx_buffer(void);
-fract32 *sport0_get_tx_buffer(void);
+void gui_task(void);
+void gui_print(uint8_t pos_x, uint8_t pos_y, char *text);
+void gui_post(char *text);
+void gui_post_param(char *label, uint8_t value);
+void gui_print_int(uint8_t x_start, uint8_t y_start, uint8_t value);
+void gui_draw_line(uint8_t x_start, uint8_t y_start, uint8_t x_end,
+                   uint8_t y_end, bool colour);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* PER_SPORT_H */
+#endif
 
 /*----- End of file --------------------------------------------------*/

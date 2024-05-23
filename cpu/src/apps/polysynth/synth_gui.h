@@ -29,14 +29,14 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /*
- * @file    per_sport.h
+ * @file    synth_gui.h
  *
- * @brief   Public API for BF523 SPORT peripheral driver.
+ * @brief   Public API for synth example GUI.
  *
  */
 
-#ifndef PER_SPORT_H
-#define PER_SPORT_H
+#ifndef SYNTH_GUI_H
+#define SYNTH_GUI_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,25 +44,29 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
-#include "types.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 /*----- Macros and Definitions ---------------------------------------*/
+
+typedef enum {
+    GUI_MENU_MODULATION,
+
+    GUI_MENU_COUNT
+} e_gui_menu_index;
 
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
 
-void sport0_init(void);
-bool sport0_frame_received(void);
-void sport0_frame_processed(void);
-
-fract32 *sport0_get_rx_buffer(void);
-fract32 *sport0_get_tx_buffer(void);
+bool gui_menu_select(e_gui_menu_index menu);
+void gui_menu_next(e_gui_menu_index menu_index);
+void gui_menu_previous(e_gui_menu_index menu_index);
+e_gui_menu_index gui_menu_current(void);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* PER_SPORT_H */
+#endif
 
 /*----- End of file --------------------------------------------------*/

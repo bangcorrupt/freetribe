@@ -55,7 +55,10 @@ SRCS := $(shell find $(SRC_DIR)  \( -name '*.cpp' -or -name '*.c' -or -name '*.S
 		-not -path "$(SRC_DIR)/apps/*")
 
 
-SRCS += $(shell find $(LIB_DIR)  -name '*.cpp' -or -name '*.c' -or -name '*.S')
+SRCS += $(shell find $(LIB_DIR)  \( -name '*.cpp' -or -name '*.c' -or -name '*.S' \) \
+		-not -path "$(LIB_DIR)/LEAF/*")
+
+SRCS += $(shell find $(LIB_DIR)/LEAF/leaf/  -name '*.cpp' -or -name '*.c' -or -name '*.S')
 
 SRCS += $(shell find $(APP_DIR)  -name '*.cpp' -or -name '*.c' -or -name '*.S')
 
@@ -70,8 +73,10 @@ DEPS := $(OBJS:.o=.d)
 # Every folder in ./src will need to be passed to GCC so that it can find header files.
 INC_DIRS += $(shell find $(SRC_DIR) -type d -not -path "$(SRC_DIR)/apps/*" )
 
+INC_DIRS += $(shell find $(LIB_DIR) -type d -not -path "$(SRC_DIR)/LEAF/*" )
 
-INC_DIRS += $(shell find $(LIB_DIR) -type d)
+
+INC_DIRS += $(shell find $(LIB_DIR)/LEAF/leaf/ -type d)
 
 INC_DIRS += $(shell find $(APP_DIR) -type d)
 

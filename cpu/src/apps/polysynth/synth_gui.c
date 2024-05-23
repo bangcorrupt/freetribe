@@ -29,40 +29,69 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /*
- * @file    per_sport.h
+ * @file    synth_gui.c
  *
- * @brief   Public API for BF523 SPORT peripheral driver.
+ * @brief   GUI for synth example.
  *
  */
 
-#ifndef PER_SPORT_H
-#define PER_SPORT_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /*----- Includes -----------------------------------------------------*/
 
-#include "types.h"
-#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "freetribe.h"
+
+#include "gui_task.h"
+#include "gui_window.h"
+
+#include "synth_gui.h"
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-/*----- Extern variable declarations ---------------------------------*/
+/*----- Static variable definitions ----------------------------------*/
 
-/*----- Extern function prototypes -----------------------------------*/
+static e_gui_menu_index g_gui_menu_current;
 
-void sport0_init(void);
-bool sport0_frame_received(void);
-void sport0_frame_processed(void);
+/*----- Extern variable definitions ----------------------------------*/
 
-fract32 *sport0_get_rx_buffer(void);
-fract32 *sport0_get_tx_buffer(void);
+/*----- Static function prototypes -----------------------------------*/
 
-#ifdef __cplusplus
+/*----- Extern function implementations ------------------------------*/
+
+bool gui_menu_select(e_gui_menu_index menu_index) {
+
+    bool result = false;
+
+    // if (gui_menu_current() != menu_index) {
+
+    switch (menu_index) {
+
+    case GUI_MENU_MODULATION:
+        gui_post("Modulation\n");
+        result = true;
+        break;
+
+    default:
+        break;
+    }
+    // } else {
+    //     //
+    // }
+    return result;
 }
-#endif
-#endif /* PER_SPORT_H */
+
+e_gui_menu_index gui_menu_current(void) { return g_gui_menu_current; }
+
+void gui_menu_next(e_gui_menu_index menu_index) {
+    //
+}
+
+void gui_menu_previous(e_gui_menu_index menu_index) {
+    //
+}
+
+/*----- Static function implementations ------------------------------*/
 
 /*----- End of file --------------------------------------------------*/

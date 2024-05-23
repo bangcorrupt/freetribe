@@ -35,7 +35,7 @@ under the terms of the GNU Affero General Public License as published by
  *
  */
 
-// TODO: initcode in LDR
+/// TODO: initcode in LDR
 
 /*----- Includes -----------------------------------------------------*/
 
@@ -59,8 +59,9 @@ static void _dma_error_isr(void) __attribute__((interrupt_handler));
 
 /*----- Extern function implementations ------------------------------*/
 
+/// TODO: Can incorrect clock configuration damage processor?
+//
 // Initialize clocks
-// TODO: Can incorrect clock configuration damage processor?
 void pll_init(void) {
 
     ADI_SYSCTRL_VALUES sysctl;
@@ -78,7 +79,7 @@ void pll_init(void) {
 
 void ebiu_init(void) {
 
-    // TODO: Do we need this?
+    /// TODO: Do we need this?
     //
     // Straight from the self-test example project
     // Initalize EBIU control registers to enable all banks
@@ -107,7 +108,7 @@ void ebiu_init(void) {
     ssync();
 }
 
-// TODO: Move to DMA peripheral driver.
+/// TODO: Move to DMA peripheral driver.
 void dma_init(void) {
 
     // DMA error interrupt IVG7.
@@ -130,8 +131,9 @@ void dma_init(void) {
 
 __attribute__((interrupt_handler)) static void _dma_error_isr(void) {
 
-    // TODO: Check actual source of error and handle.
-    //          Register handler in peripheral initialisation function.
+    /// TODO: Check actual source of error and handle.
+    ///          Register handler in peripheral initialisation function.
+    //
     // Clear interrupt status.
     *pDMA3_IRQ_STATUS = DMA_ERR;
     *pDMA4_IRQ_STATUS = DMA_ERR;

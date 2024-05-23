@@ -29,14 +29,14 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /*
- * @file    per_sport.h
+ * @file    knl_profile.h
  *
- * @brief   Public API for BF523 SPORT peripheral driver.
+ * @brief   Public API for Freetribe blackfin profiling.
  *
  */
 
-#ifndef PER_SPORT_H
-#define PER_SPORT_H
+#ifndef KNL_PROFILE_H
+#define KNL_PROFILE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,25 +44,19 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
-#include "types.h"
-#include <stdbool.h>
-
 /*----- Macros and Definitions ---------------------------------------*/
+
+#define CYCLE_LOG_LENGTH (16)
 
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
 
-void sport0_init(void);
-bool sport0_frame_received(void);
-void sport0_frame_processed(void);
-
-fract32 *sport0_get_rx_buffer(void);
-fract32 *sport0_get_tx_buffer(void);
+inline int cycles() __attribute__((always_inline));
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* PER_SPORT_H */
+#endif
 
 /*----- End of file --------------------------------------------------*/

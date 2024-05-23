@@ -39,6 +39,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include <blackfin.h>
 #include <builtins.h>
+#include <stdint.h>
 
 #include "init.h"
 #include "module.h"
@@ -47,9 +48,16 @@ under the terms of the GNU Affero General Public License as published by
 #include "per_sport.h"
 #include "svc_cpu.h"
 
+#include "knl_profile.h"
+
 /*----- Macros and Definitions ---------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
+
+static uint32_t g_saved_imask;
+
+static uint32_t g_audio_callback_time[CYCLE_LOG_LENGTH];
+static uint32_t g_cpu_task_time[CYCLE_LOG_LENGTH];
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -57,7 +65,25 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Extern function implementations ------------------------------*/
 
+inline void disable_interrupts(void) {
+
+    g_saved_imask = *pIMASK;
+    *pIMASK = 0;
+    ssync();
+}
+
+inline void enable_interrupts(void) {
+
+    *pIMASK = g_saved_imask;
+    ssync();
+}
+
 int main(void) {
+
+    int i = 0;
+    int j = 0;
+    int cycles_before = 0;
+    int cycles_after = 0;
 
     *pPORTGIO_SET = HWAIT;
 
@@ -78,16 +104,41 @@ int main(void) {
 
     module_init();
 
-    while (1) {
+    while (true) {
 
         if (sport0_frame_received()) {
+
+            // disable_interrupts();
+
+            cycles_before = cycles();
+
             /// TODO: Maybe disable interrupts while processing audio.
             module_process(sport0_get_rx_buffer(), sport0_get_tx_buffer());
 
+            cycles_after = cycles();
+
+            g_audio_callback_time[i] = cycles_after - cycles_before;
+
+            if (i >= CYCLE_LOG_LENGTH) {
+                i = 0;
+            }
+
             sport0_frame_processed();
+
+            // enable_interrupts();
         }
 
+        cycles_before = cycles();
+
         svc_cpu_task();
+
+        cycles_after = cycles();
+
+        g_cpu_task_time[i] = cycles_after - cycles_before;
+
+        if (j >= CYCLE_LOG_LENGTH) {
+            j = 0;
+        }
     }
 }
 

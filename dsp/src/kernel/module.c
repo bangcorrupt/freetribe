@@ -34,7 +34,7 @@ under the terms of the GNU Affero General Public License as published by
  * @file    module.c
  *
  * @brief   Audio processing module.
- *          
+ *
  */
 
 /*----- Includes -----------------------------------------------------*/

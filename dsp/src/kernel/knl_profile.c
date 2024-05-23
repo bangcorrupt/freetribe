@@ -29,40 +29,39 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /*
- * @file    per_sport.h
+ * @file    knl_profile.c
  *
- * @brief   Public API for BF523 SPORT peripheral driver.
+ * @brief   Performance profiling.
  *
  */
 
-#ifndef PER_SPORT_H
-#define PER_SPORT_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /*----- Includes -----------------------------------------------------*/
 
-#include "types.h"
-#include <stdbool.h>
+#include <blackfin.h>
+#include <builtins.h>
+
+#include "cdefBF52x_base.h"
+#include "gcc.h"
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-/*----- Extern variable declarations ---------------------------------*/
+/*----- Static variable definitions ----------------------------------*/
 
-/*----- Extern function prototypes -----------------------------------*/
+/*----- Extern variable definitions ----------------------------------*/
 
-void sport0_init(void);
-bool sport0_frame_received(void);
-void sport0_frame_processed(void);
+/*----- Static function prototypes -----------------------------------*/
 
-fract32 *sport0_get_rx_buffer(void);
-fract32 *sport0_get_tx_buffer(void);
+/*----- Extern function implementations ------------------------------*/
 
-#ifdef __cplusplus
+inline int cycles() {
+
+    volatile long int ret;
+
+    __asm__ __volatile__("%0 = CYCLES;\n\t" : "=&d"(ret) : : "R1");
+
+    return ret;
 }
-#endif
-#endif /* PER_SPORT_H */
+
+/*----- Static function implementations ------------------------------*/
 
 /*----- End of file --------------------------------------------------*/

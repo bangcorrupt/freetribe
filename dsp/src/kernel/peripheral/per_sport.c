@@ -45,6 +45,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "per_sport.h"
 
+#include "knl_profile.h"
+
 /*----- Macros and Definitions ---------------------------------------*/
 
 /// TODO: Add this to defBF52x_base.h and rebuild toolchain.
@@ -53,29 +55,31 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Static variable definitions ----------------------------------*/
 
+/// TODO: Do buffers need to be volatile?
+
 // SPORT0 DMA transmit buffer
-volatile static fract32 g_codec_tx_buffer[2];
+static fract32 g_codec_tx_buffer[2];
 // SPORT0 DMA receive buffer
-volatile static fract32 g_codec_rx_buffer[2];
+static fract32 g_codec_rx_buffer[2];
 
 // SPORT1 DMA transmit buffer
-volatile static int32_t g_cpu_tx_buffer[2];
+static int32_t g_cpu_tx_buffer[2];
 // SPORT1 DMA receive buffer
-volatile static int32_t g_cpu_rx_buffer[2];
+static int32_t g_cpu_rx_buffer[2];
 
 // 2 channels of input from ADC.
-volatile static fract32 g_codec_in[2];
+static fract32 g_codec_in[2];
 // 2 channels of output to DAC.
-volatile static fract32 g_codec_out[2];
+static fract32 g_codec_out[2];
 
 // 2 channels of input from CPU.
-volatile static fract32 g_cpu_in[2];
+static fract32 g_cpu_in[2];
 // 2 channels of output to CPU.
-volatile static fract32 g_cpu_out[2];
+static fract32 g_cpu_out[2];
 
 volatile static bool g_sport0_frame_received = false;
 
-static uint32_t g_sport_isr_period;
+static uint32_t g_sport_isr_period[CYCLE_LOG_LENGTH];
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -84,17 +88,10 @@ static uint32_t g_sport_isr_period;
 static void _sport0_isr(void) __attribute__((interrupt_handler));
 
 /*----- Extern function implementations ------------------------------*/
-int cycles() {
-    volatile long int ret;
-
-    __asm__ __volatile__("%0 = CYCLES;\n\t" : "=&d"(ret) : : "R1");
-
-    return ret;
-}
 
 void sport0_init(void) {
 
-    // TODO: Do we need secondary enabled?
+    /// TODO: Do we need secondary enabled?
 
     // Configure SPORT0 Rx.
     // Clock Falling Edge, Receive Frame Sync, Data Format Sign Extend.
@@ -107,7 +104,7 @@ void sport0_init(void) {
     *pSPORT0_TCR2 = TSFSE | TXSE | SLEN(0x1f);
     ssync();
 
-    // TODO: DMA linked descriptor mode.
+    /// TODO: DMA linked descriptor mode.
 
     // SPORT0 Rx DMA.
     *pDMA3_PERIPHERAL_MAP = PMAP_SPORT0RX;
@@ -169,7 +166,7 @@ void sport0_init(void) {
 
 void sport1_init(void) {
 
-    // TODO: Do we need secondary enabled?
+    /// TODO: Do we need secondary enabled?
 
     // Configure SPORT1 Rx.
     *pSPORT1_RCR1 = RCKFE | RFSR | DTYPE_SIGX;
@@ -180,7 +177,7 @@ void sport1_init(void) {
     *pSPORT1_TCR2 = TSFSE | TXSE | SLEN(0x1f);
     ssync();
 
-    // TODO: DMA linked descriptor mode.
+    /// TODO: DMA linked descriptor mode.
 
     // SPORT1 Rx DMA.
     *pDMA5_PERIPHERAL_MAP = PMAP_SPORT1RX;
@@ -223,38 +220,44 @@ void sport1_init(void) {
     ssync();
 }
 
-fract32 *sport0_get_rx_buffer(void) { return &g_codec_in; }
+inline fract32 *sport0_get_rx_buffer(void) { return g_codec_in; }
 
-fract32 *sport0_get_tx_buffer(void) { return &g_codec_out; }
+inline fract32 *sport0_get_tx_buffer(void) { return g_codec_out; }
 
-// TODO: DMA ping-pong block buffer.
-bool sport0_frame_received(void) { return g_sport0_frame_received; }
+/// TODO: DMA ping-pong block buffer.
+inline bool sport0_frame_received(void) { return g_sport0_frame_received; }
 
-void sport0_frame_processed(void) { g_sport0_frame_received = false; }
+inline void sport0_frame_processed(void) { g_sport0_frame_received = false; }
 
-// TODO: Block processing.  For now we process each frame as it arrives.
+/// TODO: Block processing.  For now we process each frame as it arrives.
 __attribute__((interrupt_handler)) static void _sport0_isr(void) {
 
-    // static uint16_t i = 0;
+    static int i = 0;
 
-    // static uint32_t cycles_this;
-    // static uint32_t cycles_last;
-    //
-    // cycles_this = cycles();
-    // g_sport_isr_period = cycles_this - cycles_last;
-    // cycles_last = cycles_this;
+    static uint32_t cycles_this;
+    static uint32_t cycles_last;
+
+    cycles_this = cycles();
+
+    g_sport_isr_period[i] = cycles_this - cycles_last;
+
+    cycles_last = cycles_this;
+
+    if (i >= CYCLE_LOG_LENGTH) {
+        i = 0;
+    }
 
     // Clear interrupt status.
     *pDMA3_IRQ_STATUS = DMA_DONE;
     ssync();
 
-    // TODO: DMA ping-pong block buffer.
+    /// TODO: DMA ping-pong block buffer.
 
     // Get input from codec.
     g_codec_in[0] = g_codec_rx_buffer[0];
     g_codec_in[1] = g_codec_rx_buffer[1];
 
-    // TODO: Is CPU MCASP clock actually connected?
+    /// TODO: Is CPU MCASP clock actually connected?
 
     // Get input from CPU.
     // g_cpu_in[0] = g_cpu_rx_buffer[0];
