@@ -198,6 +198,7 @@ static void _knob_callback(uint8_t index, uint8_t value);
 static void _encoder_callback(uint8_t index, uint8_t value);
 static void _button_callback(uint8_t index, bool state);
 static void _trigger_callback(uint8_t pad, uint8_t vel, bool state);
+static void _tick_callback(void);
 
 static void _set_filter_type(uint8_t filter_type);
 static void _set_mod_depth(uint32_t mod_depth);
@@ -277,10 +278,12 @@ t_status app_init(void) {
     ft_register_panel_callback(BUTTON_EVENT, _button_callback);
     ft_register_panel_callback(TRIGGER_EVENT, _trigger_callback);
 
+    ft_register_tick_callback(0, _tick_callback);
+
     // Initialise GUI.
     gui_task();
 
-    gui_print(4, 7, "MonoSynth Example");
+    gui_print(4, 7, "PolySynth Example");
 
     status = SUCCESS;
     return status;
@@ -292,6 +295,10 @@ t_status app_init(void) {
 void app_run(void) { gui_task(); }
 
 /*----- Static function implementations ------------------------------*/
+
+static void _tick_callback(void) {
+    //
+}
 
 /**
  * @brief   Callback triggered by panel knob events.
