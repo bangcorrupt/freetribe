@@ -189,6 +189,7 @@ static LEAF g_leaf;
 static char g_mempool[MEMPOOL_SIZE];
 
 static tSimplePoly g_poly;
+static tADSR g_amp_env[POLY_VOICE_COUNT];
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -270,6 +271,11 @@ t_status app_init(void) {
 
     tSimplePoly_init(&g_poly, POLY_VOICE_COUNT, &g_leaf);
 
+    for (i = 0; i < POLY_VOICE_COUNT; i++) {
+
+        tADSR_init(&g_amp_env[i], 0, 1024, 8192, 1024, &g_leaf);
+    }
+
     scale_init(&g_scale, DEFAULT_SCALE_NOTES, DEFAULT_SCALE_TONES);
     keyboard_init(&g_kbd, &g_scale);
 
@@ -297,7 +303,12 @@ void app_run(void) { gui_task(); }
 /*----- Static function implementations ------------------------------*/
 
 static void _tick_callback(void) {
-    //
+
+    int i;
+    for (i = 0; i < POLY_VOICE_COUNT; i++) {
+
+        tADSR_tick(&g_amp_env[i]);
+    }
 }
 
 /**
