@@ -51,7 +51,7 @@ under the terms of the GNU Affero General Public License as published by
 #define SAMPLERATE (48000)
 #define MEMPOOL_SIZE (0x4000)
 
-#define POLYSYNTH_NUM_VOICES (2)
+#define POLYSYNTH_NUM_VOICES (4)
 
 /// TODO: Struct for parameter type.
 ///         scaler,
@@ -93,6 +93,7 @@ under the terms of the GNU Affero General Public License as published by
  */
 typedef enum {
     PARAM_VOICE_INDEX,
+    PARAM_AMP,
     PARAM_FREQ,
     PARAM_GATE,
     PARAM_VEL,
@@ -222,6 +223,11 @@ void module_set_param(uint16_t param_index, int32_t value) {
         g_module.voice_index = (uint8_t)(value & 0xff);
         break;
 
+    case PARAM_AMP:
+        Aleph_PolySynth_set_voice_amp(&g_module.synth, g_module.voice_index,
+                                      value);
+        break;
+
     case PARAM_FREQ:
         Aleph_PolySynth_set_voice_freq(&g_module.synth, g_module.voice_index,
                                        value);
@@ -249,7 +255,6 @@ void module_set_param(uint16_t param_index, int32_t value) {
     case PARAM_GATE:
         Aleph_PolySynth_set_voice_gate(&g_module.synth, g_module.voice_index,
                                        value);
-        // Aleph_PolySynth_set_gate(&g_module.synth, value);
         break;
 
     case PARAM_AMP_ENV_ATTACK:

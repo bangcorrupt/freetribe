@@ -56,9 +56,9 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Macros and Definitions ---------------------------------------*/
 
 #define CONTROL_RATE (1000)
-// #define MEMPOOL_SIZE (0x1000)
-#define MEMPOOL_SIZE (0x4000)
-#define POLY_VOICE_COUNT (2)
+#define MEMPOOL_SIZE (0x1000)
+// #define MEMPOOL_SIZE (0x4000)
+#define POLY_VOICE_COUNT (4)
 
 #define KNOB_LEVEL 0x00
 #define KNOB_PITCH 0x02
@@ -111,6 +111,7 @@ under the terms of the GNU Affero General Public License as published by
 
 typedef enum {
     PARAM_VOICE_INDEX,
+    PARAM_AMP,
     PARAM_FREQ,
     PARAM_GATE,
     PARAM_VEL,
@@ -170,6 +171,13 @@ typedef enum {
     MOD_TYPE_COUNT
 } e_mod_type;
 
+typedef struct {
+
+    int32_t next;
+    int32_t last;
+    bool changed;
+} t_cv;
+
 /*----- Static variable definitions ----------------------------------*/
 
 static int32_t g_midi_hz_lut[128];
@@ -189,7 +197,9 @@ static LEAF g_leaf;
 static char g_mempool[MEMPOOL_SIZE];
 
 static tSimplePoly g_poly;
-static tADSR g_amp_env[POLY_VOICE_COUNT];
+
+static tADSRS g_amp_env[POLY_VOICE_COUNT];
+static t_cv g_amp_cv[POLY_VOICE_COUNT];
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -273,7 +283,7 @@ t_status app_init(void) {
 
     for (i = 0; i < POLY_VOICE_COUNT; i++) {
 
-        tADSR_init(&g_amp_env[i], 0, 1024, 8192, 1024, &g_leaf);
+        tADSRS_init(&g_amp_env[i], 0, 1024, 8192, 1024, &g_leaf);
     }
 
     scale_init(&g_scale, DEFAULT_SCALE_NOTES, DEFAULT_SCALE_TONES);
@@ -304,10 +314,35 @@ void app_run(void) { gui_task(); }
 
 static void _tick_callback(void) {
 
+    float next = 0;
+
     int i;
     for (i = 0; i < POLY_VOICE_COUNT; i++) {
 
-        tADSR_tick(&g_amp_env[i]);
+        /// TODO: Use a fixed point envelope generator, or convert properly.
+        ///       We can probably use a much cheaper envelope generator,
+        ///       as control rate is relatively low and parameters
+        ///       are interpolated at audio rate on the DSP side.
+        //
+        next = tADSRS_tick(&g_amp_env[i]);
+        g_amp_cv[i].next = ((int32_t)(next * 262143.0) >> 16) << 16;
+
+        if (g_amp_cv[i].next != g_amp_cv[i].last) {
+            g_amp_cv[i].last = g_amp_cv[i].next;
+            g_amp_cv[i].changed = true;
+
+        } else {
+            g_amp_cv[i].changed = false;
+        }
+    }
+
+    // Only send parameters if they have changed.
+    for (i = 0; i < POLY_VOICE_COUNT; i++) {
+
+        if (g_amp_cv[i].changed) {
+            ft_set_module_param(0, PARAM_VOICE_INDEX, i);
+            ft_set_module_param(0, PARAM_AMP, g_amp_cv[i].next);
+        }
     }
 }
 
@@ -315,7 +350,7 @@ static void _tick_callback(void) {
  * @brief   Callback triggered by panel knob events.
  *
  * @param[in]   index   Index of knob.
- * @param[in]   value   Values of knob.
+ * @param[in]   value   Value of knob.
  */
 static void _knob_callback(uint8_t index, uint8_t value) {
 
@@ -411,7 +446,7 @@ static void _knob_callback(uint8_t index, uint8_t value) {
  * @brief   Callback triggered by panel encoder events.
  *
  * @param[in]   index   Index of encoder.
- * @param[in]   value   Values of encoder.
+ * @param[in]   value   Value of encoder.
  */
 static void _encoder_callback(uint8_t index, uint8_t value) {
 
@@ -511,7 +546,8 @@ static void _trigger_callback(uint8_t pad, uint8_t vel, bool state) {
 
             ft_set_module_param(0, PARAM_FREQ, freq);
             // ft_set_module_param(0, PARAM_VEL, vel << 23);
-            ft_set_module_param(0, PARAM_GATE, state);
+            // ft_set_module_param(0, PARAM_GATE, state);
+            tADSRS_on(&g_amp_env[voice], 1);
         }
 
     } else {
@@ -523,7 +559,8 @@ static void _trigger_callback(uint8_t pad, uint8_t vel, bool state) {
             ft_set_module_param(0, PARAM_VOICE_INDEX, voice);
 
             // ft_set_module_param(0, PARAM_VEL, vel << 23);
-            ft_set_module_param(0, PARAM_GATE, state);
+            // ft_set_module_param(0, PARAM_GATE, state);
+            tADSRS_off(&g_amp_env[voice]);
         }
     }
 }
