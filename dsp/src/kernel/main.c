@@ -113,6 +113,7 @@ int main(void) {
             cycles_before = cycles();
 
             /// TODO: Maybe disable interrupts while processing audio.
+            //
             module_process(sport0_get_rx_buffer(), sport0_get_tx_buffer());
 
             cycles_after = cycles();
