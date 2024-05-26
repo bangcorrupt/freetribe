@@ -61,11 +61,13 @@ __attribute__((section(".l1.data.a")))
 __attribute__((aligned(32))) static fract32 g_codec_rx_buffer[BUFFER_LENGTH];
 
 // SPORT0 DMA transmit buffer
-__attribute__((section(".l1.data.b")))
+// __attribute__((section(".l1.data.b")))
+__attribute__((section(".l1.data.a")))
 __attribute__((aligned(32))) static fract32 g_codec_tx_buffer[BUFFER_LENGTH];
 
 // 2 channels of input from ADC.
-__attribute__((section(".l1.data.a")))
+// __attribute__((section(".l1.data.a")))
+__attribute__((section(".l1.data.b")))
 __attribute__((aligned(32))) static t_audio_buffer g_codec_in;
 
 // 2 channels of output to DAC.

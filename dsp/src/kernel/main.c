@@ -93,9 +93,9 @@ int main(void) {
 
     per_gpio_init();
 
-    sysint_init();
+    // sysint_init();
 
-    // dma_init();
+    dma_init();
 
     // spi_init();
 
