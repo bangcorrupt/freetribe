@@ -98,7 +98,7 @@ void spi_init(void) {
     int j;
 
     // SPI Rx interrupt IVG10.
-    *pSIC_IAR2 |= P21_IVG(10);
+    *pSIC_IAR2 |= P21_IVG(11);
     ssync();
 
     *pEVT10 = _spi_rx_isr;
