@@ -56,15 +56,21 @@ under the terms of the GNU Affero General Public License as published by
 
 /// TODO: Do buffers need to be volatile?
 
-// SPORT0 DMA transmit buffer
-static fract32 g_codec_tx_buffer[BUFFER_LENGTH];
 // SPORT0 DMA receive buffer
-static fract32 g_codec_rx_buffer[BUFFER_LENGTH];
+__attribute__((section(".l1.data.a")))
+__attribute__((aligned(32))) static fract32 g_codec_rx_buffer[BUFFER_LENGTH];
+
+// SPORT0 DMA transmit buffer
+__attribute__((section(".l1.data.b")))
+__attribute__((aligned(32))) static fract32 g_codec_tx_buffer[BUFFER_LENGTH];
 
 // 2 channels of input from ADC.
-static t_audio_buffer g_codec_in;
+__attribute__((section(".l1.data.a")))
+__attribute__((aligned(32))) static t_audio_buffer g_codec_in;
+
 // 2 channels of output to DAC.
-static t_audio_buffer g_codec_out;
+__attribute__((section(".l1.data.b")))
+__attribute__((aligned(32))) static t_audio_buffer g_codec_out;
 
 volatile static bool g_sport0_tx_complete = false;
 volatile static bool g_sport0_rx_complete = false;
