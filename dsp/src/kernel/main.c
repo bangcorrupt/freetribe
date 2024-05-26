@@ -97,7 +97,7 @@ int main(void) {
 
     dma_init();
 
-    // spi_init();
+    spi_init();
 
     sport0_init();
     // sport1_init();
@@ -131,7 +131,7 @@ int main(void) {
 
         // cycles_before = cycles();
         //
-        // svc_cpu_task();
+        svc_cpu_task();
         //
         // cycles_after = cycles();
         //

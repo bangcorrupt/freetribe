@@ -43,6 +43,7 @@ under the terms of the GNU Affero General Public License as published by
 #include <blackfin.h>
 #include <builtins.h>
 
+#include "per_gpio.h"
 #include "per_sport.h"
 
 #include "knl_profile.h"
@@ -150,7 +151,7 @@ void sport0_init(void) {
 
     int i;
     // unmask in the core event processor
-    asm volatile("cli %0; bitset(%0, 9);bitset(%0, 10); sti %0; csync;"
+    asm volatile("cli %0; bitset(%0, 9); bitset(%0, 10); sti %0; csync;"
                  : "+d"(i));
     ssync();
 
@@ -246,6 +247,7 @@ inline void sport0_frame_processed(void) {
 /// TODO: Block processing.  For now we process each frame as it arrives.
 __attribute__((interrupt_handler)) static void _sport0_rx_isr(void) {
 
+    // *pPORTGIO_SET = HWAIT;
     // Clear interrupt status.
     *pDMA3_IRQ_STATUS = DMA_DONE;
     ssync();
@@ -262,9 +264,11 @@ __attribute__((interrupt_handler)) static void _sport0_rx_isr(void) {
     /// TODO: DMA ping-pong block buffer.
 
     g_sport0_rx_complete = true;
+    // *pPORTGIO_CLEAR = HWAIT;
 }
 
 __attribute__((interrupt_handler)) static void _sport0_tx_isr(void) {
+    // *pPORTGIO_SET = HWAIT;
 
     // Clear interrupt status.
     *pDMA4_IRQ_STATUS = DMA_DONE;
@@ -279,6 +283,7 @@ __attribute__((interrupt_handler)) static void _sport0_tx_isr(void) {
     }
 
     g_sport0_tx_complete = true;
+    // *pPORTGIO_CLEAR = HWAIT;
 }
 
 /*----- Static function implementations ------------------------------*/

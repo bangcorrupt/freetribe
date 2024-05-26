@@ -49,7 +49,7 @@ extern "C" {
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-#define BLOCK_SIZE (32)
+#define BLOCK_SIZE (1)
 #define SAMPLE_SIZE (4)
 #define CHANNEL_COUNT (2)
 #define BUFFER_LENGTH (BLOCK_SIZE * CHANNEL_COUNT)
