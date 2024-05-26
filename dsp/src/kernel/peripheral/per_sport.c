@@ -279,7 +279,9 @@ static fract32 square_lut[1024];
 
 /*----- Static function prototypes -----------------------------------*/
 
-static void _sport0_isr(void) __attribute__((interrupt_handler));
+// static void _sport0_isr(void) __attribute__((interrupt_handler));
+static void _sport0_rx_isr(void) __attribute__((interrupt_handler));
+static void _sport0_tx_isr(void) __attribute__((interrupt_handler));
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -337,11 +339,14 @@ void sport0_init(void) {
     ssync();
 
     // SPORT0 Rx DMA3 interrupt IVG9.
-    *pSIC_IAR2 |= P16_IVG(9);
+    *pSIC_IAR2 |= P16_IVG(10);
+    // SPORT0 Tx DMA3 interrupt IVG9.
+    *pSIC_IAR2 |= P17_IVG(9);
     ssync();
 
     // Set SPORT0 Rx interrupt vector.
-    *pEVT9 = _sport0_isr;
+    *pEVT9 = _sport0_tx_isr;
+    *pEVT10 = _sport0_rx_isr;
     ssync();
 
     // Enable SPORT0 Rx interrupt.
@@ -351,7 +356,8 @@ void sport0_init(void) {
 
     int i;
     // unmask in the core event processor
-    asm volatile("cli %0; bitset(%0, 9); sti %0; csync;" : "+d"(i));
+    asm volatile("cli %0; bitset(%0, 9);bitset(%0, 10); sti %0; csync;"
+                 : "+d"(i));
     ssync();
 
     // Enable SPORT0 Rx DMA.
@@ -437,7 +443,7 @@ inline bool sport0_frame_received(void) { return g_sport0_frame_received; }
 inline void sport0_frame_processed(void) { g_sport0_frame_received = false; }
 
 /// TODO: Block processing.  For now we process each frame as it arrives.
-__attribute__((interrupt_handler)) static void _sport0_isr(void) {
+__attribute__((interrupt_handler)) static void _sport0_rx_isr(void) {
 
     // static int i = 0;
 
@@ -445,10 +451,10 @@ __attribute__((interrupt_handler)) static void _sport0_isr(void) {
     // static uint32_t cycles_last;
 
     if (*pDMA3_IRQ_STATUS) {
-
         // Clear interrupt status.
         *pDMA3_IRQ_STATUS = DMA_DONE;
         ssync();
+
         int j;
         for (j = 0; j < BUFFER_LENGTH; j++) {
 
@@ -457,18 +463,6 @@ __attribute__((interrupt_handler)) static void _sport0_isr(void) {
         }
     }
 
-    if (*pDMA4_IRQ_STATUS) {
-
-        // Clear interrupt status.
-        *pDMA4_IRQ_STATUS = DMA_DONE;
-        ssync();
-        int j;
-        for (j = 0; j < BUFFER_LENGTH; j++) {
-
-            // Get input from codec.
-            g_codec_tx_buffer[j] = g_temp_rx_buffer[j];
-        }
-    }
     // cycles_this = cycles();
     //
     // g_sport_isr_period[i] = cycles_this - cycles_last;
@@ -529,6 +523,30 @@ __attribute__((interrupt_handler)) static void _sport0_isr(void) {
     // }
 
     g_sport0_frame_received = true;
+}
+
+__attribute__((interrupt_handler)) static void _sport0_tx_isr(void) {
+
+    if (*pDMA4_IRQ_STATUS) {
+        // Clear interrupt status.
+        *pDMA4_IRQ_STATUS = DMA_DONE;
+        ssync();
+
+        int k;
+        // static int l = 0;
+        for (k = 0; k < BUFFER_LENGTH; k++) {
+            // for (k = 0; k < BLOCK_SIZE; k++) {
+
+            g_codec_tx_buffer[k] = g_temp_rx_buffer[k];
+
+            // g_codec_tx_buffer[k * 2] = sine_lut[l];
+            // g_codec_tx_buffer[k * 2 + 1] = sine_lut[l];
+            //
+            // if (++l >= 1024) {
+            //     l = 0;
+            // }
+        }
+    }
 }
 
 /*----- Static function implementations ------------------------------*/
