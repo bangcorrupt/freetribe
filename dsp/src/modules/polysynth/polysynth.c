@@ -51,7 +51,8 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Macros and Definitions ---------------------------------------*/
 
 #define SAMPLERATE (48000)
-#define MEMPOOL_SIZE (0x4000)
+// #define MEMPOOL_SIZE (0x4000)
+#define MEMPOOL_SIZE (0x100)
 
 #define POLYSYNTH_NUM_VOICES (4)
 
@@ -207,9 +208,9 @@ void module_process(t_audio_buffer *in, t_audio_buffer *out) {
 
     fract32 output;
 
+    Aleph_PolySynth_set_amp(&g_module.synth, FR32_MAX);
     while (samples--) {
 
-        // Aleph_PolySynth_set_amp(&g_module.synth, FR32_MAX);
         output = Aleph_PolySynth_next(&g_module.synth);
 
         // Scale amplitude by level.
