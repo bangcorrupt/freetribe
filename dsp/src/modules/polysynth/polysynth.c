@@ -42,7 +42,9 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "module.h"
 
+#include "per_sport.h"
 #include "utils.h"
+#include <stdint.h>
 
 // #include "polysynth.h"
 
@@ -193,18 +195,29 @@ void module_init(void) {
  * @param[in]   in  Pointer to input buffer.
  * @param[out]  out Pointer to input buffer.
  */
-void module_process(fract32 *in, fract32 *out) {
+void module_process(t_audio_buffer *in, t_audio_buffer *out) {
+
+    fract32 *left_in = in[0][0];
+    fract32 *right_in = in[1][0];
+
+    fract32 *left_out = out[0][0];
+    fract32 *right_out = out[1][0];
+
+    int32_t samples = BLOCK_SIZE;
 
     fract32 output;
 
-    output = Aleph_PolySynth_next(&g_module.synth);
+    while (--samples) {
 
-    // Scale amplitude by level.
-    output = mult_fr1x32x32(output, g_module.amp_level);
+        output = Aleph_PolySynth_next(&g_module.synth);
 
-    // Set output.
-    out[0] = output;
-    out[1] = output;
+        // Scale amplitude by level.
+        output = mult_fr1x32x32(output, g_module.amp_level);
+
+        // Set output.
+        *left_out++ = output;
+        *right_out++ = output;
+    }
 }
 
 /**
