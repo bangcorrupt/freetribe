@@ -59,8 +59,10 @@ under the terms of the GNU Affero General Public License as published by
 
 // SPORT0 DMA transmit buffer
 static fract32 g_codec_tx_buffer[BUFFER_LENGTH];
+static fract32 g_temp_tx_buffer[BUFFER_LENGTH];
 // SPORT0 DMA receive buffer
 static fract32 g_codec_rx_buffer[BUFFER_LENGTH];
+static fract32 g_temp_rx_buffer[BUFFER_LENGTH];
 
 // 2 channels of input from ADC.
 static t_audio_buffer g_codec_in;
@@ -298,12 +300,12 @@ void sport0_init(void) {
     // Configure SPORT0 Rx.
     // Clock Falling Edge, Receive Frame Sync, Data Format Sign Extend.
     *pSPORT0_RCR1 = RCKFE | RFSR | DTYPE_SIGX;
-    // Rx Stereo Frame Sync Enable, Rx Secondary Enable, Rx Word Length 32 bit.
-    *pSPORT0_RCR2 = RSFSE | RXSE | SLEN(0x1f);
+    // Rx Stereo Frame Sync Enable, Rx Word Length 32 bit.
+    *pSPORT0_RCR2 = RSFSE | SLEN(0x1f);
 
     // Configure SPORT0 Tx.
     *pSPORT0_TCR1 = TCKFE | TFSR;
-    *pSPORT0_TCR2 = TSFSE | TXSE | SLEN(0x1f);
+    *pSPORT0_TCR2 = TSFSE | SLEN(0x1f);
     ssync();
 
     /// TODO: DMA linked descriptor mode.
@@ -323,7 +325,7 @@ void sport0_init(void) {
     // SPORT0 Tx DMA.
     *pDMA4_PERIPHERAL_MAP = PMAP_SPORT0TX;
     /* *pDMA4_CONFIG = 0x1008; // 0x7608; */
-    *pDMA4_CONFIG = FLOW_AUTO | WDSIZE_32;
+    *pDMA4_CONFIG = FLOW_AUTO | WDSIZE_32 | DI_EN;
     // Start address of data buffer
     *pDMA4_START_ADDR = &g_codec_tx_buffer;
     // DMA inner loop count
@@ -344,6 +346,7 @@ void sport0_init(void) {
 
     // Enable SPORT0 Rx interrupt.
     *pSIC_IMASK0 |= IRQ_DMA3;
+    *pSIC_IMASK0 |= IRQ_DMA4;
     ssync();
 
     int i;
@@ -441,10 +444,31 @@ __attribute__((interrupt_handler)) static void _sport0_isr(void) {
     // static uint32_t cycles_this;
     // static uint32_t cycles_last;
 
-    // Clear interrupt status.
-    *pDMA3_IRQ_STATUS = DMA_DONE;
-    ssync();
+    if (*pDMA3_IRQ_STATUS) {
 
+        // Clear interrupt status.
+        *pDMA3_IRQ_STATUS = DMA_DONE;
+        ssync();
+        int j;
+        for (j = 0; j < BUFFER_LENGTH; j++) {
+
+            // Get input from codec.
+            g_temp_rx_buffer[j] = g_codec_rx_buffer[j];
+        }
+    }
+
+    if (*pDMA4_IRQ_STATUS) {
+
+        // Clear interrupt status.
+        *pDMA4_IRQ_STATUS = DMA_DONE;
+        ssync();
+        int j;
+        for (j = 0; j < BUFFER_LENGTH; j++) {
+
+            // Get input from codec.
+            g_codec_tx_buffer[j] = g_temp_rx_buffer[j];
+        }
+    }
     // cycles_this = cycles();
     //
     // g_sport_isr_period[i] = cycles_this - cycles_last;
@@ -475,12 +499,6 @@ __attribute__((interrupt_handler)) static void _sport0_isr(void) {
     //     g_codec_tx_buffer[j * 2] = g_codec_rx_buffer[j * 2];
     //     g_codec_tx_buffer[j * 2 + 1] = g_codec_rx_buffer[j * 2 + 1];
     // }
-    int j;
-    for (j = 0; j < BUFFER_LENGTH; j++) {
-
-        // Get input from codec.
-        g_codec_tx_buffer[j] = g_codec_rx_buffer[j];
-    }
     // int j;
     // static int k = 0;
     // for (j = 0; j < BUFFER_LENGTH; j++) {
