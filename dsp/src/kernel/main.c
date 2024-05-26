@@ -97,7 +97,7 @@ int main(void) {
 
     dma_init();
 
-    spi_init();
+    // spi_init();
 
     sport0_init();
     // sport1_init();
@@ -106,41 +106,40 @@ int main(void) {
 
     while (true) {
 
-        //     if (sport0_frame_received()) {
+        if (sport0_frame_received()) {
+
+            // disable_interrupts();
+
+            // cycles_before = cycles();
+
+            /// TODO: Maybe disable interrupts while processing audio.
+            //
+            module_process(sport0_get_rx_buffer(), sport0_get_tx_buffer());
+
+            // cycles_after = cycles();
+            //
+            // g_audio_callback_time[i] = cycles_after - cycles_before;
+            //
+            // if (i >= CYCLE_LOG_LENGTH) {
+            //     i = 0;
+            // }
+            //
+            sport0_frame_processed();
+
+            // enable_interrupts();
+        }
+
+        // cycles_before = cycles();
         //
-        //         // disable_interrupts();
+        // svc_cpu_task();
         //
-        //         cycles_before = cycles();
+        // cycles_after = cycles();
         //
-        //         /// TODO: Maybe disable interrupts while processing audio.
-        //         //
-        //         module_process(sport0_get_rx_buffer(),
-        //         sport0_get_tx_buffer());
+        // g_cpu_task_time[i] = cycles_after - cycles_before;
         //
-        //         cycles_after = cycles();
-        //
-        //         g_audio_callback_time[i] = cycles_after - cycles_before;
-        //
-        //         if (i >= CYCLE_LOG_LENGTH) {
-        //             i = 0;
-        //         }
-        //
-        //         sport0_frame_processed();
-        //
-        //         // enable_interrupts();
-        //     }
-        //
-        //     cycles_before = cycles();
-        //
-        //     svc_cpu_task();
-        //
-        //     cycles_after = cycles();
-        //
-        //     g_cpu_task_time[i] = cycles_after - cycles_before;
-        //
-        //     if (j >= CYCLE_LOG_LENGTH) {
-        //         j = 0;
-        //     }
+        // if (j >= CYCLE_LOG_LENGTH) {
+        //     j = 0;
+        // }
     }
 }
 

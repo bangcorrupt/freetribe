@@ -59,17 +59,16 @@ under the terms of the GNU Affero General Public License as published by
 
 // SPORT0 DMA transmit buffer
 static fract32 g_codec_tx_buffer[BUFFER_LENGTH];
-static fract32 g_temp_tx_buffer[BUFFER_LENGTH];
 // SPORT0 DMA receive buffer
 static fract32 g_codec_rx_buffer[BUFFER_LENGTH];
-static fract32 g_temp_rx_buffer[BUFFER_LENGTH];
 
 // 2 channels of input from ADC.
 static t_audio_buffer g_codec_in;
 // 2 channels of output to DAC.
 static t_audio_buffer g_codec_out;
 
-volatile static bool g_sport0_frame_received = false;
+volatile static bool g_sport0_tx_complete = false;
+volatile static bool g_sport0_rx_complete = false;
 
 static uint32_t g_sport_isr_period[CYCLE_LOG_LENGTH];
 
@@ -233,9 +232,16 @@ inline t_audio_buffer *sport0_get_rx_buffer(void) { return &g_codec_in; }
 inline t_audio_buffer *sport0_get_tx_buffer(void) { return &g_codec_out; }
 
 /// TODO: DMA ping-pong block buffer.
-inline bool sport0_frame_received(void) { return g_sport0_frame_received; }
+inline bool sport0_frame_received(void) {
 
-inline void sport0_frame_processed(void) { g_sport0_frame_received = false; }
+    return g_sport0_rx_complete && g_sport0_tx_complete;
+}
+
+inline void sport0_frame_processed(void) {
+
+    g_sport0_tx_complete = false;
+    g_sport0_rx_complete = false;
+}
 
 /// TODO: Block processing.  For now we process each frame as it arrives.
 __attribute__((interrupt_handler)) static void _sport0_rx_isr(void) {
@@ -245,15 +251,17 @@ __attribute__((interrupt_handler)) static void _sport0_rx_isr(void) {
     ssync();
 
     int j;
-    for (j = 0; j < BUFFER_LENGTH; j++) {
+    // for (j = 0; j < BUFFER_LENGTH; j++) {
+    for (j = 0; j < BLOCK_SIZE; j++) {
 
         // Get input from codec.
-        g_temp_rx_buffer[j] = g_codec_rx_buffer[j];
+        g_codec_in[0][j] = g_codec_rx_buffer[j * 2];
+        g_codec_in[1][j] = g_codec_rx_buffer[j * 2 + 1];
     }
 
     /// TODO: DMA ping-pong block buffer.
 
-    g_sport0_frame_received = true;
+    g_sport0_rx_complete = true;
 }
 
 __attribute__((interrupt_handler)) static void _sport0_tx_isr(void) {
@@ -263,10 +271,14 @@ __attribute__((interrupt_handler)) static void _sport0_tx_isr(void) {
     ssync();
 
     int k;
-    for (k = 0; k < BUFFER_LENGTH; k++) {
+    // for (k = 0; k < BUFFER_LENGTH; k++) {
+    for (k = 0; k < BLOCK_SIZE; k++) {
 
-        g_codec_tx_buffer[k] = g_temp_rx_buffer[k];
+        g_codec_tx_buffer[k * 2] = g_codec_out[0][k];
+        g_codec_tx_buffer[k * 2 + 1] = g_codec_out[1][k];
     }
+
+    g_sport0_tx_complete = true;
 }
 
 /*----- Static function implementations ------------------------------*/

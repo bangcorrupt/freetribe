@@ -207,16 +207,18 @@ void module_process(t_audio_buffer *in, t_audio_buffer *out) {
 
     fract32 output;
 
-    while (--samples) {
-
-        output = Aleph_PolySynth_next(&g_module.synth);
-
-        // Scale amplitude by level.
-        output = mult_fr1x32x32(output, g_module.amp_level);
-
-        // Set output.
-        *left_out++ = output;
-        *right_out++ = output;
+    while (samples--) {
+        //
+        // output = Aleph_PolySynth_next(&g_module.synth);
+        //
+        // // Scale amplitude by level.
+        // output = mult_fr1x32x32(output, g_module.amp_level);
+        //
+        // // Set output.
+        // *left_out++ = output;
+        // *right_out++ = output;
+        *left_out++ = *left_in++;
+        *right_out++ = *right_in++;
     }
 }
 
