@@ -95,7 +95,7 @@ int main(void) {
 
     sysint_init();
 
-    dma_init();
+    // dma_init();
 
     // spi_init();
 
@@ -145,16 +145,17 @@ int main(void) {
 
 void sysint_init(void) {
 
-    // Clear interrupt assignment registers.
-    *pSIC_IAR0 = 0;
-    *pSIC_IAR1 = 0;
-    *pSIC_IAR2 = 0;
-    *pSIC_IAR3 = 0;
-    *pSIC_IAR4 = 0;
-    *pSIC_IAR5 = 0;
-    *pSIC_IAR6 = 0;
-    *pSIC_IAR7 = 0;
+    // Default all peripherals to lowest priority interrupts.
+    *pSIC_IAR0 = 0x88888888;
+    *pSIC_IAR1 = 0x88888888;
+    *pSIC_IAR2 = 0x88888888;
+    *pSIC_IAR3 = 0x88888888;
+    *pSIC_IAR4 = 0x88888888;
+    *pSIC_IAR5 = 0x88888888;
+    *pSIC_IAR6 = 0x88888888;
+    *pSIC_IAR7 = 0x88888888;
 
+    // Default all interrupts can wake core.
     *pSIC_IWR0 = 0xffffffff;
     *pSIC_IWR1 = 0xffffffff;
 }

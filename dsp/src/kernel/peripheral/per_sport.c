@@ -50,9 +50,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-/// TODO: Add this to defBF52x_base.h and rebuild toolchain.
-//
-#define DTYPE_SIGX 0x0004 /* SPORTx RCR1 Data Format Sign Extend */
+#define DTYPE_SIGX 0x0004 // SPORTx RCR1 Data Format Sign Extend.
 
 /*----- Static variable definitions ----------------------------------*/
 
@@ -77,11 +75,12 @@ static uint32_t g_sport_isr_period[CYCLE_LOG_LENGTH];
 
 /*----- Static function prototypes -----------------------------------*/
 
-// static void _sport0_isr(void) __attribute__((interrupt_handler));
 static void _sport0_rx_isr(void) __attribute__((interrupt_handler));
 static void _sport0_tx_isr(void) __attribute__((interrupt_handler));
 
 /*----- Extern function implementations ------------------------------*/
+
+/// TODO: DMA ping-pong block buffer.
 
 void sport0_init(void) {
 
@@ -106,37 +105,32 @@ void sport0_init(void) {
 
     // SPORT0 Rx DMA.
     *pDMA3_PERIPHERAL_MAP = PMAP_SPORT0RX;
-    /* *pDMA3_CONFIG = 0x108a; // 0x760a; */
-    *pDMA3_CONFIG = FLOW_AUTO | DI_EN | WDSIZE_32 | WNR;
+    *pDMA3_CONFIG = FLOW_AUTO | WDSIZE_32 | WNR | DI_EN;
     // Start address of data buffer.
     *pDMA3_START_ADDR = &g_codec_rx_buffer;
     // DMA inner loop count.
-    // *pDMA3_X_COUNT = 2; // 2 samples.
     *pDMA3_X_COUNT = BUFFER_LENGTH;
+    // Inner loop address increment
     *pDMA3_X_MODIFY = SAMPLE_SIZE;
     ssync();
 
     // SPORT0 Tx DMA.
     *pDMA4_PERIPHERAL_MAP = PMAP_SPORT0TX;
-    /* *pDMA4_CONFIG = 0x1008; // 0x7608; */
     *pDMA4_CONFIG = FLOW_AUTO | WDSIZE_32 | DI_EN;
     // Start address of data buffer
     *pDMA4_START_ADDR = &g_codec_tx_buffer;
     // DMA inner loop count
-    // *pDMA4_X_COUNT = 2; // 2 samples.
     *pDMA4_X_COUNT = BUFFER_LENGTH;
     // Inner loop address increment
-    // *pDMA4_X_MODIFY = 4; // 32 bit.
     *pDMA4_X_MODIFY = SAMPLE_SIZE;
     ssync();
 
-    /// TODO: Set correct interrupt priorities.
-    ///         SPI is 10 by default.
+    /// TODO: Review interrupt priorities.
 
-    // SPORT0 Rx DMA3 interrupt IVG9.
-    *pSIC_IAR2 |= P16_IVG(10);
-    // SPORT0 Tx DMA3 interrupt IVG9.
+    // SPORT0 Tx DMA4 interrupt IVG9.
     *pSIC_IAR2 |= P17_IVG(9);
+    // SPORT0 Rx DMA3 interrupt IVG10.
+    *pSIC_IAR2 |= P16_IVG(10);
     ssync();
 
     // Set SPORT0 Rx interrupt vector.
@@ -232,7 +226,6 @@ inline t_audio_buffer *sport0_get_rx_buffer(void) { return &g_codec_in; }
 
 inline t_audio_buffer *sport0_get_tx_buffer(void) { return &g_codec_out; }
 
-/// TODO: DMA ping-pong block buffer.
 inline bool sport0_frame_received(void) {
 
     return g_sport0_rx_complete && g_sport0_tx_complete;
@@ -244,7 +237,8 @@ inline void sport0_frame_processed(void) {
     g_sport0_rx_complete = false;
 }
 
-/// TODO: Block processing.  For now we process each frame as it arrives.
+/*----- Static function implementations ------------------------------*/
+
 __attribute__((interrupt_handler)) static void _sport0_rx_isr(void) {
 
     // *pPORTGIO_SET = HWAIT;
@@ -252,6 +246,8 @@ __attribute__((interrupt_handler)) static void _sport0_rx_isr(void) {
     *pDMA3_IRQ_STATUS = DMA_DONE;
     ssync();
 
+    /// TODO: DMA ping-pong block buffer.
+    //
     int j;
     // for (j = 0; j < BUFFER_LENGTH; j++) {
     for (j = 0; j < BLOCK_SIZE; j++) {
@@ -260,8 +256,6 @@ __attribute__((interrupt_handler)) static void _sport0_rx_isr(void) {
         g_codec_in[0][j] = g_codec_rx_buffer[j * 2];
         g_codec_in[1][j] = g_codec_rx_buffer[j * 2 + 1];
     }
-
-    /// TODO: DMA ping-pong block buffer.
 
     g_sport0_rx_complete = true;
     // *pPORTGIO_CLEAR = HWAIT;
@@ -274,6 +268,8 @@ __attribute__((interrupt_handler)) static void _sport0_tx_isr(void) {
     *pDMA4_IRQ_STATUS = DMA_DONE;
     ssync();
 
+    /// TODO: DMA ping-pong block buffer.
+    //
     int k;
     // for (k = 0; k < BUFFER_LENGTH; k++) {
     for (k = 0; k < BLOCK_SIZE; k++) {
@@ -285,7 +281,5 @@ __attribute__((interrupt_handler)) static void _sport0_tx_isr(void) {
     g_sport0_tx_complete = true;
     // *pPORTGIO_CLEAR = HWAIT;
 }
-
-/*----- Static function implementations ------------------------------*/
 
 /*----- End of file --------------------------------------------------*/

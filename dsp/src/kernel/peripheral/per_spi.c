@@ -130,6 +130,7 @@ void spi_init(void) {
 
     // clear the spi rx register by reading from it
     int j = *pSPI_RDBR;
+    (void)j;
 
     // clear the rx error bit (sticky - W1C)
     *pSPI_STAT |= 0x10;
@@ -142,7 +143,7 @@ int per_spi_rx_dequeue(uint8_t *spi_byte) {
     return ring_buffer_get(spi_rx_rbd, spi_byte);
 }
 
-// TODO: Check/return status.
+/// TODO: Check/return status.
 void per_spi_tx_enqueue(uint8_t *spi_byte) {
 
     // Overwrite on overflow?
@@ -155,7 +156,8 @@ __attribute__((interrupt_handler)) static void _spi_rx_isr(void) {
 
     *pPORTGIO_SET = HWAIT;
 
-    // TODO: Can we queue register contents directly?
+    /// TODO: Queue register contents directly.
+    //
     uint8_t rx_byte = 0;
     uint8_t tx_byte = 0;
 
@@ -174,13 +176,13 @@ __attribute__((interrupt_handler)) static void _spi_rx_isr(void) {
     *pPORTGIO_CLEAR = HWAIT;
 }
 
-// TODO: Check/return status.
+/// TODO: Check/return status.
 static int _spi_tx_dequeue(uint8_t *spi_byte) {
 
     return ring_buffer_get(spi_tx_rbd, spi_byte);
 }
 
-// TODO: Check/return status.
+/// TODO: Check/return status.
 static void _spi_rx_enqueue(uint8_t *spi_byte) {
 
     // Overwrite on overflow?

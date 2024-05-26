@@ -52,7 +52,7 @@ extern "C" {
 #define BLOCK_SIZE (32)
 #define SAMPLE_SIZE (4)
 #define CHANNEL_COUNT (2)
-#define BUFFER_LENGTH (BLOCK_SIZE * CHANNEL_COUNT)
+#define BUFFER_LENGTH (CHANNEL_COUNT * BLOCK_SIZE)
 
 typedef fract32 t_audio_buffer[CHANNEL_COUNT][BLOCK_SIZE];
 

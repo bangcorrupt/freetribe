@@ -51,8 +51,7 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Macros and Definitions ---------------------------------------*/
 
 #define SAMPLERATE (48000)
-// #define MEMPOOL_SIZE (0x4000)
-#define MEMPOOL_SIZE (0x100)
+#define MEMPOOL_SIZE (0x1000)
 
 #define POLYSYNTH_NUM_VOICES (4)
 
@@ -143,7 +142,9 @@ typedef struct {
 /*----- Static variable definitions ----------------------------------*/
 
 static t_Aleph g_aleph;
-static char g_mempool[MEMPOOL_SIZE];
+
+__attribute__((section(".l1.data.b")))
+__attribute__((aligned(32))) static char g_mempool[MEMPOOL_SIZE];
 
 static t_module g_module;
 
@@ -204,12 +205,13 @@ void module_process(t_audio_buffer *in, t_audio_buffer *out) {
     fract32 *left_out = out[0][0];
     fract32 *right_out = out[1][0];
 
-    int32_t samples = BLOCK_SIZE;
+    uint32_t samples = BLOCK_SIZE;
 
     fract32 output;
 
-    Aleph_PolySynth_set_amp(&g_module.synth, FR32_MAX);
     while (samples--) {
+
+        Aleph_PolySynth_set_amp(&g_module.synth, FR32_MAX);
 
         output = Aleph_PolySynth_next(&g_module.synth);
 
