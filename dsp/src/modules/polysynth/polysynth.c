@@ -51,7 +51,7 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Macros and Definitions ---------------------------------------*/
 
 #define SAMPLERATE (48000)
-#define MEMPOOL_SIZE (0x1000)
+#define MEMPOOL_SIZE (0x2000)
 
 #define POLYSYNTH_NUM_VOICES (4)
 
@@ -97,6 +97,7 @@ typedef enum {
     PARAM_VOICE_INDEX,
     PARAM_AMP,
     PARAM_FREQ,
+    PARAM_PHASE,
     PARAM_GATE,
     PARAM_VEL,
     PARAM_AMP_LEVEL,
@@ -254,6 +255,11 @@ void module_set_param(uint16_t param_index, int32_t value) {
     case PARAM_FREQ:
         Aleph_PolySynth_set_voice_freq(&g_module.synth, g_module.voice_index,
                                        value);
+        break;
+
+    case PARAM_PHASE:
+        Aleph_PolySynth_set_voice_phase(&g_module.synth, g_module.voice_index,
+                                        value);
         break;
 
     case PARAM_TUNE:

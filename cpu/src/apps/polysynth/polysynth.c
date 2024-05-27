@@ -113,6 +113,7 @@ typedef enum {
     PARAM_VOICE_INDEX,
     PARAM_AMP,
     PARAM_FREQ,
+    PARAM_PHASE,
     PARAM_GATE,
     PARAM_VEL,
     PARAM_AMP_LEVEL,
@@ -544,6 +545,7 @@ static void _trigger_callback(uint8_t pad, uint8_t vel, bool state) {
 
             ft_set_module_param(0, PARAM_VOICE_INDEX, voice);
 
+            ft_set_module_param(0, PARAM_PHASE, 0);
             ft_set_module_param(0, PARAM_FREQ, freq);
             // ft_set_module_param(0, PARAM_VEL, vel << 23);
             // ft_set_module_param(0, PARAM_GATE, state);
