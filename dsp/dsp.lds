@@ -178,7 +178,7 @@ SECTIONS
   .dynamic        : { *(.dynamic) } >MEM_L1_DATA_A
   .data           :
   {
-    *(.data .data.* .gnu.linkonce.d.* .l1.data .l1.data.*)
+    *(.data .data.* .gnu.linkonce.d.* .l1.data .l1.data.a .l1.data.A)
     KEEP (*(.gnu.linkonce.d.*personality*))
     SORT(CONSTRUCTORS)
   } >MEM_L1_DATA_A
@@ -212,6 +212,13 @@ SECTIONS
     . = ALIGN(. != 0 ? 32 / 8 : 1);
     __bss_end = .;
   } >MEM_L1_DATA_A
+
+  .l1.data.b           :
+  {
+    *(.l1.data.b .l1.data.B)
+    KEEP (*(.*personality*))
+  } >MEM_L1_DATA_B
+
   . = ALIGN(32 / 8);
   . = ALIGN(32 / 8);
   __end = .; PROVIDE (_end = .);

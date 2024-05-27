@@ -54,6 +54,8 @@ under the terms of the GNU Affero General Public License as published by
 // #define SPI_TX_BUF_LEN 0x40
 #define SPI_RX_BUF_LEN 0x200
 #define SPI_TX_BUF_LEN 0x200
+// #define SPI_RX_BUF_LEN 0x2000
+// #define SPI_TX_BUF_LEN 0x200
 
 /*----- Static variable definitions ----------------------------------*/
 
@@ -93,15 +95,13 @@ void spi_init(void) {
     // Initialise MCU message ring buffers.
     if (ring_buffer_init(&spi_tx_rbd, &tx_attr) ||
         ring_buffer_init(&spi_rx_rbd, &rx_attr) == 0) {
-        //
     }
-    int j;
 
-    // SPI Rx interrupt IVG10.
-    *pSIC_IAR2 |= P21_IVG(10);
+    // SPI Rx interrupt IVG11.
+    *pSIC_IAR2 |= P21_IVG(11);
     ssync();
 
-    *pEVT10 = _spi_rx_isr;
+    *pEVT11 = &_spi_rx_isr;
 
     // Enable SPI Rx interrupt.
     *pSIC_IMASK0 |= IRQ_DMA7; // Not actually using DMA.
@@ -109,7 +109,7 @@ void spi_init(void) {
 
     int i;
     // unmask in the core event processor
-    asm volatile("cli %0; bitset(%0, 10); sti %0; csync;" : "+d"(i));
+    asm volatile("cli %0; bitset(%0, 11); sti %0; csync;" : "+d"(i));
     ssync();
 
     // don't attempt to drive the clock
@@ -129,7 +129,8 @@ void spi_init(void) {
     ssync();
 
     // clear the spi rx register by reading from it
-    j = *pSPI_RDBR;
+    int j = *pSPI_RDBR;
+    (void)j;
 
     // clear the rx error bit (sticky - W1C)
     *pSPI_STAT |= 0x10;
@@ -142,7 +143,7 @@ int per_spi_rx_dequeue(uint8_t *spi_byte) {
     return ring_buffer_get(spi_rx_rbd, spi_byte);
 }
 
-// TODO: Check/return status.
+/// TODO: Check/return status.
 void per_spi_tx_enqueue(uint8_t *spi_byte) {
 
     // Overwrite on overflow?
@@ -155,7 +156,8 @@ __attribute__((interrupt_handler)) static void _spi_rx_isr(void) {
 
     *pPORTGIO_SET = HWAIT;
 
-    // TODO: Can we queue register contents directly?
+    /// TODO: Queue register contents directly.
+    //
     uint8_t rx_byte = 0;
     uint8_t tx_byte = 0;
 
@@ -174,13 +176,13 @@ __attribute__((interrupt_handler)) static void _spi_rx_isr(void) {
     *pPORTGIO_CLEAR = HWAIT;
 }
 
-// TODO: Check/return status.
+/// TODO: Check/return status.
 static int _spi_tx_dequeue(uint8_t *spi_byte) {
 
     return ring_buffer_get(spi_tx_rbd, spi_byte);
 }
 
-// TODO: Check/return status.
+/// TODO: Check/return status.
 static void _spi_rx_enqueue(uint8_t *spi_byte) {
 
     // Overwrite on overflow?

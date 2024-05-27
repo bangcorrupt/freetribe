@@ -49,6 +49,13 @@ extern "C" {
 
 /*----- Macros and Definitions ---------------------------------------*/
 
+#define BLOCK_SIZE (32)
+#define SAMPLE_SIZE (4)
+#define CHANNEL_COUNT (2)
+#define BUFFER_LENGTH (CHANNEL_COUNT * BLOCK_SIZE)
+
+typedef fract32 t_audio_buffer[CHANNEL_COUNT][BLOCK_SIZE];
+
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
@@ -57,8 +64,8 @@ void sport0_init(void);
 bool sport0_frame_received(void);
 void sport0_frame_processed(void);
 
-fract32 *sport0_get_rx_buffer(void);
-fract32 *sport0_get_tx_buffer(void);
+t_audio_buffer *sport0_get_rx_buffer(void);
+t_audio_buffer *sport0_get_tx_buffer(void);
 
 #ifdef __cplusplus
 }

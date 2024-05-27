@@ -56,9 +56,9 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Macros and Definitions ---------------------------------------*/
 
 #define CONTROL_RATE (1000)
-// #define MEMPOOL_SIZE (0x1000)
-#define MEMPOOL_SIZE (0x4000)
-#define POLY_VOICE_COUNT (2)
+#define MEMPOOL_SIZE (0x1000)
+// #define MEMPOOL_SIZE (0x4000)
+#define POLY_VOICE_COUNT (4)
 
 #define KNOB_LEVEL 0x00
 #define KNOB_PITCH 0x02
@@ -111,7 +111,9 @@ under the terms of the GNU Affero General Public License as published by
 
 typedef enum {
     PARAM_VOICE_INDEX,
+    PARAM_AMP,
     PARAM_FREQ,
+    PARAM_PHASE,
     PARAM_GATE,
     PARAM_VEL,
     PARAM_AMP_LEVEL,
@@ -170,6 +172,13 @@ typedef enum {
     MOD_TYPE_COUNT
 } e_mod_type;
 
+typedef struct {
+
+    int32_t next;
+    int32_t last;
+    bool changed;
+} t_cv;
+
 /*----- Static variable definitions ----------------------------------*/
 
 static int32_t g_midi_hz_lut[128];
@@ -190,6 +199,9 @@ static char g_mempool[MEMPOOL_SIZE];
 
 static tSimplePoly g_poly;
 
+static tADSRS g_amp_env[POLY_VOICE_COUNT];
+static t_cv g_amp_cv[POLY_VOICE_COUNT];
+
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
@@ -198,6 +210,7 @@ static void _knob_callback(uint8_t index, uint8_t value);
 static void _encoder_callback(uint8_t index, uint8_t value);
 static void _button_callback(uint8_t index, bool state);
 static void _trigger_callback(uint8_t pad, uint8_t vel, bool state);
+static void _tick_callback(void);
 
 static void _set_filter_type(uint8_t filter_type);
 static void _set_mod_depth(uint32_t mod_depth);
@@ -269,6 +282,11 @@ t_status app_init(void) {
 
     tSimplePoly_init(&g_poly, POLY_VOICE_COUNT, &g_leaf);
 
+    for (i = 0; i < POLY_VOICE_COUNT; i++) {
+
+        tADSRS_init(&g_amp_env[i], 0, 1024, 8192, 1024, &g_leaf);
+    }
+
     scale_init(&g_scale, DEFAULT_SCALE_NOTES, DEFAULT_SCALE_TONES);
     keyboard_init(&g_kbd, &g_scale);
 
@@ -277,10 +295,12 @@ t_status app_init(void) {
     ft_register_panel_callback(BUTTON_EVENT, _button_callback);
     ft_register_panel_callback(TRIGGER_EVENT, _trigger_callback);
 
+    ft_register_tick_callback(0, _tick_callback);
+
     // Initialise GUI.
     gui_task();
 
-    gui_print(4, 7, "MonoSynth Example");
+    gui_print(4, 7, "PolySynth Example");
 
     status = SUCCESS;
     return status;
@@ -293,11 +313,45 @@ void app_run(void) { gui_task(); }
 
 /*----- Static function implementations ------------------------------*/
 
+static void _tick_callback(void) {
+
+    float next = 0;
+
+    int i;
+    for (i = 0; i < POLY_VOICE_COUNT; i++) {
+
+        /// TODO: Use a fixed point envelope generator, or convert properly.
+        ///       We can probably use a much cheaper envelope generator,
+        ///       as control rate is relatively low and parameters
+        ///       are interpolated at audio rate on the DSP side.
+        //
+        next = tADSRS_tick(&g_amp_env[i]);
+        g_amp_cv[i].next = ((int32_t)(next * 262143.0) >> 16) << 16;
+
+        if (g_amp_cv[i].next != g_amp_cv[i].last) {
+            g_amp_cv[i].last = g_amp_cv[i].next;
+            g_amp_cv[i].changed = true;
+
+        } else {
+            g_amp_cv[i].changed = false;
+        }
+    }
+
+    // Only send parameters if they have changed.
+    for (i = 0; i < POLY_VOICE_COUNT; i++) {
+
+        if (g_amp_cv[i].changed) {
+            ft_set_module_param(0, PARAM_VOICE_INDEX, i);
+            ft_set_module_param(0, PARAM_AMP, g_amp_cv[i].next);
+        }
+    }
+}
+
 /**
  * @brief   Callback triggered by panel knob events.
  *
  * @param[in]   index   Index of knob.
- * @param[in]   value   Values of knob.
+ * @param[in]   value   Value of knob.
  */
 static void _knob_callback(uint8_t index, uint8_t value) {
 
@@ -393,7 +447,7 @@ static void _knob_callback(uint8_t index, uint8_t value) {
  * @brief   Callback triggered by panel encoder events.
  *
  * @param[in]   index   Index of encoder.
- * @param[in]   value   Values of encoder.
+ * @param[in]   value   Value of encoder.
  */
 static void _encoder_callback(uint8_t index, uint8_t value) {
 
@@ -491,9 +545,11 @@ static void _trigger_callback(uint8_t pad, uint8_t vel, bool state) {
 
             ft_set_module_param(0, PARAM_VOICE_INDEX, voice);
 
+            ft_set_module_param(0, PARAM_PHASE, 0);
             ft_set_module_param(0, PARAM_FREQ, freq);
             // ft_set_module_param(0, PARAM_VEL, vel << 23);
-            ft_set_module_param(0, PARAM_GATE, state);
+            // ft_set_module_param(0, PARAM_GATE, state);
+            tADSRS_on(&g_amp_env[voice], 1);
         }
 
     } else {
@@ -505,7 +561,8 @@ static void _trigger_callback(uint8_t pad, uint8_t vel, bool state) {
             ft_set_module_param(0, PARAM_VOICE_INDEX, voice);
 
             // ft_set_module_param(0, PARAM_VEL, vel << 23);
-            ft_set_module_param(0, PARAM_GATE, state);
+            // ft_set_module_param(0, PARAM_GATE, state);
+            tADSRS_off(&g_amp_env[voice]);
         }
     }
 }
