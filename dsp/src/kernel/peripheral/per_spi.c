@@ -101,7 +101,7 @@ void spi_init(void) {
     *pSIC_IAR2 |= P21_IVG(11);
     ssync();
 
-    *pEVT11 = _spi_rx_isr;
+    *pEVT11 = &_spi_rx_isr;
 
     // Enable SPI Rx interrupt.
     *pSIC_IMASK0 |= IRQ_DMA7; // Not actually using DMA.

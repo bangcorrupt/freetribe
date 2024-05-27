@@ -53,7 +53,7 @@ under the terms of the GNU Affero General Public License as published by
 #define SAMPLERATE (48000)
 #define MEMPOOL_SIZE (0x1000)
 
-#define POLYSYNTH_NUM_VOICES (1)
+#define POLYSYNTH_NUM_VOICES (4)
 
 /// TODO: Struct for parameter type.
 ///         scaler,
@@ -212,7 +212,7 @@ void module_process(t_audio_buffer *in, t_audio_buffer *out) {
 
     while (samples--) {
 
-        Aleph_PolySynth_set_amp(&g_module.synth, FR32_MAX);
+        // Aleph_PolySynth_set_amp(&g_module.synth, FR32_MAX);
 
         output = Aleph_PolySynth_next(&g_module.synth);
 

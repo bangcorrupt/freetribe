@@ -93,11 +93,11 @@ int main(void) {
 
     per_gpio_init();
 
-    // sysint_init();
+    sysint_init();
 
     dma_init();
 
-    // spi_init();
+    spi_init();
 
     sport0_init();
     // sport1_init();
@@ -131,7 +131,7 @@ int main(void) {
 
         // cycles_before = cycles();
         //
-        // svc_cpu_task();
+        svc_cpu_task();
         //
         // cycles_after = cycles();
         //
@@ -145,17 +145,15 @@ int main(void) {
 
 void sysint_init(void) {
 
-    // Default all peripherals to lowest priority interrupts.
-    *pSIC_IAR0 = 0x88888888;
-    *pSIC_IAR1 = 0x88888888;
-    *pSIC_IAR2 = 0x88888888;
-    *pSIC_IAR3 = 0x88888888;
-    *pSIC_IAR4 = 0x88888888;
-    *pSIC_IAR5 = 0x88888888;
-    *pSIC_IAR6 = 0x88888888;
-    *pSIC_IAR7 = 0x88888888;
+    *pSIC_IAR0 = 0;
+    *pSIC_IAR1 = 0;
+    *pSIC_IAR2 = 0;
+    *pSIC_IAR3 = 0;
+    *pSIC_IAR4 = 0;
+    *pSIC_IAR5 = 0;
+    *pSIC_IAR6 = 0;
+    *pSIC_IAR7 = 0;
 
-    // Default all interrupts can wake core.
     *pSIC_IWR0 = 0xffffffff;
     *pSIC_IWR1 = 0xffffffff;
 }
