@@ -48,6 +48,8 @@ extern "C" {
 
 #include "types.h"
 
+#include "per_sport.h"
+
 /*----- Macros and Definitions ---------------------------------------*/
 
 #ifndef SAMPLERATE
@@ -61,7 +63,7 @@ extern "C" {
 /*----- Extern function prototypes -----------------------------------*/
 
 void module_init(void);
-void module_process(fract32 *in, fract32 *out);
+void module_process(t_audio_buffer *in, t_audio_buffer *out);
 void module_set_param(uint16_t index, int32_t value);
 int32_t module_get_param(uint16_t index);
 uint32_t module_get_param_count(void); // TODO: return uint16_t ?

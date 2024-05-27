@@ -61,7 +61,8 @@ __attribute__((weak)) void module_init(void) {
     //
 }
 
-__attribute__((weak)) void module_process(fract32 *in, fract32 *out) {
+__attribute__((weak)) void module_process(t_audio_buffer *in,
+                                          t_audio_buffer *out) {
     //
 }
 

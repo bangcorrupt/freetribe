@@ -42,14 +42,16 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "module.h"
 
+#include "per_sport.h"
 #include "utils.h"
+#include <stdint.h>
 
 // #include "polysynth.h"
 
 /*----- Macros and Definitions ---------------------------------------*/
 
 #define SAMPLERATE (48000)
-#define MEMPOOL_SIZE (0x4000)
+#define MEMPOOL_SIZE (0x2000)
 
 #define POLYSYNTH_NUM_VOICES (4)
 
@@ -95,6 +97,7 @@ typedef enum {
     PARAM_VOICE_INDEX,
     PARAM_AMP,
     PARAM_FREQ,
+    PARAM_PHASE,
     PARAM_GATE,
     PARAM_VEL,
     PARAM_AMP_LEVEL,
@@ -140,9 +143,12 @@ typedef struct {
 /*----- Static variable definitions ----------------------------------*/
 
 static t_Aleph g_aleph;
-static char g_mempool[MEMPOOL_SIZE];
+
+__attribute__((section(".l1.data.a")))
+__attribute__((aligned(32))) static char g_mempool[MEMPOOL_SIZE];
 
 static t_module g_module;
+static uint32_t g_process_count;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -193,18 +199,36 @@ void module_init(void) {
  * @param[in]   in  Pointer to input buffer.
  * @param[out]  out Pointer to input buffer.
  */
-void module_process(fract32 *in, fract32 *out) {
+void module_process(t_audio_buffer *in, t_audio_buffer *out) {
+
+    fract32 *left_in = *in[0];
+    fract32 *right_in = *in[1];
+
+    fract32 *left_out = *out[0];
+    fract32 *right_out = *out[1];
+
+    uint32_t samples = BLOCK_SIZE;
 
     fract32 output;
 
-    output = Aleph_PolySynth_next(&g_module.synth);
+    while (samples--) {
 
-    // Scale amplitude by level.
-    output = mult_fr1x32x32(output, g_module.amp_level);
+        // Aleph_PolySynth_set_amp(&g_module.synth, FR32_MAX);
 
-    // Set output.
-    out[0] = output;
-    out[1] = output;
+        output = Aleph_PolySynth_next(&g_module.synth);
+
+        // Scale amplitude by level.
+        output = mult_fr1x32x32(output, g_module.amp_level);
+
+        // Set output.
+        *left_out++ = output;
+        *right_out++ = output;
+
+        // *left_out++ = *left_in++;
+        // *right_out++ = *right_in++;
+    }
+
+    g_process_count++;
 }
 
 /**
@@ -231,6 +255,11 @@ void module_set_param(uint16_t param_index, int32_t value) {
     case PARAM_FREQ:
         Aleph_PolySynth_set_voice_freq(&g_module.synth, g_module.voice_index,
                                        value);
+        break;
+
+    case PARAM_PHASE:
+        Aleph_PolySynth_set_voice_phase(&g_module.synth, g_module.voice_index,
+                                        value);
         break;
 
     case PARAM_TUNE:
