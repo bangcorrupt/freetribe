@@ -30,7 +30,7 @@ CPU := bf527
 # C compilation options
 OPTIMISE ?= -g3 -O0
 # OPTIMISE = -g -O3
-CFLAGS := -mcpu=$(CPU) $(OPTIMISE) -fdata-sections -ffunction-sections -Wall 
+CFLAGS := -mcpu=$(CPU) $(OPTIMISE) -mfast-fp  -fdata-sections -ffunction-sections -Wall 
 # Assembly compilation options
 ASM_FLAGS := -x assembler-with-cpp
 
