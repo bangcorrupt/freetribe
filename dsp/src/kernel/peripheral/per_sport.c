@@ -54,8 +54,6 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Static variable definitions ----------------------------------*/
 
-/// TODO: Do buffers need to be volatile?
-
 // SPORT0 DMA receive buffer
 __attribute__((section(".l1.data.a")))
 __attribute__((aligned(32))) static fract32 g_codec_rx_buffer[BUFFER_LENGTH];
