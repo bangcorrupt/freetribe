@@ -31,7 +31,7 @@ under the terms of the GNU Affero General Public License as published by
 /**
  * @file    template_app.c
  *
- * @brief   Template for CPU application souce files.
+ * @brief   Template for CPU application source files.
  */
 
 /*----- Includes -----------------------------------------------------*/

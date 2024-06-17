@@ -248,6 +248,7 @@ inline void sport0_frame_processed(void) {
 __attribute__((interrupt_handler)) static void _sport0_rx_isr(void) {
 
     // *pPORTGIO_SET = HWAIT;
+
     // Clear interrupt status.
     *pDMA3_IRQ_STATUS = DMA_DONE;
     ssync();
@@ -264,10 +265,12 @@ __attribute__((interrupt_handler)) static void _sport0_rx_isr(void) {
     }
 
     g_sport0_rx_complete = true;
+
     // *pPORTGIO_CLEAR = HWAIT;
 }
 
 __attribute__((interrupt_handler)) static void _sport0_tx_isr(void) {
+
     // *pPORTGIO_SET = HWAIT;
 
     // Clear interrupt status.
@@ -285,6 +288,7 @@ __attribute__((interrupt_handler)) static void _sport0_tx_isr(void) {
     }
 
     g_sport0_tx_complete = true;
+
     // *pPORTGIO_CLEAR = HWAIT;
 }
 
