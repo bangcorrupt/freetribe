@@ -84,7 +84,7 @@ static void _trs_rx_callback(void);
 
 /*----- Extern function implementations ------------------------------*/
 
-// TODO: Return status code.
+/// TODO: Return status code.
 void dev_trs_init(void) {
 
     // Tx ring buffer attributes.
@@ -130,7 +130,7 @@ void dev_trs_tx_enqueue(uint8_t *byte) {
 
     } else {
         // Queue byte if transmission in progress.
-        // TODO: Handle overflow here?
+        /// TODO: Handle overflow here?
         ring_buffer_put_force(trs_tx_rbd, byte);
     }
 }

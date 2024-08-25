@@ -100,9 +100,9 @@ void svc_midi_task(void) {
     }
 }
 
-// TODO: Abstract this to separate library.
-//          Functions returning messages.
-// TODO: Running status, only send changes.
+/// TODO: Abstract this to separate library.
+///          Functions returning messages.
+/// TODO: Running status, only send changes.
 void svc_midi_send_note_on(char chan, char note, char vel) {
     _midi_out(0x90 | chan);
     _midi_out(note);
@@ -122,7 +122,6 @@ void svc_midi_send_cc(uint8_t chan, uint8_t idx, uint8_t val) {
     _midi_out(val);
 }
 
-// TODO: This only sends null terminated strings.
 void svc_midi_send_string(char *text) {
 
     _midi_out(0xf0);
@@ -134,7 +133,8 @@ void svc_midi_send_string(char *text) {
     _midi_out(0xf7);
 }
 
-// TODO: Refactor svc_midi_send_sysex.
+/// TODO: Refactor svc_midi_send_sysex.
+//
 void sysex_response(uint8_t msg_id) {
     _midi_out(0xf0);
 
@@ -161,7 +161,9 @@ static t_status _midi_init(void) {
 }
 
 static void _midi_out(uint8_t midi_byte) {
-    // TODO: Refactor to use returned error code.
+
+    /// TODO: Refactor to use returned error code.
+    //
     dev_trs_tx_enqueue(&midi_byte);
 }
 
