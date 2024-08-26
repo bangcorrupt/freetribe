@@ -118,13 +118,13 @@ static t_status _system_init(void) {
     // Initialise hardware.
     dev_board_init();
 
-    // TODO: How long is necessary?
-    //          Are there signals we can test?
+    /// TODO: How long is necessary?
+    ///          Are there signals we can test?
     //
     // Give the hardware time to wake up.
     delay_block_us(2000000);
 
-    // TODO: Only necessary if flash is locked.
+    /// TODO: Only necessary if flash is locked.
     //
     // Workaround flash write protect.
     // flash_unlock();
@@ -136,8 +136,8 @@ static t_status _system_init(void) {
 
 static void _system_run(void) {
 
-    // TODO: Maybe integrate timers into system task
-    //       and kick watchdog in run state.
+    /// TODO: Maybe integrate timers into system task
+    ///       and kick watchdog in run state.
 }
 
 /*----- End of file --------------------------------------------------*/
