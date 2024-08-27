@@ -60,7 +60,7 @@ extern void CP15MMUDisable(void);
 extern void CP15MMUEnable(void);
 extern void CP15ICacheFlushBuff(unsigned int ptr, unsigned int size);
 extern void CP15DCacheCleanBuff(unsigned int bufPtr, unsigned int size);
-extern void CP15HighExceptionVectorEnable(void);
+extern void CP15HighVectorEnable(void);
 
 #ifdef __cplusplus
 }

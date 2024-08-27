@@ -263,7 +263,7 @@ void CP15MMUEnable(void) {
  * \return     None.
  *
  **/
-void CP15HighExceptionVectorEnable(void) {
+void CP15HighVectorEnable(void) {
     asm("    mrc     p15, #0, r0, c1, c0, #0\n\t"
         "    orr     r0,  r0, #0x00002000 \n\t"
         "    mcr     p15, #0, r0, c1, c0, #0 \n\t");
