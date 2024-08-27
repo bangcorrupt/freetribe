@@ -206,7 +206,7 @@ void CP15DCacheCleanBuff(unsigned int bufPtr, unsigned int size) {
  *  Note : Page Table starting address should be aligned to 16k.
  **/
 void CP15TtbSet(unsigned int ttb) {
-    
+
     /// TODO: Move this to separate function and parameterise.
     /* Invalidates all TLBs.Domain access is selected as
      * client by configuring domain access register,
@@ -253,6 +253,20 @@ void CP15MMUEnable(void) {
     asm("    mrc p15, #0, r0, c1, c0, #0\n\t"
         "    orr r0, r0, #0x00000001\n\t"
         "    mcr p15, #0, r0, c1, c0, #0\n\t");
+}
+
+/**
+ * \brief      This API sets the exception vector to high address at 0xffff0000.
+ *
+ * \param      None.
+ *
+ * \return     None.
+ *
+ **/
+void CP15HighExceptionVectorEnable(void) {
+    asm("    mrc     p15, #0, r0, c1, c0, #0\n\t"
+        "    orr     r0,  r0, #0x00002000 \n\t"
+        "    mcr     p15, #0, r0, c1, c0, #0 \n\t");
 }
 
 /********************************* End Of File *******************************/
