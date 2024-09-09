@@ -36,20 +36,16 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
-#include <math.h>
 #include <stdint.h>
 
 #include "freetribe.h"
 
 #include "keyboard.h"
 
-#include "leaf-midi.h"
 #include "param_scale.h"
 #include "svc_panel.h"
 
 #include "gui_task.h"
-#include "gui_window.h"
-#include "synth_gui.h"
 
 #include "leaf.h"
 
@@ -108,6 +104,7 @@ under the terms of the GNU Affero General Public License as published by
 // #define DEFAULT_PITCH_LFO_DEPTH 0
 // #define DEFAULT_PITCH_LFO_SPEED FIX16_ONE
 
+/// TODO: Move to common location.
 typedef enum {
     PARAM_AMP,
     PARAM_FREQ,
@@ -194,8 +191,6 @@ static t_scale g_scale;
 
 static LEAF g_leaf;
 static char g_mempool[MEMPOOL_SIZE];
-
-static tSimplePoly g_poly;
 
 static tADSRS g_amp_env;
 static t_cv g_amp_cv;
@@ -290,6 +285,8 @@ t_status app_init(void) {
 
     ft_register_tick_callback(0, _tick_callback);
 
+    _set_filter_type(FILTER_TYPE_LPF);
+
     // Initialise GUI.
     gui_task();
 
@@ -312,8 +309,8 @@ static void _tick_callback(void) {
 
     /// TODO: Use a fixed point envelope generator, or convert properly.
     ///       We can probably use a much cheaper envelope generator,
-    ///       as control rate is relatively low and parameters
-    ///       are interpolated at audio rate on the DSP side.
+    ///       as control rate is relatively low and parameters can be
+    ///       interpolated at audio rate on the DSP side.
     //
     next = tADSRS_tick(&g_amp_env);
     g_amp_cv.next = ((int32_t)(next * 262143.0) >> 16) << 16;
@@ -351,53 +348,53 @@ static void _knob_callback(uint8_t index, uint8_t value) {
 
     case KNOB_ATTACK:
 
-        if (g_shift_held) {
-            if (g_amp_eg) {
-                ft_set_module_param(0, PARAM_AMP_ENV_SUSTAIN, amp_lut[value]);
-                gui_post_param("Amp Sus: ", value);
-            } else {
-                ft_set_module_param(0, PARAM_FILTER_ENV_SUSTAIN,
-                                    amp_lut[value]);
-                gui_post_param("Fil Sus: ", value);
-            }
-
-        } else {
-            if (g_amp_eg) {
-                ft_set_module_param(0, PARAM_AMP_ENV_ATTACK,
-                                    integrator_lut[value]);
-                gui_post_param("Amp Atk: ", value);
-            } else {
-                ft_set_module_param(0, PARAM_FILTER_ENV_ATTACK,
-                                    integrator_lut[value]);
-                gui_post_param("Fil Atk: ", value);
-            }
-        }
+        // if (g_shift_held) {
+        //     if (g_amp_eg) {
+        //         ft_set_module_param(0, PARAM_AMP_ENV_SUSTAIN,
+        //         amp_lut[value]); gui_post_param("Amp Sus: ", value);
+        //     } else {
+        //         ft_set_module_param(0, PARAM_FILTER_ENV_SUSTAIN,
+        //                             amp_lut[value]);
+        //         gui_post_param("Fil Sus: ", value);
+        //     }
+        //
+        // } else {
+        //     if (g_amp_eg) {
+        //         ft_set_module_param(0, PARAM_AMP_ENV_ATTACK,
+        //                             integrator_lut[value]);
+        //         gui_post_param("Amp Atk: ", value);
+        //     } else {
+        //         ft_set_module_param(0, PARAM_FILTER_ENV_ATTACK,
+        //                             integrator_lut[value]);
+        //         gui_post_param("Fil Atk: ", value);
+        //     }
+        // }
 
         break;
 
     case KNOB_DECAY:
-        if (g_shift_held) {
-            if (g_amp_eg) {
-                ft_set_module_param(0, PARAM_AMP_ENV_RELEASE,
-                                    integrator_lut[value]);
-                gui_post_param("Amp Rel: ", value);
-            } else {
-                ft_set_module_param(0, PARAM_FILTER_ENV_RELEASE,
-                                    integrator_lut[value]);
-                gui_post_param("Fil Rel: ", value);
-            }
-
-        } else {
-            if (g_amp_eg) {
-                ft_set_module_param(0, PARAM_AMP_ENV_DECAY,
-                                    integrator_lut[value]);
-                gui_post_param("Amp Dec: ", value);
-            } else {
-                ft_set_module_param(0, PARAM_FILTER_ENV_DECAY,
-                                    integrator_lut[value]);
-                gui_post_param("Fil Dec: ", value);
-            }
-        }
+        // if (g_shift_held) {
+        //     if (g_amp_eg) {
+        //         ft_set_module_param(0, PARAM_AMP_ENV_RELEASE,
+        //                             integrator_lut[value]);
+        //         gui_post_param("Amp Rel: ", value);
+        //     } else {
+        //         ft_set_module_param(0, PARAM_FILTER_ENV_RELEASE,
+        //                             integrator_lut[value]);
+        //         gui_post_param("Fil Rel: ", value);
+        //     }
+        //
+        // } else {
+        //     if (g_amp_eg) {
+        //         ft_set_module_param(0, PARAM_AMP_ENV_DECAY,
+        //                             integrator_lut[value]);
+        //         gui_post_param("Amp Dec: ", value);
+        //     } else {
+        //         ft_set_module_param(0, PARAM_FILTER_ENV_DECAY,
+        //                             integrator_lut[value]);
+        //         gui_post_param("Fil Dec: ", value);
+        //     }
+        // }
         break;
 
     case KNOB_LEVEL:
@@ -411,8 +408,8 @@ static void _knob_callback(uint8_t index, uint8_t value) {
         break;
 
     case KNOB_EG:
-        ft_set_module_param(0, PARAM_FILTER_ENV_DEPTH, amp_lut[value]);
-        gui_post_param("EG Depth: ", value);
+        // ft_set_module_param(0, PARAM_FILTER_ENV_DEPTH, amp_lut[value]);
+        // gui_post_param("EG Depth: ", value);
         break;
 
     case KNOB_MOD_DEPTH:
@@ -480,29 +477,22 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
         break;
 
     case ENCODER_MOD:
-        if (g_menu_held) {
-            // gui_menu_select(GUI_MENU_MODULATION);
-            // if (value == 0x01) {
-            //     gui_menu_next(GUI_MENU_MODULATION);
-            // } else {
-            //     gui_menu_previous(GUI_MENU_MODULATION);
-            // }
 
-        } else {
-            if (value == 0x01) {
-                mod_type++;
-                if (mod_type > MOD_TYPE_MAX) {
-                    mod_type = 0;
-                }
-            } else {
-                mod_type--;
-                if (mod_type < 0) {
-                    mod_type = MOD_TYPE_MAX;
-                }
+        if (value == 0x01) {
+            mod_type++;
+            if (mod_type > MOD_TYPE_MAX) {
+                mod_type = 0;
             }
-            g_mod_type = mod_type;
-            gui_post_param("Mod Type: ", mod_type);
+        } else {
+            mod_type--;
+            if (mod_type < 0) {
+                mod_type = MOD_TYPE_MAX;
+            }
         }
+
+        g_mod_type = mod_type;
+        gui_post_param("Mod Type: ", mod_type);
+
         break;
 
     default:
@@ -512,43 +502,26 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
 
 static void _trigger_callback(uint8_t pad, uint8_t vel, bool state) {
 
-    /// TODO: Polyphonic velocity.
-
     int32_t freq;
     uint8_t note;
-    int32_t voice;
 
     note = keyboard_map_note(&g_kbd, pad);
 
     if (state) {
 
-        // voice = tSimplePoly_noteOn(&g_poly, note, vel);
-
-        // if (voice >= 0) {
-
         freq = g_midi_hz_lut[note];
-
-        // ft_set_module_param(0, PARAM_VOICE_INDEX, voice);
 
         ft_set_module_param(0, PARAM_PHASE, 0);
         ft_set_module_param(0, PARAM_FREQ, freq);
         // ft_set_module_param(0, PARAM_VEL, vel << 23);
         // ft_set_module_param(0, PARAM_GATE, state);
-        tADSRS_on(&g_amp_env, 1);
-        // }
+        tADSRS_on(&g_amp_env, vel / 128.0);
 
     } else {
-
-        // voice = tSimplePoly_noteOff(&g_poly, note);
-
-        // if (voice >= 0) {
-
-        // ft_set_module_param(0, PARAM_VOICE_INDEX, voice);
 
         // ft_set_module_param(0, PARAM_VEL, vel << 23);
         // ft_set_module_param(0, PARAM_GATE, state);
         tADSRS_off(&g_amp_env);
-        // }
     }
 }
 
@@ -636,18 +609,18 @@ static void _set_mod_depth(uint32_t mod_depth) {
     switch (g_mod_type) {
 
     case MOD_AMP_LFO:
-        ft_set_module_param(0, PARAM_AMP_LFO_DEPTH, mod_depth);
-        gui_post_param("A.LFO Dpt: ", mod_depth >> 23);
+        // ft_set_module_param(0, PARAM_AMP_LFO_DEPTH, mod_depth);
+        // gui_post_param("A.LFO Dpt: ", mod_depth >> 23);
         break;
 
     case MOD_FILTER_LFO:
-        ft_set_module_param(0, PARAM_FILTER_LFO_DEPTH, mod_depth);
-        gui_post_param("F.LFO Dpt: ", mod_depth >> 23);
+        // ft_set_module_param(0, PARAM_FILTER_LFO_DEPTH, mod_depth);
+        // gui_post_param("F.LFO Dpt: ", mod_depth >> 23);
         break;
 
     case MOD_PITCH_LFO:
-        ft_set_module_param(0, PARAM_PITCH_LFO_DEPTH, mod_depth);
-        gui_post_param("P.LFO Dpt: ", mod_depth >> 23);
+        // ft_set_module_param(0, PARAM_PITCH_LFO_DEPTH, mod_depth);
+        // gui_post_param("P.LFO Dpt: ", mod_depth >> 23);
         break;
 
     default:
@@ -660,18 +633,18 @@ static void _set_mod_speed(uint32_t mod_speed) {
     switch (g_mod_type) {
 
     case MOD_AMP_LFO:
-        ft_set_module_param(0, PARAM_AMP_LFO_SPEED, mod_speed);
-        gui_post_param("A.LFO Spd: ", mod_speed >> 13);
+        // ft_set_module_param(0, PARAM_AMP_LFO_SPEED, mod_speed);
+        // gui_post_param("A.LFO Spd: ", mod_speed >> 13);
         break;
 
     case MOD_FILTER_LFO:
-        ft_set_module_param(0, PARAM_FILTER_LFO_SPEED, mod_speed);
-        gui_post_param("F.LFO Spd: ", mod_speed >> 13);
+        // ft_set_module_param(0, PARAM_FILTER_LFO_SPEED, mod_speed);
+        // gui_post_param("F.LFO Spd: ", mod_speed >> 13);
         break;
 
     case MOD_PITCH_LFO:
-        ft_set_module_param(0, PARAM_PITCH_LFO_SPEED, mod_speed);
-        gui_post_param("P.LFO Spd: ", mod_speed >> 13);
+        // ft_set_module_param(0, PARAM_PITCH_LFO_SPEED, mod_speed);
+        // gui_post_param("P.LFO Spd: ", mod_speed >> 13);
         break;
 
     default:
