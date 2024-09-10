@@ -205,6 +205,7 @@ static void _button_callback(uint8_t index, bool state);
 static void _trigger_callback(uint8_t pad, uint8_t vel, bool state);
 static void _tick_callback(void);
 
+static void _lut_init(void);
 static void _set_filter_type(uint8_t filter_type);
 static void _set_mod_depth(uint32_t mod_depth);
 static void _set_mod_speed(uint32_t mod_speed);
@@ -223,57 +224,11 @@ t_status app_init(void) {
 
     t_status status = ERROR;
 
-    int i;
-
-    float hz;
-    for (i = 0; i <= 127; i++) {
-        // Initialise pitch to frequency lookup table.
-        hz = freq_12tet_lut[i * 2];
-
-        /// TODO: Oscillators in the Aleph DSP library
-        ///       are producing the wrong frequencies.
-        ///       It's probably user error, maybe
-        ///       samplerate. As a workaround, we
-        ///       scale the frequency here to compensate.
-        ///       Should multiplication be fixed point?
-        //
-        hz *= 0.6827421407069484;
-
-        // Convert to fix16,
-        g_midi_hz_lut[i] = (int32_t)hz;
-    }
-
-    /// TODO: Should be log.
-    //
-    // Initialise pitch mod lookup table.
-    float tune;
-    for (i = 0; i <= 255; i++) {
-
-        if (i <= 128) {
-            // 0.5...1.
-            tune = i / 256.0 + 0.5;
-
-        } else {
-            // >1...2.0
-            tune = ((i - 128) / 127.0) + 1;
-        }
-
-        // Convert to fix16,
-        tune *= (1 << 16);
-        g_octave_tune_lut[i] = (int32_t)tune;
-    }
-
-    int32_t res;
-    for (i = 0; i <= 255; i++) {
-
-        res = 0x7fffffff - (i * (1 << 23));
-
-        g_filter_res_lut[i] = res;
-    }
-
     LEAF_init(&g_leaf, CONTROL_RATE, g_mempool, MEMPOOL_SIZE, NULL);
 
     tADSRS_init(&g_amp_env, 0, 1024, 8192, 1024, &g_leaf);
+
+    _lut_init();
 
     scale_init(&g_scale, DEFAULT_SCALE_NOTES, DEFAULT_SCALE_TONES);
     keyboard_init(&g_kbd, &g_scale);
@@ -649,6 +604,57 @@ static void _set_mod_speed(uint32_t mod_speed) {
 
     default:
         break;
+    }
+}
+
+static void _lut_init(void) {
+
+    int i;
+
+    float hz;
+    for (i = 0; i <= 127; i++) {
+        // Initialise pitch to frequency lookup table.
+        hz = freq_12tet_lut[i * 2];
+
+        /// TODO: Oscillators in the Aleph DSP library
+        ///       are producing the wrong frequencies.
+        ///       It's probably user error, maybe
+        ///       samplerate. As a workaround, we
+        ///       scale the frequency here to compensate.
+        ///       Should multiplication be fixed point?
+        //
+        hz *= 0.6827421407069484;
+
+        // Convert to fix16,
+        g_midi_hz_lut[i] = (int32_t)hz;
+    }
+
+    /// TODO: Should be log.
+    //
+    // Initialise pitch mod lookup table.
+    float tune;
+    for (i = 0; i <= 255; i++) {
+
+        if (i <= 128) {
+            // 0.5...1.
+            tune = i / 256.0 + 0.5;
+
+        } else {
+            // >1...2.0
+            tune = ((i - 128) / 127.0) + 1;
+        }
+
+        // Convert to fix16,
+        tune *= (1 << 16);
+        g_octave_tune_lut[i] = (int32_t)tune;
+    }
+
+    int32_t res;
+    for (i = 0; i <= 255; i++) {
+
+        res = 0x7fffffff - (i * (1 << 23));
+
+        g_filter_res_lut[i] = res;
     }
 }
 
