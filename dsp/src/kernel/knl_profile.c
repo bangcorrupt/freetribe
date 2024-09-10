@@ -37,9 +37,6 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
-#include <blackfin.h>
-#include <builtins.h>
-
 #include "cdefBF52x_base.h"
 #include "gcc.h"
 
@@ -52,15 +49,6 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Static function prototypes -----------------------------------*/
 
 /*----- Extern function implementations ------------------------------*/
-
-inline int cycles() {
-
-    volatile long int ret;
-
-    __asm__ __volatile__("%0 = CYCLES;\n\t" : "=&d"(ret) : : "R1");
-
-    return ret;
-}
 
 /*----- Static function implementations ------------------------------*/
 

@@ -44,6 +44,9 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
+#include <blackfin.h>
+#include <builtins.h>
+
 /*----- Macros and Definitions ---------------------------------------*/
 
 #define CYCLE_LOG_LENGTH (16)
@@ -52,7 +55,16 @@ extern "C" {
 
 /*----- Extern function prototypes -----------------------------------*/
 
-inline int cycles() __attribute__((always_inline));
+inline static int cycles() __attribute__((always_inline));
+
+inline static int cycles() {
+
+    volatile long int ret;
+
+    __asm__ __volatile__("%0 = CYCLES;\n\t" : "=&d"(ret) : : "R1");
+
+    return ret;
+}
 
 #ifdef __cplusplus
 }
