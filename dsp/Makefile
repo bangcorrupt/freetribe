@@ -1,6 +1,6 @@
 # Thanks to Job Vranish (https://spin.atomicobject.com/2016/08/26/makefile-c-projects/)
 
-MODULE ?= attenuate
+MODULE ?= default 
 
 BFIN_TOOLCHAIN ?= /opt/bfin-elf/bin/
 
@@ -28,8 +28,7 @@ BIN := $(BFIN_TOOLCHAIN)$(PREFIX)objcopy
 CPU := bf527
 
 # C compilation options
-OPTIMISE ?= -g3 -O0
-# OPTIMISE = -g -O3
+OPTIMISE = -g -O3
 CFLAGS := -mcpu=$(CPU) $(OPTIMISE) -mfast-fp  -fdata-sections -ffunction-sections -Wall 
 # Assembly compilation options
 ASM_FLAGS := -x assembler-with-cpp

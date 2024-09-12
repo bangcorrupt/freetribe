@@ -175,10 +175,11 @@ static void _ui_init(void) {
     g_device.x_dim = 128;
     g_device.y_dim = 64;
     g_device.pset = _put_pixel;
-    /// TODO: How does flush function work?
 
     // Initialise uGUI
     UG_Init(&g_gui, &g_device);
+
+    /// TODO: Is fill_frame driver broken?
     UG_DriverRegister(DRIVER_FILL_FRAME, svc_display_fill_frame);
 
     // Configure uGUI
@@ -257,8 +258,6 @@ static void _note_off_callback(char chan, char note, char vel) {
  * @param[in]   index   Index of knob.
  * @param[in]   value   Values of knob.
  */
-/// TODO: We are doing too much in the callbacks.
-///       Push events to queue and handle in main loop.
 void _knob_callback(uint8_t index, uint8_t value) {
 
     ft_send_cc(0, index, value >> 1);
@@ -296,38 +295,19 @@ static void _put_pixel(UG_S16 x, UG_S16 y, UG_COLOR c) {
  */
 static void _ui_print(char *text) {
 
-    /// TODO: This is slow and starves system.
-    ///       How does UG_FILL_AREA driver work?
-    ///       Has cache fixed this?
     //
     UG_ConsolePutString(text);
 }
 
 /**
- * @brief   Utility function to build parameter string.
+ * @brief   Utility function to convert int to string.
  *
- * Converts integer value of knob to string and
- * concatenates with parameter name.
+ * Converts integer value  to string.
  *
- * @note    Currently only supports 'Volume' parameter.
+ * @param[in]   value           Value to convert.
  *
- * @param[in]   value   Value of parameter.
+ * @return      value_string    Value as string.
  */
-/// TODO: Use lookup tables.
-static char *_build_string(uint8_t value) {
-
-    char value_string[5];
-    static char display_string[20];
-
-    itoa(value, value_string, 10);
-
-    strcpy(display_string, "Level ");
-
-    strncat(display_string, value_string, 3);
-    strncat(display_string, "\n", 1);
-
-    return display_string;
-}
 
 static char *_int_to_string(uint8_t value) {
 
