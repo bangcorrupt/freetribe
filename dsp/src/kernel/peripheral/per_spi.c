@@ -50,12 +50,10 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-// #define SPI_RX_BUF_LEN 0x40
-// #define SPI_TX_BUF_LEN 0x40
+/// TODO: Central header for queue sizes.
+//
 #define SPI_RX_BUF_LEN 0x200
 #define SPI_TX_BUF_LEN 0x200
-// #define SPI_RX_BUF_LEN 0x2000
-// #define SPI_TX_BUF_LEN 0x200
 
 /*----- Static variable definitions ----------------------------------*/
 

@@ -41,15 +41,16 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Includes -----------------------------------------------------*/
 
 #include "fract_math.h"
-#include "types.h"
 
 #include "module.h"
-
-#include "filter_1p.h"
-
 #include "utils.h"
 
+#include "aleph.h"
+#include "aleph_lpf_one_pole.h"
+
 /*----- Macros and Definitions ---------------------------------------*/
+
+#define MEMPOOL_SIZE (0x2000)
 
 #define PARAM_AMP_MAX 0x7fffffff      ///< Maximum amplitude scale value.
 #define PARAM_SLEW_DEFAULT 0x00010000 ///< Default parameter slew time.
@@ -60,21 +61,32 @@ under the terms of the GNU Affero General Public License as published by
  * Index of each external parameter of module.
  *
  */
-enum params {
+typedef enum {
 
     PARAM_LEVEL0, ///< Attenuation multiplier channel 0.
     PARAM_LEVEL1, ///< Attenuation multiplier channel 1.
 
     PARAM_COUNT ///< Should remain last to return number of paramters.
-};
+} e_param;
+
+typedef struct {
+
+    /// Input parameters for amplitude scaling.
+    fract32 level[2];
+
+    /// Parameter slew filters.
+    Aleph_LPFOnePole level_slew[2];
+
+} t_module;
 
 /*----- Static variable definitions ----------------------------------*/
 
-/// Input parameters for amplitude scaling.
-static fract32 g_level[2];
+static t_Aleph g_aleph;
 
-/// Parameter slew filters.
-static filter_1p_lo g_level_slew[2];
+__attribute__((section(".l1.data.a")))
+__attribute__((aligned(32))) static char g_mempool[MEMPOOL_SIZE];
+
+static t_module g_module;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -89,17 +101,19 @@ static filter_1p_lo g_level_slew[2];
  */
 void module_init(void) {
 
+    Aleph_init(&g_aleph, SAMPLERATE, g_mempool, MEMPOOL_SIZE, NULL);
+
     // Initialise 1pole filters for input attenuation slew.
-    filter_1p_lo_init(&(g_level_slew[0]), 0);
-    filter_1p_lo_init(&(g_level_slew[1]), 0);
+    Aleph_LPFOnePole_init(&g_module.level_slew[0], &g_aleph);
+    Aleph_LPFOnePole_init(&g_module.level_slew[1], &g_aleph);
+
+    // Set slew defaults.
+    Aleph_LPFOnePole_set_coeff(&g_module.level_slew[0], PARAM_SLEW_DEFAULT);
+    Aleph_LPFOnePole_set_coeff(&g_module.level_slew[1], PARAM_SLEW_DEFAULT);
 
     // Set amp to -12db.
     module_set_param(PARAM_LEVEL0, PARAM_AMP_MAX >> 2);
     module_set_param(PARAM_LEVEL1, PARAM_AMP_MAX >> 2);
-
-    // Set slew defaults.
-    filter_1p_lo_set_slew(&(g_level_slew[0]), PARAM_SLEW_DEFAULT);
-    filter_1p_lo_set_slew(&(g_level_slew[1]), PARAM_SLEW_DEFAULT);
 }
 
 /**
@@ -113,12 +127,12 @@ void module_init(void) {
 void module_process(fract32 *in, fract32 *out) {
 
     // Process parameter slew.
-    g_level[0] = filter_1p_lo_next(&(g_level_slew[0]));
-    g_level[1] = filter_1p_lo_next(&(g_level_slew[1]));
+    g_module.level[0] = Aleph_LPFOnePole_next(&g_module.level_slew[0]);
+    g_module.level[1] = Aleph_LPFOnePole_next(&g_module.level_slew[1]);
 
     // Process audio samples.
-    out[0] = mult_fr1x32x32(in[0], g_level[0]);
-    out[1] = mult_fr1x32x32(in[1], g_level[1]);
+    out[0] = mult_fr1x32x32(in[0], g_module.level[0]);
+    out[1] = mult_fr1x32x32(in[1], g_module.level[1]);
 }
 
 /**
@@ -135,14 +149,16 @@ void module_set_param(uint16_t param_index, int32_t value) {
 
     // Input attenuation values
     case PARAM_LEVEL0:
+
         value = value < PARAM_AMP_MAX ? value : PARAM_AMP_MAX;
         // Add value to slew filter to avoid stepping.
-        filter_1p_lo_in(&(g_level_slew[0]), value);
+        Aleph_LPFOnePole_set_target(&g_module.level_slew[0], value);
         break;
 
     case PARAM_LEVEL1:
+
         value = value < PARAM_AMP_MAX ? value : PARAM_AMP_MAX;
-        filter_1p_lo_in(&(g_level_slew[1]), value);
+        Aleph_LPFOnePole_set_target(&g_module.level_slew[1], value);
         break;
 
     default:
@@ -167,10 +183,10 @@ int32_t module_get_param(uint16_t param_index) {
 
     // Input attenuation values
     case PARAM_LEVEL0:
-        value = g_level[0];
+        value = g_module.level[0];
 
     case PARAM_LEVEL1:
-        value = g_level[1];
+        value = g_module.level[1];
 
     default:
         break;

@@ -153,7 +153,7 @@ int ring_buffer_get(rbd_t rbd, void *data) {
     return result;
 }
 
-// TODO: Return bool?
+/// TODO: Return bool?
 static int _ring_buffer_full(struct ring_buffer *rb) {
     return ((rb->head - rb->tail) == rb->n_elem) ? 1 : 0;
 }
@@ -162,7 +162,7 @@ static int _ring_buffer_empty(struct ring_buffer *rb) {
     return ((rb->head - rb->tail) == 0U) ? 1 : 0;
 }
 
-// TODO: Refactor and delete.
+/// TODO: Refactor and delete.
 int rb_data_ready(rbd_t rbd) { return !_ring_buffer_empty(&_rb[rbd]); }
 
 int rb_buffer_full(rbd_t rbd) { return _ring_buffer_full(&_rb[rbd]); }

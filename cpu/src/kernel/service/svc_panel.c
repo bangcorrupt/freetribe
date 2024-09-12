@@ -338,7 +338,7 @@ static t_status _panel_parse(uint8_t *msg) {
         break;
 
     case MSG_ID_ACK:
-        // TODO: Is this actually version number?
+        /// TODO: Is this actually version number?
         version = msg[1] << 0x18 | msg[2] << 0x10 | msg[3] << 0x8 | msg[4];
 
         if (p_panel_ack_callback != NULL) {
@@ -363,8 +363,8 @@ static t_status _panel_parse(uint8_t *msg) {
         }
 
         /// TODO: Clear state?
-        /* held_buttons[0] = 0; */
-        /* held_buttons[1] = 0; */
+        // held_buttons[0] = 0;
+        // held_buttons[1] = 0;
 
         result = SUCCESS;
         break;

@@ -51,6 +51,7 @@ extern "C" {
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
+
 void usr_main_task(void);
 
 t_status app_init(void);

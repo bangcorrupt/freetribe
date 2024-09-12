@@ -53,7 +53,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #define SYSTICK_INT TMR_INT_TMR12_NON_CAPT_MODE
 
-// TODO: Single header file with interrupt priorities.
+/// TODO: Single header file with interrupt priorities.
+//
 //  Lowest priority. SPI0 is 8.
 #define SYSTICK_INT_CHAN 9 // 8
 
@@ -94,8 +95,8 @@ uint32_t systick_get(void) { return g_systick; }
 
 /*----- Static function implementations ------------------------------*/
 
-// TODO: ISR should not be at service layer.
-//       Integrate timers into system service.
+/// TODO: ISR should not be at service layer.
+///       Integrate timers into system service.
 
 void _systick_isr(void) {
 
@@ -107,7 +108,7 @@ void _systick_isr(void) {
 #endif
     TimerIntStatusClear(SYSTICK_TIMER, SYSTICK_INT << 1);
 
-    // TODO: Handle overflow (7 weeks at 1ms interval).
+    /// TODO: Handle overflow (7 weeks at 1ms interval).
     g_systick++;
 
     if (p_systick_callback != NULL) {

@@ -44,8 +44,6 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "svc_dsp.h"
 
-#include "svc_delay.h"
-
 /*----- Macros and Definitions ---------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/

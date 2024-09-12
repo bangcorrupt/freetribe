@@ -45,7 +45,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Static variable definitions ----------------------------------*/
 
-// TODO: Count recoverable errors.
+/// TODO: Count recoverable errors.
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -55,9 +55,9 @@ static void _failed(void);
 
 /*----- Extern function implementations ------------------------------*/
 
-// TODO: This is jank.
-// TODO: Refactor for debug string.
-//       Count errors by type.
+/// TODO: This is jank.
+/// TODO: Refactor for debug string.
+
 /*
  * @brief Log errors and attempt to recover.
  */
@@ -86,7 +86,7 @@ t_status error_check(t_status error) {
         break;
 
     case TASK_INIT_ERROR:
-        // TODO: Log error.
+        /// TODO: Log error.
         result = ERROR;
         break;
 
@@ -95,18 +95,16 @@ t_status error_check(t_status error) {
         break;
 
     case RING_BUFFER_INIT_ERROR:
-        // TODO: Log error.
         result = ERROR;
         break;
 
     case RING_BUFFER_PUT_ERROR:
-        // TODO: Log errors.
-        //          Ring buffer full, handle gracefully.
+        // Ring buffer full, handle gracefully.
         result = WARNING;
         break;
 
     case RING_BUFFER_GET_ERROR:
-        // TODO: Not usually an error if data not available.
+        // Not usually an error if data not available.
         result = WARNING;
         break;
 

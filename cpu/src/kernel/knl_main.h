@@ -54,6 +54,7 @@ extern "C" {
 
 void knl_main_task(void);
 void knl_register_user_tick_callback(uint32_t divisor, void (*callback)(void));
+
 #ifdef __cplusplus
 }
 #endif

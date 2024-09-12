@@ -179,8 +179,10 @@ void svc_dsp_task(void) {
         }
 
         else if (g_pending_response > 0) {
+
+            /// TODO: Can we use GPIO to signal?
+            //
             // Poll Blackfin for queued bytes.
-            // TODO: Can we use GPIO to signal?
             dev_dsp_spi_poll();
         }
 
@@ -194,7 +196,7 @@ void svc_dsp_task(void) {
         break;
 
     default:
-        // TODO: Record unhandled state.
+        /// TODO: Record unhandled state.
         if (error_check(UNHANDLED_STATE_ERROR) != SUCCESS) {
             state = STATE_ERROR;
         }
@@ -204,7 +206,7 @@ void svc_dsp_task(void) {
 
 void svc_dsp_register_callback(uint8_t msg_type, uint8_t msg_id,
                                void *callback) {
-    //
+
     switch (msg_type) {
     case MSG_TYPE_MODULE:
         _register_module_callback(msg_id, callback);
@@ -250,7 +252,7 @@ void svc_dsp_get_module_param(uint8_t module_id, uint16_t param_index) {
 }
 
 /// TODO: svc_dsp_get_module_param_count
-//       svc_dsp_get_module_param_name
+///       svc_dsp_get_module_param_name
 
 // Request state of Port F, Port G, Port H GPIO.
 void svc_dsp_get_port_state(void) {
@@ -458,7 +460,9 @@ static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
 static t_status _handle_module_param_value(uint8_t *payload, uint8_t length) {
 
     if (p_module_param_value_callback != NULL) {
+
         /// TODO: Union struct for message parsing.
+
         uint16_t module_id = (payload[1] << 8) | payload[0];
 
         uint16_t param_index = (payload[3] << 8) | payload[2];

@@ -46,7 +46,7 @@ extern "C" {
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-// TODO: Move to sys_pll.c
+/// TODO: Move to sys_pll.c
 //
 #define CLK_PLL0_SYSCLK3 (0xFFFFFFF8)
 

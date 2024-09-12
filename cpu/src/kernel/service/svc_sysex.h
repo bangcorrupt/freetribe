@@ -58,21 +58,21 @@ typedef enum {
 } t_sysex_parse_result;
 
 typedef enum {
-    /* CURRENT_PATTERN_REQUEST = 0x10, */
-    /* PATTERN_REQUEST = 0x1c, */
-    /* GLOBAL_REQUEST = 0x0e, */
-    /* PATTERN_WRITE = 0x11, */
-    /* CURRENT_PATTERN_DUMP = 0x40, */
-    /* PATTERN_DUMP = 0x4c, */
-    /* GLOBAL_DUMP = 0x51, */
+    // CURRENT_PATTERN_REQUEST = 0x10,
+    // PATTERN_REQUEST = 0x1c,
+    // GLOBAL_REQUEST = 0x0e,
+    // PATTERN_WRITE = 0x11,
+    // CURRENT_PATTERN_DUMP = 0x40,
+    // PATTERN_DUMP = 0x4c,
+    // GLOBAL_DUMP = 0x51,
     READ_CPU_RAM = 0x52,
     SET_WRITE_ADDRESS = 0x53,
     WRITE_CPU_RAM = 0x54,
     READ_FLASH = 0x55,
     WRITE_FLASH = 0x56,
-    /* DATA_FORMAT_ERROR = 0x26, */
-    /* DATA_LOAD_COMPLETE = 0x23, */
-    /* DATA_LOAD_ERROR = 0x24, */
+    // DATA_FORMAT_ERROR = 0x26,
+    // DATA_LOAD_COMPLETE = 0x23,
+    // DATA_LOAD_ERROR = 0x24,
     WRITE_COMPLETE = 0x21,
     WRITE_ERROR = 0x22,
 } t_msg_id;

@@ -55,9 +55,7 @@ extern "C" {
 
 /*----- Extern function prototypes -----------------------------------*/
 
-inline static int cycles() __attribute__((always_inline));
-
-inline static int cycles() {
+__inline__ __attribute__((always_inline)) static int cycles() {
 
     volatile long int ret;
 

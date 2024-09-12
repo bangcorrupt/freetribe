@@ -35,8 +35,8 @@ under the terms of the GNU Affero General Public License as published by
  *
  */
 
-// TODO: Support MCU flash modes.
-//          Re-initialise with different ring buffers and callbacks.
+/// TODO: Support MCU flash modes.
+///       Re-initialise with different ring buffers and callbacks.
 
 /*----- Includes -----------------------------------------------------*/
 
@@ -51,7 +51,7 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Macros and Definitions ---------------------------------------*/
 
 #define MCU_UART UART_0
-// TODO: Centralised header for interrupt priorities.
+/// TODO: Centralised header for interrupt priorities.
 #define MCU_UART_INT_CHANNEL 7
 
 #define MCU_TX_BUF_LEN 0x100
@@ -87,7 +87,7 @@ static void _mcu_rx_callback(void);
 
 /*----- Extern function implementations ------------------------------*/
 
-// TODO: Return status code.
+/// TODO: Return status code.
 void dev_mcu_init(void) {
 
     static t_uart_config uart_cfg = {.instance = MCU_UART,

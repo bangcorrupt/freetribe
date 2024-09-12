@@ -35,8 +35,8 @@ under the terms of the GNU Affero General Public License as published by
  *
  */
 
-// TODO: This is specific to Korg sysex format.
-//       Abstract to separate library, should not be part of kernel.
+/// TODO: This is specific to Korg sysex format.
+///       Abstract to separate library, should not be part of kernel.
 
 /*----- Includes -----------------------------------------------------*/
 
@@ -63,7 +63,7 @@ t_sysex_parse_result _parse_msg_body(uint8_t *msg, uint32_t msg_length);
 
 /*----- Extern function implementations ------------------------------*/
 
-// TODO: Abstract this to separate library.
+/// TODO: Abstract this to separate library.
 
 t_sysex_parse_result sysex_parse(uint8_t *msg, uint32_t length) {
 
@@ -77,8 +77,8 @@ t_sysex_parse_result sysex_parse(uint8_t *msg, uint32_t length) {
         switch (state) {
 
         case PARSE_MANU_ID:
-            // TODO: Use unique manufacturer ID.
-            if (*msg++ == 0x42) { // TODO: Use #define instead of magic number.
+            /// TODO: Use unique manufacturer ID.
+            if (*msg++ == 0x42) { /// TODO: Use #define instead of magic number.
                 state = PARSE_GLOBAL_CHANNEL;
             } else {
                 state = SYSEX_PARSE_ERROR;
@@ -144,7 +144,7 @@ t_sysex_parse_result _parse_msg_body(uint8_t *msg, uint32_t msg_length) {
         if (msg_length) {
             sysex_decode(msg, g_decode_buffer, msg_length);
 
-            // TODO: Helper macro to pack/unpack int.
+            /// TODO: Helper macro to pack/unpack int.
             write_address =
                 (uint8_t *)(g_decode_buffer[0] | g_decode_buffer[1] << 8 |
                             g_decode_buffer[2] << 16 |
@@ -175,7 +175,7 @@ t_sysex_parse_result _parse_msg_body(uint8_t *msg, uint32_t msg_length) {
         if (write_length && msg_length) {
             sysex_decode(msg, g_decode_buffer, msg_length);
 
-            // TODO: Sanity check before writing flash.
+            /// TODO: Sanity check before writing flash.
             //
             // flash_write(write_address, g_decode_buffer, write_length);
 

@@ -54,7 +54,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "dev_flash.h"
 
-// TODO: Use device layer delay, or SPI peripheral timing.
+/// TODO: Use device layer delay, or SPI peripheral timing.
 #include "svc_delay.h"
 
 /*----- Macros and Definitions ---------------------------------------*/
@@ -498,6 +498,7 @@ void _flash_chip_select(bool state) {
     }
 
     /// TODO: Use per_spi_chip_format.
+    //
     // per_spi_chip_select(SPI_FLASH_BASE, SPI_FLASH_CS, state);
 
     if (state) {
@@ -536,12 +537,14 @@ void _flash_address_32bit(uint32_t address) {
 }
 
 void _flash_tx(uint8_t *p_tx, uint32_t len) {
+
     /// TODO: SPI_1 needs mutex to prevent DSP and flash access collision.
     //
     // per_spi_tx(SPI_FLASH_BASE, p_tx, len);
 }
 
 void _flash_rx(uint8_t *p_rx, uint32_t len) {
+
     /// TODO: SPI_1 needs mutex to prevent DSP and flash access collision.
     //
     // per_spi_rx(SPI_FLASH_BASE, p_rx, len);

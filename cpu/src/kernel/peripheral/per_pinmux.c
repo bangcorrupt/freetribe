@@ -52,8 +52,8 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Extern function implementations ------------------------------*/
 
-// TODO: Maybe configure pinmux in each peripheral driver.
-//          Could save power for apps that don't need some peripherals.
+/// TODO: Maybe configure pinmux in each peripheral driver.
+//        Could save power for apps that don't need some peripherals.
 void per_pinmux_init(void) {
 
     // TODO: #define masks for pinmux.
@@ -100,7 +100,7 @@ void per_pinmux_init(void) {
     // Reset Out / GPIO6 8-14.
     HWREG(SOC_SYSCFG_0_REGS + SYSCFG0_PINMUX(13)) = 0x88888881;
 
-    // TODO: Are the RMII pins exposed?
+    /// TODO: Are the RMII pins exposed?
     //
     // RMII, GPIO6 6-7.
     HWREG(SOC_SYSCFG_0_REGS + SYSCFG0_PINMUX(14)) = 0x88888888;

@@ -37,8 +37,6 @@ under the terms of the GNU Affero General Public License as published by
 
 /* Original work by the libmidi authors, modified by bangcorrupt 2023. */
 
-// TODO: Abstract from Freetribe and port back to libmidi with original license.
-
 /*
  * Copyright (c) 2018, The libmidi authors.
  * All rights reserved.
@@ -69,8 +67,6 @@ under the terms of the GNU Affero General Public License as published by
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-// TODO: Abstract to seaparate library with original BSD license.
 
 #ifndef MIDI_FSM_H
 #define MIDI_FSM_H

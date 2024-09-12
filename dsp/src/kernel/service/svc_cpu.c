@@ -148,7 +148,7 @@ void svc_cpu_task(void) {
         // successful.
         break;
 
-        // TODO: case STATE_HANDSHAKE:
+        /// TODO: case STATE_HANDSHAKE:
 
     case STATE_RUN:
 
@@ -163,7 +163,7 @@ void svc_cpu_task(void) {
         break;
 
     default:
-        // TODO: Record unhandled state.
+        /// TODO: Record unhandled state.
         if (error_check(UNHANDLED_STATE_ERROR) != SUCCESS) {
             state = STATE_ERROR;
         }
@@ -173,7 +173,7 @@ void svc_cpu_task(void) {
 
 /*----- Static function implementations ------------------------------*/
 
-// TODO: Return status.
+/// TODO: Return status.
 static void _transmit_message(uint8_t msg_type, uint8_t msg_id,
                               uint8_t *payload, uint8_t length) {
     //
@@ -195,14 +195,14 @@ static t_status _cpu_init(void) {
 
     // _transmit_message(MSG_TYPE_SYSTEM, SYSTEM_READY, NULL, 0);
 
-    // TODO: Handhsake.
+    /// TODO: Handhsake.
 
     result = SUCCESS;
 
     return result;
 }
 
-// TODO: Move to separate module.
+/// TODO: Move to separate module.
 static void _cpu_receive(uint8_t byte) {
 
     static t_msg_parse_state state = PARSE_START;
@@ -215,7 +215,7 @@ static void _cpu_receive(uint8_t byte) {
 
     switch (state) {
 
-        // TODO: Handshake.
+        /// TODO: Handshake.
 
     case PARSE_START:
         if (byte == MSG_START) {
@@ -315,7 +315,7 @@ static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
         break;
 
     case SYSTEM_SET_PORT_STATE:
-        /* result = _handle_system_set_port_state(payload, length); */
+        // result = _handle_system_set_port_state(payload, length);
         break;
 
     default:
@@ -329,37 +329,38 @@ static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
 static t_status _handle_module_get_param_value(uint8_t *payload,
                                                uint8_t length) {
 
-    // TODO: Union struct for message parsing.
+    /// TODO: Union struct for message parsing.
     uint16_t module_id = (payload[1] << 8) | payload[0];
 
     uint16_t param_index = (payload[3] << 8) | payload[2];
 
-    // TODO: Register callbacks for message handling?
+    /// TODO: Register callbacks for message handling?
+    //
     // module_id not supported yet.
     int32_t param_value = module_get_param(param_index);
 
     _respond_module_param_value(module_id, param_index, param_value);
 
-    // TODO: Error handling and protocol reset.
+    /// TODO: Error handling and protocol reset.
     return SUCCESS;
 }
 
 static t_status _handle_module_set_param_value(uint8_t *payload,
                                                uint8_t length) {
 
-    // TODO: Union struct for message parsing.
+    /// TODO: Union struct for message parsing.
     int16_t module_id = (payload[1] << 8) | payload[0];
 
     uint16_t param_index = (payload[3] << 8) | payload[2];
 
-    // TODO: Register callbacks for message handling?
+    /// TODO: Register callbacks for message handling?
     int32_t param_value = (payload[7] << 24) | (payload[6] << 16) |
                           (payload[5] << 8) | payload[4];
 
     // module_id not supported yet.
     module_set_param(param_index, param_value);
 
-    // TODO: Error handling and protocol reset.
+    /// TODO: Error handling and protocol reset.
     return SUCCESS;
 }
 
@@ -371,7 +372,7 @@ static t_status _handle_module_get_param_name(uint8_t *payload,
 
     char param_name[MAX_PARAM_NAME_LENGTH];
 
-    // TODO: Union struct for message parsing.
+    /// TODO: Union struct for message parsing.
     module_id = (payload[1] << 8) | payload[0];
 
     param_index = (payload[3] << 8) | payload[2];
@@ -381,7 +382,7 @@ static t_status _handle_module_get_param_name(uint8_t *payload,
 
     _respond_module_param_name(module_id, param_index, param_name);
 
-    // TODO: Error handling and protocol reset.
+    /// TODO: Error handling and protocol reset.
     return SUCCESS;
 }
 
@@ -409,7 +410,7 @@ static t_status _handle_system_get_port_state(void) {
 
     _respond_system_port_state(port_f, port_g, port_h);
 
-    // TODO: Error handling and protocol reset.
+    /// TODO: Error handling and protocol reset.
     return SUCCESS;
 }
 
@@ -431,7 +432,7 @@ static t_status _respond_module_param_name(uint16_t module_id,
                                            uint16_t param_index,
                                            char *param_name) {
 
-    // TODO: This is jank.
+    /// TODO: This is jank.
 
     uint32_t string_length = strlen(param_name);
     uint32_t payload_length = string_length + 5;

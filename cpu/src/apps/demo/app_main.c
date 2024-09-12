@@ -295,8 +295,10 @@ static void _put_pixel(UG_S16 x, UG_S16 y, UG_COLOR c) {
  * @param[in]   text    String to print.
  */
 static void _ui_print(char *text) {
+
     /// TODO: This is slow and starves system.
     ///       How does UG_FILL_AREA driver work?
+    ///       Has cache fixed this?
     //
     UG_ConsolePutString(text);
 }

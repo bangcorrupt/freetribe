@@ -69,8 +69,9 @@ under the terms of the GNU Affero General Public License as published by
  */
 void per_gpio_init(void) {
 
-    // Set pin direction and state.
     /// TODO: Refactor to use HAL functions.
+
+    // Set pin direction and state.
 
     // SPI1 CS0 CS1 outputs, set.
     //      Is this necessary if using pins in SPI mode?

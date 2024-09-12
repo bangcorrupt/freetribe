@@ -110,7 +110,7 @@ int8_t ft_fill_frame(uint16_t x_start, uint16_t y_start, uint16_t x_end,
 
 // Print API
 //
-// TODO: What is going on with print?
+/// TODO: What is going on with print?
 void ft_register_print_callback(void (*callback)(char *)) {
 
     svc_system_register_print_callback(callback);
@@ -136,7 +136,7 @@ void ft_print(char *text) { svc_midi_send_string(text); }
  * @param[in]   callback    Function to call.
  *
  */
-// TODO: Separate function for each event type.
+/// TODO: Separate function for each event type.
 void ft_register_panel_callback(t_panel_event event, void *callback) {
 
     svc_panel_register_callback(event, callback);
@@ -153,7 +153,7 @@ void ft_set_trigger_mode(uint8_t mode) { svc_panel_set_trigger_mode(mode); }
  * @param[in]   callback    Function to call.
  *
  */
-// TODO: Separate function for each event type.
+/// TODO: Separate function for each event type.
 void ft_register_midi_callback(event_type event,
                                t_midi_event_callback callback) {
 

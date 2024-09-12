@@ -51,8 +51,8 @@ extern "C" {
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-// TODO: Move protocol definition to common module.
-//       Union struct for message.
+/// TODO: Move protocol definition to common module.
+///       Union struct for message.
 enum e_message_type { MSG_TYPE_MODULE, MSG_TYPE_SYSTEM };
 
 enum e_module_msg_id {

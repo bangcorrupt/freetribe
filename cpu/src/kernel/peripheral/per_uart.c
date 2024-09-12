@@ -203,7 +203,7 @@ void per_uart_register_callback(uint8_t instance, t_uart_event event,
 
 /*----- Static function implementations ------------------------------*/
 
-// TODO: Implement DMA and higher level MCU device driver.
+/// TODO: Implement DMA and higher level MCU device driver.
 //          5 byte message buffer.
 //              DMA continually services UART.
 //                  DMA Complete interrupt pushes/pops ring buffer.

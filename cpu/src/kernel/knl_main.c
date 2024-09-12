@@ -201,7 +201,7 @@ static void _systick_callback(uint32_t systick) {
 
 static void _panel_ack_callback(uint32_t version) {
 
-    // TODO: Store version with get method exposed to user.
+    /// TODO: Store version with get method exposed to user.
 
     // Clear callback registration.
     svc_panel_register_callback(PANEL_ACK_EVENT, NULL);
@@ -209,13 +209,13 @@ static void _panel_ack_callback(uint32_t version) {
 
 static void _held_buttons_callback(uint32_t *held_buttons) {
 
-    // TODO: Store buttons with get method exposed to user.
+    /// TODO: Store buttons with get method exposed to user.
 
     // Clear callback registration.
     svc_panel_register_callback(HELD_BUTTONS_EVENT, NULL);
 }
 
-// TODO: User print callback should trigger this callback.
+/// TODO: User print callback should trigger this callback.
 //          Get function pointer via api/freetribe.c
 //       Function to enable/disable midi printing.
 static void _print_callback(char *text) { svc_midi_send_string(text); }

@@ -35,8 +35,8 @@ under the terms of the GNU Affero General Public License as published by
  *
  */
 
-// TODO: Support serial mode, not just MIDI.
-//       Support buffer transmit/receive.
+/// TODO: Support serial mode, not just MIDI.
+///       Support buffer transmit/receive.
 
 /*----- Includes -----------------------------------------------------*/
 
@@ -129,8 +129,10 @@ void dev_trs_tx_enqueue(uint8_t *byte) {
         _trs_tx_byte(byte);
 
     } else {
-        // Queue byte if transmission in progress.
+
         /// TODO: Handle overflow here?
+        //
+        // Queue byte if transmission in progress.
         ring_buffer_put_force(trs_tx_rbd, byte);
     }
 }

@@ -122,45 +122,45 @@ void ddr_init(void) {
         HWREG(SOC_SYSCFG_1_REGS + SYSCFG1_VTPIO_CTL) |=
             SYSCFG1_VTPIO_CTL_IOPWRDN;
 
-        /* Clear POWERDN bit (enable VTP) */
+        // Clear POWERDN bit (enable VTP)
         HWREG(SOC_SYSCFG_1_REGS + SYSCFG1_VTPIO_CTL) &=
             ~(SYSCFG1_VTPIO_CTL_POWERDN);
 
-        /* Set CLKRZ bit */
+        // Set CLKRZ bit
         HWREG(SOC_SYSCFG_1_REGS + SYSCFG1_VTPIO_CTL) |= SYSCFG1_VTPIO_CTL_CLKRZ;
 
-        /* Clear CLRKZ bit */
+        // Clear CLRKZ bit
         HWREG(SOC_SYSCFG_1_REGS + SYSCFG1_VTPIO_CTL) &=
             ~SYSCFG1_VTPIO_CTL_CLKRZ;
 
-        /* CLKRZ bit should be low at least for 2ns */
+        // CLKRZ bit should be low at least for 2ns
         delay(4);
 
-        /* Set CLKRZ bit */
+        // Set CLKRZ bit
         HWREG(SOC_SYSCFG_1_REGS + SYSCFG1_VTPIO_CTL) |= SYSCFG1_VTPIO_CTL_CLKRZ;
-        /* Poll ready bit in VTPIO_CTL Untill it is high */
+        // Poll ready bit in VTPIO_CTL Untill it is high
 
         while (
             !((HWREG(SOC_SYSCFG_1_REGS + SYSCFG1_VTPIO_CTL) & VTPIO_CTL_HIGH) >>
               15))
             ;
-        /* Set Lock bit for static mode */
+        // Set Lock bit for static mode
         HWREG(SOC_SYSCFG_1_REGS + SYSCFG1_VTPIO_CTL) |= SYSCFG1_VTPIO_CTL_LOCK;
 
-        /* set PWRSAVE bit to save Power */
+        // set PWRSAVE bit to save Power
         HWREG(SOC_SYSCFG_1_REGS + SYSCFG1_VTPIO_CTL) |=
             SYSCFG1_VTPIO_CTL_PWRSAVE;
-        /* VTP Calibration ends */
+        // VTP Calibration ends
     }
 
-    /* Set BOOTUNLOCK */
+    // Set BOOTUNLOCK
     HWREG(SOC_DDR2_0_CTRL_REGS + DDR2_MDDR_SDCR) |= DDR2_MDDR_SDCR_BOOTUNLOCK;
 
     // Set peripheral bus burst priority
     HWREG(SOC_DDR2_0_CTRL_REGS + DDR2_MDDR_PBBPR) = 0x20;
 
-    /* Set EXT_STRBEN and PWRDNEN bit of DDR PHY control register,
-                                   assign desired value to the RL bit */
+    // Set EXT_STRBEN and PWRDNEN bit of DDR PHY control register,
+    // assign desired value to the RL bit
     HWREG(SOC_DDR2_0_CTRL_REGS + DDR2_MDDR_DRPYC1R) =
         DDR2_MDDR_DRPYC1R_EXT_STRBEN | DDR2_MDDR_DRPYC1R_PWRDNEN |
         DDR2_MDDR_DRPYC1R_READ_LAT;
@@ -169,24 +169,24 @@ void ddr_init(void) {
     HWREG(SOC_DDR2_0_CTRL_REGS + DDR2_MDDR_SDTIMR1) = DDR2_SDTIMR1;
     HWREG(SOC_DDR2_0_CTRL_REGS + DDR2_MDDR_SDTIMR2) = DDR2_SDTIMR2;
 
-    /* CLEAR TIMINGUNLOCK */
+    // CLEAR TIMINGUNLOCK
     HWREG(SOC_DDR2_0_CTRL_REGS + DDR2_MDDR_SDCR) &= ~DDR2_MDDR_SDCR_BOOTUNLOCK;
 
-    /*  IBANK_POS set to 0 so this register does not apply */
+    //  IBANK_POS set to 0 so this register does not apply
     HWREG(SOC_DDR2_0_CTRL_REGS + DDR2_MDDR_SDCR2) = DDR2_MDDR_SDCR_IBANK_ONE;
 
-    /* SET the refreshing rate */
+    // SET the refreshing rate
     HWREG(SOC_DDR2_0_CTRL_REGS + DDR2_MDDR_SDRCR) = DDR2_SDRCR;
 
-    /* SyncReset the Clock to SDRAM */
+    // SyncReset the Clock to SDRAM
     PSCModuleControl(SOC_PSC_1_REGS, HW_PSC_DDR2_MDDR, 0,
                      PSC_MDSTAT_STATE_SYNCRST);
 
-    /* Enable clock to SDRAM */
+    // Enable clock to SDRAM
     PSCModuleControl(SOC_PSC_1_REGS, HW_PSC_DDR2_MDDR, 0,
                      PSC_MDCTL_NEXT_ENABLE);
 
-    /* Disable Self refresh rate */
+    // Disable Self refresh rate
     HWREG(SOC_DDR2_0_CTRL_REGS + DDR2_MDDR_SDRCR) &= ~DDR2_SDRCR_CLEAR;
 }
 
@@ -200,24 +200,24 @@ void ddr_init(void) {
  */
 void ddr_terminate(void) {
 
-    /* Set POWERDN bit (disable VTP) */
+    // Set POWERDN bit (disable VTP).
     HWREG(SOC_SYSCFG_1_REGS + SYSCFG1_VTPIO_CTL) |= SYSCFG1_VTPIO_CTL_POWERDN;
 
-    /* Clear Lock bit */
+    // Clear Lock bit
     HWREG(SOC_SYSCFG_1_REGS + SYSCFG1_VTPIO_CTL) &= ~(SYSCFG1_VTPIO_CTL_LOCK);
 
-    /* Clear PWRSAVE bit */
+    // Clear PWRSAVE bit.
     HWREG(SOC_SYSCFG_1_REGS + SYSCFG1_VTPIO_CTL) &=
         ~(SYSCFG1_VTPIO_CTL_PWRSAVE);
 
-    /* Clear IOPWRDN bit, powerdown disable mode */
+    // Clear IOPWRDN bit, powerdown disable mode.
     HWREG(SOC_SYSCFG_1_REGS + SYSCFG1_VTPIO_CTL) &=
         ~(SYSCFG1_VTPIO_CTL_IOPWRDN);
 
-    /* Clear CLRZ bit */
+    // Clear CLRZ bit
     HWREG(SOC_SYSCFG_1_REGS + SYSCFG1_VTPIO_CTL) &= ~SYSCFG1_VTPIO_CTL_CLKRZ;
 
-    /* CLRZ bit should be low at least for 2ns */
+    // CLRZ bit should be low at least for 2ns.
     delay(4);
 }
 

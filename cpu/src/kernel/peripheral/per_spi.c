@@ -370,7 +370,7 @@ static inline void _spi_isr(t_spi *spi) {
             }
             break;
 
-        // TODO: Interrogate source of error and trigger callback.
+        /// TODO: Interrogate source of error and trigger callback.
         case SPI_ERR:
 
             while (true)

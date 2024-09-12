@@ -195,7 +195,6 @@ int8_t svc_display_fill_frame(uint16_t x_start, uint16_t y_start,
                               uint16_t x_end, uint16_t y_end, bool state) {
 
     /// TODO: Handle partial bytes.
-    //
 
     uint8_t fill;
     uint16_t length;

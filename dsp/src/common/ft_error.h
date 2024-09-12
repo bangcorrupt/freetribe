@@ -63,7 +63,6 @@ typedef enum {
 
 /*----- Extern function prototypes -----------------------------------*/
 
-// TODO: Refactor for debug string.
 t_status error_check(t_status error);
 
 #ifdef __cplusplus

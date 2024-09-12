@@ -139,8 +139,6 @@ void per_gpio_set_port(uint8_t port, uint16_t value) {
     default:
         break;
     }
-
-    //
 }
 
 /*----- Static function implementations ------------------------------*/

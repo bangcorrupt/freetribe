@@ -75,7 +75,9 @@ t_status app_init(void) {
 
     ft_register_tick_callback(USER_TICK_DIV, _tick_callback);
 
-    return SUCCESS;
+    status = SUCCESS;
+
+    return status;
 }
 
 /**

@@ -37,7 +37,8 @@ under the terms of the GNU Affero General Public License as published by
 
 /* Original work by the libmidi authors, modified by bangcorrupt 2023. */
 
-// TODO: Abstract from Freetribe and port back to libmidi with original license.
+/// TODO: Abstract from Freetribe and port back to libmidi with original
+/// license.
 
 /*
  * Copyright (c) 2018, The libmidi authors.
@@ -70,7 +71,7 @@ under the terms of the GNU Affero General Public License as published by
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-// TODO: Abstract to seaparate library with original BSD license.
+/// TODO: Abstract to seaparate library with original BSD license.
 
 #include "midi_fsm.h"
 #include "ft_error.h"
@@ -213,7 +214,8 @@ static inline void invoke_callback(int evt) {
 
     // System exclusive.
     if (evt == EVT_SYS_EXCLUSIVE) {
-        // TODO: Count sysex messages or total bytes received?
+        /// TODO: Count sysex messages or total bytes received?
+        //
         // Invoke the callback.
         (g_sysex_callback)(g_sysex_buffer, g_sysex_byte_count);
 
@@ -317,8 +319,9 @@ static t_status rx_status_channel_byte(char byte) {
     // we are now processing. This is held in a global.
     g_current_channel = (byte & CHAN_MASK);
 
+    /// TODO: This could report an error condition.
+    //
     // Status byte ends system exclusive message without invoking callback.
-    // TODO: This could report an error condition.
     if (g_state == STATE_WAITING_SYSEX_DATA) {
         // Reset count of received sysex data bytes.
         g_sysex_byte_count = 0;
@@ -450,8 +453,9 @@ static t_status rx_data_byte(char byte) {
         if (g_sysex_byte_count < SYSEX_BUFFER_LENGTH) {
             g_sysex_buffer[g_sysex_byte_count++] = byte;
         } else {
+            /// TODO: This should report error condition.
+            //
             // Buffer overflow ends sysex mesage without invoking callback.
-            // TODO: This should report error condition.
             g_sysex_byte_count = 0;
             g_state = STATE_WAITING_FOR_STATUS;
         }

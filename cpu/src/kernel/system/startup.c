@@ -151,10 +151,10 @@ static void _boot_abort(void);
  **/
 void start_boot(void) {
 
-    /* Enable write-protection for registers of SYSCFG module. */
+    // Enable write-protection for registers of SYSCFG module.
     SysCfgRegistersLock();
 
-    /* Disable write-protection for registers of SYSCFG module. */
+    // Disable write-protection for registers of SYSCFG module.
     SysCfgRegistersUnlock();
 
     /// TODO: Configure Master Priority Control
@@ -162,7 +162,7 @@ void start_boot(void) {
     _psc0_init();
     _psc1_init();
 
-    /* Set the PLL0 to generate 300MHz for ARM */
+    // Set the PLL0 to generate 300MHz for ARM.
     _pll0_init(PLL_CLK_SRC, PLL0_MUL, PLL0_PREDIV, PLL0_POSTDIV, PLL0_DIV1,
                PLL0_DIV3, PLL0_DIV7);
 
@@ -176,7 +176,7 @@ void start_boot(void) {
     //     _boot_abort();
     // }
 
-    /* Initialize the vector table with opcodes */
+    // Initialize the vector table with opcodes.
     _copy_vector_table();
 
     main();
@@ -192,7 +192,7 @@ void delay(unsigned int count) {
 
 /*----- Static function implementations ------------------------------*/
 
-// TODO: Move peripheral power up to driver init function.
+/// TODO: Move peripheral power up to driver init function.
 /*
  *  Configure PSC0:
  */
@@ -212,13 +212,13 @@ static void _psc0_init(void) {
     PSCModuleControl(SOC_PSC_0_REGS, HW_PSC_SCR1_SS, 0, PSC_MDCTL_NEXT_ENABLE);
     PSCModuleControl(SOC_PSC_0_REGS, HW_PSC_SCR2_SS, 0, PSC_MDCTL_NEXT_ENABLE);
 
-    // TODO: Investigate why this causes boot to fail.
+    /// TODO: Investigate why this causes boot to fail.
     //
     // Boot fails
     // PSCModuleControl(SOC_PSC_0_REGS, HW_PSC_ARM, 0, PSC_MDCTL_NEXT_ENABLE);
 }
 
-// TODO: Move peripheral power up to driver init function.
+/// TODO: Move peripheral power up to driver init function.
 /*
  *  Configure PSC1:
  */
@@ -228,8 +228,8 @@ static void _psc1_init(void) {
     PSCModuleControl(SOC_PSC_1_REGS, HW_PSC_USB0, 0, PSC_MDCTL_NEXT_ENABLE);
     PSCModuleControl(SOC_PSC_1_REGS, HW_PSC_GPIO, 0, PSC_MDCTL_NEXT_ENABLE);
 
-    /* PSCModuleControl(SOC_PSC_1_REGS, HW_PSC_DDR2_MDDR, 0, */
-    /*                  PSC_MDCTL_NEXT_ENABLE); */
+    // PSCModuleControl(SOC_PSC_1_REGS, HW_PSC_DDR2_MDDR, 0,
+    //                  PSC_MDCTL_NEXT_ENABLE);
 
     PSCModuleControl(SOC_PSC_1_REGS, HW_PSC_MCASP0, 0, PSC_MDCTL_NEXT_ENABLE);
     PSCModuleControl(SOC_PSC_1_REGS, HW_PSC_SPI1, 0, PSC_MDCTL_NEXT_ENABLE);
@@ -242,7 +242,7 @@ static void _psc1_init(void) {
     PSCModuleControl(SOC_PSC_1_REGS, HW_PSC_SCRF7_SS, 0, PSC_MDCTL_NEXT_ENABLE);
     PSCModuleControl(SOC_PSC_1_REGS, HW_PSC_SCRF8_SS, 0, PSC_MDCTL_NEXT_ENABLE);
 
-    // TODO: Investigate why this causes boot to fail.
+    /// TODO: Investigate why this causes boot to fail.
     //
     // Boot fails
     // PSCModuleControl(SOC_PSC_1_REGS, HW_PSC_SHRAM, 0, PSC_MDCTL_NEXT_ENABLE);
@@ -273,49 +273,49 @@ static void _pll0_init(unsigned char clk_src, unsigned char pllm,
     HWREG(SOC_SYSCFG_0_REGS + SYSCFG0_CFGCHIP0) &=
         ~SYSCFG_CFGCHIP0_PLL_MASTER_LOCK;
 
-    /* PLLENSRC must be cleared before PLLEN bit have any effect */
+    // PLLENSRC must be cleared before PLLEN bit have any effect
     HWREG(SOC_PLLC_0_REGS + PLLC_PLLCTL) &= ~PLLC_PLLCTL_PLLENSRC;
 
-    /* PLLCTL.EXTCLKSRC bit 9 should be left at 0  */
+    // PLLCTL.EXTCLKSRC bit 9 should be left at 0
     HWREG(SOC_PLLC_0_REGS + PLLC_PLLCTL) &= ~PLLC_PLLCTL_EXTCLKSRC;
 
-    /*PLLEN = 0 put pll in bypass mode  */
+    // PLLEN = 0 put pll in bypass mode
     HWREG(SOC_PLLC_0_REGS + PLLC_PLLCTL) &= ~PLLC_PLLCTL_PLLEN;
 
-    /*wait for 4 counts to switch pll to the bypass mode */
+    // wait for 4 counts to switch pll to the bypass mode
     delay(4);
 
-    /*Select the Clock Mode bit 8 as On Chip Oscillator  */
+    // Select the Clock Mode bit 8 as On Chip Oscillator
     HWREG(SOC_PLLC_0_REGS + PLLC_PLLCTL) &= ~PLLC_PLLCTL_CLKMODE;
     HWREG(SOC_PLLC_0_REGS + PLLC_PLLCTL) |= (clk_src << 8);
 
-    /* Clear the PLLRST to reset the PLL */
+    // Clear the PLLRST to reset the PLL
     HWREG(SOC_PLLC_0_REGS + PLLC_PLLCTL) &= ~PLLC_PLLCTL_PLLRST;
 
-    /*Disable PLL out */
+    // Disable PLL out
     HWREG(SOC_PLLC_0_REGS + PLLC_PLLCTL) |= PLLC_PLLCTL_PLLDIS;
 
-    /* PLL initialization sequece, power up the PLL */
+    // PLL initialization sequece, power up the PLL
     HWREG(SOC_PLLC_0_REGS + PLLC_PLLCTL) &= ~PLLC_PLLCTL_PLLPWRDN;
 
     // Enable PLL out.
     HWREG(SOC_PLLC_0_REGS + PLLC_PLLCTL) &= ~PLLC_PLLCTL_PLLDIS;
 
-    /* Wait for 2000 counts */
+    // Wait for 2000 counts
     delay(2000);
 
-    /* Program the required multiplier value   */
+    // Program the required multiplier value
     HWREG(SOC_PLLC_0_REGS + PLLC_PLLM) = pllm;
 
     HWREG(SOC_PLLC_0_REGS + PLLC_PREDIV) = PLLC_PREDIV_PREDEN | prediv;
     HWREG(SOC_PLLC_0_REGS + PLLC_POSTDIV) = PLLC_POSTDIV_POSTDEN | postdiv;
 
-    /* Check for the GOSTAT bit in PLLSTAT to clear to 0 to indicate that
-                no GO operation is currently in progress */
+    // Check for the GOSTAT bit in PLLSTAT to clear to 0
+    // to indicate that no GO operation is currently in progress
     while (HWREG(SOC_PLLC_0_REGS + PLLC_PLLSTAT) & PLLC_PLLSTAT_GOSTAT)
         ;
 
-    /* divider values are assigned */
+    // divider values are assigned
     HWREG(SOC_PLLC_0_REGS + PLLC_PLLDIV1) = PLLC_PLLDIV1_D1EN | div1;
 
     HWREG(SOC_PLLC_0_REGS + PLLC_PLLDIV2) =
@@ -332,24 +332,24 @@ static void _pll0_init(unsigned char clk_src, unsigned char pllm,
 
     HWREG(SOC_PLLC_0_REGS + PLLC_PLLCMD) |= PLLC_PLLCMD_GOSET;
 
-    /*Wait for the Gostat bit in PLLSTAT to clear to 0
-        ( completion of phase alignment) */
+    // Wait for the Gostat bit in PLLSTAT to clear to 0
+    // (completion of phase alignment)
     while (HWREG(SOC_PLLC_0_REGS + PLLC_PLLSTAT) & PLLC_PLLSTAT_GOSTAT)
         ;
 
-    /* Wait for 200 counts */
+    // Wait for 200 counts
     delay(200);
 
-    /* set the PLLRST bit in PLLCTL to 1,bring the PLL out of reset */
+    // set the PLLRST bit in PLLCTL to 1,bring the PLL out of reset
     HWREG(SOC_PLLC_0_REGS + PLLC_PLLCTL) |= PLLC_PLLCTL_PLLRST;
 
-    /* Wait for 0x960 counts*/
+    // Wait for 0x960 counts
     delay(0x960);
 
-    /*removing pll from bypass mode */
+    // removing pll from bypass mode
     HWREG(SOC_PLLC_0_REGS + PLLC_PLLCTL) |= PLLC_PLLCTL_PLLEN;
 
-    /* set PLL lock bit */
+    // set PLL lock bit
     HWREG(SOC_SYSCFG_0_REGS + SYSCFG0_CFGCHIP0) |=
         (0x01 << SYSCFG_CFGCHIP0_PLL_MASTER_LOCK_SHIFT) &
         SYSCFG_CFGCHIP0_PLL_MASTER_LOCK;
@@ -360,12 +360,12 @@ static void _pll0_init(unsigned char clk_src, unsigned char pllm,
     //
     // Not set in factory firmware.
     // EMIFA driven by PLL0_SYSCLK3
-    /* HWREG(SOC_SYSCFG_0_REGS + SYSCFG0_CFGCHIP3) &= CLK_PLL0_SYSCLK3; */
+    // HWREG(SOC_SYSCFG_0_REGS + SYSCFG0_CFGCHIP3) &= CLK_PLL0_SYSCLK3;
 }
 
-/*
+/**
  * @brief This function Configures the PLL1 registers.
-    PLL Register are set to achieve the desired frequencies.
+ * PLL Register are set to achieve the desired frequencies.
  *
  * @param   clk_src
  *          pllm             This value is assigned to the PLL1Multipler
@@ -377,43 +377,43 @@ static void _pll0_init(unsigned char clk_src, unsigned char pllm,
  *          div3             This value is assigned to the PLL1_Div3 register.
  *
  * @return  Int          Returns Success or Failure,depending on the execution
-*/
+**/
 static void _pll1_init(unsigned char pllm, unsigned char postdiv,
                        unsigned char div1, unsigned char div2,
                        unsigned char div3) {
-    /* Clear PLL lock bit */
+    // Clear PLL lock bit
     HWREG(SOC_SYSCFG_0_REGS + SYSCFG0_CFGCHIP3) &=
         ~SYSCFG_CFGCHIP3_PLL1_MASTER_LOCK;
 
-    /* PLLENSRC must be cleared before PLLEN has any effect*/
+    // PLLENSRC must be cleared before PLLEN has any effect
     HWREG(SOC_PLLC_1_REGS + PLLC_PLLCTL) &= ~PLLC_PLLCTL_PLLENSRC;
 
-    /* PLLCTL.EXTCLKSRC bit 9 should be left at 0  */
+    // PLLCTL.EXTCLKSRC bit 9 should be left at 0
     HWREG(SOC_PLLC_1_REGS + PLLC_PLLCTL) &= ~PLLC_PLLCTL_EXTCLKSRC;
 
-    /* Set PLLEN=0 to put in bypass mode */
+    // Set PLLEN=0 to put in bypass mode
     HWREG(SOC_PLLC_1_REGS + PLLC_PLLCTL) &= ~PLLC_PLLCTL_PLLEN;
 
-    /* wait for 4 cycles to allow PLLEN mux
-            switches properly to bypass clock */
+    // wait for 4 cycles to allow PLLEN mux
+    // switches properly to bypass clock
     delay(4);
 
-    /* Clear PLLRST bit to reset the PLL */
+    // Clear PLLRST bit to reset the PLL
     HWREG(SOC_PLLC_1_REGS + PLLC_PLLCTL) &= ~PLLC_PLLCTL_PLLRST;
 
-    /* Disable the PLL output */
+    // Disable the PLL output
     HWREG(SOC_PLLC_1_REGS + PLLC_PLLCTL) &= PLLC_PLLCTL_PLLDIS;
 
-    /* PLL initialization sequence */
-    /* Power up the PLL by setting PWRDN bit set to 0 */
+    // PLL initialization sequence
+    // Power up the PLL by setting PWRDN bit set to 0
     HWREG(SOC_PLLC_1_REGS + PLLC_PLLCTL) &= ~PLLC_PLLCTL_PLLPWRDN;
 
-    /* Enable the PLL output */
+    // Enable the PLL output
     HWREG(SOC_PLLC_1_REGS + PLLC_PLLCTL) &= ~PLLC_PLLCTL_PLLDIS;
 
     delay(2000);
 
-    /* Multiplier value is set */
+    // Multiplier value is set
     HWREG(SOC_PLLC_1_REGS + PLLC_PLLM) = pllm;
 
     HWREG(SOC_PLLC_1_REGS + PLLC_POSTDIV) = PLLC_POSTDIV_POSTDEN | postdiv;
@@ -424,22 +424,24 @@ static void _pll1_init(unsigned char pllm, unsigned char postdiv,
     HWREG(SOC_PLLC_1_REGS + PLLC_PLLDIV2) = PLLC_PLLDIV2_D2EN | div2;
     HWREG(SOC_PLLC_1_REGS + PLLC_PLLDIV3) = PLLC_PLLDIV3_D3EN | div3;
 
-    /*Set the GOSET bit in PLLCMD to 1 to initiate a new divider transition*/
+    // Set the GOSET bit in PLLCMD to 1 to initiate a new divider transition
     HWREG(SOC_PLLC_1_REGS + PLLC_PLLCMD) |= PLLC_PLLCMD_GOSET;
 
     while (HWREG(SOC_PLLC_1_REGS + PLLC_PLLSTAT) & PLLC_PLLSTAT_GOSTAT)
         ;
-    /*Wait for the Gostat bit in PLLSTAT to clear to 0
-        ( completion of phase alignment ) */
+
+    // Wait for the Gostat bit in PLLSTAT to clear to 0
+    // (completion of phase alignment).
     delay(200);
 
-    /* set the PLLRST bit in PLLCTL to 1,bring the PLL out of reset  */
+    // set the PLLRST bit in PLLCTL to 1,bring the PLL out of reset
     HWREG(SOC_PLLC_1_REGS + PLLC_PLLCTL) |= PLLC_PLLCTL_PLLRST;
     delay(0x960);
-    /* Removing PLL from bypass mode */
+
+    // Removing PLL from bypass mode
     HWREG(SOC_PLLC_1_REGS + PLLC_PLLCTL) |= PLLC_PLLCTL_PLLEN;
 
-    /* set PLL lock bit */
+    // set PLL lock bit
     HWREG(SOC_SYSCFG_0_REGS + SYSCFG0_CFGCHIP3) |=
         (0x1 << SYSCFG_CFGCHIP3_PLL1_MASTER_LOCK_SHIFT) &
         SYSCFG_CFGCHIP3_PLL1_MASTER_LOCK;
@@ -485,6 +487,7 @@ static void _config_cache_mmu() {
     }
 
     /// TODO: Move Domain Access setting to separate function.
+    //
     CP15TtbSet((unsigned int)page_table);
 
     CP15ICacheFlush();
@@ -512,23 +515,18 @@ static void _boot_abort(void) {
 //         "    msr     CPSR, r0");
 // }
 //
-// void enable_irq(void) {
-//     asm("    mrs r0, CPSR\n\t"
-//         "    bic r0, r0, #0x80\n\t"
-//         "    msr CPSR, r0\n\t");
-// }
 
 /// TODO: Read and write CPSR.
 //
-/* unsigned int read_cpsr(void) { */
-/*     asm volatile("eor     r3, %1, %1, ror #16\n\t" */
-/*                  "bic     r3, r3, #0x00FF0000\n\t" */
-/*                  "mov     %0, %1, ror #8\n\t" */
-/*                  "eor     %0, %0, r3, lsr #8" */
-/*                  : "=r"(val) */
-/*                  : "0"(val) */
-/*                  : "r3"); */
-/*     return val; */
-/* } */
+// unsigned int read_cpsr(void) {
+//     asm volatile("eor     r3, %1, %1, ror #16\n\t"
+//                  "bic     r3, r3, #0x00FF0000\n\t"
+//                  "mov     %0, %1, ror #8\n\t"
+//                  "eor     %0, %0, r3, lsr #8"
+//                  : "=r"(val)
+//                  : "0"(val)
+//                  : "r3");
+//     return val;
+// }
 
 /*----- End of file --------------------------------------------------*/

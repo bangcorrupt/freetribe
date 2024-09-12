@@ -79,7 +79,7 @@ void delay_init(void) {
                                 .int_chan = 0,
                                 .p_isr = NULL};
 
-    // TODO: Init functions should return True on success.
+    /// TODO: Init functions should return True on success.
     timer_init(delay_cfg);
 
     g_delay_ready = true;
@@ -185,7 +185,7 @@ void delay_block_ms(uint32_t time) { delay_block_us(time * 1000); }
 
 uint32_t delay_get_current_count(void) { return timer_count_get(DELAY_TIMER); }
 
-// TODO: Get elapsed time.
+/// TODO: Get elapsed time.
 
 void delay_cycles(uint32_t count) {
     while (count--)

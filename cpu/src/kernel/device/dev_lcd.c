@@ -72,7 +72,8 @@ typedef enum { COMMAND, DATA } t_lcd_mode;
 // LCD_PIN_RESET, LCD_PIN_A0
 
 /// TODO: HAL for LCD module?
-// typedef enum {} t_lcd_command;
+
+/// TODO: typedef enum {} t_lcd_command;
 
 /*----- Static variable definitions ----------------------------------*/
 
@@ -80,7 +81,6 @@ typedef enum { COMMAND, DATA } t_lcd_mode;
 
 /*----- Static function prototypes -----------------------------------*/
 
-/// TODO: t_lcd_command.
 static void _lcd_command(uint8_t command);
 static void _lcd_mode(t_lcd_mode mode);
 static void _lcd_tx(uint8_t *p_tx, uint32_t len);
@@ -146,8 +146,8 @@ void dev_lcd_set_frame(uint8_t *frame_buffer) {
 
         page_buffer = frame_buffer + page_index * LCD_COLUMNS;
 
-        // TODO: Implement ping-pong frame buffer.
-        //          strcmp page buffer and only update changes.
+        /// TODO: Implement ping-pong frame buffer.
+        ///       strcmp page buffer and only update changes.
 
         dev_lcd_set_page(page_index, page_buffer);
     }
@@ -163,6 +163,7 @@ void dev_lcd_set_page(uint8_t page_index, uint8_t *page_buffer) {
     // _lcd_command(0x00);              // Column address lower.
 
     uint8_t lcd_page_cmd[] = {0xb0 | page_index, 0x40, 0x10, 0x00};
+
     _lcd_tx(lcd_page_cmd, sizeof(lcd_page_cmd));
 
     _lcd_mode(DATA);
@@ -203,7 +204,7 @@ void dev_lcd_set_backlight(bool red, bool green, bool blue) {
 
 static void _lcd_tx(uint8_t *buffer, uint32_t length) {
 
-    // TODO: DMA frame buffer.
+    /// TODO: DMA frame buffer.
 
     per_spi_chip_format(LCD_SPI, LCD_SPI_DATA_FORMAT, LCD_SPI_CHIP_SELECT,
                         LCD_SPI_CSHOLD);

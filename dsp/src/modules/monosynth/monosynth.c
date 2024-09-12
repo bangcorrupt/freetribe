@@ -38,17 +38,15 @@ under the terms of the GNU Affero General Public License as published by
 
 #include <stdint.h>
 
-#include "per_sport.h"
-
-#include "aleph.h"
 #include "module.h"
+#include "types.h"
 #include "utils.h"
 
+#include "aleph.h"
 #include "aleph_monovoice.h"
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-#define SAMPLERATE (48000)
 #define MEMPOOL_SIZE (0x2000)
 
 /// TODO: Struct for parameter type.
@@ -114,11 +112,10 @@ typedef struct {
 
 /*----- Static variable definitions ----------------------------------*/
 
-static t_Aleph g_aleph;
-
 __attribute__((section(".l1.data.a")))
 __attribute__((aligned(32))) static char g_mempool[MEMPOOL_SIZE];
 
+static t_Aleph g_aleph;
 static t_module g_module;
 
 /*----- Extern variable definitions ----------------------------------*/
@@ -152,32 +149,18 @@ void module_init(void) {
  * @param[in]   in  Pointer to input buffer.
  * @param[out]  out Pointer to input buffer.
  */
-void module_process(t_audio_buffer *in, t_audio_buffer *out) {
-
-    fract32 *left_in = *in[0];
-    fract32 *right_in = *in[1];
-
-    fract32 *left_out = *out[0];
-    fract32 *right_out = *out[1];
-
-    uint32_t samples = BLOCK_SIZE;
+void module_process(fract32 *in, fract32 *out) {
 
     fract32 output;
 
-    while (samples--) {
+    output = Aleph_MonoVoice_next(&g_module.voice);
 
-        output = Aleph_MonoVoice_next(&g_module.voice);
+    // Scale amplitude by level.
+    output = mult_fr1x32x32(output, g_module.amp_level);
 
-        // Scale amplitude by level.
-        output = mult_fr1x32x32(output, g_module.amp_level);
-
-        // Set output.
-        *left_out++ = output;
-        *right_out++ = output;
-
-        // *left_out++ = *left_in++;
-        // *right_out++ = *right_in++;
-    }
+    // Set output.
+    out[0] = output;
+    out[1] = output;
 }
 
 /**

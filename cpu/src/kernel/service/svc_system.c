@@ -39,8 +39,9 @@ under the terms of the GNU Affero General Public License as published by
 
 #include <stddef.h>
 
-// TODO: Device layer blocking delay.
-//       integrate timers into system service.
+/// TODO: Device layer blocking delay.
+///       integrate timers into system service.
+
 #include "svc_delay.h"
 
 #include "dev_board.h"

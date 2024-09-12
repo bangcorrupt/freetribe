@@ -46,11 +46,11 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "dev_board.h"
 
-// TODO: Move up to svc_system.
+/// TODO: Move up to svc_system.
 #include "dev_flash.h"
 #include "dev_lcd.h"
 
-// TODO: Move blocking delay to device layer.
+/// TODO: Move blocking delay to device layer.
 #include "svc_delay.h"
 
 /*----- Macros and Definitions ---------------------------------------*/
