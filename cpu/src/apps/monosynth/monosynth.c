@@ -465,26 +465,29 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
 
 static void _trigger_callback(uint8_t pad, uint8_t vel, bool state) {
 
+    /// TODO: Use MIDI note stack from LEAF.
+
+    static uint8_t note_count;
+
     int32_t freq;
     uint8_t note;
 
     note = keyboard_map_note(&g_kbd, pad);
 
     if (state) {
-
+        note_count++;
         freq = g_midi_hz_lut[note];
-
-        ft_set_module_param(0, PARAM_PHASE, 0);
         ft_set_module_param(0, PARAM_FREQ, freq);
-        // ft_set_module_param(0, PARAM_VEL, vel << 23);
-        // ft_set_module_param(0, PARAM_GATE, state);
-        tADSRS_on(&g_amp_env, vel / 128.0);
+
+        if (note_count) {
+            tADSRS_on(&g_amp_env, vel / 256.0);
+        }
 
     } else {
-
-        // ft_set_module_param(0, PARAM_VEL, vel << 23);
-        // ft_set_module_param(0, PARAM_GATE, state);
-        tADSRS_off(&g_amp_env);
+        note_count--;
+        if (!note_count) {
+            tADSRS_off(&g_amp_env);
+        }
     }
 }
 
