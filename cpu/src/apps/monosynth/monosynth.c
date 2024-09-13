@@ -42,6 +42,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "keyboard.h"
 
+#include "leaf-envelopes.h"
+#include "leaf-oscillators.h"
 #include "param_scale.h"
 #include "svc_panel.h"
 
@@ -193,6 +195,8 @@ static LEAF g_leaf;
 static char g_mempool[MEMPOOL_SIZE];
 
 static tADSRS g_amp_env;
+static tTriLFO g_amp_lfo;
+
 static t_cv g_amp_cv;
 
 /*----- Extern variable definitions ----------------------------------*/
@@ -227,6 +231,7 @@ t_status app_init(void) {
     LEAF_init(&g_leaf, CONTROL_RATE, g_mempool, MEMPOOL_SIZE, NULL);
 
     tADSRS_init(&g_amp_env, 0, 1024, 8192, 1024, &g_leaf);
+    tTriLFO_init(&g_amp_lfo, &g_leaf);
 
     _lut_init();
 
@@ -268,7 +273,13 @@ static void _tick_callback(void) {
     ///       interpolated at audio rate on the DSP side.
     //
     next = tADSRS_tick(&g_amp_env);
-    g_amp_cv.next = ((int32_t)(next * 262143.0) >> 16) << 16;
+
+    /// TODO: Huh?
+    //
+    // g_amp_cv.next = ((int32_t)(next * 262143.0) >> 16) << 16;
+
+    g_amp_cv.next = (int32_t)(next * 2147483647.0);
+    // g_amp_cv.next = (int32_t)(next * 0x7fffffff);
 
     if (g_amp_cv.next != g_amp_cv.last) {
         g_amp_cv.last = g_amp_cv.next;
@@ -303,53 +314,50 @@ static void _knob_callback(uint8_t index, uint8_t value) {
 
     case KNOB_ATTACK:
 
-        // if (g_shift_held) {
-        //     if (g_amp_eg) {
-        //         ft_set_module_param(0, PARAM_AMP_ENV_SUSTAIN,
-        //         amp_lut[value]); gui_post_param("Amp Sus: ", value);
-        //     } else {
-        //         ft_set_module_param(0, PARAM_FILTER_ENV_SUSTAIN,
-        //                             amp_lut[value]);
-        //         gui_post_param("Fil Sus: ", value);
-        //     }
-        //
-        // } else {
-        //     if (g_amp_eg) {
-        //         ft_set_module_param(0, PARAM_AMP_ENV_ATTACK,
-        //                             integrator_lut[value]);
-        //         gui_post_param("Amp Atk: ", value);
-        //     } else {
-        //         ft_set_module_param(0, PARAM_FILTER_ENV_ATTACK,
-        //                             integrator_lut[value]);
-        //         gui_post_param("Fil Atk: ", value);
-        //     }
-        // }
+        if (g_shift_held) {
+
+            if (g_amp_eg) {
+                tADSRS_setSustain(&g_amp_env, value / 128.0);
+                gui_post_param("Amp Sus: ", value);
+
+            } else {
+                // tADSRS_setSustain(&g_filter_env, value / 128.0);
+                // gui_post_param("Fil Sus: ", value);
+            }
+
+        } else {
+            if (g_amp_eg) {
+                tADSRS_setAttack(&g_amp_env, value << 8);
+                gui_post_param("Amp Atk: ", value);
+            } else {
+                // tADSRS_setSustain(&g_filter_env, value << 8);
+                // gui_post_param("Fil Atk: ", value);
+            }
+        }
 
         break;
 
     case KNOB_DECAY:
-        // if (g_shift_held) {
-        //     if (g_amp_eg) {
-        //         ft_set_module_param(0, PARAM_AMP_ENV_RELEASE,
-        //                             integrator_lut[value]);
-        //         gui_post_param("Amp Rel: ", value);
-        //     } else {
-        //         ft_set_module_param(0, PARAM_FILTER_ENV_RELEASE,
-        //                             integrator_lut[value]);
-        //         gui_post_param("Fil Rel: ", value);
-        //     }
-        //
-        // } else {
-        //     if (g_amp_eg) {
-        //         ft_set_module_param(0, PARAM_AMP_ENV_DECAY,
-        //                             integrator_lut[value]);
-        //         gui_post_param("Amp Dec: ", value);
-        //     } else {
-        //         ft_set_module_param(0, PARAM_FILTER_ENV_DECAY,
-        //                             integrator_lut[value]);
-        //         gui_post_param("Fil Dec: ", value);
-        //     }
-        // }
+        if (g_shift_held) {
+
+            if (g_amp_eg) {
+                tADSRS_setRelease(&g_amp_env, value << 8);
+                gui_post_param("Amp Rel: ", value);
+
+            } else {
+                // tADSRS_setRelease(&g_filter_env, value << 8);
+                // gui_post_param("Fil Rel: ", value);
+            }
+
+        } else {
+            if (g_amp_eg) {
+                tADSRS_setDecay(&g_amp_env, value << 8);
+                gui_post_param("Amp Dec: ", value);
+            } else {
+                // tADSRS_setDecay(&g_filter_env, value << 8);
+                // gui_post_param("Fil Dec: ", value);
+            }
+        }
         break;
 
     case KNOB_LEVEL:
@@ -363,7 +371,7 @@ static void _knob_callback(uint8_t index, uint8_t value) {
         break;
 
     case KNOB_EG:
-        // ft_set_module_param(0, PARAM_FILTER_ENV_DEPTH, amp_lut[value]);
+        // tADSRS_setGain(&g_filter_env, value << 8);
         // gui_post_param("EG Depth: ", value);
         break;
 
