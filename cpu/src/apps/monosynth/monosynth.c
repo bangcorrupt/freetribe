@@ -267,7 +267,9 @@ void app_run(void) { gui_task(); }
 
 static void _tick_callback(void) {
 
-    static int32_t log_timeout;
+    static uint32_t log_timeout;
+
+    static uint32_t amp_cv_log;
 
     /// TODO: Use a fixed point envelope generator, or convert properly.
     ///       We can probably use a much cheaper envelope generator,
@@ -291,7 +293,12 @@ static void _tick_callback(void) {
     }
 
     if (!log_timeout++) {
-        gui_post_param("Amp CV: ", g_amp_cv.next);
+
+        if (amp_cv_log != g_amp_cv.next >> 23) {
+            amp_cv_log = g_amp_cv.next >> 23;
+
+            gui_post_param("Amp CV: ", amp_cv_log);
+        }
 
         if (log_timeout >= LOG_RATE_DIVISOR) {
             log_timeout = 0;
