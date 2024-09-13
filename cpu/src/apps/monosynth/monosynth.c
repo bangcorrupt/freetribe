@@ -57,6 +57,8 @@ under the terms of the GNU Affero General Public License as published by
 #define MEMPOOL_SIZE (0x1000)
 // #define MEMPOOL_SIZE (0x4000)
 
+#define LOG_RATE_DIVISOR (200)
+
 #define KNOB_LEVEL 0x00
 #define KNOB_PITCH 0x02
 #define KNOB_RES 0x03
@@ -265,21 +267,15 @@ void app_run(void) { gui_task(); }
 
 static void _tick_callback(void) {
 
-    float next = 0;
+    static int32_t log_timeout;
 
     /// TODO: Use a fixed point envelope generator, or convert properly.
     ///       We can probably use a much cheaper envelope generator,
     ///       as control rate is relatively low and parameters can be
     ///       interpolated at audio rate on the DSP side.
     //
-    next = tADSRS_tick(&g_amp_env);
 
-    /// TODO: Huh?
-    //
-    // g_amp_cv.next = ((int32_t)(next * 262143.0) >> 16) << 16;
-
-    g_amp_cv.next = (int32_t)(next * 2147483647.0);
-    // g_amp_cv.next = (int32_t)(next * 0x7fffffff);
+    g_amp_cv.next = (int32_t)(tADSRS_tick(&g_amp_env) * 2147483647.0);
 
     if (g_amp_cv.next != g_amp_cv.last) {
         g_amp_cv.last = g_amp_cv.next;
@@ -292,6 +288,14 @@ static void _tick_callback(void) {
     // Only send parameters if they have changed.
     if (g_amp_cv.changed) {
         ft_set_module_param(0, PARAM_AMP, g_amp_cv.next);
+    }
+
+    if (!log_timeout++) {
+        gui_post_param("Amp CV: ", g_amp_cv.next);
+
+        if (log_timeout >= LOG_RATE_DIVISOR) {
+            log_timeout = 0;
+        }
     }
 }
 
