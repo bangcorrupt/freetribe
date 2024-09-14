@@ -4,6 +4,7 @@ MAKEFLAGS += -j $(CPUS) -l $(CPUS) -s
 endif
 
 all:
+	mkdir -p ./dsp/src/common
 	cp -u ./cpu/src/common/* ./dsp/src/common # TODO: Restructure.
 	cd ./dsp && $(MAKE)
 	cd ./dsp/build && xxd -i bfin.ldr > bfin_ldr.h
