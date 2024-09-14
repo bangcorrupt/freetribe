@@ -81,11 +81,11 @@ void sport0_init(void) {
     // Clock Falling Edge, Receive Frame Sync, Data Format Sign Extend.
     *pSPORT0_RCR1 = RCKFE | RFSR | DTYPE_SIGX;
     // Rx Stereo Frame Sync Enable, Rx Word Length 32 bit.
-    *pSPORT0_RCR2 = RXSE | SLEN(0x1f); // RSFSE;
+    *pSPORT0_RCR2 = RSFSE | SLEN(0x1f); // RXSE;
 
     // Configure SPORT0 Tx.
     *pSPORT0_TCR1 = TCKFE | TFSR;
-    *pSPORT0_TCR2 = TXSE | SLEN(0x1f); // TSFSE ;
+    *pSPORT0_TCR2 = TSFSE | SLEN(0x1f); // TXSE ;
     ssync();
 
     /// TODO: DMA linked descriptor mode.
@@ -154,11 +154,11 @@ void sport1_init(void) {
     ///
     /// // Configure SPORT1 Rx.
     /// *pSPORT1_RCR1 = RCKFE | RFSR | DTYPE_SIGX;
-    /// *pSPORT1_RCR2 = RXSE | SLEN(0x1f); // RSFSE;
+    /// *pSPORT1_RCR2 = RSFSE | SLEN(0x1f); // RXSE ;
     ///
     /// // Configure SPORT1 Tx.
     /// *pSPORT1_TCR1 = TCKFE | TFSR;
-    /// *pSPORT1_TCR2 = TXSE | SLEN(0x1f); // TSFSE ;
+    /// *pSPORT1_TCR2 = TSFSE | SLEN(0x1f); // TXSE  ;
     /// ssync();
     ///
     /// /// TODO: DMA linked descriptor mode.
