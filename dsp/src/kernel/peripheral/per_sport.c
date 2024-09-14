@@ -63,9 +63,7 @@ static fract32 g_codec_in[2];
 // 2 channels of output to DAC.
 static fract32 g_codec_out[2];
 
-volatile static bool g_sport0_frame_received = false;
-
-static uint32_t g_sport_isr_period;
+static bool g_sport0_frame_received = false;
 
 /*----- Extern variable definitions ----------------------------------*/
 
