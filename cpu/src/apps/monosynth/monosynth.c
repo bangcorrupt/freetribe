@@ -42,6 +42,9 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "keyboard.h"
 
+#include "leaf-config.h"
+#include "leaf-envelopes.h"
+#include "leaf-oscillators.h"
 #include "param_scale.h"
 #include "svc_panel.h"
 
@@ -51,9 +54,13 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-#define CONTROL_RATE (1000)
+// #define CONTROL_RATE (1000)
+#define CONTROL_RATE (100)
 #define MEMPOOL_SIZE (0x1000)
 // #define MEMPOOL_SIZE (0x4000)
+#define EXP_BUFFER_SIZE (0x400)
+
+#define LOG_RATE_DIVISOR (200)
 
 #define KNOB_LEVEL 0x00
 #define KNOB_PITCH 0x02
@@ -192,8 +199,18 @@ static t_scale g_scale;
 static LEAF g_leaf;
 static char g_mempool[MEMPOOL_SIZE];
 
-static tADSRS g_amp_env;
+static tADSRT g_amp_env;
+static tADSRT g_filter_env;
+
+static tTriLFO g_amp_lfo;
+
+static float g_filter_cutoff;
+static float g_filter_env_depth;
+
 static t_cv g_amp_cv;
+static t_cv g_filter_cv;
+
+static Lfloat g_exp_buffer[EXP_BUFFER_SIZE];
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -226,9 +243,15 @@ t_status app_init(void) {
 
     LEAF_init(&g_leaf, CONTROL_RATE, g_mempool, MEMPOOL_SIZE, NULL);
 
-    tADSRS_init(&g_amp_env, 0, 1024, 8192, 1024, &g_leaf);
-
     _lut_init();
+
+    tADSRT_init(&g_amp_env, 32, 1024, 1, 1024, g_exp_buffer, EXP_BUFFER_SIZE,
+                &g_leaf);
+
+    tADSRT_init(&g_filter_env, 32, 1024, 1, 1024, g_exp_buffer, EXP_BUFFER_SIZE,
+                &g_leaf);
+
+    tTriLFO_init(&g_amp_lfo, &g_leaf);
 
     scale_init(&g_scale, DEFAULT_SCALE_NOTES, DEFAULT_SCALE_TONES);
     keyboard_init(&g_kbd, &g_scale);
@@ -260,15 +283,14 @@ void app_run(void) { gui_task(); }
 
 static void _tick_callback(void) {
 
-    float next = 0;
-
     /// TODO: Use a fixed point envelope generator, or convert properly.
     ///       We can probably use a much cheaper envelope generator,
     ///       as control rate is relatively low and parameters can be
     ///       interpolated at audio rate on the DSP side.
     //
-    next = tADSRS_tick(&g_amp_env);
-    g_amp_cv.next = ((int32_t)(next * 262143.0) >> 16) << 16;
+
+    // Amplitude modulation.
+    g_amp_cv.next = (int32_t)(tADSRT_tick(&g_amp_env) * 2147483647.0);
 
     if (g_amp_cv.next != g_amp_cv.last) {
         g_amp_cv.last = g_amp_cv.next;
@@ -281,6 +303,23 @@ static void _tick_callback(void) {
     // Only send parameters if they have changed.
     if (g_amp_cv.changed) {
         ft_set_module_param(0, PARAM_AMP, g_amp_cv.next);
+    }
+
+    // Filter cutolff modulation.
+    g_filter_cv.next = g_filter_cutoff + (int32_t)(tADSRT_tick(&g_filter_env) *
+                                                   g_filter_env_depth);
+
+    if (g_filter_cv.next != g_filter_cv.last) {
+        g_filter_cv.last = g_filter_cv.next;
+        g_filter_cv.changed = true;
+
+    } else {
+        g_filter_cv.changed = false;
+    }
+
+    // Only send parameters if they have changed.
+    if (g_filter_cv.changed) {
+        ft_set_module_param(0, PARAM_CUTOFF, g_filter_cv.next);
     }
 }
 
@@ -303,53 +342,52 @@ static void _knob_callback(uint8_t index, uint8_t value) {
 
     case KNOB_ATTACK:
 
-        // if (g_shift_held) {
-        //     if (g_amp_eg) {
-        //         ft_set_module_param(0, PARAM_AMP_ENV_SUSTAIN,
-        //         amp_lut[value]); gui_post_param("Amp Sus: ", value);
-        //     } else {
-        //         ft_set_module_param(0, PARAM_FILTER_ENV_SUSTAIN,
-        //                             amp_lut[value]);
-        //         gui_post_param("Fil Sus: ", value);
-        //     }
-        //
-        // } else {
-        //     if (g_amp_eg) {
-        //         ft_set_module_param(0, PARAM_AMP_ENV_ATTACK,
-        //                             integrator_lut[value]);
-        //         gui_post_param("Amp Atk: ", value);
-        //     } else {
-        //         ft_set_module_param(0, PARAM_FILTER_ENV_ATTACK,
-        //                             integrator_lut[value]);
-        //         gui_post_param("Fil Atk: ", value);
-        //     }
-        // }
+        /// TODO: Envelope stage ms lookup table.
+
+        if (g_shift_held) {
+
+            if (g_amp_eg) {
+                tADSRT_setSustain(&g_amp_env, value / 255.0);
+                gui_post_param("Amp Sus: ", value);
+
+            } else {
+                tADSRT_setSustain(&g_filter_env, value / 255.0);
+                gui_post_param("Fil Sus: ", value);
+            }
+
+        } else {
+            if (g_amp_eg) {
+                tADSRT_setAttack(&g_amp_env, value << 5);
+                gui_post_param("Amp Atk: ", value);
+            } else {
+                tADSRT_setAttack(&g_filter_env, value << 5);
+                gui_post_param("Fil Atk: ", value);
+            }
+        }
 
         break;
 
     case KNOB_DECAY:
-        // if (g_shift_held) {
-        //     if (g_amp_eg) {
-        //         ft_set_module_param(0, PARAM_AMP_ENV_RELEASE,
-        //                             integrator_lut[value]);
-        //         gui_post_param("Amp Rel: ", value);
-        //     } else {
-        //         ft_set_module_param(0, PARAM_FILTER_ENV_RELEASE,
-        //                             integrator_lut[value]);
-        //         gui_post_param("Fil Rel: ", value);
-        //     }
-        //
-        // } else {
-        //     if (g_amp_eg) {
-        //         ft_set_module_param(0, PARAM_AMP_ENV_DECAY,
-        //                             integrator_lut[value]);
-        //         gui_post_param("Amp Dec: ", value);
-        //     } else {
-        //         ft_set_module_param(0, PARAM_FILTER_ENV_DECAY,
-        //                             integrator_lut[value]);
-        //         gui_post_param("Fil Dec: ", value);
-        //     }
-        // }
+        if (g_shift_held) {
+
+            if (g_amp_eg) {
+                tADSRT_setRelease(&g_amp_env, value << 5);
+                gui_post_param("Amp Rel: ", value);
+
+            } else {
+                tADSRT_setRelease(&g_filter_env, value << 5);
+                gui_post_param("Fil Rel: ", value);
+            }
+
+        } else {
+            if (g_amp_eg) {
+                tADSRT_setDecay(&g_amp_env, value << 5);
+                gui_post_param("Amp Dec: ", value);
+            } else {
+                tADSRT_setDecay(&g_filter_env, value << 5);
+                gui_post_param("Fil Dec: ", value);
+            }
+        }
         break;
 
     case KNOB_LEVEL:
@@ -363,8 +401,8 @@ static void _knob_callback(uint8_t index, uint8_t value) {
         break;
 
     case KNOB_EG:
-        // ft_set_module_param(0, PARAM_FILTER_ENV_DEPTH, amp_lut[value]);
-        // gui_post_param("EG Depth: ", value);
+        g_filter_env_depth = (value / 255.0) * 2147483647.0;
+        gui_post_param("EG Depth: ", value);
         break;
 
     case KNOB_MOD_DEPTH:
@@ -400,13 +438,15 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
 
             if (pitch < 0x7f) {
                 pitch++;
-                ft_set_module_param(0, PARAM_CUTOFF, g_midi_hz_lut[pitch]);
+                // ft_set_module_param(0, PARAM_CUTOFF, g_midi_hz_lut[pitch]);
+                g_filter_cutoff = g_midi_hz_lut[pitch];
             }
 
         } else {
             if (pitch > 0) {
                 pitch--;
-                ft_set_module_param(0, PARAM_CUTOFF, g_midi_hz_lut[pitch]);
+                g_filter_cutoff = g_midi_hz_lut[pitch];
+                // ft_set_module_param(0, PARAM_CUTOFF, g_midi_hz_lut[pitch]);
             }
         }
         gui_post_param("Cutoff: ", pitch);
@@ -457,26 +497,33 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
 
 static void _trigger_callback(uint8_t pad, uint8_t vel, bool state) {
 
+    /// TODO: Use MIDI note stack from LEAF.
+
+    static uint8_t note_count;
+
     int32_t freq;
     uint8_t note;
 
     note = keyboard_map_note(&g_kbd, pad);
 
     if (state) {
-
+        note_count++;
         freq = g_midi_hz_lut[note];
-
-        ft_set_module_param(0, PARAM_PHASE, 0);
         ft_set_module_param(0, PARAM_FREQ, freq);
-        // ft_set_module_param(0, PARAM_VEL, vel << 23);
-        // ft_set_module_param(0, PARAM_GATE, state);
-        tADSRS_on(&g_amp_env, vel / 128.0);
+        ft_set_module_param(0, PARAM_PHASE, 0);
+
+        if (note_count) {
+            tADSRT_on(&g_amp_env, vel / 255.0);
+            // tADSRT_on(&g_amp_env, 1);
+            tADSRT_on(&g_filter_env, 1);
+        }
 
     } else {
-
-        // ft_set_module_param(0, PARAM_VEL, vel << 23);
-        // ft_set_module_param(0, PARAM_GATE, state);
-        tADSRS_off(&g_amp_env);
+        note_count--;
+        if (!note_count) {
+            tADSRT_off(&g_amp_env);
+            tADSRT_off(&g_filter_env);
+        }
     }
 }
 
@@ -656,6 +703,9 @@ static void _lut_init(void) {
 
         g_filter_res_lut[i] = res;
     }
+
+    LEAF_generate_exp(g_exp_buffer, 0.001f, 0.0f, 1.0f, -0.0008f,
+                      EXP_BUFFER_SIZE);
 }
 
 /*----- End of file --------------------------------------------------*/
