@@ -54,24 +54,14 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Static variable definitions ----------------------------------*/
 
 // SPORT0 DMA transmit buffer
-volatile static fract32 g_codec_tx_buffer[2];
+static fract32 g_codec_tx_buffer[2];
 // SPORT0 DMA receive buffer
-volatile static fract32 g_codec_rx_buffer[2];
-
-// SPORT1 DMA transmit buffer
-volatile static int32_t g_cpu_tx_buffer[2];
-// SPORT1 DMA receive buffer
-volatile static int32_t g_cpu_rx_buffer[2];
+static fract32 g_codec_rx_buffer[2];
 
 // 2 channels of input from ADC.
-volatile static fract32 g_codec_in[2];
+static fract32 g_codec_in[2];
 // 2 channels of output to DAC.
-volatile static fract32 g_codec_out[2];
-
-// 2 channels of input from CPU.
-volatile static fract32 g_cpu_in[2];
-// 2 channels of output to CPU.
-volatile static fract32 g_cpu_out[2];
+static fract32 g_codec_out[2];
 
 volatile static bool g_sport0_frame_received = false;
 
@@ -162,63 +152,63 @@ void sport0_init(void) {
 
 void sport1_init(void) {
 
-    // TODO: Do we need secondary enabled?
-
-    // Configure SPORT1 Rx.
-    *pSPORT1_RCR1 = RCKFE | RFSR | DTYPE_SIGX;
-    *pSPORT1_RCR2 = RXSE | SLEN(0x1f); // RSFSE;
-
-    // Configure SPORT1 Tx.
-    *pSPORT1_TCR1 = TCKFE | TFSR;
-    *pSPORT1_TCR2 = TXSE | SLEN(0x1f); // TSFSE ;
-    ssync();
-
-    // TODO: DMA linked descriptor mode.
-
-    // SPORT1 Rx DMA.
-    *pDMA5_PERIPHERAL_MAP = PMAP_SPORT1RX;
-    // Configure DMA.
-    *pDMA5_CONFIG = FLOW_AUTO | WDSIZE_32 | WNR;
-    // Start address of data buffer.
-    *pDMA5_START_ADDR = &g_cpu_rx_buffer;
-    // DMA inner loop count.
-    *pDMA5_X_COUNT = 2; // 2 samples.
-    // Inner loop address increment.
-    *pDMA5_X_MODIFY = 4; // 32 bit.
-    ssync();
-
-    // SPORT1 Tx DMA.
-    *pDMA6_PERIPHERAL_MAP = PMAP_SPORT1TX;
-    // Configure DMA.
-    *pDMA6_CONFIG = FLOW_AUTO | WDSIZE_32;
-    // Start address of data buffer
-    *pDMA6_START_ADDR = &g_cpu_tx_buffer;
-    // DMA inner loop count
-    *pDMA6_X_COUNT = 2; // 2 samples.
-    // Inner loop address increment
-    *pDMA6_X_MODIFY = 4; // 32 bit.
-    ssync();
-
-    // Enable SPORT1 Rx DMA.
-    *pDMA5_CONFIG |= DMAEN;
-    ssync();
-
-    // Enable SPORT1 Tx DMA.
-    *pDMA6_CONFIG |= DMAEN;
-    ssync();
-
-    // Enable SPORT1 Rx.
-    *pSPORT1_RCR1 |= RSPEN;
-    ssync();
-
-    // Enable SPORT1 Tx.
-    *pSPORT1_TCR1 |= TSPEN;
-    ssync();
+    /// /// TODO: Do we need secondary enabled?
+    ///
+    /// // Configure SPORT1 Rx.
+    /// *pSPORT1_RCR1 = RCKFE | RFSR | DTYPE_SIGX;
+    /// *pSPORT1_RCR2 = RXSE | SLEN(0x1f); // RSFSE;
+    ///
+    /// // Configure SPORT1 Tx.
+    /// *pSPORT1_TCR1 = TCKFE | TFSR;
+    /// *pSPORT1_TCR2 = TXSE | SLEN(0x1f); // TSFSE ;
+    /// ssync();
+    ///
+    /// /// TODO: DMA linked descriptor mode.
+    ///
+    /// // SPORT1 Rx DMA.
+    /// *pDMA5_PERIPHERAL_MAP = PMAP_SPORT1RX;
+    /// // Configure DMA.
+    /// *pDMA5_CONFIG = FLOW_AUTO | WDSIZE_32 | WNR;
+    /// // Start address of data buffer.
+    /// *pDMA5_START_ADDR = &g_cpu_rx_buffer;
+    /// // DMA inner loop count.
+    /// *pDMA5_X_COUNT = 2; // 2 samples.
+    /// // Inner loop address increment.
+    /// *pDMA5_X_MODIFY = 4; // 32 bit.
+    /// ssync();
+    ///
+    /// // SPORT1 Tx DMA.
+    /// *pDMA6_PERIPHERAL_MAP = PMAP_SPORT1TX;
+    /// // Configure DMA.
+    /// *pDMA6_CONFIG = FLOW_AUTO | WDSIZE_32;
+    /// // Start address of data buffer
+    /// *pDMA6_START_ADDR = &g_cpu_tx_buffer;
+    /// // DMA inner loop count
+    /// *pDMA6_X_COUNT = 2; // 2 samples.
+    /// // Inner loop address increment
+    /// *pDMA6_X_MODIFY = 4; // 32 bit.
+    /// ssync();
+    ///
+    /// // Enable SPORT1 Rx DMA.
+    /// *pDMA5_CONFIG |= DMAEN;
+    /// ssync();
+    ///
+    /// // Enable SPORT1 Tx DMA.
+    /// *pDMA6_CONFIG |= DMAEN;
+    /// ssync();
+    ///
+    /// // Enable SPORT1 Rx.
+    /// *pSPORT1_RCR1 |= RSPEN;
+    /// ssync();
+    ///
+    /// // Enable SPORT1 Tx.
+    /// *pSPORT1_TCR1 |= TSPEN;
+    /// ssync();
 }
 
-fract32 *sport0_get_rx_buffer(void) { return &g_codec_in; }
+fract32 *sport0_get_rx_buffer(void) { return g_codec_in; }
 
-fract32 *sport0_get_tx_buffer(void) { return &g_codec_out; }
+fract32 *sport0_get_tx_buffer(void) { return g_codec_out; }
 
 /// TODO: DMA ping-pong block buffer.
 bool sport0_frame_received(void) { return g_sport0_frame_received; }
