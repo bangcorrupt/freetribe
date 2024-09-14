@@ -4,6 +4,7 @@ binary/
 build/
 scripts/
 docs/
+dsp/src/common/*
 TODO.txt
 .cache
 *.log
