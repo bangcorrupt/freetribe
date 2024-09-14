@@ -204,6 +204,7 @@ static tADSRT g_filter_env;
 
 static tTriLFO g_amp_lfo;
 
+static float g_filter_cutoff;
 static float g_filter_env_depth;
 
 static t_cv g_amp_cv;
@@ -305,8 +306,8 @@ static void _tick_callback(void) {
     }
 
     // Filter cutolff modulation.
-    g_filter_cv.next = (int32_t)((tADSRT_tick(&g_filter_env) * 2147483647.0) *
-                                 g_filter_env_depth);
+    g_filter_cv.next = g_filter_cutoff + (int32_t)(tADSRT_tick(&g_filter_env) *
+                                                   g_filter_env_depth);
 
     if (g_filter_cv.next != g_filter_cv.last) {
         g_filter_cv.last = g_filter_cv.next;
@@ -341,6 +342,8 @@ static void _knob_callback(uint8_t index, uint8_t value) {
 
     case KNOB_ATTACK:
 
+        /// TODO: Envelope stage ms lookup table.
+
         if (g_shift_held) {
 
             if (g_amp_eg) {
@@ -357,7 +360,7 @@ static void _knob_callback(uint8_t index, uint8_t value) {
                 tADSRT_setAttack(&g_amp_env, value << 5);
                 gui_post_param("Amp Atk: ", value);
             } else {
-                tADSRT_setSustain(&g_filter_env, value << 5);
+                tADSRT_setAttack(&g_filter_env, value << 5);
                 gui_post_param("Fil Atk: ", value);
             }
         }
@@ -398,7 +401,7 @@ static void _knob_callback(uint8_t index, uint8_t value) {
         break;
 
     case KNOB_EG:
-        g_filter_env_depth = value / 255.0;
+        g_filter_env_depth = (value / 255.0) * 2147483647.0;
         gui_post_param("EG Depth: ", value);
         break;
 
@@ -435,13 +438,15 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
 
             if (pitch < 0x7f) {
                 pitch++;
-                ft_set_module_param(0, PARAM_CUTOFF, g_midi_hz_lut[pitch]);
+                // ft_set_module_param(0, PARAM_CUTOFF, g_midi_hz_lut[pitch]);
+                g_filter_cutoff = g_midi_hz_lut[pitch];
             }
 
         } else {
             if (pitch > 0) {
                 pitch--;
-                ft_set_module_param(0, PARAM_CUTOFF, g_midi_hz_lut[pitch]);
+                g_filter_cutoff = g_midi_hz_lut[pitch];
+                // ft_set_module_param(0, PARAM_CUTOFF, g_midi_hz_lut[pitch]);
             }
         }
         gui_post_param("Cutoff: ", pitch);
@@ -505,10 +510,11 @@ static void _trigger_callback(uint8_t pad, uint8_t vel, bool state) {
         note_count++;
         freq = g_midi_hz_lut[note];
         ft_set_module_param(0, PARAM_FREQ, freq);
+        ft_set_module_param(0, PARAM_PHASE, 0);
 
         if (note_count) {
-            // tADSRT_on(&g_amp_env, vel / 256.0);
-            tADSRT_on(&g_amp_env, 1);
+            tADSRT_on(&g_amp_env, vel / 255.0);
+            // tADSRT_on(&g_amp_env, 1);
             tADSRT_on(&g_filter_env, 1);
         }
 
