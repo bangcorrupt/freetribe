@@ -84,17 +84,10 @@ static uint32_t g_sport_isr_period;
 static void _sport0_isr(void) __attribute__((interrupt_handler));
 
 /*----- Extern function implementations ------------------------------*/
-int cycles() {
-    volatile long int ret;
-
-    __asm__ __volatile__("%0 = CYCLES;\n\t" : "=&d"(ret) : : "R1");
-
-    return ret;
-}
 
 void sport0_init(void) {
 
-    // TODO: Do we need secondary enabled?
+    /// TODO: Do we need secondary enabled?
 
     // Configure SPORT0 Rx.
     // Clock Falling Edge, Receive Frame Sync, Data Format Sign Extend.
@@ -107,7 +100,7 @@ void sport0_init(void) {
     *pSPORT0_TCR2 = TXSE | SLEN(0x1f); // TSFSE ;
     ssync();
 
-    // TODO: DMA linked descriptor mode.
+    /// TODO: DMA linked descriptor mode.
 
     // SPORT0 Rx DMA.
     *pDMA3_PERIPHERAL_MAP = PMAP_SPORT0RX;
