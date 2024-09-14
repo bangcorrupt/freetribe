@@ -202,9 +202,9 @@ static char g_mempool[MEMPOOL_SIZE];
 static tADSRT g_amp_env;
 static tADSRT g_filter_env;
 
-static float g_filter_env_depth;
-
 static tTriLFO g_amp_lfo;
+
+static float g_filter_env_depth;
 
 static t_cv g_amp_cv;
 static t_cv g_filter_cv;
