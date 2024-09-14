@@ -14,3 +14,4 @@ all:
 clean:
 	cd ./dsp && $(MAKE) clean
 	cd ./cpu && $(MAKE) clean
+	rm -rf ./dsp/src/common
