@@ -10,8 +10,8 @@ all:
 	cd ./dsp/build && xxd -i bfin.ldr > bfin_ldr.h
 	cp -u ./dsp/build/bfin_ldr.h ./cpu/src/resources/bfin_ldr.h
 	cd ./cpu && $(MAKE)
+	rm -rf ./dsp/src/common
 
 clean:
 	cd ./dsp && $(MAKE) clean
 	cd ./cpu && $(MAKE) clean
-	rm -rf ./dsp/src/common
