@@ -283,6 +283,9 @@ void app_run(void) { gui_task(); }
 
 static void _tick_callback(void) {
 
+    float amp_env;
+    float amp_lfo;
+
     /// TODO: Use a fixed point envelope generator, or convert properly.
     ///       We can probably use a much cheaper envelope generator,
     ///       as control rate is relatively low and parameters can be
@@ -290,7 +293,12 @@ static void _tick_callback(void) {
     //
 
     // Amplitude modulation.
-    g_amp_cv.next = (int32_t)(tADSRT_tick(&g_amp_env) * 2147483647.0);
+    //
+
+    amp_env = tADSRT_tick(&g_amp_env);
+    amp_lfo = tTriLFO_tick(&g_amp_lfo);
+
+    g_amp_cv.next = (int32_t)(amp_env * amp_lfo * 2147483647.0);
 
     if (g_amp_cv.next != g_amp_cv.last) {
         g_amp_cv.last = g_amp_cv.next;
