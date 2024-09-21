@@ -205,6 +205,9 @@ static tADSRT g_filter_env;
 static tTriLFO g_amp_lfo;
 static float g_amp_lfo_depth;
 
+static tTriLFO g_filter_lfo;
+static float g_filter_lfo_depth;
+
 static float g_filter_cutoff;
 static float g_filter_env_depth;
 
@@ -287,6 +290,9 @@ static void _tick_callback(void) {
     float amp_env;
     float amp_lfo;
 
+    float filter_env;
+    float filter_lfo;
+
     /// TODO: Use a fixed point envelope generator, or convert properly.
     ///       We can probably use a much cheaper envelope generator,
     ///       as control rate is relatively low and parameters can be
@@ -315,8 +321,12 @@ static void _tick_callback(void) {
     }
 
     // Filter cutolff modulation.
-    g_filter_cv.next = g_filter_cutoff + (int32_t)(tADSRT_tick(&g_filter_env) *
-                                                   g_filter_env_depth);
+    //
+
+    filter_env = tADSRT_tick(&g_filter_env);
+    filter_lfo = tTriLFO_tick(&g_filter_lfo) * g_filter_lfo_depth;
+
+    g_filter_cv.next = (int32_t)(filter_env * filter_lfo * 2147483647.0);
 
     if (g_filter_cv.next != g_filter_cv.last) {
         g_filter_cv.last = g_filter_cv.next;
@@ -625,8 +635,8 @@ static void _set_mod_depth(uint32_t mod_depth) {
         break;
 
     case MOD_FILTER_LFO:
-        // ft_set_module_param(0, PARAM_FILTER_LFO_DEPTH, mod_depth);
-        // gui_post_param("F.LFO Dpt: ", mod_depth >> 23);
+        g_filter_lfo_depth = mod_depth / 255.0;
+        gui_post_param("F.LFO Dpt: ", mod_depth >> 23);
         break;
 
     case MOD_PITCH_LFO:
@@ -649,8 +659,8 @@ static void _set_mod_speed(uint32_t mod_speed) {
         break;
 
     case MOD_FILTER_LFO:
-        // ft_set_module_param(0, PARAM_FILTER_LFO_SPEED, mod_speed);
-        // gui_post_param("F.LFO Spd: ", mod_speed >> 13);
+        tTriLFO_setFreq(&g_filter_lfo, mod_speed);
+        gui_post_param("F.LFO Spd: ", mod_speed >> 13);
         break;
 
     case MOD_PITCH_LFO:
@@ -674,10 +684,8 @@ static void _lut_init(void) {
 
         /// TODO: Oscillators in the Aleph DSP library
         ///       are producing the wrong frequencies.
-        ///       It's probably user error, maybe
-        ///       samplerate. As a workaround, we
-        ///       scale the frequency here to compensate.
-        ///       Should multiplication be fixed point?
+        ///       As a workaround, we scale the
+        ///       frequency here to compensate.
         //
         hz *= 0.6827421407069484;
 
