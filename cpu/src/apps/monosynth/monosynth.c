@@ -203,6 +203,7 @@ static tADSRT g_amp_env;
 static tADSRT g_filter_env;
 
 static tTriLFO g_amp_lfo;
+static float g_amp_lfo_depth;
 
 static float g_filter_cutoff;
 static float g_filter_env_depth;
@@ -296,7 +297,7 @@ static void _tick_callback(void) {
     //
 
     amp_env = tADSRT_tick(&g_amp_env);
-    amp_lfo = tTriLFO_tick(&g_amp_lfo);
+    amp_lfo = tTriLFO_tick(&g_amp_lfo) * g_amp_lfo_depth;
 
     g_amp_cv.next = (int32_t)(amp_env * amp_lfo * 2147483647.0);
 
@@ -414,7 +415,7 @@ static void _knob_callback(uint8_t index, uint8_t value) {
         break;
 
     case KNOB_MOD_DEPTH:
-        _set_mod_depth(value << 23);
+        _set_mod_depth(value);
         break;
 
     case KNOB_MOD_SPEED:
@@ -619,8 +620,8 @@ static void _set_mod_depth(uint32_t mod_depth) {
     switch (g_mod_type) {
 
     case MOD_AMP_LFO:
-        // ft_set_module_param(0, PARAM_AMP_LFO_DEPTH, mod_depth);
-        // gui_post_param("A.LFO Dpt: ", mod_depth >> 23);
+        g_amp_lfo_depth = mod_depth / 255.0;
+        gui_post_param("A.LFO Dpt: ", mod_depth >> 23);
         break;
 
     case MOD_FILTER_LFO:
@@ -643,8 +644,8 @@ static void _set_mod_speed(uint32_t mod_speed) {
     switch (g_mod_type) {
 
     case MOD_AMP_LFO:
-        // ft_set_module_param(0, PARAM_AMP_LFO_SPEED, mod_speed);
-        // gui_post_param("A.LFO Spd: ", mod_speed >> 13);
+        tTriLFO_setFreq(&g_amp_lfo, mod_speed);
+        gui_post_param("A.LFO Spd: ", mod_speed >> 13);
         break;
 
     case MOD_FILTER_LFO:
