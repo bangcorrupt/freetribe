@@ -54,8 +54,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros and Definitions ---------------------------------------*/
 
-// #define CONTROL_RATE (1000)
-#define CONTROL_RATE (100)
+#define CONTROL_RATE (1000)
 #define MEMPOOL_SIZE (0x1000)
 // #define MEMPOOL_SIZE (0x4000)
 #define EXP_BUFFER_SIZE (0x400)
@@ -201,6 +200,7 @@ static char g_mempool[MEMPOOL_SIZE];
 
 static tADSRT g_amp_env;
 static tADSRT g_filter_env;
+static tADSRT g_pitch_env;
 
 static tTriLFO g_amp_lfo;
 static float g_amp_lfo_depth;
@@ -211,8 +211,17 @@ static float g_filter_lfo_depth;
 static float g_filter_cutoff;
 static float g_filter_env_depth;
 
+static float g_osc_freq;
+static float g_pitch_env_depth;
+
+static tTriLFO g_pitch_lfo;
+static float g_pitch_lfo_depth;
+
 static t_cv g_amp_cv;
 static t_cv g_filter_cv;
+static t_cv g_pitch_cv;
+
+static bool g_reset_phase;
 
 static Lfloat g_exp_buffer[EXP_BUFFER_SIZE];
 
@@ -255,7 +264,12 @@ t_status app_init(void) {
     tADSRT_init(&g_filter_env, 32, 1024, 1, 1024, g_exp_buffer, EXP_BUFFER_SIZE,
                 &g_leaf);
 
+    tADSRT_init(&g_pitch_env, 32, 1024, 1, 1024, g_exp_buffer, EXP_BUFFER_SIZE,
+                &g_leaf);
+
     tTriLFO_init(&g_amp_lfo, &g_leaf);
+    tTriLFO_init(&g_filter_lfo, &g_leaf);
+    tTriLFO_init(&g_pitch_lfo, &g_leaf);
 
     scale_init(&g_scale, DEFAULT_SCALE_NOTES, DEFAULT_SCALE_TONES);
     keyboard_init(&g_kbd, &g_scale);
@@ -287,25 +301,37 @@ void app_run(void) { gui_task(); }
 
 static void _tick_callback(void) {
 
-    float amp_env;
-    float amp_lfo;
+    float amp_mod;
+    float filter_mod;
+    float pitch_mod;
 
     float filter_env;
     float filter_lfo;
+    float cutoff;
 
-    /// TODO: Use a fixed point envelope generator, or convert properly.
-    ///       We can probably use a much cheaper envelope generator,
+    if (g_reset_phase) {
+
+        ft_set_module_param(0, PARAM_PHASE, 0);
+
+        tTriLFO_setPhase(&g_amp_lfo, 0);
+        tTriLFO_setPhase(&g_filter_lfo, 0);
+        tTriLFO_setPhase(&g_pitch_lfo, 0);
+
+        g_reset_phase = false;
+    }
+
+    /// TODO: We can probably use a much cheaper envelope generator,
     ///       as control rate is relatively low and parameters can be
     ///       interpolated at audio rate on the DSP side.
     //
 
     // Amplitude modulation.
     //
+    amp_mod = tADSRT_tick(&g_amp_env);
 
-    amp_env = tADSRT_tick(&g_amp_env);
-    amp_lfo = tTriLFO_tick(&g_amp_lfo) * g_amp_lfo_depth;
+    amp_mod += amp_mod * tTriLFO_tick(&g_amp_lfo) * g_amp_lfo_depth;
 
-    g_amp_cv.next = (int32_t)(amp_env * amp_lfo * 2147483647.0);
+    g_amp_cv.next = (int32_t)(amp_mod * 2147483647.0);
 
     if (g_amp_cv.next != g_amp_cv.last) {
         g_amp_cv.last = g_amp_cv.next;
@@ -322,11 +348,13 @@ static void _tick_callback(void) {
 
     // Filter cutolff modulation.
     //
+    filter_env = tADSRT_tick(&g_filter_env) * g_filter_env_depth;
 
-    filter_env = tADSRT_tick(&g_filter_env);
     filter_lfo = tTriLFO_tick(&g_filter_lfo) * g_filter_lfo_depth;
 
-    g_filter_cv.next = (int32_t)(filter_env * filter_lfo * 2147483647.0);
+    filter_mod = filter_env + filter_lfo;
+
+    g_filter_cv.next = g_filter_cutoff + (int32_t)(filter_mod * 2147483647.0);
 
     if (g_filter_cv.next != g_filter_cv.last) {
         g_filter_cv.last = g_filter_cv.next;
@@ -339,6 +367,26 @@ static void _tick_callback(void) {
     // Only send parameters if they have changed.
     if (g_filter_cv.changed) {
         ft_set_module_param(0, PARAM_CUTOFF, g_filter_cv.next);
+    }
+
+    // Pitch modulation.
+    //
+    // pitch_mod = tADSRT_tick(&g_pitch_env) * g_pitch_env_depth;
+    pitch_mod = 1 + ((tTriLFO_tick(&g_pitch_lfo) * g_pitch_lfo_depth) / 2);
+
+    g_pitch_cv.next = (int32_t)(g_osc_freq * pitch_mod);
+
+    if (g_pitch_cv.next != g_pitch_cv.last) {
+        g_pitch_cv.last = g_pitch_cv.next;
+        g_pitch_cv.changed = true;
+
+    } else {
+        g_pitch_cv.changed = false;
+    }
+
+    // Only send parameters if they have changed.
+    if (g_pitch_cv.changed) {
+        ft_set_module_param(0, PARAM_FREQ, g_pitch_cv.next);
     }
 }
 
@@ -420,7 +468,7 @@ static void _knob_callback(uint8_t index, uint8_t value) {
         break;
 
     case KNOB_EG:
-        g_filter_env_depth = (value / 255.0) * 2147483647.0;
+        g_filter_env_depth = (value / 255.0);
         gui_post_param("EG Depth: ", value);
         break;
 
@@ -429,7 +477,7 @@ static void _knob_callback(uint8_t index, uint8_t value) {
         break;
 
     case KNOB_MOD_SPEED:
-        _set_mod_speed(value << 13);
+        _set_mod_speed(value);
         break;
 
     default:
@@ -520,20 +568,18 @@ static void _trigger_callback(uint8_t pad, uint8_t vel, bool state) {
 
     static uint8_t note_count;
 
-    int32_t freq;
+    // int32_t freq;
     uint8_t note;
 
     note = keyboard_map_note(&g_kbd, pad);
 
     if (state) {
         note_count++;
-        freq = g_midi_hz_lut[note];
-        ft_set_module_param(0, PARAM_FREQ, freq);
-        ft_set_module_param(0, PARAM_PHASE, 0);
+        g_osc_freq = g_midi_hz_lut[note];
+        g_reset_phase = true;
 
         if (note_count) {
             tADSRT_on(&g_amp_env, vel / 255.0);
-            // tADSRT_on(&g_amp_env, 1);
             tADSRT_on(&g_filter_env, 1);
         }
 
@@ -631,17 +677,17 @@ static void _set_mod_depth(uint32_t mod_depth) {
 
     case MOD_AMP_LFO:
         g_amp_lfo_depth = mod_depth / 255.0;
-        gui_post_param("A.LFO Dpt: ", mod_depth >> 23);
+        gui_post_param("A.LFO Dpt: ", mod_depth);
         break;
 
     case MOD_FILTER_LFO:
         g_filter_lfo_depth = mod_depth / 255.0;
-        gui_post_param("F.LFO Dpt: ", mod_depth >> 23);
+        gui_post_param("F.LFO Dpt: ", mod_depth);
         break;
 
     case MOD_PITCH_LFO:
-        // ft_set_module_param(0, PARAM_PITCH_LFO_DEPTH, mod_depth);
-        // gui_post_param("P.LFO Dpt: ", mod_depth >> 23);
+        g_pitch_lfo_depth = mod_depth / 255.0;
+        gui_post_param("P.LFO Dpt: ", mod_depth);
         break;
 
     default:
@@ -654,18 +700,18 @@ static void _set_mod_speed(uint32_t mod_speed) {
     switch (g_mod_type) {
 
     case MOD_AMP_LFO:
-        tTriLFO_setFreq(&g_amp_lfo, mod_speed);
-        gui_post_param("A.LFO Spd: ", mod_speed >> 13);
+        tTriLFO_setFreq(&g_amp_lfo, mod_speed / 25.5);
+        gui_post_param("A.LFO Spd: ", mod_speed);
         break;
 
     case MOD_FILTER_LFO:
-        tTriLFO_setFreq(&g_filter_lfo, mod_speed);
-        gui_post_param("F.LFO Spd: ", mod_speed >> 13);
+        tTriLFO_setFreq(&g_filter_lfo, mod_speed / 25.5);
+        gui_post_param("F.LFO Spd: ", mod_speed);
         break;
 
     case MOD_PITCH_LFO:
-        // ft_set_module_param(0, PARAM_PITCH_LFO_SPEED, mod_speed);
-        // gui_post_param("P.LFO Spd: ", mod_speed >> 13);
+        tTriLFO_setFreq(&g_pitch_lfo, mod_speed / 25.5);
+        gui_post_param("P.LFO Spd: ", mod_speed);
         break;
 
     default:
