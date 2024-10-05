@@ -68,7 +68,8 @@ under the terms of the GNU Affero General Public License as published by
 typedef enum {
     PARAM_AMP,
     PARAM_FREQ,
-    PARAM_PHASE,
+    PARAM_OSC_PHASE,
+    PARAM_LFO_PHASE,
     PARAM_GATE,
     PARAM_VEL,
     PARAM_AMP_LEVEL,
@@ -181,7 +182,7 @@ void module_set_param(uint16_t param_index, int32_t value) {
         Aleph_MonoVoice_set_freq(&g_module.voice, value);
         break;
 
-    case PARAM_PHASE:
+    case PARAM_OSC_PHASE:
         Aleph_MonoVoice_set_phase(&g_module.voice, value);
         break;
 
