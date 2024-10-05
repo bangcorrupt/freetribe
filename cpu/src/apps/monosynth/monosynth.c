@@ -195,7 +195,7 @@ typedef struct {
 // const float FRACT32_MIN_FLOAT = -1.0F;
 static float g_midi_pitch_cv_lut[128];
 static float g_amp_cv_lut[128];
-static float g_knob_cv_lut[255];
+static float g_knob_cv_lut[256];
 
 static int32_t g_midi_hz_lut[128];
 static int32_t g_octave_tune_lut[256];
@@ -372,55 +372,6 @@ static void _module_process(void) {
     pitch_mod = (tTriLFO_tick(&g_pitch_lfo) * g_pitch_lfo_depth);
 
     _module_set_param(PARAM_FREQ, _clamp_value(g_osc_freq + pitch_mod));
-}
-
-static inline float _clamp_value(float value) {
-
-    return fmaxf(fminf(value, FRACT32_MAX_FLOAT), FRACT32_MIN_FLOAT);
-}
-
-static inline int32_t _float_to_fract32(float value) {
-
-    int32_t result;
-
-    if (value == 0) {
-        result = 0;
-
-    } else {
-        _clamp_value(value);
-
-        result = (int32_t)roundf(scalbnf(value, 31));
-    }
-    return result;
-}
-
-static inline int32_t _float_to_fix16(float value) {
-
-    int32_t result;
-
-    if (value == 0) {
-        result = 0;
-
-    } else {
-        result = (int32_t)(value * FIX16_ONE);
-    }
-
-    return result;
-}
-
-static bool _cv_update(t_cv *cv, float value) {
-
-    cv->next = value;
-
-    if (cv->next != cv->last) {
-        cv->last = cv->next;
-        cv->changed = true;
-
-    } else {
-        cv->changed = false;
-    }
-
-    return cv->changed;
 }
 
 /**
@@ -613,9 +564,6 @@ static void _knob_callback(uint8_t index, uint8_t value) {
         break;
 
     case KNOB_ATTACK:
-
-        /// TODO: Envelope stage ms lookup table.
-
         if (g_shift_held) {
 
             if (g_amp_eg) {
@@ -789,7 +737,7 @@ static void _trigger_callback(uint8_t pad, uint8_t vel, bool state) {
 
     if (state) {
         note_count++;
-        _module_set_param(PARAM_VEL, vel / 255.0);
+        _module_set_param(PARAM_VEL, g_knob_cv_lut[vel]);
         _module_set_param(PARAM_GATE, state);
         g_osc_freq = g_midi_pitch_cv_lut[note];
         g_reset_phase = true;
@@ -892,17 +840,17 @@ static void _set_mod_depth(uint32_t mod_depth) {
     switch (g_mod_type) {
 
     case MOD_AMP_LFO:
-        _module_set_param(PARAM_AMP_LFO_DEPTH, mod_depth / 255.0);
+        _module_set_param(PARAM_AMP_LFO_DEPTH, g_knob_cv_lut[mod_depth]);
         gui_post_param("A.LFO Dpt: ", mod_depth);
         break;
 
     case MOD_FILTER_LFO:
-        _module_set_param(PARAM_FILTER_LFO_DEPTH, mod_depth / 255.0);
+        _module_set_param(PARAM_FILTER_LFO_DEPTH, g_knob_cv_lut[mod_depth]);
         gui_post_param("F.LFO Dpt: ", mod_depth);
         break;
 
     case MOD_PITCH_LFO:
-        _module_set_param(PARAM_PITCH_LFO_DEPTH, mod_depth / 255.0);
+        _module_set_param(PARAM_PITCH_LFO_DEPTH, g_knob_cv_lut[mod_depth]);
         gui_post_param("P.LFO Dpt: ", mod_depth);
         break;
 
@@ -916,39 +864,23 @@ static void _set_mod_speed(uint32_t mod_speed) {
     switch (g_mod_type) {
 
     case MOD_AMP_LFO:
-        _module_set_param(PARAM_AMP_LFO_SPEED, mod_speed / 255.0);
+        _module_set_param(PARAM_AMP_LFO_SPEED, g_knob_cv_lut[mod_speed]);
         gui_post_param("A.LFO Spd: ", mod_speed);
         break;
 
     case MOD_FILTER_LFO:
-        _module_set_param(PARAM_FILTER_LFO_SPEED, mod_speed / 255.0);
+        _module_set_param(PARAM_FILTER_LFO_SPEED, g_knob_cv_lut[mod_speed]);
         gui_post_param("F.LFO Spd: ", mod_speed);
         break;
 
     case MOD_PITCH_LFO:
-        _module_set_param(PARAM_PITCH_LFO_SPEED, mod_speed / 255.0);
+        _module_set_param(PARAM_PITCH_LFO_SPEED, g_knob_cv_lut[mod_speed]);
         gui_post_param("P.LFO Spd: ", mod_speed);
         break;
 
     default:
         break;
     }
-}
-
-static inline float _note_to_freq(uint8_t note) {
-    //
-    return 440 * 2 ^ ((note - 69) / 12);
-}
-
-static inline float _freq_to_cv(float freq) {
-
-    // 0.1 per octave, 0 == 27.5 Hz (A0).
-    return (logf(freq / 27.5) / logf(2.0)) / 10;
-}
-
-static inline float _note_to_cv(uint8_t note) {
-    //
-    return _freq_to_cv(_note_to_freq(note));
 }
 
 static void _lut_init(void) {
@@ -1001,6 +933,71 @@ static void _lut_init(void) {
 
     LEAF_generate_exp(g_exp_buffer, 0.001f, 0.0f, 1.0f, -0.0008f,
                       EXP_BUFFER_SIZE);
+}
+
+static inline float _clamp_value(float value) {
+
+    return fmaxf(fminf(value, FRACT32_MAX_FLOAT), FRACT32_MIN_FLOAT);
+}
+
+static inline int32_t _float_to_fract32(float value) {
+
+    int32_t result;
+
+    if (value == 0) {
+        result = 0;
+
+    } else {
+        _clamp_value(value);
+
+        result = (int32_t)roundf(scalbnf(value, 31));
+    }
+    return result;
+}
+
+static inline int32_t _float_to_fix16(float value) {
+
+    int32_t result;
+
+    if (value == 0) {
+        result = 0;
+
+    } else {
+        result = (int32_t)(value * FIX16_ONE);
+    }
+
+    return result;
+}
+
+static inline float _note_to_freq(uint8_t note) {
+    //
+    return 440 * 2 ^ ((note - 69) / 12);
+}
+
+static inline float _freq_to_cv(float freq) {
+
+    // 0.1 per octave, 0 == 27.5 Hz (A0).
+    return (logf(freq / 27.5) / logf(2.0)) / 10;
+}
+
+static inline float _note_to_cv(uint8_t note) {
+    //
+    return _freq_to_cv(_note_to_freq(note));
+}
+
+static bool _cv_update(t_cv *cv, float value) {
+
+    cv->next = value;
+
+    if (cv->next != cv->last) {
+        cv->last = cv->next;
+        cv->changed = true;
+
+    } else {
+        cv->changed = false;
+    }
+
+    return cv->changed;
 }
 
 /*----- End of file --------------------------------------------------*/
