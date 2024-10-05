@@ -320,11 +320,6 @@ static void _tick_callback(void) {
         g_reset_phase = false;
     }
 
-    /// TODO: We can probably use a much cheaper envelope generator,
-    ///       as control rate is relatively low and parameters can be
-    ///       interpolated at audio rate on the DSP side.
-    //
-
     // Amplitude modulation.
     //
     amp_mod = tADSRT_tick(&g_amp_env);
@@ -348,13 +343,24 @@ static void _tick_callback(void) {
 
     // Filter cutolff modulation.
     //
-    filter_env = tADSRT_tick(&g_filter_env) * g_filter_env_depth;
+    // filter_env = tADSRT_tick(&g_filter_env) * g_filter_env_depth;
+    //
+    // filter_lfo = tTriLFO_tick(&g_filter_lfo) * g_filter_lfo_depth;
 
-    filter_lfo = tTriLFO_tick(&g_filter_lfo) * g_filter_lfo_depth;
+    filter_mod = tADSRT_tick(&g_filter_env) * g_filter_env_depth;
 
-    filter_mod = filter_env + filter_lfo;
+    filter_mod += filter_mod * tTriLFO_tick(&g_filter_lfo) * g_filter_lfo_depth;
 
-    g_filter_cv.next = g_filter_cutoff + (int32_t)(filter_mod * 2147483647.0);
+    // filter_mod = filter_env + filter_lfo;
+
+    cutoff = (g_filter_cutoff / 65536.0) + filter_mod * 2147483647.0;
+
+    cutoff = cutoff > 2147483647.0 ? 2147483647.0 : cutoff;
+
+    // g_filter_cv.next = g_filter_cutoff + (int32_t)(filter_mod *
+    // 2147483647.0);
+
+    g_filter_cv.next = (int32_t)(cutoff * 65536.0);
 
     if (g_filter_cv.next != g_filter_cv.last) {
         g_filter_cv.last = g_filter_cv.next;
