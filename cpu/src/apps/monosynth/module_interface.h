@@ -76,6 +76,7 @@ extern "C" {
 // #define DEFAULT_PITCH_LFO_SPEED FIX16_ONE
 
 /// TODO: Move to common location.
+//
 typedef enum {
     PARAM_AMP,
     PARAM_FREQ,

@@ -56,7 +56,6 @@ under the terms of the GNU Affero General Public License as published by
 
 #define CONTROL_RATE (1000)
 #define MEMPOOL_SIZE (0x1000)
-// #define MEMPOOL_SIZE (0x4000)
 
 #define KNOB_LEVEL 0x00
 #define KNOB_PITCH 0x02
@@ -185,7 +184,6 @@ static void _knob_callback(uint8_t index, uint8_t value) {
 
             if (g_amp_eg) {
                 module_set_param(PARAM_AMP_ENV_SUSTAIN, g_knob_cv_lut[value]);
-
                 gui_post_param("Amp Sus: ", value);
 
             } else {
@@ -198,16 +196,13 @@ static void _knob_callback(uint8_t index, uint8_t value) {
         } else {
             if (g_amp_eg) {
                 module_set_param(PARAM_AMP_ENV_ATTACK, g_knob_cv_lut[value]);
-
                 gui_post_param("Amp Atk: ", value);
 
             } else {
                 module_set_param(PARAM_FILTER_ENV_ATTACK, g_knob_cv_lut[value]);
-
                 gui_post_param("Fil Atk: ", value);
             }
         }
-
         break;
 
     case KNOB_DECAY:
@@ -215,7 +210,6 @@ static void _knob_callback(uint8_t index, uint8_t value) {
 
             if (g_amp_eg) {
                 module_set_param(PARAM_AMP_ENV_RELEASE, g_knob_cv_lut[value]);
-
                 gui_post_param("Amp Rel: ", value);
 
             } else {
@@ -228,12 +222,10 @@ static void _knob_callback(uint8_t index, uint8_t value) {
         } else {
             if (g_amp_eg) {
                 module_set_param(PARAM_AMP_ENV_DECAY, g_knob_cv_lut[value]);
-
                 gui_post_param("Amp Dec: ", value);
 
             } else {
                 module_set_param(PARAM_FILTER_ENV_DECAY, g_knob_cv_lut[value]);
-
                 gui_post_param("Fil Dec: ", value);
             }
         }
@@ -275,7 +267,7 @@ static void _knob_callback(uint8_t index, uint8_t value) {
  */
 static void _encoder_callback(uint8_t index, uint8_t value) {
 
-    static uint8_t pitch = DEFAULT_CUTOFF;
+    static uint8_t cutoff = DEFAULT_CUTOFF;
     static int8_t osc_type = DEFAULT_OSC_TYPE;
     static int8_t mod_type;
 
@@ -285,17 +277,17 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
 
         if (value == 0x01) {
 
-            if (pitch < 0x7f) {
-                pitch++;
+            if (cutoff < 0x7f) {
+                cutoff++;
             }
 
         } else {
-            if (pitch > 0) {
-                pitch--;
+            if (cutoff > 0) {
+                cutoff--;
             }
         }
-        module_set_param(PARAM_FILTER_BASE_CUTOFF, g_midi_pitch_cv_lut[pitch]);
-        gui_post_param("Cutoff: ", pitch);
+        module_set_param(PARAM_FILTER_BASE_CUTOFF, g_midi_pitch_cv_lut[cutoff]);
+        gui_post_param("Cutoff: ", cutoff);
 
         break;
 

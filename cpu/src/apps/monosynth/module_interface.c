@@ -59,34 +59,39 @@ typedef struct {
     bool changed;
 } t_cv;
 
+typedef struct {
+    tADSRT amp_env;
+    tADSRT filter_env;
+    tADSRT pitch_env;
+
+    float vel;
+
+    tTriLFO amp_lfo;
+    float amp_lfo_depth;
+
+    tTriLFO filter_lfo;
+    float filter_lfo_depth;
+
+    float filter_cutoff;
+    float filter_env_depth;
+
+    float osc_freq;
+    float pitch_env_depth;
+
+    tTriLFO pitch_lfo;
+    float pitch_lfo_depth;
+
+    t_cv amp_cv;
+    t_cv filter_cv;
+    t_cv pitch_cv;
+
+    bool reset_phase;
+
+} t_module;
+
 /*----- Static variable definitions ----------------------------------*/
 
-static tADSRT g_amp_env;
-static tADSRT g_filter_env;
-static tADSRT g_pitch_env;
-
-static float g_vel;
-
-static tTriLFO g_amp_lfo;
-static float g_amp_lfo_depth;
-
-static tTriLFO g_filter_lfo;
-static float g_filter_lfo_depth;
-
-static float g_filter_cutoff;
-static float g_filter_env_depth;
-
-static float g_osc_freq;
-static float g_pitch_env_depth;
-
-static tTriLFO g_pitch_lfo;
-static float g_pitch_lfo_depth;
-
-static t_cv g_amp_cv;
-static t_cv g_filter_cv;
-static t_cv g_pitch_cv;
-
-static bool g_reset_phase;
+static t_module g_module;
 
 static Lfloat g_exp_buffer[EXP_BUFFER_SIZE];
 
@@ -103,18 +108,18 @@ void module_init(LEAF *leaf) {
     LEAF_generate_exp(g_exp_buffer, 0.001f, 0.0f, 1.0f, -0.0008f,
                       EXP_BUFFER_SIZE);
 
-    tADSRT_init(&g_amp_env, 32, 1024, 1, 1024, g_exp_buffer, EXP_BUFFER_SIZE,
-                leaf);
+    tADSRT_init(&g_module.amp_env, 32, 1024, 1, 1024, g_exp_buffer,
+                EXP_BUFFER_SIZE, leaf);
 
-    tADSRT_init(&g_filter_env, 32, 1024, 1, 1024, g_exp_buffer, EXP_BUFFER_SIZE,
-                leaf);
+    tADSRT_init(&g_module.filter_env, 32, 1024, 1, 1024, g_exp_buffer,
+                EXP_BUFFER_SIZE, leaf);
 
-    tADSRT_init(&g_pitch_env, 32, 1024, 1, 1024, g_exp_buffer, EXP_BUFFER_SIZE,
-                leaf);
+    tADSRT_init(&g_module.pitch_env, 32, 1024, 1, 1024, g_exp_buffer,
+                EXP_BUFFER_SIZE, leaf);
 
-    tTriLFO_init(&g_amp_lfo, leaf);
-    tTriLFO_init(&g_filter_lfo, leaf);
-    tTriLFO_init(&g_pitch_lfo, leaf);
+    tTriLFO_init(&g_module.amp_lfo, leaf);
+    tTriLFO_init(&g_module.filter_lfo, leaf);
+    tTriLFO_init(&g_module.pitch_lfo, leaf);
 }
 
 void module_process(void) {
@@ -123,37 +128,39 @@ void module_process(void) {
     float filter_mod;
     float pitch_mod;
 
-    if (g_reset_phase) {
+    if (g_module.reset_phase) {
 
         module_set_param(PARAM_OSC_PHASE, 0);
         module_set_param(PARAM_LFO_PHASE, 0);
 
-        g_reset_phase = false;
+        g_module.reset_phase = false;
     }
 
     // Amplitude modulation.
     //
-    amp_mod = tADSRT_tick(&g_amp_env);
+    amp_mod = tADSRT_tick(&g_module.amp_env);
 
-    amp_mod += tTriLFO_tick(&g_amp_lfo) * g_amp_lfo_depth;
+    amp_mod += tTriLFO_tick(&g_module.amp_lfo) * g_module.amp_lfo_depth;
 
     module_set_param(PARAM_AMP, clamp_value(amp_mod));
 
     // Filter cutoff modulation.
     //
-    filter_mod = tADSRT_tick(&g_filter_env) * g_filter_env_depth;
+    filter_mod = tADSRT_tick(&g_module.filter_env) * g_module.filter_env_depth;
 
-    filter_mod += tTriLFO_tick(&g_filter_lfo) * g_filter_lfo_depth;
+    filter_mod +=
+        tTriLFO_tick(&g_module.filter_lfo) * g_module.filter_lfo_depth;
 
-    module_set_param(PARAM_CUTOFF, clamp_value(g_filter_cutoff + filter_mod));
+    module_set_param(PARAM_CUTOFF,
+                     clamp_value(g_module.filter_cutoff + filter_mod));
 
     // Pitch modulation.
     //
-    // pitch_mod = tADSRT_tick(&g_pitch_env) * g_pitch_env_depth;
+    // pitch_mod = tADSRT_tick(&g_module.pitch_env) * g_module.pitch_env_depth;
 
-    pitch_mod = (tTriLFO_tick(&g_pitch_lfo) * g_pitch_lfo_depth);
+    pitch_mod = (tTriLFO_tick(&g_module.pitch_lfo) * g_module.pitch_lfo_depth);
 
-    module_set_param(PARAM_FREQ, clamp_value(g_osc_freq + pitch_mod));
+    module_set_param(PARAM_FREQ, clamp_value(g_module.osc_freq + pitch_mod));
 }
 
 /**
@@ -170,16 +177,15 @@ void module_set_param(uint16_t param_index, float value) {
     switch (param_index) {
 
     case PARAM_AMP:
-
         // Only send parameters to DSP if they have changed.
-        if (_cv_update(&g_amp_cv, value)) {
+        if (_cv_update(&g_module.amp_cv, value)) {
 
             ft_set_module_param(0, param_index, float_to_fract32(value));
         }
         break;
 
     case PARAM_FREQ:
-        if (_cv_update(&g_pitch_cv, value)) {
+        if (_cv_update(&g_module.pitch_cv, value)) {
 
             ft_set_module_param(0, param_index, float_to_fract32(value));
         }
@@ -190,9 +196,9 @@ void module_set_param(uint16_t param_index, float value) {
         break;
 
     case PARAM_LFO_PHASE:
-        tTriLFO_setPhase(&g_amp_lfo, float_to_fract32(value));
-        tTriLFO_setPhase(&g_filter_lfo, float_to_fract32(value));
-        tTriLFO_setPhase(&g_pitch_lfo, float_to_fract32(value));
+        tTriLFO_setPhase(&g_module.amp_lfo, float_to_fract32(value));
+        tTriLFO_setPhase(&g_module.filter_lfo, float_to_fract32(value));
+        tTriLFO_setPhase(&g_module.pitch_lfo, float_to_fract32(value));
         break;
 
     case PARAM_GATE:
@@ -200,17 +206,17 @@ void module_set_param(uint16_t param_index, float value) {
         /// TODO: Handle repeated gate on.
         //
         if (value > 0) {
-            tADSRT_on(&g_amp_env, g_vel);
-            tADSRT_on(&g_filter_env, 1);
+            tADSRT_on(&g_module.amp_env, g_module.vel);
+            tADSRT_on(&g_module.filter_env, 1);
 
         } else {
-            tADSRT_off(&g_amp_env);
-            tADSRT_off(&g_filter_env);
+            tADSRT_off(&g_module.amp_env);
+            tADSRT_off(&g_module.filter_env);
         }
         break;
 
     case PARAM_VEL:
-        g_vel = value;
+        g_module.vel = value;
         break;
 
     case PARAM_AMP_LEVEL:
@@ -218,42 +224,42 @@ void module_set_param(uint16_t param_index, float value) {
         break;
 
     case PARAM_AMP_ENV_ATTACK:
-        tADSRT_setAttack(&g_amp_env, value * 8192.0);
+        tADSRT_setAttack(&g_module.amp_env, value * 8192.0);
         break;
 
     case PARAM_AMP_ENV_DECAY:
-        tADSRT_setDecay(&g_amp_env, value * 8192.0);
+        tADSRT_setDecay(&g_module.amp_env, value * 8192.0);
         break;
 
     case PARAM_AMP_ENV_SUSTAIN:
-        tADSRT_setSustain(&g_amp_env, value);
+        tADSRT_setSustain(&g_module.amp_env, value);
         break;
 
     case PARAM_AMP_ENV_RELEASE:
-        tADSRT_setRelease(&g_amp_env, value * 8192.0);
+        tADSRT_setRelease(&g_module.amp_env, value * 8192.0);
         break;
 
     case PARAM_AMP_ENV_DEPTH:
         break;
 
     case PARAM_FILTER_ENV_DEPTH:
-        g_filter_env_depth = value;
+        g_module.filter_env_depth = value;
         break;
 
     case PARAM_FILTER_ENV_ATTACK:
-        tADSRT_setAttack(&g_filter_env, value * 8192.0);
+        tADSRT_setAttack(&g_module.filter_env, value * 8192.0);
         break;
 
     case PARAM_FILTER_ENV_DECAY:
-        tADSRT_setDecay(&g_filter_env, value * 8192.0);
+        tADSRT_setDecay(&g_module.filter_env, value * 8192.0);
         break;
 
     case PARAM_FILTER_ENV_SUSTAIN:
-        tADSRT_setSustain(&g_filter_env, value);
+        tADSRT_setSustain(&g_module.filter_env, value);
         break;
 
     case PARAM_FILTER_ENV_RELEASE:
-        tADSRT_setRelease(&g_filter_env, value * 8192.0);
+        tADSRT_setRelease(&g_module.filter_env, value * 8192.0);
         break;
 
     case PARAM_PITCH_ENV_DEPTH:
@@ -272,8 +278,7 @@ void module_set_param(uint16_t param_index, float value) {
         break;
 
     case PARAM_CUTOFF:
-
-        if (_cv_update(&g_filter_cv, value)) {
+        if (_cv_update(&g_module.filter_cv, value)) {
 
             ft_set_module_param(0, param_index, value);
         }
@@ -297,39 +302,39 @@ void module_set_param(uint16_t param_index, float value) {
         break;
 
     case PARAM_AMP_LFO_DEPTH:
-        g_amp_lfo_depth = value;
+        g_module.amp_lfo_depth = value;
         break;
 
     case PARAM_AMP_LFO_SPEED:
-        tTriLFO_setFreq(&g_amp_lfo, value * 10);
+        tTriLFO_setFreq(&g_module.amp_lfo, value * 10);
         break;
 
     case PARAM_FILTER_LFO_DEPTH:
-        g_filter_lfo_depth = value;
+        g_module.filter_lfo_depth = value;
         break;
 
     case PARAM_FILTER_LFO_SPEED:
-        tTriLFO_setFreq(&g_filter_lfo, value * 10);
+        tTriLFO_setFreq(&g_module.filter_lfo, value * 10);
         break;
 
     case PARAM_PITCH_LFO_DEPTH:
-        g_pitch_lfo_depth = value;
+        g_module.pitch_lfo_depth = value;
         break;
 
     case PARAM_PITCH_LFO_SPEED:
-        tTriLFO_setFreq(&g_pitch_lfo, value * 10);
+        tTriLFO_setFreq(&g_module.pitch_lfo, value * 10);
         break;
 
     case PARAM_OSC_BASE_FREQ:
-        g_osc_freq = value;
+        g_module.osc_freq = value;
         break;
 
     case PARAM_FILTER_BASE_CUTOFF:
-        g_filter_cutoff = value;
+        g_module.filter_cutoff = value;
         break;
 
     case PARAM_PHASE_RESET:
-        g_reset_phase = value;
+        g_module.reset_phase = value;
         break;
 
     default:
