@@ -1,0 +1,357 @@
+/*----------------------------------------------------------------------
+
+                     This file is part of Freetribe
+
+                https://github.com/bangcorrupt/freetribe
+
+                                License
+
+                   GNU AFFERO GENERAL PUBLIC LICENSE
+                      Version 3, 19 November 2007
+
+                           AGPL-3.0-or-later
+
+ Freetribe is free software: you can redistribute it and/or modify it
+under the terms of the GNU Affero General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+                  (at your option) any later version.
+
+     Freetribe is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty
+        of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+          See the GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+ along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+                       Copyright bangcorrupt 2023
+
+----------------------------------------------------------------------*/
+
+/*
+ * @file    module_interface.c
+ *
+ * @brief   CPU interface interface to DSP module.
+ *
+ */
+
+/*----- Includes -----------------------------------------------------*/
+
+#include "freetribe.h"
+
+#include "leaf.h"
+
+#include "leaf-envelopes.h"
+#include "leaf-oscillators.h"
+
+#include "param_scale.h"
+
+#include "module_interface.h"
+
+/*----- Macros and Definitions ---------------------------------------*/
+
+#define EXP_BUFFER_SIZE (0x400)
+
+typedef struct {
+
+    float next;
+    float last;
+    bool changed;
+} t_cv;
+
+/*----- Static variable definitions ----------------------------------*/
+
+static tADSRT g_amp_env;
+static tADSRT g_filter_env;
+static tADSRT g_pitch_env;
+
+static float g_vel;
+
+static tTriLFO g_amp_lfo;
+static float g_amp_lfo_depth;
+
+static tTriLFO g_filter_lfo;
+static float g_filter_lfo_depth;
+
+static float g_filter_cutoff;
+static float g_filter_env_depth;
+
+static float g_osc_freq;
+static float g_pitch_env_depth;
+
+static tTriLFO g_pitch_lfo;
+static float g_pitch_lfo_depth;
+
+static t_cv g_amp_cv;
+static t_cv g_filter_cv;
+static t_cv g_pitch_cv;
+
+static bool g_reset_phase;
+
+static Lfloat g_exp_buffer[EXP_BUFFER_SIZE];
+
+/*----- Extern variable definitions ----------------------------------*/
+
+/*----- Static function prototypes -----------------------------------*/
+
+static bool _cv_update(t_cv *cv, float value);
+
+/*----- Extern function implementations ------------------------------*/
+
+void module_init(LEAF *leaf) {
+
+    LEAF_generate_exp(g_exp_buffer, 0.001f, 0.0f, 1.0f, -0.0008f,
+                      EXP_BUFFER_SIZE);
+
+    tADSRT_init(&g_amp_env, 32, 1024, 1, 1024, g_exp_buffer, EXP_BUFFER_SIZE,
+                leaf);
+
+    tADSRT_init(&g_filter_env, 32, 1024, 1, 1024, g_exp_buffer, EXP_BUFFER_SIZE,
+                leaf);
+
+    tADSRT_init(&g_pitch_env, 32, 1024, 1, 1024, g_exp_buffer, EXP_BUFFER_SIZE,
+                leaf);
+
+    tTriLFO_init(&g_amp_lfo, leaf);
+    tTriLFO_init(&g_filter_lfo, leaf);
+    tTriLFO_init(&g_pitch_lfo, leaf);
+}
+
+void module_process(void) {
+
+    float amp_mod;
+    float filter_mod;
+    float pitch_mod;
+
+    if (g_reset_phase) {
+
+        module_set_param(PARAM_OSC_PHASE, 0);
+        module_set_param(PARAM_LFO_PHASE, 0);
+
+        g_reset_phase = false;
+    }
+
+    // Amplitude modulation.
+    //
+    amp_mod = tADSRT_tick(&g_amp_env);
+
+    amp_mod += tTriLFO_tick(&g_amp_lfo) * g_amp_lfo_depth;
+
+    module_set_param(PARAM_AMP, clamp_value(amp_mod));
+
+    // Filter cutoff modulation.
+    //
+    filter_mod = tADSRT_tick(&g_filter_env) * g_filter_env_depth;
+
+    filter_mod += tTriLFO_tick(&g_filter_lfo) * g_filter_lfo_depth;
+
+    module_set_param(PARAM_CUTOFF, clamp_value(g_filter_cutoff + filter_mod));
+
+    // Pitch modulation.
+    //
+    // pitch_mod = tADSRT_tick(&g_pitch_env) * g_pitch_env_depth;
+
+    pitch_mod = (tTriLFO_tick(&g_pitch_lfo) * g_pitch_lfo_depth);
+
+    module_set_param(PARAM_FREQ, clamp_value(g_osc_freq + pitch_mod));
+}
+
+/**
+ * @brief       Handle module parameter changes.
+ *              Receives float, -1.0 <= value < 1.0,
+ *              converts to format required by destination.
+ *
+ * @param[in]   param_index     Index of parameter.
+ * @param[in]   value           Value of parameter.
+ *
+ */
+void module_set_param(uint16_t param_index, float value) {
+
+    switch (param_index) {
+
+    case PARAM_AMP:
+
+        // Only send parameters to DSP if they have changed.
+        if (_cv_update(&g_amp_cv, value)) {
+
+            ft_set_module_param(0, param_index, float_to_fract32(value));
+        }
+        break;
+
+    case PARAM_FREQ:
+        if (_cv_update(&g_pitch_cv, value)) {
+
+            ft_set_module_param(0, param_index, float_to_fract32(value));
+        }
+        break;
+
+    case PARAM_OSC_PHASE:
+        ft_set_module_param(0, param_index, float_to_fract32(value));
+        break;
+
+    case PARAM_LFO_PHASE:
+        tTriLFO_setPhase(&g_amp_lfo, float_to_fract32(value));
+        tTriLFO_setPhase(&g_filter_lfo, float_to_fract32(value));
+        tTriLFO_setPhase(&g_pitch_lfo, float_to_fract32(value));
+        break;
+
+    case PARAM_GATE:
+
+        /// TODO: Handle repeated gate on.
+        //
+        if (value > 0) {
+            tADSRT_on(&g_amp_env, g_vel);
+            tADSRT_on(&g_filter_env, 1);
+
+        } else {
+            tADSRT_off(&g_amp_env);
+            tADSRT_off(&g_filter_env);
+        }
+        break;
+
+    case PARAM_VEL:
+        g_vel = value;
+        break;
+
+    case PARAM_AMP_LEVEL:
+        ft_set_module_param(0, param_index, float_to_fract32(value));
+        break;
+
+    case PARAM_AMP_ENV_ATTACK:
+        tADSRT_setAttack(&g_amp_env, value * 8192.0);
+        break;
+
+    case PARAM_AMP_ENV_DECAY:
+        tADSRT_setDecay(&g_amp_env, value * 8192.0);
+        break;
+
+    case PARAM_AMP_ENV_SUSTAIN:
+        tADSRT_setSustain(&g_amp_env, value);
+        break;
+
+    case PARAM_AMP_ENV_RELEASE:
+        tADSRT_setRelease(&g_amp_env, value * 8192.0);
+        break;
+
+    case PARAM_AMP_ENV_DEPTH:
+        break;
+
+    case PARAM_FILTER_ENV_DEPTH:
+        g_filter_env_depth = value;
+        break;
+
+    case PARAM_FILTER_ENV_ATTACK:
+        tADSRT_setAttack(&g_filter_env, value * 8192.0);
+        break;
+
+    case PARAM_FILTER_ENV_DECAY:
+        tADSRT_setDecay(&g_filter_env, value * 8192.0);
+        break;
+
+    case PARAM_FILTER_ENV_SUSTAIN:
+        tADSRT_setSustain(&g_filter_env, value);
+        break;
+
+    case PARAM_FILTER_ENV_RELEASE:
+        tADSRT_setRelease(&g_filter_env, value * 8192.0);
+        break;
+
+    case PARAM_PITCH_ENV_DEPTH:
+        break;
+
+    case PARAM_PITCH_ENV_ATTACK:
+        break;
+
+    case PARAM_PITCH_ENV_DECAY:
+        break;
+
+    case PARAM_PITCH_ENV_SUSTAIN:
+        break;
+
+    case PARAM_PITCH_ENV_RELEASE:
+        break;
+
+    case PARAM_CUTOFF:
+
+        if (_cv_update(&g_filter_cv, value)) {
+
+            ft_set_module_param(0, param_index, value);
+        }
+        break;
+
+    case PARAM_RES:
+        ft_set_module_param(0, param_index, float_to_fract32(1.0 - value));
+        break;
+
+    case PARAM_TUNE:
+        ft_set_module_param(0, param_index, float_to_fix16(value * 2.0));
+        break;
+
+    case PARAM_OSC_TYPE:
+        ft_set_module_param(0, param_index, (int32_t)value * OSC_TYPE_COUNT);
+        break;
+
+    case PARAM_FILTER_TYPE:
+        ft_set_module_param(0, PARAM_FILTER_TYPE,
+                            (int32_t)value * OSC_TYPE_COUNT);
+        break;
+
+    case PARAM_AMP_LFO_DEPTH:
+        g_amp_lfo_depth = value;
+        break;
+
+    case PARAM_AMP_LFO_SPEED:
+        tTriLFO_setFreq(&g_amp_lfo, value * 10);
+        break;
+
+    case PARAM_FILTER_LFO_DEPTH:
+        g_filter_lfo_depth = value;
+        break;
+
+    case PARAM_FILTER_LFO_SPEED:
+        tTriLFO_setFreq(&g_filter_lfo, value * 10);
+        break;
+
+    case PARAM_PITCH_LFO_DEPTH:
+        g_pitch_lfo_depth = value;
+        break;
+
+    case PARAM_PITCH_LFO_SPEED:
+        tTriLFO_setFreq(&g_pitch_lfo, value * 10);
+        break;
+
+    case PARAM_OSC_BASE_FREQ:
+        g_osc_freq = value;
+        break;
+
+    case PARAM_FILTER_BASE_CUTOFF:
+        g_filter_cutoff = value;
+        break;
+
+    case PARAM_PHASE_RESET:
+        g_reset_phase = value;
+        break;
+
+    default:
+        break;
+    }
+}
+
+/*----- Static function implementations ------------------------------*/
+
+static bool _cv_update(t_cv *cv, float value) {
+
+    cv->next = value;
+
+    if (cv->next != cv->last) {
+        cv->last = cv->next;
+        cv->changed = true;
+
+    } else {
+        cv->changed = false;
+    }
+
+    return cv->changed;
+}
+
+/*----- End of file --------------------------------------------------*/

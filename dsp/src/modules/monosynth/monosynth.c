@@ -43,6 +43,7 @@ under the terms of the GNU Affero General Public License as published by
 #include "utils.h"
 
 #include "aleph.h"
+
 #include "aleph_monovoice.h"
 
 /*----- Macros and Definitions ---------------------------------------*/
@@ -99,6 +100,9 @@ typedef enum {
     PARAM_FILTER_LFO_SPEED,
     PARAM_PITCH_LFO_DEPTH,
     PARAM_PITCH_LFO_SPEED,
+    PARAM_OSC_BASE_FREQ,
+    PARAM_FILTER_BASE_CUTOFF,
+    PARAM_PHASE_RESET,
 
     PARAM_COUNT
 } e_param;
