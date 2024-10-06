@@ -58,8 +58,6 @@ under the terms of the GNU Affero General Public License as published by
 #define MEMPOOL_SIZE (0x1000)
 // #define MEMPOOL_SIZE (0x4000)
 
-#define LOG_RATE_DIVISOR (200)
-
 #define KNOB_LEVEL 0x00
 #define KNOB_PITCH 0x02
 #define KNOB_RES 0x03
@@ -80,34 +78,9 @@ under the terms of the GNU Affero General Public License as published by
 #define BUTTON_HPF 0x14
 #define BUTTON_BPF 0x16
 
-#define DEFAULT_CUTOFF 0x7f // Index in pitch LUT.
-#define DEFAULT_OSC_TYPE 2
-
 #define DEFAULT_SCALE_NOTES NOTES_PHRYGIAN_DOMINANT
 #define DEFAULT_SCALE_TONES 12
 #define DEFAULT_SCALE_MODE 0
-
-#define PARAM_MAX (PARAM_COUNT - 1)
-#define FILTER_TYPE_MAX (FILTER_TYPE_COUNT - 1)
-#define MOD_TYPE_MAX (MOD_TYPE_COUNT - 1)
-#define OSC_TYPE_MAX (OSC_TYPE_COUNT - 1)
-
-// #define DEFAULT_AMP_ENV_ATTACK SLEW_10MS
-// #define DEFAULT_AMP_ENV_DECAY SLEW_1S
-// #define DEFAULT_AMP_ENV_SUSTAIN FR32_MAX
-//
-// #define DEFAULT_FILTER_ENV_ATTACK SLEW_10MS
-// #define DEFAULT_FILTER_ENV_DECAY SLEW_1S
-// #define DEFAULT_FILTER_ENV_SUSTAIN FR32_MAX
-//
-// #define DEFAULT_AMP_LFO_DEPTH 0
-// #define DEFAULT_AMP_LFO_SPEED FIX16_ONE
-//
-// #define DEFAULT_FILTER_LFO_DEPTH 0
-// #define DEFAULT_FILTER_LFO_SPEED FIX16_ONE
-//
-// #define DEFAULT_PITCH_LFO_DEPTH 0
-// #define DEFAULT_PITCH_LFO_SPEED FIX16_ONE
 
 /*----- Static variable definitions ----------------------------------*/
 
