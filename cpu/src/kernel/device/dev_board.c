@@ -53,7 +53,7 @@ under the terms of the GNU Affero General Public License as published by
 /// TODO: Move blocking delay to device layer.
 #include "svc_delay.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

@@ -47,9 +47,11 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define LED_COUNT 0x58
+
+/*----- Typedefs -----------------------------------------------------*/
 
 typedef enum {
     BUTTON_EVENT = 0,

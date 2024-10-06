@@ -48,9 +48,11 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "midi_fsm.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } t_midi_task_state;
 

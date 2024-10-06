@@ -48,7 +48,7 @@ extern "C" {
 
 #include "leaf.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define DEFAULT_CUTOFF 0x7f // Index in pitch LUT.
 #define DEFAULT_OSC_TYPE 2
@@ -74,6 +74,8 @@ extern "C" {
 //
 // #define DEFAULT_PITCH_LFO_DEPTH 0
 // #define DEFAULT_PITCH_LFO_SPEED FIX16_ONE
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /// TODO: Move to common location.
 //

@@ -140,6 +140,8 @@
 #endif
 
 /* Structures for the syscontrol() function */
+/*----- Typedefs -----------------------------------------------------*/
+
 typedef struct ADI_SYSCTRL_VALUES {
     uint16_t uwVrCtl;
     uint16_t uwPllCtl;

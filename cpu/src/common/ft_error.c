@@ -41,7 +41,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "ft_error.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

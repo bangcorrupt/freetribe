@@ -47,7 +47,9 @@ under the terms of the GNU Affero General Public License as published by
 #include "ft_error.h"
 #include "ring_buffer.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 typedef enum {
     STATE_INIT,

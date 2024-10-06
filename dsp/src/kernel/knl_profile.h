@@ -47,7 +47,7 @@ extern "C" {
 #include <blackfin.h>
 #include <builtins.h>
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define CYCLE_LOG_LENGTH (16)
 

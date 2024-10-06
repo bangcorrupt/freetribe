@@ -82,7 +82,7 @@ under the terms of the GNU Affero General Public License as published by
 #include "per_ddr.h"
 #include "sys/types.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 // DDR timing values/refresh rates
 #define DDR2_SDTIMR1 0x20923249

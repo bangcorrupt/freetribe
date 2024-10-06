@@ -44,7 +44,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "per_gpio.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define PFMUX_SPORT 0x0555
 #define PGMUX_SPISSEL 0x0002

@@ -48,7 +48,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "ring_buffer.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define MCU_UART UART_0
 /// TODO: Centralised header for interrupt priorities.

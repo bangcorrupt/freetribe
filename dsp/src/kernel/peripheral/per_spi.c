@@ -48,7 +48,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "ring_buffer.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 /// TODO: Central header for queue sizes.
 //

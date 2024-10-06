@@ -65,7 +65,7 @@ extern "C" {
 #include "knl_main.h"
 #include "usr_main.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
 

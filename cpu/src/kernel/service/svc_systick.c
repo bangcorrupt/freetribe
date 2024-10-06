@@ -43,7 +43,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "per_timer.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define SYSTICK_TIMER SOC_TMR_0_REGS
 #define SYSTICK_PERIOD 0x5dbf // 1ms

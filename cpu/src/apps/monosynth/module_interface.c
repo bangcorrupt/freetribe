@@ -48,9 +48,11 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "module_interface.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define EXP_BUFFER_SIZE (0x400)
+
+/*----- Typedefs -----------------------------------------------------*/
 
 typedef struct {
 

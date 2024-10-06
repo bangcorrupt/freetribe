@@ -48,7 +48,7 @@ under the terms of the GNU Affero General Public License as published by
 #include "midi_fsm.h"
 #include "sysex_codec.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 // Decoded data length is always less than received message length.
 static uint8_t g_decode_buffer[SYSEX_BUFFER_LENGTH];

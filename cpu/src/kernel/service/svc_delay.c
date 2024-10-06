@@ -48,7 +48,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "svc_delay.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define DELAY_TIMER SOC_TMR_3_REGS
 #define DELAY_PERIOD 0x8F0D17F // 1s

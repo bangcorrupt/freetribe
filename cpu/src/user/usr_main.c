@@ -45,10 +45,12 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "usr_main.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define DEBUG_TICK_DIV 1000
 #define USER_TICK_DIV 0
+
+/*----- Typedefs -----------------------------------------------------*/
 
 typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } t_user_task_state;
 

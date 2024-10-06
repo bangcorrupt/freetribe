@@ -41,7 +41,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "module.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 // Enumerate parameters.
 enum params {

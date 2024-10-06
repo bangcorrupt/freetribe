@@ -44,7 +44,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "utils.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 /**
  * @brief   Enumeration of module parameters.

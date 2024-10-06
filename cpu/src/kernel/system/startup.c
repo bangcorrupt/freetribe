@@ -88,7 +88,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "startup.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

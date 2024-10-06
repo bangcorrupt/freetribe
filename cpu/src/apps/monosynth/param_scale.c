@@ -42,7 +42,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "param_scale.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

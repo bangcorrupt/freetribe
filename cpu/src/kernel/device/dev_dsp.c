@@ -48,7 +48,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "ring_buffer.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define DSP_SPI SPI_1
 #define DSP_SPI_BOOT_DATA_FORMAT 1

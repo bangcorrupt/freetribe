@@ -49,7 +49,9 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "ft_error.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } t_system_task_state;
 

@@ -52,7 +52,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "module_interface.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define CONTROL_RATE (1000)
 #define MEMPOOL_SIZE (0x1000)

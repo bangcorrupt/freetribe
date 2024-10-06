@@ -47,10 +47,12 @@ under the terms of the GNU Affero General Public License as published by
 #include "svc_delay.h"
 #include "svc_display.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define FRAME_BUF_LEN 0x400
 #define LCD_COLUMNS 0x80
+
+/*----- Typedefs -----------------------------------------------------*/
 
 typedef enum {
     STATE_ASSERT_RESET,

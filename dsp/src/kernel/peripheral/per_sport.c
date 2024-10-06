@@ -45,7 +45,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "per_sport.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 /// TODO: Add this to defBF52x_base.h and rebuild toolchain.
 //

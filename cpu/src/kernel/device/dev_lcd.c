@@ -48,7 +48,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "svc_delay.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define LCD_SPI 0
 
@@ -66,6 +66,8 @@ under the terms of the GNU Affero General Public License as published by
 #define LCD_COLUMNS 0x80
 #define LCD_PAGES 0x8
 #define LCD_PAGE_LINES 0x8
+
+/*----- Typedefs -----------------------------------------------------*/
 
 typedef enum { COMMAND, DATA } t_lcd_mode;
 

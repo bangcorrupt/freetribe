@@ -49,7 +49,7 @@ extern "C" {
 
 #include "ft_error.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 /// TODO: Move protocol definition to common module.
 ///       Union struct for message.

@@ -46,7 +46,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "per_timer.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define CLOCK_TIMER SOC_TMR_2_REGS
 #define CLOCK_PERIOD 0x124F7 // 500us

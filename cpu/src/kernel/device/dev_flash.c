@@ -57,7 +57,7 @@ under the terms of the GNU Affero General Public License as published by
 /// TODO: Use device layer delay, or SPI peripheral timing.
 #include "svc_delay.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define SPI_FLASH_BASE SPI1_BASE
 #define SPI_FLASH_CS 0x1

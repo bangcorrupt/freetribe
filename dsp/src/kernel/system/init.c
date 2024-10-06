@@ -45,7 +45,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "init.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define RDIV 0x7d6
 

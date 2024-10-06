@@ -40,7 +40,7 @@ under the terms of the GNU Affero General Public License as published by
 #include <stdint.h>
 #include <string.h>
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

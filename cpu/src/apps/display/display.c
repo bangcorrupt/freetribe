@@ -38,7 +38,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "freetribe.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define TRIGGER_MODE_CONTINUOUS 1
 

@@ -48,7 +48,7 @@ extern "C" {
 
 #include "types.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #ifndef SAMPLERATE
 #define SAMPLERATE 48000

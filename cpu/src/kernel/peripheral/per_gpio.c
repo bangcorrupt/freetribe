@@ -49,7 +49,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "per_gpio.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

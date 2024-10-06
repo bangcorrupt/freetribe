@@ -46,7 +46,7 @@ extern "C" {
 
 #include <stdint.h>
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define HWAIT PG0
 #define UART0_TX PG7

@@ -46,7 +46,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "aleph_monovoice.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define MEMPOOL_SIZE (0x2000)
 
@@ -66,6 +66,8 @@ under the terms of the GNU Affero General Public License as published by
  *
  * Index of each external parameter of module.
  */
+/*----- Typedefs -----------------------------------------------------*/
+
 typedef enum {
     PARAM_AMP,
     PARAM_FREQ,

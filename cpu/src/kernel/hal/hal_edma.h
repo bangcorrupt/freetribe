@@ -88,9 +88,10 @@ extern "C" {
 #define EDMA3CC_DMAQNUM_SET(chNum, queNum)                                     \
     ((0x7u & (queNum)) << (((chNum) % 8u) * 4u))
 /** QDMAQNUM bits Clear */
-#define EDMA3CC_QDMAQNUM_CLR(chNum) (~(0x7u << ((chNum)*4u)))
+#define EDMA3CC_QDMAQNUM_CLR(chNum) (~(0x7u << ((chNum) * 4u)))
 /** QDMAQNUM bits Set */
-#define EDMA3CC_QDMAQNUM_SET(chNum, queNum) ((0x7u & (queNum)) << ((chNum)*4u))
+#define EDMA3CC_QDMAQNUM_SET(chNum, queNum)                                    \
+    ((0x7u & (queNum)) << ((chNum) * 4u))
 
 #define EDMA3CC_QCHMAP_PAENTRY_CLR (~EDMA3CC_QCHMAP_PAENTRY)
 /** QCHMAP-PaRAMEntry bitfield Set */

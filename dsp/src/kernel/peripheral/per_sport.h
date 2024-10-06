@@ -47,7 +47,7 @@ extern "C" {
 #include "types.h"
 #include <stdbool.h>
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
 

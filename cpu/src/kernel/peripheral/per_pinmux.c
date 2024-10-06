@@ -42,7 +42,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "soc_AM1808.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

@@ -42,7 +42,7 @@ under the terms of the GNU Affero General Public License as published by
 #include "freetribe.h"
 #include "svc_delay.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 // 0.5 seconds in microseconds.
 #define DELAY_TIME 500000

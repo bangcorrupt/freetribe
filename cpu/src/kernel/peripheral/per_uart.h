@@ -49,13 +49,15 @@ extern "C" {
 
 #include "hal_uart.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define UART_0 0
 #define UART_1 1
 
 #define OVERSAMPLE_13 UART_OVER_SAMP_RATE_13
 #define OVERSAMPLE_16 UART_OVER_SAMP_RATE_16
+
+/*----- Typedefs -----------------------------------------------------*/
 
 typedef enum { UART_TX_COMPLETE, UART_RX_COMPLETE, UART_RX_ERROR } t_uart_event;
 

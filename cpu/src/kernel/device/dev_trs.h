@@ -47,7 +47,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
 

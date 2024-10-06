@@ -52,7 +52,7 @@ extern "C" {
 
 #include "hal_spi.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define SPI_INSTANCES SOC_SPI_PER_CNT
 
@@ -90,6 +90,8 @@ extern "C" {
 #define SPI_DEFAULT_FREQ SPI_FREQ_30_MHZ
 #define SPI_DEFAULT_PHASE SPI_CLK_OUTOFPHASE
 #define SPI_DEFAULT_CHAR_LENGTH 8
+
+/*----- Typedefs -----------------------------------------------------*/
 
 typedef enum { SPI_TX_COMPLETE, SPI_RX_COMPLETE } t_spi_event;
 

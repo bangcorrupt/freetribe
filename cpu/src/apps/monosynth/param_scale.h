@@ -49,7 +49,7 @@ extern "C" {
 
 #include "lookup_tables.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 // Maximum and minimum float values representable as fract32.
 #define FRACT32_MAX_FLOAT 0x0.FFFFFFp0F

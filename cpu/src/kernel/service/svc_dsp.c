@@ -51,9 +51,11 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "bfin_ldr.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define MSG_START 0xf0
+
+/*----- Typedefs -----------------------------------------------------*/
 
 typedef enum {
     STATE_INIT,

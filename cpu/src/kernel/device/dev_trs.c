@@ -47,7 +47,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "ring_buffer.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 #define TRS_UART UART_1
 #define TRS_UART_INT_CHANNEL 6
 

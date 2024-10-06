@@ -49,9 +49,11 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "module.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define MSG_START 0xf0
+
+/*----- Typedefs -----------------------------------------------------*/
 
 typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } t_cpu_task_state;
 

@@ -51,10 +51,12 @@ under the terms of the GNU Affero General Public License as published by
 #include "ring_buffer.h"
 #include "ugui.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define GUI_EVENT_BUF_LEN 0x20
 #define GUI_MAX_STRING_LEN 18 // FONT_6X8
+
+/*----- Typedefs -----------------------------------------------------*/
 
 typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } t_gui_task_state;
 

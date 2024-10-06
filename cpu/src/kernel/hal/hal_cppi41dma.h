@@ -53,8 +53,8 @@ extern "C" {
 #define NULL ((void *)0)
 #endif
 
-#define USB_TX_MODE_SHIFT(n) (((((n)-1) << 1) * 2))
-#define USB_RX_MODE_SHIFT(n) ((((((n)-1) << 1) * 2) + 16))
+#define USB_TX_MODE_SHIFT(n) (((((n) - 1) << 1) * 2))
+#define USB_RX_MODE_SHIFT(n) ((((((n) - 1) << 1) * 2) + 16))
 
 #if defined(am335x_15x15) || defined(am335x)
 #define USB_OTGBASE USBSS_BASE

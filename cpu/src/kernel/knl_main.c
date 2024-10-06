@@ -53,9 +53,11 @@ under the terus of the GNU Affero General Public License as published by
 #include "svc_system.h"
 #include "svc_systick.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 // #define DISPLAY_TICK_DIV 0
+
+/*----- Typedefs -----------------------------------------------------*/
 
 typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } t_kernel_task_state;
 
