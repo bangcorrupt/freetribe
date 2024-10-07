@@ -123,6 +123,10 @@ void module_init(LEAF *leaf) {
     tTriLFO_init(&g_module.amp_lfo, leaf);
     tTriLFO_init(&g_module.filter_lfo, leaf);
     tTriLFO_init(&g_module.pitch_lfo, leaf);
+
+    tTriLFO_setFreq(&g_module.amp_lfo, 10);
+    tTriLFO_setFreq(&g_module.filter_lfo, 10);
+    tTriLFO_setFreq(&g_module.pitch_lfo, 10);
 }
 
 void module_process(void) {
@@ -151,6 +155,9 @@ void module_process(void) {
 
         module_set_param(PARAM_AMP, clamp_value(amp_mod));
     }
+
+    /// TODO: Should filter LFO follow the
+    ///       envelope, like the amp LFO?
 
     // Filter cutoff modulation.
     //
@@ -313,7 +320,7 @@ void module_set_param(uint16_t param_index, float value) {
         break;
 
     case PARAM_AMP_LFO_SPEED:
-        tTriLFO_setFreq(&g_module.amp_lfo, value * 10);
+        tTriLFO_setFreq(&g_module.amp_lfo, value * 20);
         break;
 
     case PARAM_FILTER_LFO_DEPTH:
@@ -321,7 +328,7 @@ void module_set_param(uint16_t param_index, float value) {
         break;
 
     case PARAM_FILTER_LFO_SPEED:
-        tTriLFO_setFreq(&g_module.filter_lfo, value * 10);
+        tTriLFO_setFreq(&g_module.filter_lfo, value * 20);
         break;
 
     case PARAM_PITCH_LFO_DEPTH:
@@ -329,7 +336,7 @@ void module_set_param(uint16_t param_index, float value) {
         break;
 
     case PARAM_PITCH_LFO_SPEED:
-        tTriLFO_setFreq(&g_module.pitch_lfo, value * 10);
+        tTriLFO_setFreq(&g_module.pitch_lfo, value * 20);
         break;
 
     case PARAM_OSC_BASE_FREQ:
