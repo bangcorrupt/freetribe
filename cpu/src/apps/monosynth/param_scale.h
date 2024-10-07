@@ -64,17 +64,7 @@ extern "C" {
 
 /*----- Static variable definitions ----------------------------------*/
 
-static float g_midi_pitch_cv_lut[128];
-static float g_amp_cv_lut[128];
-static float g_knob_cv_lut[256];
-
-static int32_t g_midi_hz_lut[128];
-static int32_t g_octave_tune_lut[256];
-static int32_t g_filter_res_lut[256];
-
 /*----- Extern function prototypes -----------------------------------*/
-
-void lut_init(void);
 
 /*----- Extern function implementations ------------------------------*/
 
