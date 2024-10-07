@@ -101,9 +101,9 @@ static float g_midi_pitch_cv_lut[128];
 static float g_amp_cv_lut[128];
 static float g_knob_cv_lut[256];
 
-static int32_t g_midi_hz_lut[128];
-static int32_t g_octave_tune_lut[256];
-static int32_t g_filter_res_lut[256];
+static float g_midi_hz_lut[128];
+static float g_octave_tune_lut[256];
+static float g_filter_res_lut[256];
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -528,16 +528,18 @@ static void _lut_init(void) {
 
         if (i <= 128) {
             // 0.5...1.
-            tune = i / 256.0 + 0.5;
+            tune = (i / 256.0) + 0.5;
 
         } else {
             // >1...2.0
             tune = ((i - 128) / 127.0) + 1;
         }
 
-        // Convert to fix16,
-        tune *= (1 << 16);
-        g_octave_tune_lut[i] = (int32_t)tune;
+        // // Convert to fix16,
+        // tune *= (1 << 16);
+        // g_octave_tune_lut[i] = (int32_t)tune;
+
+        g_octave_tune_lut[i] = tune;
     }
 
     int32_t res;
