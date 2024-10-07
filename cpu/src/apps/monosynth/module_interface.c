@@ -87,6 +87,8 @@ typedef struct {
     t_cv filter_cv;
     t_cv pitch_cv;
 
+    e_mod_type mod_type;
+
     bool reset_phase;
 
 } t_module;
@@ -339,9 +341,31 @@ void module_set_param(uint16_t param_index, float value) {
         g_module.reset_phase = value;
         break;
 
+    case PARAM_MOD_TYPE:
+        g_module.mod_type = (int32_t)value * MOD_TYPE_COUNT;
+        break;
+
     default:
         break;
     }
+}
+
+float module_get_param(uint16_t param_index) {
+
+    float value = 0;
+
+    switch (param_index) {
+
+    case PARAM_MOD_TYPE:
+
+        value = (1.0 / MOD_TYPE_COUNT) * g_module.mod_type;
+        break;
+
+    default:
+        break;
+    }
+
+    return value;
 }
 
 /*----- Static function implementations ------------------------------*/

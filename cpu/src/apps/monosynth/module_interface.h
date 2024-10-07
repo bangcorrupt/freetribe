@@ -115,6 +115,7 @@ typedef enum {
     PARAM_PITCH_LFO_SPEED,
     PARAM_OSC_BASE_FREQ,
     PARAM_FILTER_BASE_CUTOFF,
+    PARAM_MOD_TYPE,
     PARAM_PHASE_RESET,
 
     PARAM_COUNT
@@ -154,6 +155,7 @@ typedef enum {
 void module_init(LEAF *leaf);
 void module_process(void);
 void module_set_param(uint16_t param_index, float value);
+float module_get_param(uint16_t param_index);
 
 #ifdef __cplusplus
 }

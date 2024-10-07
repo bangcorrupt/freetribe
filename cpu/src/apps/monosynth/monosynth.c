@@ -83,20 +83,15 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Static variable definitions ----------------------------------*/
 
-// const float FRACT32_MAX_FLOAT = 0x0.FFFFFFp0F;
-// const float FRACT32_MIN_FLOAT = -1.0F;
-
-static bool g_shift_held;
-static bool g_menu_held;
-static bool g_amp_eg;
-
-static e_mod_type g_mod_type;
+static LEAF g_leaf;
+static char g_mempool[MEMPOOL_SIZE];
 
 static t_keyboard g_kbd;
 static t_scale g_scale;
 
-static LEAF g_leaf;
-static char g_mempool[MEMPOOL_SIZE];
+static bool g_shift_held;
+static bool g_menu_held;
+static bool g_amp_eg;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -323,7 +318,7 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
             }
         }
 
-        g_mod_type = mod_type;
+        module_set_param(PARAM_MOD_TYPE, (1.0 / MOD_TYPE_COUNT) * mod_type);
         gui_post_param("Mod Type: ", mod_type);
 
         break;
