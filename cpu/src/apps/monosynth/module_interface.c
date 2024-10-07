@@ -291,9 +291,9 @@ void module_set_param(uint16_t param_index, float value) {
                             float_to_fix16(cv_to_freq((value))));
         break;
 
-        // case PARAM_RES:
-        //     ft_set_module_param(0, param_index, float_to_fract32(1.0 -
-        //     value)); break;
+    case PARAM_RES:
+        ft_set_module_param(0, param_index, float_to_fract32(1.0 - value));
+        break;
 
     case PARAM_TUNE:
         ft_set_module_param(0, param_index, float_to_fix16(value * 2.0));
