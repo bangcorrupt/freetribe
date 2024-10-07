@@ -119,6 +119,8 @@ static void _set_filter_type(uint8_t filter_type);
 static void _set_mod_depth(uint32_t mod_depth);
 static void _set_mod_speed(uint32_t mod_speed);
 
+static void _lut_init(void);
+
 /*----- Extern function implementations ------------------------------*/
 
 /**
@@ -138,7 +140,7 @@ t_status app_init(void) {
     module_init(&g_leaf);
     _set_filter_type(FILTER_TYPE_LPF);
 
-    lut_init();
+    _lut_init();
 
     scale_init(&g_scale, DEFAULT_SCALE_NOTES, DEFAULT_SCALE_TONES);
     keyboard_init(&g_kbd, &g_scale);
@@ -498,7 +500,7 @@ static void _set_mod_speed(uint32_t mod_speed) {
     }
 }
 
-void lut_init(void) {
+static void _lut_init(void) {
 
     int i;
     float scaled;
