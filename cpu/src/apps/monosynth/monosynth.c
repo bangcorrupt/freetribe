@@ -89,6 +89,8 @@ static char g_mempool[MEMPOOL_SIZE];
 static t_keyboard g_kbd;
 static t_scale g_scale;
 
+static e_mod_type g_mod_type;
+
 static bool g_shift_held;
 static bool g_menu_held;
 static bool g_amp_eg;
@@ -318,7 +320,7 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
             }
         }
 
-        module_set_param(PARAM_MOD_TYPE, (1.0 / MOD_TYPE_COUNT) * mod_type);
+        g_mod_type = mod_type;
         gui_post_param("Mod Type: ", mod_type);
 
         break;
