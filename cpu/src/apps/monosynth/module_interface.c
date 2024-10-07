@@ -143,7 +143,8 @@ void module_process(void) {
     //
     amp_mod = tADSRT_tick(&g_module.amp_env);
 
-    amp_mod += tTriLFO_tick(&g_module.amp_lfo) * g_module.amp_lfo_depth;
+    amp_mod +=
+        amp_mod * tTriLFO_tick(&g_module.amp_lfo) * g_module.amp_lfo_depth;
 
     // Only send parameters to DSP if they have changed.
     if (_cv_update(&g_module.amp_cv, amp_mod)) {
