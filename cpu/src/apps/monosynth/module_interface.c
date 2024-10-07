@@ -300,12 +300,11 @@ void module_set_param(uint16_t param_index, float value) {
         break;
 
     case PARAM_OSC_TYPE:
-        ft_set_module_param(0, param_index, (int32_t)value * OSC_TYPE_COUNT);
+        ft_set_module_param(0, param_index, value * OSC_TYPE_COUNT);
         break;
 
     case PARAM_FILTER_TYPE:
-        ft_set_module_param(0, PARAM_FILTER_TYPE,
-                            (int32_t)value * OSC_TYPE_COUNT);
+        ft_set_module_param(0, PARAM_FILTER_TYPE, value * OSC_TYPE_COUNT);
         break;
 
     case PARAM_AMP_LFO_DEPTH:
