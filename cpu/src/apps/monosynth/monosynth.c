@@ -98,7 +98,7 @@ static bool g_menu_held;
 static bool g_amp_eg;
 
 static float g_midi_pitch_cv_lut[128];
-static float g_amp_cv_lut[128];
+static float g_amp_cv_lut[256];
 static float g_knob_cv_lut[256];
 
 static float g_midi_hz_lut[128];

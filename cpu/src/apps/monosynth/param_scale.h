@@ -102,9 +102,9 @@ static inline int32_t float_to_fix16(float value) {
     return result;
 }
 
-static inline float note_to_freq(uint8_t note) {
+static inline float note_to_freq(float note) {
     //
-    return 440 * 2 ^ ((note - 69) / 12);
+    return 440 * powf(2.0, ((note - 69) / 12.0));
 }
 
 static inline float freq_to_cv(float freq) {
@@ -113,9 +113,14 @@ static inline float freq_to_cv(float freq) {
     return (logf(freq / 27.5) / logf(2.0)) / 10;
 }
 
-static inline float note_to_cv(uint8_t note) {
+static inline float note_to_cv(float note) {
     //
     return freq_to_cv(note_to_freq(note));
+}
+
+static inline float cv_to_freq(float cv) {
+    //
+    return powf(2.0, cv * 10) * 27.5;
 }
 
 #ifdef __cplusplus

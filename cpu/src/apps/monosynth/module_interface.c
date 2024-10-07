@@ -153,27 +153,29 @@ void module_process(void) {
 
     // Filter cutoff modulation.
     //
-    filter_mod = tADSRT_tick(&g_module.filter_env) * g_module.filter_env_depth;
+    filter_mod = g_module.filter_cutoff;
+
+    filter_mod += tADSRT_tick(&g_module.filter_env) * g_module.filter_env_depth;
 
     filter_mod +=
         tTriLFO_tick(&g_module.filter_lfo) * g_module.filter_lfo_depth;
 
     if (_cv_update(&g_module.filter_cv, filter_mod)) {
 
-        module_set_param(PARAM_CUTOFF,
-                         clamp_value(g_module.filter_cutoff + filter_mod));
+        module_set_param(PARAM_CUTOFF, clamp_value(filter_mod));
     }
 
     // Pitch modulation.
     //
-    // pitch_mod = tADSRT_tick(&g_module.pitch_env) * g_module.pitch_env_depth;
+    pitch_mod = g_module.osc_freq;
 
-    pitch_mod = (tTriLFO_tick(&g_module.pitch_lfo) * g_module.pitch_lfo_depth);
+    // pitch_mod += tADSRT_tick(&g_module.pitch_env) * g_module.pitch_env_depth;
+
+    pitch_mod += (tTriLFO_tick(&g_module.pitch_lfo) * g_module.pitch_lfo_depth);
 
     if (_cv_update(&g_module.pitch_cv, pitch_mod)) {
 
-        module_set_param(PARAM_FREQ,
-                         clamp_value(g_module.osc_freq + pitch_mod));
+        module_set_param(PARAM_FREQ, clamp_value(pitch_mod));
     }
 }
 
@@ -195,7 +197,7 @@ void module_set_param(uint16_t param_index, float value) {
         break;
 
     case PARAM_FREQ:
-        ft_set_module_param(0, param_index, float_to_fract32(value));
+        ft_set_module_param(0, param_index, float_to_fix16(cv_to_freq(value)));
         break;
 
     case PARAM_OSC_PHASE:
@@ -285,7 +287,8 @@ void module_set_param(uint16_t param_index, float value) {
         break;
 
     case PARAM_CUTOFF:
-        ft_set_module_param(0, param_index, value);
+        ft_set_module_param(0, param_index,
+                            float_to_fix16(cv_to_freq((value))));
         break;
 
         // case PARAM_RES:
