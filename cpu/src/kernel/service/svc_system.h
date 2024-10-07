@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    svc_system.h
  *
  * @brief   Public API for svc_system.c.
- *
  */
 
 #ifndef SVC_SYSTEM_H
@@ -45,6 +44,8 @@ extern "C" {
 /*----- Includes -----------------------------------------------------*/
 
 /*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
 

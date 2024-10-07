@@ -32,7 +32,6 @@ under the terms of the GNU Affero General Public License as published by
  * @file    dev_board.h
  *
  * @brief   Public API for main board device driver.
- *
  */
 
 #ifndef DEV_BOARD_H
@@ -45,6 +44,8 @@ extern "C" {
 /*----- Includes -----------------------------------------------------*/
 
 /*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
 

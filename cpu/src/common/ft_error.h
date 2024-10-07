@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    error.h
  *
  * @brief   Exports API for error.c.
- *
  */
 
 #ifndef ERROR_H

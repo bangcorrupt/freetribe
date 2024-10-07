@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    gui_task.h
  *
  * @brief   Public API for GUI task.
- *
  */
 
 #ifndef GUI_TASK_H
@@ -48,6 +47,8 @@ extern "C" {
 #include <stdint.h>
 
 /*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
 

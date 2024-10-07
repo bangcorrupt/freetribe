@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    per_timer.c
  *
  * @brief   Driver for timer peripheral.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/
@@ -45,6 +44,8 @@ under the terms of the GNU Affero General Public License as published by
 #include "per_timer.h"
 
 /*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

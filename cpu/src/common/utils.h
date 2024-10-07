@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    utils.h
  *
  * @brief   Public API for common utility functions.
- *
  */
 
 #ifndef UTILS_H
@@ -47,6 +46,8 @@ extern "C" {
 #include <stdint.h>
 
 /*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
 

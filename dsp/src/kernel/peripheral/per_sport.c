@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    per_sport.c
  *
  * @brief   Peripheral driver for for BF523 SPORT.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/
@@ -50,6 +49,8 @@ under the terms of the GNU Affero General Public License as published by
 /// TODO: Add this to defBF52x_base.h and rebuild toolchain.
 //
 #define DTYPE_SIGX 0x0004 /* SPORTx RCR1 Data Format Sign Extend */
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

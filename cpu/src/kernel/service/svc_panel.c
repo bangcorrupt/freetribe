@@ -32,7 +32,6 @@ under the terms of the GNU Affero General Public License as published by
  * @file    svc_panel.c
  *
  * @brief   Interface to panel controls and LED.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/

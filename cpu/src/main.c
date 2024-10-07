@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    main.c
  *
  * @brief   Main function for Freetribe CPU firmware.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/
@@ -45,6 +44,8 @@ under the terms of the GNU Affero General Public License as published by
 #include "svc_dsp.h"
 
 /*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

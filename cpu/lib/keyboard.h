@@ -46,12 +46,14 @@ extern "C" {
 
 #include <stdint.h>
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
 
 #define NOTES_IONIAN 2741
 #define NOTES_AEOLIAN 1453
 #define NOTES_PHRYGIAN_DOMINANT 1459
 #define NOTES_MINOR_BLUES 1257
+
+/*----- Typedefs -----------------------------------------------------*/
 
 typedef struct {
     uint32_t notes;

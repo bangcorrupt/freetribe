@@ -66,6 +66,7 @@ under the terms of the GNU Affero General Public License as published by
  *
  * Index of each external parameter of module.
  */
+
 /*----- Typedefs -----------------------------------------------------*/
 
 typedef enum {

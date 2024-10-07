@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    per_pinmux.h
  *
  * @brief   Public API for pin multiplexing peripheral driver.
- *
  */
 
 #ifndef PER_PINMUX_H
@@ -45,6 +44,8 @@ extern "C" {
 /*----- Includes -----------------------------------------------------*/
 
 /*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
 

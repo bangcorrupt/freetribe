@@ -37,8 +37,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /* Original work by the libmidi authors, modified by bangcorrupt 2023. */
 
-/// TODO: Abstract from Freetribe and port back to libmidi with original
-/// license.
+/// TODO: Abstract from Freetribe and port back to libmidi.
 
 /*
  * Copyright (c) 2018, The libmidi authors.

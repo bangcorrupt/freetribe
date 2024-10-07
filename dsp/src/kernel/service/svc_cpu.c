@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    svc_cpu.c
  *
  * @brief   Service for communicating with host CPU.
- *
  */
 
 // TODO: CPU device driver, command service.

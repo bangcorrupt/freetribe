@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    knl_profile.h
  *
  * @brief   Public API for Freetribe blackfin profiling.
- *
  */
 
 #ifndef KNL_PROFILE_H
@@ -50,6 +49,8 @@ extern "C" {
 /*----- Macros -------------------------------------------------------*/
 
 #define CYCLE_LOG_LENGTH (16)
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
 

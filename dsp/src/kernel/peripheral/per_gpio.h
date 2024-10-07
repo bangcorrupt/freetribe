@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    per_gpio.h
  *
  * @brief   Public API for BF523 GPIO driver.
- *
  */
 
 #ifndef PER_GPIO_H
@@ -51,7 +50,9 @@ extern "C" {
 #define HWAIT PG0
 #define UART0_TX PG7
 
-enum e_port { PORT_F, PORT_G, PORT_H };
+/*----- Typedefs -----------------------------------------------------*/
+
+typedef enum { PORT_F, PORT_G, PORT_H } e_port;
 
 /*----- Extern variable declarations ---------------------------------*/
 

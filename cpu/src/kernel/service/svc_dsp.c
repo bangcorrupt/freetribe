@@ -32,7 +32,6 @@ under the terms of the GNU Affero General Public License as published by
  * @file    svc_dsp.c
  *
  * @brief   Interface to Blackfin DSP.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/

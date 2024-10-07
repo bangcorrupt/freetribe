@@ -28,7 +28,7 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  *  @file   dev_flash.c
  *
  *  @brief  Flash memory device driver.
@@ -92,6 +92,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #define SECTOR_OFFSET_MASK 0xfff
 #define SECTOR_INDEX_SHIFT 0xc
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

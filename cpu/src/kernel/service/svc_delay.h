@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    svc_delay.h
  *
  * @brief   Public interface for delay.c.
- *
  */
 
 #ifndef SVC_DELAY_H

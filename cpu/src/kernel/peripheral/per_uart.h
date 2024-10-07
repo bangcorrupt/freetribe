@@ -32,7 +32,6 @@ under the terms of the GNU Affero General Public License as published by
  * @file per_uart.h
  *
  * @brief  Public api for UART peripheral driver.
- *
  */
 
 #ifndef PER_UART_H

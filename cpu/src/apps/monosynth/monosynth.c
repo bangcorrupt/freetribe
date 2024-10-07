@@ -81,6 +81,8 @@ under the terms of the GNU Affero General Public License as published by
 #define DEFAULT_SCALE_TONES 12
 #define DEFAULT_SCALE_MODE 0
 
+/*----- Typedefs -----------------------------------------------------*/
+
 /*----- Static variable definitions ----------------------------------*/
 
 static LEAF g_leaf;

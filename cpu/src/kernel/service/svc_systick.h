@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    svc_systick.h
  *
  * @brief   Public interface for svc_systick.c.
- *
  */
 
 #ifndef SVC_SYSTICK_H
@@ -47,6 +46,8 @@ extern "C" {
 #include <stdint.h>
 
 /*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
 

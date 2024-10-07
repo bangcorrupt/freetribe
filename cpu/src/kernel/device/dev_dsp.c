@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    dev_dsp.c
  *
  * @brief   Device driver for communicating with Blackfin DSP.
- *
  */
 
 /// TODO: Separate modules for SPI and EMIFA.
@@ -85,6 +84,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #define DSP_SPI_ENA_BANK 2
 #define DSP_SPI_ENA_PIN 12
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

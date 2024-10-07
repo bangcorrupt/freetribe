@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    knl_profile.c
  *
  * @brief   Performance profiling.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/
@@ -41,6 +40,8 @@ under the terms of the GNU Affero General Public License as published by
 #include "gcc.h"
 
 /*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

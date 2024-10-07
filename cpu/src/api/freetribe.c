@@ -43,6 +43,8 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros -------------------------------------------------------*/
 
+/*----- Typedefs -----------------------------------------------------*/
+
 /*----- Static variable definitions ----------------------------------*/
 
 /*----- Extern variable definitions ----------------------------------*/
@@ -81,6 +83,7 @@ void ft_register_tick_callback(uint32_t divisor, void (*callback)(void)) {
 uint32_t ft_get_delay_current(void) {
 
     /// TODO: Refactor delay functions.
+    //
     return delay_get_current_count();
 }
 
@@ -111,6 +114,7 @@ int8_t ft_fill_frame(uint16_t x_start, uint16_t y_start, uint16_t x_end,
 // Print API
 //
 /// TODO: What is going on with print?
+//
 void ft_register_print_callback(void (*callback)(char *)) {
 
     svc_system_register_print_callback(callback);
@@ -137,6 +141,7 @@ void ft_print(char *text) { svc_midi_send_string(text); }
  *
  */
 /// TODO: Separate function for each event type.
+//
 void ft_register_panel_callback(t_panel_event event, void *callback) {
 
     svc_panel_register_callback(event, callback);
@@ -154,6 +159,7 @@ void ft_set_trigger_mode(uint8_t mode) { svc_panel_set_trigger_mode(mode); }
  *
  */
 /// TODO: Separate function for each event type.
+//
 void ft_register_midi_callback(event_type event,
                                t_midi_event_callback callback) {
 

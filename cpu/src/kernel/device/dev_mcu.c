@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    dev_mcu.c
  *
  * @brief   Device driver for communicating with panel board MCU.
- *
  */
 
 /// TODO: Support MCU flash modes.
@@ -57,6 +56,8 @@ under the terms of the GNU Affero General Public License as published by
 #define MCU_TX_BUF_LEN 0x100
 #define MCU_RX_BUF_LEN 0x20
 #define MCU_MSG_LEN 0x5
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

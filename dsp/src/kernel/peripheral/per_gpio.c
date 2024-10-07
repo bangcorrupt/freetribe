@@ -28,7 +28,7 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    per_gpio.c
  *
  * @brief   Peripheral driver for BF523 GPIO.
@@ -59,6 +59,8 @@ under the terms of the GNU Affero General Public License as published by
 #define PGFER_UART 0x0180
 #define PGFER_HOSTDP 0xf800
 #define PHFER_HOSTDP 0xffff
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

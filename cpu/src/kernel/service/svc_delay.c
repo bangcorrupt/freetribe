@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    svc_delay.c
  *
  * @brief   Configuration and handling for delay timer.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/
@@ -57,6 +56,8 @@ under the terms of the GNU Affero General Public License as published by
     TMR_CFG_32BIT_UNCH_CLK_BOTH_INT & ~TMR_TGCR_TIM34RS & ~TMR_TGCR_PLUSEN
 
 #define CYCLES_PER_US 150 // 150MHz
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

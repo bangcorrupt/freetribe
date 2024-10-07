@@ -62,11 +62,10 @@ under the terms of the GNU Affero General Public License as published by
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
+/**
  * @file per_ddr.c
  *
  * @brief  Initialise and terminate DDR.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/
@@ -92,6 +91,8 @@ under the terms of the GNU Affero General Public License as published by
 #define DDR2_SDCR 0x0813ca22
 #define VTPIO_CTL_HIGH 0x00080000
 #define DDR2_MDDR_DRPYC1R_READ_LAT 0x6
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

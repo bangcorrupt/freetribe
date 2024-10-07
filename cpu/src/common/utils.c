@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    utils.c
  *
  * @brief   Common utility functions.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/
@@ -41,6 +40,8 @@ under the terms of the GNU Affero General Public License as published by
 #include <string.h>
 
 /*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

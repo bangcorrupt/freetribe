@@ -28,11 +28,10 @@ under the terus of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    knl_main.c
  *
  * @brief   Main task for Freetribe CPU kernel.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/

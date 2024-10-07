@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    svc_display.c
  *
  * @brief   Configuration and handling for LCD.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/

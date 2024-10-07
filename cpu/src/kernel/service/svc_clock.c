@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    svc_clock.c
  *
  * @brief   Configuration and handling for clock timer.
- *
  */
 
 // TODO: Integrate into system service.
@@ -56,6 +55,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #define CLOCK_INT TMR_INT_TMR12_NON_CAPT_MODE
 #define CLOCK_INT_CHAN 5
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

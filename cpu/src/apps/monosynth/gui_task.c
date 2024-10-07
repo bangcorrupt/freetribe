@@ -32,7 +32,6 @@ under the terms of the GNU Affero General Public License as published by
  * @file    gui_task.c
  *
  * @brief   Event handling for Freetribe GUI.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/
@@ -161,6 +160,7 @@ void gui_print(uint8_t x_start, uint8_t y_start, char *text) {
     event.y_start = y_start;
 
     /// TODO: This is jank.
+    //
     uint32_t length = (uint32_t)fmin(GUI_MAX_STRING_LEN, strlen(text)) + 1;
 
     strncpy(event.text, text, length);
@@ -235,12 +235,14 @@ static t_status _init(void) {
         g_device.x_dim = 128;
         g_device.y_dim = 64;
         g_device.pset = _put_pixel;
+        //
         /// TODO: How does flush function work?
 
         // Initialise uGUI
         UG_Init(&g_gui, &g_device);
 
         /// TODO: Handle partial pages in fill_frame accelerator.
+        //
         UG_DriverRegister(DRIVER_FILL_FRAME, ft_fill_frame);
 
         // Configure uGUI

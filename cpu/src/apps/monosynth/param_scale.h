@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    param_scale.h
  *
  * @brief   Public API for parameter scaling.
- *
  */
 
 #ifndef PARAM_SCALE_H
@@ -58,6 +57,8 @@ extern "C" {
 #define FIX16_MAX 0x7FFFFFFF
 #define FIX16_MIN 0x80000000
 #define FIX16_ONE 0x00010000
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
 

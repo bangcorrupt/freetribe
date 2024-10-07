@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    dev_lcd.h
  *
  * @brief   Public API for LCD device driver.
- *
  */
 
 #ifndef DEV_LCD_H
@@ -48,6 +47,8 @@ extern "C" {
 #include <stdint.h>
 
 /*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
 

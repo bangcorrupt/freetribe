@@ -32,7 +32,6 @@ under the terms of the GNU Affero General Public License as published by
  * @file    per_spi.c.
  *
  * @brief   Configuration and handling for SPI peripherals.
- *
  */
 
 /// TODO: SPI_1 needs mutex to prevent DSP and flash access collision.

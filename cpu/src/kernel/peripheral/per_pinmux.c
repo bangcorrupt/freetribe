@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    per_pinmux.c
  *
  * @brief   Peripheral driver for configuring pin multiplexing.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/
@@ -43,6 +42,8 @@ under the terms of the GNU Affero General Public License as published by
 #include "soc_AM1808.h"
 
 /*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

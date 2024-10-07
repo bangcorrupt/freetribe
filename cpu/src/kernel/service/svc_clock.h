@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    svc_clock.h
  *
  * @brief   Public interface for clock.c.
- *
  */
 
 #ifndef SVC_CLOCK_H
@@ -47,6 +46,8 @@ extern "C" {
 #include <stdint.h>
 
 /*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
 

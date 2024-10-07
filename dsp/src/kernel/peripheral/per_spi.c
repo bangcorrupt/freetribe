@@ -28,7 +28,7 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    per_spi.c
  *
  * @brief   Peripheral driver for BF523 SPI.
@@ -54,6 +54,8 @@ under the terms of the GNU Affero General Public License as published by
 //
 #define SPI_RX_BUF_LEN 0x200
 #define SPI_TX_BUF_LEN 0x200
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

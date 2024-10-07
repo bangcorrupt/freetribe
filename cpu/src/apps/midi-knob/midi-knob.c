@@ -47,6 +47,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #define BUTTON_PLAY 0x2
 
+/*----- Typedefs -----------------------------------------------------*/
+
 /*----- Static variable definitions ----------------------------------*/
 
 static bool g_toggle_led = false;

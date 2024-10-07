@@ -46,6 +46,8 @@ under the terms of the GNU Affero General Public License as published by
 #define USER_TICK_DIV 0   // User tick for every systick (~1ms).
 #define LED_TICK_DIV 1000 // Debug tick per 1000 user ticks (~1s).
 
+/*----- Typedefs -----------------------------------------------------*/
+
 /*----- Static variable definitions ----------------------------------*/
 
 static bool g_toggle_led = false;

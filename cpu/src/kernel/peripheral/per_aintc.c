@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    per_aint.c
  *
  * @brief   Peripheral driver for ARM Interrupt Controller.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/
@@ -42,6 +41,8 @@ under the terms of the GNU Affero General Public License as published by
 #include "per_aintc.h"
 
 /*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

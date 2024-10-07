@@ -39,7 +39,6 @@ under the terms of the GNU Affero General Public License as published by
  * and printing to the display.  Received MIDI note messages
  * are echoed to the output and a blinking LED is driven by the
  * user tick.  An external library is integrated for GUI management.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/
@@ -56,6 +55,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #define USER_TICK_DIV 0   // User tick for every systick (~1ms).
 #define LED_TICK_DIV 1000 // Debug tick per 1000 user ticks (~1s).
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 
@@ -180,6 +181,7 @@ static void _ui_init(void) {
     UG_Init(&g_gui, &g_device);
 
     /// TODO: Is fill_frame driver broken?
+    //
     UG_DriverRegister(DRIVER_FILL_FRAME, svc_display_fill_frame);
 
     // Configure uGUI

@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    startup.h
  *
  * @brief   Header for startup.c.
- *
  */
 
 #ifndef STARTUP_H
@@ -65,6 +64,8 @@ extern "C" {
 #define PLL1_DIV1 0
 #define PLL1_DIV2 1
 #define PLL1_DIV3 2
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
 

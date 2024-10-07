@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    main.c
  *
  * @brief   Main function for Blackfin firmware.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/
@@ -51,6 +50,8 @@ under the terms of the GNU Affero General Public License as published by
 #include "knl_profile.h"
 
 /*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

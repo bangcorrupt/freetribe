@@ -32,7 +32,6 @@ under the terms of the GNU Affero General Public License as published by
  * @file    per_spi.h
  *
  * @brief   Public API for SPI peripheral driver.
- *
  */
 
 #ifndef PER_SPI_H

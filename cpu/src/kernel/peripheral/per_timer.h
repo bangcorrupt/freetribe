@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    per_timer.h
  *
  * @brief   Header file for per_tiomer.c.
- *
  */
 
 #ifndef PER_TIMER_H

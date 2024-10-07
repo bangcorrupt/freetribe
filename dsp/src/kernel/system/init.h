@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    init.h
  *
  * @brief   Public API for Blackfin initialisation.
- *
  */
 
 #ifndef BFIN_INIT_H
@@ -47,6 +46,8 @@ extern "C" {
 #include <blackfin.h>
 
 /*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
 

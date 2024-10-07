@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    svc_panel.h
  *
  * @brief   Public API for communicating with panel.
- *
  */
 
 #ifndef SVC_PANEL_H

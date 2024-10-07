@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    svc_system.c
  *
  * @brief   System task.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/

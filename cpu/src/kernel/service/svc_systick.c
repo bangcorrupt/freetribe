@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    svc_systick.c
  *
  * @brief   Configuration and handling for systick timer.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/
@@ -57,6 +56,8 @@ under the terms of the GNU Affero General Public License as published by
 //
 //  Lowest priority. SPI0 is 8.
 #define SYSTICK_INT_CHAN 9 // 8
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

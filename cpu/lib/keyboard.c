@@ -46,7 +46,9 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "keyboard.h"
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 
@@ -65,6 +67,7 @@ void scale_init(t_scale *scale, uint32_t notes, uint8_t tones) {
     scale->tones = tones;
 
     /// TODO: Support mode rotation.
+    //
     scale->mode = 0;
 }
 
@@ -90,6 +93,7 @@ void keyboard_set_octave(t_keyboard *kbd, uint8_t octave) {
 void keyboard_set_split(t_keyboard *kbd, uint8_t split) { kbd->split = split; }
 
 /// TODO: Pre-compute lookup tables.
+//
 uint8_t keyboard_map_note(t_keyboard *kbd, uint8_t pad) {
 
     uint8_t octave;

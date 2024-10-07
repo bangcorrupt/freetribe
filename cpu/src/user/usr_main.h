@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    usr_main.h
  *
  * @brief   Public API for Freetribe user task.
- *
  */
 
 #ifndef USR_MAIN_H
@@ -47,6 +46,8 @@ extern "C" {
 #include "ft_error.h"
 
 /*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
 

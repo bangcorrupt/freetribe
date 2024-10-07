@@ -30,11 +30,10 @@ under the terms of the GNU Affero General Public License as published by
 
 /* Original work by monome, modified by bangcorrupt 2023 */
 
-/*
+/**
  * @file    module.c
  *
  * @brief   Audio processing module.
- *          
  */
 
 /*----- Includes -----------------------------------------------------*/
@@ -43,11 +42,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros -------------------------------------------------------*/
 
-// Enumerate parameters.
-enum params {
-    // Number of parameters.
-    PARAM_COUNT
-};
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 
@@ -71,13 +66,14 @@ __attribute__((weak)) void module_set_param(uint16_t param_index,
 }
 
 __attribute__((weak)) int32_t module_get_param(uint16_t param_index) {
-
+    //
     return 0;
 }
 
 // Get number of parameters
 __attribute__((weak)) uint32_t module_get_param_count(void) {
-    return PARAM_COUNT;
+    //
+    return 0;
 }
 
 // Buffer 'text' must provide 'MAX_PARAM_NAME_LENGTH' bytes of storage.

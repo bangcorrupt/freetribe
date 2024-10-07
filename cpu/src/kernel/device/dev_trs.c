@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    dev_trs.c
  *
  * @brief   Device driver for TRS serial port.
- *
  */
 
 /// TODO: Support serial mode, not just MIDI.
@@ -48,11 +47,14 @@ under the terms of the GNU Affero General Public License as published by
 #include "ring_buffer.h"
 
 /*----- Macros -------------------------------------------------------*/
+
 #define TRS_UART UART_1
 #define TRS_UART_INT_CHANNEL 6
 
 #define TRS_TX_BUF_LEN 0x100
 #define TRS_RX_BUF_LEN 0x20
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

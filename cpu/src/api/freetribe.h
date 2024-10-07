@@ -30,6 +30,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /// TODO: This should expose only those functions required by user applications.
 ///       For now we just include the service layer directly.
+//
 /**
  * @file    freetribe.h
  *
@@ -67,6 +68,8 @@ extern "C" {
 
 /*----- Macros -------------------------------------------------------*/
 
+/*----- Typedefs -----------------------------------------------------*/
+
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
@@ -92,6 +95,7 @@ void ft_send_note_off(char chan, char note, char vel);
 void ft_send_cc(char chan, char index, char val);
 
 /// TODO: Cast void pointers to typedef function pointers.
+//
 void ft_register_panel_callback(t_panel_event event, void *callback);
 void ft_toggle_led(t_led_index led_index);
 void ft_set_led(t_led_index led_index, bool state);

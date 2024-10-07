@@ -35,7 +35,6 @@ under the terms of the GNU Affero General Public License as published by
  *
  * @brief   A basic example module.
  *          Applies attenuation with slew to each input signal.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/
@@ -55,14 +54,14 @@ under the terms of the GNU Affero General Public License as published by
 #define PARAM_AMP_MAX 0x7fffffff      ///< Maximum amplitude scale value.
 #define PARAM_SLEW_DEFAULT 0x00010000 ///< Default parameter slew time.
 
+/*----- Typedefs -----------------------------------------------------*/
+
 /**
  * @brief   Enumeration of module paramters.
  *
  * Index of each external parameter of module.
  *
  */
-/*----- Typedefs -----------------------------------------------------*/
-
 typedef enum {
 
     PARAM_LEVEL0, ///< Attenuation multiplier channel 0.

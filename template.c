@@ -32,7 +32,6 @@ under the terms of the GNU Affero General Public License as published by
  * @file    template.c
  *
  * @brief   Template for source files.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/

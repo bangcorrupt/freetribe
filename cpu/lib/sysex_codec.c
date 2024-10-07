@@ -27,7 +27,7 @@
  * THE SOFTWARE.
  */
 
-/*
+/**
  * @file    sysex_codec.c
  *
  * @brief   Encode and decode MIDI system exclusinve data bytes.
@@ -40,7 +40,19 @@
 
 #include "sysex_codec.h"
 
-/*
+/*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
+
+/*----- Static variable definitions ----------------------------------*/
+
+/*----- Extern variable definitions ----------------------------------*/
+
+/*----- Static function prototypes -----------------------------------*/
+
+/*----- Extern function implementations ------------------------------*/
+
+/**
  * @brief Encode System Exclusive messages.
  *          SysEx messages are encoded to guarantee transmission of data bytes
  *          higher than 127 without breaking the MIDI protocol. Use this static
@@ -84,7 +96,7 @@ uint32_t sysex_encode(const uint8_t *in_data, uint8_t *out_sysex,
     return out_length + count + (count != 0 ? 1 : 0);
 }
 
-/*
+/**
  * @brief Decode System Exclusive messages.
  *          SysEx messages are encoded to guarantee transmission of data bytes
  *          higher than 127 without breaking the MIDI protocol. Use this static
@@ -122,3 +134,7 @@ uint32_t sysex_decode(const uint8_t *in_sysex, uint8_t *out_data,
     }
     return count;
 }
+
+/*----- Static function implementations ------------------------------*/
+
+/*----- End of file --------------------------------------------------*/

@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    svc_sysex.c
  *
  * @brief   MIDI system exclusive message handling.
- *
  */
 
 /// TODO: This is specific to Korg sysex format.
@@ -52,6 +51,8 @@ under the terms of the GNU Affero General Public License as published by
 
 // Decoded data length is always less than received message length.
 static uint8_t g_decode_buffer[SYSEX_BUFFER_LENGTH];
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 

@@ -32,7 +32,6 @@ under the terms of the GNU Affero General Public License as published by
  * @file per_uart.c
  *
  * @brief  Configuration and handling for UART peripherals.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/

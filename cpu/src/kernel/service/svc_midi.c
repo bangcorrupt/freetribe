@@ -32,7 +32,6 @@ under the terms of the GNU Affero General Public License as published by
  * @file    svc_midi.c
  *
  * @brief   Functions to transmit and receive MIDI messages.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/
@@ -50,11 +49,11 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros -------------------------------------------------------*/
 
-/*----- Static variable definitions ----------------------------------*/
-
 /*----- Typedefs -----------------------------------------------------*/
 
 typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } t_midi_task_state;
+
+/*----- Static variable definitions ----------------------------------*/
 
 /*----- Extern variable definitions ----------------------------------*/
 

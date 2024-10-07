@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    svc_dsp.h
  *
  * @brief   Public API for communicating with DSP.
- *
  */
 
 #ifndef SVC_DSP_H
@@ -70,6 +69,8 @@ enum e_system_msg_id {
     SYSTEM_SET_PORT_STATE,
     SYSTEM_PORT_STATE
 };
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
 

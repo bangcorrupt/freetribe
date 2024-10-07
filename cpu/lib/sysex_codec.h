@@ -46,11 +46,14 @@ extern "C" {
 
 #include <stdint.h>
 
-/*----- Macros and Definitions ---------------------------------------*/
+/*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
+
 uint32_t sysex_encode(const uint8_t *in_data, uint8_t *out_sysex,
                       uint32_t in_length);
 

@@ -44,6 +44,8 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros -------------------------------------------------------*/
 
+/*----- Typedefs -----------------------------------------------------*/
+
 // 0.5 seconds in microseconds.
 #define DELAY_TIME 500000
 

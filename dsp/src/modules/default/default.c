@@ -46,15 +46,17 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros -------------------------------------------------------*/
 
+/*----- Typedefs -----------------------------------------------------*/
+
 /**
  * @brief   Enumeration of module parameters.
  *
  * Index of each external parameter of module.
  */
-enum params {
+typedef enum {
 
     PARAM_COUNT /// Should remain last to return number of parameters.
-};
+} e_param;
 
 /*----- Static variable definitions ----------------------------------*/
 

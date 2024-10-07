@@ -42,6 +42,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #define TRIGGER_MODE_CONTINUOUS 1
 
+/*----- Typedefs -----------------------------------------------------*/
+
 /*----- Static variable definitions ----------------------------------*/
 
 static uint8_t g_pad_pressure;

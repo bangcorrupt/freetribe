@@ -30,11 +30,10 @@ under the terms of the GNU Affero General Public License as published by
 
 /* Original work by monome, modified by bangcorrupt 2023 */
 
-/*
+/**
  * @file    module.h
  *
  * @brief   Public API for audio processing module.
- *
  */
 
 #ifndef BFIN_AUDIO_MODULE_H
@@ -55,6 +54,8 @@ extern "C" {
 #endif
 
 #define MAX_PARAM_NAME_LENGTH 16
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
 

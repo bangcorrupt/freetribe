@@ -5,7 +5,6 @@
 
 //---- basic numerical datatypes
 #ifndef DEFINED_BASIC_TYPES
-/*----- Typedefs -----------------------------------------------------*/
 
 typedef int8_t s8;    //!< 8-bit signed integer.
 typedef uint8_t u8;   //!< 8-bit unsigned integer.
