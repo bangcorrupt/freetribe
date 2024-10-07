@@ -146,7 +146,11 @@ void module_process(void) {
 
     amp_mod += tTriLFO_tick(&g_module.amp_lfo) * g_module.amp_lfo_depth;
 
-    module_set_param(PARAM_AMP, clamp_value(amp_mod));
+    // Only send parameters to DSP if they have changed.
+    if (_cv_update(&g_module.amp_cv, amp_mod)) {
+
+        module_set_param(PARAM_AMP, clamp_value(amp_mod));
+    }
 
     // Filter cutoff modulation.
     //
@@ -155,8 +159,11 @@ void module_process(void) {
     filter_mod +=
         tTriLFO_tick(&g_module.filter_lfo) * g_module.filter_lfo_depth;
 
-    module_set_param(PARAM_CUTOFF,
-                     clamp_value(g_module.filter_cutoff + filter_mod));
+    if (_cv_update(&g_module.filter_cv, filter_mod)) {
+
+        module_set_param(PARAM_CUTOFF,
+                         clamp_value(g_module.filter_cutoff + filter_mod));
+    }
 
     // Pitch modulation.
     //
@@ -164,7 +171,11 @@ void module_process(void) {
 
     pitch_mod = (tTriLFO_tick(&g_module.pitch_lfo) * g_module.pitch_lfo_depth);
 
-    module_set_param(PARAM_FREQ, clamp_value(g_module.osc_freq + pitch_mod));
+    if (_cv_update(&g_module.pitch_cv, pitch_mod)) {
+
+        module_set_param(PARAM_FREQ,
+                         clamp_value(g_module.osc_freq + pitch_mod));
+    }
 }
 
 /**
@@ -181,18 +192,11 @@ void module_set_param(uint16_t param_index, float value) {
     switch (param_index) {
 
     case PARAM_AMP:
-        // Only send parameters to DSP if they have changed.
-        if (_cv_update(&g_module.amp_cv, value)) {
-
-            ft_set_module_param(0, param_index, float_to_fract32(value));
-        }
+        ft_set_module_param(0, param_index, float_to_fract32(value));
         break;
 
     case PARAM_FREQ:
-        if (_cv_update(&g_module.pitch_cv, value)) {
-
-            ft_set_module_param(0, param_index, float_to_fract32(value));
-        }
+        ft_set_module_param(0, param_index, float_to_fract32(value));
         break;
 
     case PARAM_OSC_PHASE:
@@ -282,10 +286,7 @@ void module_set_param(uint16_t param_index, float value) {
         break;
 
     case PARAM_CUTOFF:
-        if (_cv_update(&g_module.filter_cv, value)) {
-
-            ft_set_module_param(0, param_index, value);
-        }
+        ft_set_module_param(0, param_index, value);
         break;
 
     case PARAM_RES:
