@@ -28,11 +28,10 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    module_interface.c
  *
  * @brief   CPU interface interface to DSP module.
- *
  */
 
 /*----- Includes -----------------------------------------------------*/

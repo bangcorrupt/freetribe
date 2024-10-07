@@ -40,6 +40,8 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros -------------------------------------------------------*/
 
+/*----- Typedefs -----------------------------------------------------*/
+
 /*----- Static variable definitions ----------------------------------*/
 
 /*----- Extern variable definitions ----------------------------------*/

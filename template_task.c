@@ -28,7 +28,7 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    template_task.c
  *
  * @brief   Template for task state machine source files.

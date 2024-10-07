@@ -28,7 +28,7 @@ under the terms of the GNU Affero General Public License as published by
 
 ----------------------------------------------------------------------*/
 
-/*
+/**
  * @file    template.h
  *
  * @brief   Template for header files.
@@ -45,6 +45,8 @@ extern "C" {
 /*----- Includes -----------------------------------------------------*/
 
 /*----- Macros -------------------------------------------------------*/
+
+/*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
 
