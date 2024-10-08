@@ -58,9 +58,9 @@ extern "C" {
 #define FIX16_MIN 0x80000000
 #define FIX16_ONE 0x00010000
 
-#define CV_CENTRE_FREQ 27.5
+#define FIX16_MAX_OVER_SAMPLERATE 0.6826666663487753
 
-#define FREQ_SCALE_MAGIC_NUMBER 0.6827053543471453
+#define CV_CENTRE_FREQ 27.5
 
 /*----- Typedefs -----------------------------------------------------*/
 
