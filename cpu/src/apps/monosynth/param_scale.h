@@ -58,9 +58,23 @@ extern "C" {
 #define FIX16_MIN 0x80000000
 #define FIX16_ONE 0x00010000
 
+/// TODO: These could probably be optimised.
+///       Aleph_Phasor takes normalised frequency in Hz, 16.16 format.
+///       Aleph_FilterSVF appears to want that converted to radians
+///       Our CPU side module_set_param function expects all values
+///       as floating point between -1.0 and 1.0.
+
+// Normalise frequency, 0x7fffffff / (48000 << 16)
 #define OSC_FREQ_CONST 0.6826666663487753
+
+// Convert to radians.
 #define FILTER_FREQ_CONST (OSC_FREQ_CONST * 2 * M_PI)
+
+// Half frequency as 2 times oversampled.
 #define FILTER_FREQ_OVERSAMPLE_CONST (OSC_FREQ_CONST * M_PI)
+
+#define CONCERT_PITCH_HZ 440.0
+#define CONCERT_PITCH_MIDI 69.0
 
 #define CV_CENTRE_FREQ 27.5
 
@@ -109,7 +123,7 @@ static inline int32_t float_to_fix16(float value) {
 
 static inline float note_to_freq(float note) {
 
-    return 440 * powf(2.0, ((note - 69) / 12.0));
+    return CONCERT_PITCH_HZ * powf(2.0, ((note - CONCERT_PITCH_MIDI) / 12.0));
 }
 
 static inline float freq_to_cv(float freq) {
