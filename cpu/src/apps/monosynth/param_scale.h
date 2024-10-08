@@ -60,6 +60,8 @@ extern "C" {
 
 #define CV_CENTRE_FREQ 27.5
 
+#define FREQ_SCALE_MAGIC_NUMBER 0.6827053543471453
+
 /*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
@@ -121,7 +123,7 @@ static inline float note_to_cv(float note) {
 
 static inline float cv_to_freq(float cv) {
 
-    return powf(2.0, cv) * CV_CENTRE_FREQ;
+    return powf(2.0, cv * 10) * CV_CENTRE_FREQ;
 }
 
 #ifdef __cplusplus

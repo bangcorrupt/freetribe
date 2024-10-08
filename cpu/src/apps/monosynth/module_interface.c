@@ -205,7 +205,9 @@ void module_set_param(uint16_t param_index, float value) {
         break;
 
     case PARAM_FREQ:
-        ft_set_module_param(0, param_index, float_to_fix16(cv_to_freq(value)));
+        ft_set_module_param(
+            0, param_index,
+            float_to_fix16(cv_to_freq(value) * FREQ_SCALE_MAGIC_NUMBER));
         break;
 
     case PARAM_OSC_PHASE:
@@ -295,8 +297,7 @@ void module_set_param(uint16_t param_index, float value) {
         break;
 
     case PARAM_CUTOFF:
-        ft_set_module_param(0, param_index,
-                            float_to_fix16(cv_to_freq((value))));
+        ft_set_module_param(0, param_index, float_to_fix16(cv_to_freq(value)));
         break;
 
     case PARAM_RES:
