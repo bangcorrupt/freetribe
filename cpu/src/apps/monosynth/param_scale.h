@@ -81,9 +81,8 @@ static inline int32_t float_to_fract32(float value) {
         result = 0;
 
     } else {
-        value = clamp_value(value);
 
-        result = (int32_t)roundf(scalbnf(value, 31));
+        result = (int32_t)roundf(scalbnf(clamp_value(value), 31));
     }
     return result;
 }
