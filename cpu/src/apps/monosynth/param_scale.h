@@ -58,7 +58,9 @@ extern "C" {
 #define FIX16_MIN 0x80000000
 #define FIX16_ONE 0x00010000
 
-#define FIX16_MAX_OVER_SAMPLERATE 0.6826666663487753
+#define OSC_FREQ_CONST 0.6826666663487753
+#define FILTER_FREQ_CONST (OSC_FREQ_CONST * 2 * M_PI)
+#define FILTER_FREQ_OVERSAMPLE_CONST (OSC_FREQ_CONST * M_PI)
 
 #define CV_CENTRE_FREQ 27.5
 
@@ -124,6 +126,21 @@ static inline float note_to_cv(float note) {
 static inline float cv_to_freq(float cv) {
 
     return powf(2.0, cv * 10) * CV_CENTRE_FREQ;
+}
+
+static float cv_to_osc_freq(float cv) {
+
+    return cv_to_freq(cv) * OSC_FREQ_CONST;
+}
+
+static float cv_to_filter_freq(float cv) {
+
+    return cv_to_freq(cv) * FILTER_FREQ_CONST;
+}
+
+static float cv_to_filter_freq_oversample(float cv) {
+
+    return cv_to_freq(cv) * FILTER_FREQ_OVERSAMPLE_CONST;
 }
 
 #ifdef __cplusplus
