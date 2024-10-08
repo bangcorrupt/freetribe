@@ -81,7 +81,7 @@ static inline int32_t float_to_fract32(float value) {
         result = 0;
 
     } else {
-        clamp_value(value);
+        value = clamp_value(value);
 
         result = (int32_t)roundf(scalbnf(value, 31));
     }
@@ -120,7 +120,7 @@ static inline float note_to_cv(float note) {
 
 static inline float cv_to_freq(float cv) {
     //
-    return powf(2.0, cv * 10) * 27.5;
+    return powf(2.0, cv) * 27.5;
 }
 
 #ifdef __cplusplus
