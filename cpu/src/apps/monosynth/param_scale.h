@@ -60,12 +60,12 @@ extern "C" {
 
 /// TODO: These could probably be optimised.
 ///       Aleph_Phasor takes normalised frequency in Hz, 16.16 format.
-///       Aleph_FilterSVF appears to want that converted to radians
+///       Aleph_FilterSVF appears to want that converted to radians.
 ///       Our CPU side module_set_param function expects all values
 ///       as floating point between -1.0 and 1.0.
 
 // Normalise frequency, 0x7fffffff / (48000 << 16)
-#define OSC_FREQ_CONST 0.6826666663487753
+#define OSC_FREQ_CONST 0.6826667
 
 // Convert to radians.
 #define FILTER_FREQ_CONST (OSC_FREQ_CONST * 2 * M_PI)
