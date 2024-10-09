@@ -347,6 +347,7 @@ static void _trigger_callback(uint8_t pad, uint8_t vel, bool state) {
     /// TODO: Use MIDI note stack from LEAF.
 
     static uint8_t note_count;
+    static bool reset_phase_next_gate;
 
     uint8_t note;
 
@@ -357,12 +358,16 @@ static void _trigger_callback(uint8_t pad, uint8_t vel, bool state) {
         module_set_param(PARAM_VEL, g_knob_cv_lut[vel]);
         module_set_param(PARAM_GATE, state);
         module_set_param(PARAM_OSC_BASE_FREQ, g_midi_pitch_cv_lut[note]);
-        module_set_param(PARAM_PHASE_RESET, true);
 
+        if (reset_phase_next_gate) {
+            module_set_param(PARAM_PHASE_RESET, true);
+            reset_phase_next_gate = false;
+        }
     } else {
         note_count--;
         if (!note_count) {
             module_set_param(PARAM_GATE, state);
+            reset_phase_next_gate = true;
         }
     }
 }
