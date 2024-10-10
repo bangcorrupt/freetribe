@@ -68,8 +68,7 @@ static char trs_tx_rbmem[TRS_TX_BUF_LEN];
 
 static uint8_t g_trs_rx_byte;
 
-static bool g_trs_initialised = false;
-static bool g_trs_tx_complete = true;
+static bool g_trs_tx_complete = false;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -87,6 +86,7 @@ static void _trs_rx_callback(void);
 /*----- Extern function implementations ------------------------------*/
 
 /// TODO: Return status code.
+//
 void dev_trs_init(void) {
 
     // Tx ring buffer attributes.
@@ -118,7 +118,8 @@ void dev_trs_init(void) {
         // Register Rx callback.
         per_uart_register_callback(TRS_UART, UART_RX_COMPLETE,
                                    _trs_rx_callback);
-        g_trs_initialised = true;
+
+        g_trs_tx_complete = true;
 
         // Enable Rx callback.
         _trs_rx_byte();
@@ -127,15 +128,14 @@ void dev_trs_init(void) {
 
 void dev_trs_tx_enqueue(uint8_t *byte) {
 
-    if (g_trs_tx_complete && g_trs_initialised) {
-        _trs_tx_byte(byte);
+    ring_buffer_put_force(trs_tx_rbd, byte);
+    // while (ring_buffer_put(trs_tx_rbd, byte))
+    //     ;
 
-    } else {
+    if (g_trs_tx_complete) {
 
-        /// TODO: Handle overflow here?
-        //
-        // Queue byte if transmission in progress.
-        ring_buffer_put_force(trs_tx_rbd, byte);
+        // Start transmission.
+        _trs_tx_callback();
     }
 }
 
@@ -172,8 +172,9 @@ static void _trs_tx_callback(void) {
     //
     static uint8_t byte;
 
-    // Send next queued message.
+    // Send next queued byte.
     if (_trs_tx_dequeue(&byte) == 0) {
+
         _trs_tx_byte(&byte);
 
     } else {
