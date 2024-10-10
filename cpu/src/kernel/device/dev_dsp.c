@@ -97,11 +97,11 @@ static char dsp_spi_rx_rbmem[DSP_SPI_RX_BUF_LEN];
 static rbd_t dsp_spi_tx_rbd;
 static char dsp_spi_tx_rbmem[DSP_SPI_TX_BUF_LEN];
 
-static uint8_t g_dsp_spi_tx_byte;
+// static uint8_t g_dsp_spi_tx_byte;
 static uint8_t g_dsp_spi_rx_byte;
 
-volatile static bool g_dsp_spi_tx_complete = true;
-volatile static bool g_dsp_spi_rx_complete = true;
+volatile static bool g_dsp_spi_tx_complete = false;
+volatile static bool g_dsp_spi_rx_complete = false;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -139,9 +139,11 @@ void dev_dsp_spi_tx_enqueue(uint8_t *p_byte) {
     // Overwrite on overflow.
     ring_buffer_put_force(dsp_spi_tx_rbd, p_byte);
 
-    // Block until queue ready.
-    // while (ring_buffer_put(dsp_spi_tx_rbd, p_byte))
-    //     ;
+    if (g_dsp_spi_tx_complete) {
+
+        // Start transmission.
+        _dsp_spi_tx_callback();
+    }
 }
 
 int dev_dsp_spi_rx_dequeue(uint8_t *p_byte) {
@@ -149,12 +151,10 @@ int dev_dsp_spi_rx_dequeue(uint8_t *p_byte) {
     return ring_buffer_get(dsp_spi_rx_rbd, p_byte);
 }
 
-bool dev_dsp_spi_tx_complete(void) { return g_dsp_spi_tx_complete; }
+// bool dev_dsp_spi_tx_complete(void) { return g_dsp_spi_tx_complete; }
 
 void dev_dsp_spi_poll(void) { _dsp_spi_rx_byte(); }
 
-/// TODO: Sort out dev_dsp_spi function names.
-//
 void dev_dsp_spi_tx_boot(uint8_t *buffer, uint32_t length) {
 
     per_spi_chip_format(DSP_SPI, DSP_SPI_BOOT_DATA_FORMAT, DSP_SPI_CHIP_SELECT,
@@ -169,29 +169,30 @@ void dev_dsp_reset(bool state) {
     per_gpio_set(DSP_RESET_BANK, DSP_RESET_PIN, !state);
 }
 
-/// TODO: Use GPIO interrupt to set flag.
+/// /// TODO: Use GPIO interrupt to set flag.
+/// //
+/// // Return true if SPI enabled.
+/// bool _dsp_spi_enabled(void) {
+///     //
+///     return !per_gpio_get(DSP_SPI_ENA_BANK, DSP_SPI_ENA_PIN);
+/// }
+
+// void dev_dsp_spi_transfer(void) {
 //
-// Return true if SPI enabled.
-bool _dsp_spi_enabled(void) {
-    //
-    return !per_gpio_get(DSP_SPI_ENA_BANK, DSP_SPI_ENA_PIN);
-}
-
-void dev_dsp_spi_transfer(void) {
-
-    if (_dsp_spi_enabled()) {
-
-        if ((g_dsp_spi_rx_complete && g_dsp_spi_tx_complete) &&
-            _dsp_spi_tx_dequeue(&g_dsp_spi_tx_byte) == 0) {
-
-            _dsp_spi_tx_byte(&g_dsp_spi_tx_byte);
-        }
-    }
-}
+//     if (_dsp_spi_enabled()) {
+//
+//         if ((g_dsp_spi_rx_complete && g_dsp_spi_tx_complete) &&
+//             _dsp_spi_tx_dequeue(&g_dsp_spi_tx_byte) == 0) {
+//
+//             _dsp_spi_tx_byte(&g_dsp_spi_tx_byte);
+//         }
+//     }
+// }
 
 /*----- Static function implementations ------------------------------*/
 
 /// TODO: Return status code.
+//
 void _dsp_spi_init(void) {
 
     /// TODO: SPI1 requires mutex to coordinate flash access.
@@ -247,6 +248,9 @@ void _dsp_spi_init(void) {
         // Register Rx callback.
         per_spi_register_callback(DSP_SPI, SPI_RX_COMPLETE,
                                   _dsp_spi_rx_callback);
+
+        g_dsp_spi_tx_complete = true;
+        _dsp_spi_rx_byte();
     }
 }
 
@@ -280,12 +284,29 @@ static void _dsp_spi_rx_byte(void) {
     _dsp_spi_tx_byte(&dummy);
 }
 
-static void _dsp_spi_tx_callback(void) { g_dsp_spi_tx_complete = true; }
+// static void _dsp_spi_tx_callback(void) { g_dsp_spi_tx_complete = true; }
+static void _dsp_spi_tx_callback(void) {
+    //
+    static uint8_t byte;
+
+    // Send next queued byte.
+    if (_dsp_spi_tx_dequeue(&byte) == 0) {
+
+        _dsp_spi_tx_byte(&byte);
+
+    } else {
+        g_dsp_spi_tx_complete = true;
+    }
+}
 
 static void _dsp_spi_rx_callback(void) {
 
     _dsp_spi_rx_enqueue(&g_dsp_spi_rx_byte);
-    g_dsp_spi_rx_complete = true;
+
+    if (g_dsp_spi_tx_complete == true) {
+
+        g_dsp_spi_rx_complete = true;
+    }
 }
 
 /*----- End of file --------------------------------------------------*/

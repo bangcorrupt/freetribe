@@ -187,7 +187,7 @@ void svc_dsp_task(void) {
             dev_dsp_spi_poll();
         }
 
-        dev_dsp_spi_transfer();
+        // dev_dsp_spi_transfer();
 
         g_dsp_ready = true;
         break;
@@ -209,6 +209,7 @@ void svc_dsp_register_callback(uint8_t msg_type, uint8_t msg_id,
                                void *callback) {
 
     switch (msg_type) {
+
     case MSG_TYPE_MODULE:
         _register_module_callback(msg_id, callback);
         break;
