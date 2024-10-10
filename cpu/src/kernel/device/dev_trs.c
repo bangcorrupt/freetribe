@@ -40,7 +40,6 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Includes -----------------------------------------------------*/
 
 #include <stdint.h>
-#include <stdlib.h>
 
 #include "per_uart.h"
 
@@ -48,11 +47,13 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros -------------------------------------------------------*/
 
+/// TODO: Centralised header for interrupt priorities and queue sizes.
+
 #define TRS_UART UART_1
 #define TRS_UART_INT_CHANNEL 6
 
-#define TRS_TX_BUF_LEN 0x100
-#define TRS_RX_BUF_LEN 0x20
+#define TRS_TX_BUF_LEN 0x200
+#define TRS_RX_BUF_LEN 0x200
 
 /*----- Typedefs -----------------------------------------------------*/
 
@@ -89,6 +90,13 @@ static void _trs_rx_callback(void);
 //
 void dev_trs_init(void) {
 
+    static t_uart_config uart_cfg = {.instance = TRS_UART,
+                                     .baud = 31250,
+                                     .word_length = 8,
+                                     .int_enable = true,
+                                     .int_channel = TRS_UART_INT_CHANNEL,
+                                     .fifo_enable = true,
+                                     .oversample = OVERSAMPLE_16};
     // Tx ring buffer attributes.
     rb_attr_t tx_attr = {sizeof(trs_tx_rbmem[0]), ARRAY_SIZE(trs_tx_rbmem),
                          trs_tx_rbmem};
@@ -101,13 +109,6 @@ void dev_trs_init(void) {
     if (ring_buffer_init(&trs_tx_rbd, &tx_attr) ||
         ring_buffer_init(&trs_rx_rbd, &rx_attr) == 0) {
 
-        static t_uart_config uart_cfg = {.instance = TRS_UART,
-                                         .baud = 31250,
-                                         .word_length = 8,
-                                         .int_enable = true,
-                                         .int_channel = TRS_UART_INT_CHANNEL,
-                                         .fifo_enable = true,
-                                         .oversample = OVERSAMPLE_16};
         // Initialise UART for MIDI.
         per_uart_init(&uart_cfg);
 
@@ -129,8 +130,6 @@ void dev_trs_init(void) {
 void dev_trs_tx_enqueue(uint8_t *byte) {
 
     ring_buffer_put_force(trs_tx_rbd, byte);
-    // while (ring_buffer_put(trs_tx_rbd, byte))
-    //     ;
 
     if (g_trs_tx_complete) {
 

@@ -49,12 +49,14 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros -------------------------------------------------------*/
 
+/// TODO: Centralised header for interrupt priorities and queue sizes.
+
 #define MCU_UART UART_0
-/// TODO: Centralised header for interrupt priorities.
+
 #define MCU_UART_INT_CHANNEL 7
 
-#define MCU_TX_BUF_LEN 0x100
-#define MCU_RX_BUF_LEN 0x20
+#define MCU_TX_BUF_LEN 0x200
+#define MCU_RX_BUF_LEN 0x200
 #define MCU_MSG_LEN 0x5
 
 /*----- Typedefs -----------------------------------------------------*/
@@ -89,6 +91,7 @@ static void _mcu_rx_callback(void);
 /*----- Extern function implementations ------------------------------*/
 
 /// TODO: Return status code.
+//
 void dev_mcu_init(void) {
 
     static t_uart_config uart_cfg = {.instance = MCU_UART,
@@ -121,6 +124,8 @@ void dev_mcu_init(void) {
         per_uart_register_callback(MCU_UART, UART_RX_COMPLETE,
                                    _mcu_rx_callback);
 
+        g_mcu_tx_complete = true;
+
         // Enable Rx callback.
         _mcu_rx_msg();
     }
@@ -128,13 +133,13 @@ void dev_mcu_init(void) {
 
 void dev_mcu_tx_enqueue(uint8_t *mcu_msg) {
 
-    if (g_mcu_tx_complete) {
-        _mcu_tx_msg(mcu_msg);
+    // Overwrite on overflow.
+    ring_buffer_put_force(mcu_tx_rbd, mcu_msg);
 
-    } else {
-        // Queue message if transmission in progress.
-        // Overwrite on overflow.
-        ring_buffer_put_force(mcu_tx_rbd, mcu_msg);
+    if (g_mcu_tx_complete) {
+
+        // Start transmission.
+        _mcu_tx_callback();
     }
 }
 
