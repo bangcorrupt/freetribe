@@ -96,6 +96,7 @@ static e_mod_type g_mod_type;
 static bool g_shift_held;
 static bool g_menu_held;
 static bool g_amp_eg;
+static bool g_retrigger;
 
 static float g_midi_pitch_cv_lut[128];
 static float g_amp_cv_lut[256];
@@ -395,8 +396,17 @@ static void _button_callback(uint8_t index, bool state) {
 
     case BUTTON_AMP_EG:
         if (state) {
-            g_amp_eg = !g_amp_eg;
-            ft_set_led(LED_AMP_EG, g_amp_eg);
+
+            if (g_shift_held) {
+
+                g_retrigger = !g_retrigger;
+                module_set_param(PARAM_RETRIGGER, g_retrigger);
+                gui_post_param("Env Retrig: ", g_retrigger);
+
+            } else {
+                g_amp_eg = !g_amp_eg;
+                ft_set_led(LED_AMP_EG, g_amp_eg);
+            }
         }
         break;
 

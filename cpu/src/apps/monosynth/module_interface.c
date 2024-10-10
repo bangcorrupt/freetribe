@@ -366,6 +366,15 @@ void module_set_param(uint16_t param_index, float value) {
         g_module.reset_phase = value;
         break;
 
+    case PARAM_RETRIGGER:
+
+        if (value > 0) {
+            g_module.retrigger = true;
+        } else {
+            g_module.retrigger = false;
+        }
+        break;
+
     default:
         break;
     }

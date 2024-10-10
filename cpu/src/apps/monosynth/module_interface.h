@@ -115,6 +115,7 @@ typedef enum {
     PARAM_OSC_BASE_FREQ,
     PARAM_FILTER_BASE_CUTOFF,
     PARAM_PHASE_RESET,
+    PARAM_RETRIGGER,
 
     PARAM_COUNT
 } e_param;
