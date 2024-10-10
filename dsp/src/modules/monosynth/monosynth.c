@@ -217,10 +217,6 @@ void module_set_param(uint16_t param_index, int32_t value) {
         Aleph_MonoVoice_set_filter_type(&g_module.voice, value);
         break;
 
-    case PARAM_GATE:
-        Aleph_MonoVoice_set_gate(&g_module.voice, value);
-        break;
-
     default:
         break;
     }
