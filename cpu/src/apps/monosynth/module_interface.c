@@ -183,6 +183,8 @@ void module_process(void) {
     //
     pitch_mod = g_module.osc_freq;
 
+    /// TODO: Add control for pitch envelope.
+    //
     // pitch_mod += tADSRT_tick(&g_module.pitch_env) * g_module.pitch_env_depth;
 
     pitch_mod += (tTriLFO_tick(&g_module.pitch_lfo) * g_module.pitch_lfo_depth);
@@ -306,7 +308,6 @@ void module_set_param(uint16_t param_index, float value) {
     case PARAM_CUTOFF:
         ft_set_module_param(
             0, param_index,
-            // float_to_fix16(cv_to_freq(value)));
             float_to_fix16(cv_to_filter_freq_oversample(value)));
         break;
 
