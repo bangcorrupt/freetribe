@@ -117,13 +117,13 @@ void module_init(LEAF *leaf) {
     LEAF_generate_exp(g_exp_buffer, 0.001f, 0.0f, 1.0f, -0.0008f,
                       EXP_BUFFER_SIZE);
 
-    tADSRT_init(&g_module.amp_env, 32, 1024, 1, 1024, g_exp_buffer,
+    tADSRT_init(&g_module.amp_env, 0, 1024, 1, 1024, g_exp_buffer,
                 EXP_BUFFER_SIZE, leaf);
 
-    tADSRT_init(&g_module.filter_env, 32, 1024, 1, 1024, g_exp_buffer,
+    tADSRT_init(&g_module.filter_env, 0, 1024, 1, 1024, g_exp_buffer,
                 EXP_BUFFER_SIZE, leaf);
 
-    tADSRT_init(&g_module.pitch_env, 32, 1024, 1, 1024, g_exp_buffer,
+    tADSRT_init(&g_module.pitch_env, 0, 1024, 1, 1024, g_exp_buffer,
                 EXP_BUFFER_SIZE, leaf);
 
     tTriLFO_init(&g_module.amp_lfo, leaf);
