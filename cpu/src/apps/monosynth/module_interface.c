@@ -51,6 +51,10 @@ under the terms of the GNU Affero General Public License as published by
 
 #define EXP_BUFFER_SIZE (0x400)
 
+#define GATE_OPEN (1)
+#define GATE_CLOSED (0)
+#define GATE_THRESHOLD (0.2)
+
 /*----- Typedefs -----------------------------------------------------*/
 
 typedef struct {
@@ -88,6 +92,8 @@ typedef struct {
 
     e_mod_type mod_type;
 
+    bool gate;
+    bool retrigger;
     bool reset_phase;
 
 } t_module;
@@ -221,13 +227,15 @@ void module_set_param(uint16_t param_index, float value) {
 
     case PARAM_GATE:
 
-        /// TODO: Handle repeated gate on.
-        //
-        if (value > 0) {
+        if (((g_module.retrigger == true) || (g_module.gate == GATE_CLOSED)) &&
+            (value >= GATE_THRESHOLD)) {
+
+            g_module.gate = GATE_OPEN;
             tADSRT_on(&g_module.amp_env, g_module.vel);
             tADSRT_on(&g_module.filter_env, 1);
 
-        } else {
+        } else if (value < GATE_THRESHOLD) {
+            g_module.gate = GATE_CLOSED;
             tADSRT_off(&g_module.amp_env);
             tADSRT_off(&g_module.filter_env);
         }
