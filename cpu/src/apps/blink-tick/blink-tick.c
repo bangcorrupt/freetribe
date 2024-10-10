@@ -43,8 +43,8 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros -------------------------------------------------------*/
 
-#define USER_TICK_DIV 0   // User tick for every systick (~1ms).
-#define LED_TICK_DIV 1000 // Debug tick per 1000 user ticks (~1s).
+#define USER_TICK_DIV 0  // User tick for every systick (~1ms).
+#define LED_TICK_DIV 500 // LED tick per 500 user ticks (~0.5s).
 
 /*----- Typedefs -----------------------------------------------------*/
 
