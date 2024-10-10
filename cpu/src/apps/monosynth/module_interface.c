@@ -229,6 +229,9 @@ void module_set_param(uint16_t param_index, float value) {
 
     case PARAM_GATE:
 
+        /// TODO:  This ignores velocity for repeated notes,
+        ///        do we want this?
+        //
         if (((g_module.retrigger == true) || (g_module.gate == GATE_CLOSED)) &&
             (value >= GATE_THRESHOLD)) {
 

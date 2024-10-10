@@ -355,7 +355,10 @@ static void _trigger_callback(uint8_t pad, uint8_t vel, bool state) {
 
     if (state) {
         note_count++;
-        module_set_param(PARAM_VEL, g_knob_cv_lut[vel]);
+
+        /// TODO: Exponential lookup table.
+        //
+        module_set_param(PARAM_VEL, 1.0 - g_amp_cv_lut[255 - (vel << 1)]);
         module_set_param(PARAM_GATE, state);
         module_set_param(PARAM_OSC_BASE_FREQ, g_midi_pitch_cv_lut[note]);
 
