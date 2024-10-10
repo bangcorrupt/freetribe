@@ -17,3 +17,4 @@ compile_commands.json
 *.ldr
 *.elf
 *.out
+cpu/src/resources/bfin_ldr.h
