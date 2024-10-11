@@ -52,9 +52,9 @@ extern "C" {
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
-void ddr_init(void);
-void ddr_terminate(void);
-uint8_t ddr_memtest(void);
+void per_ddr_init(void);
+void per_ddr_terminate(void);
+uint8_t per_ddr_memtest(void);
 
 #ifdef __cplusplus
 }

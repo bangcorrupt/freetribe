@@ -79,7 +79,6 @@ under the terms of the GNU Affero General Public License as published by
 #include "startup.h"
 
 #include "per_ddr.h"
-#include "sys/types.h"
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -110,7 +109,7 @@ under the terms of the GNU Affero General Public License as published by
  * @return None.
  *
  */
-void ddr_init(void) {
+void per_ddr_init(void) {
 
     // Power up DDR controller.
     PSCModuleControl(SOC_PSC_1_REGS, HW_PSC_DDR2_MDDR, 0,
@@ -192,14 +191,14 @@ void ddr_init(void) {
 }
 
 /*
- * @brief Return DDR to unitialised state.
+ * @brief Return DDR to uninitialised state.
  *        Prevents factory bootloader hanging.
  *
  *  @param None.
  *
  *  @return None.
  */
-void ddr_terminate(void) {
+void per_ddr_terminate(void) {
 
     // Set POWERDN bit (disable VTP).
     HWREG(SOC_SYSCFG_1_REGS + SYSCFG1_VTPIO_CTL) |= SYSCFG1_VTPIO_CTL_POWERDN;
@@ -222,7 +221,7 @@ void ddr_terminate(void) {
     delay(4);
 }
 
-uint8_t ddr_memtest(void) {
+uint8_t per_ddr_memtest(void) {
 
     int i;
     unsigned int *ddr = (unsigned int *)0xc0000000;

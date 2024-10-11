@@ -170,11 +170,11 @@ void start_boot(void) {
 
     _pll1_init(PLL1_MUL, PLL1_POSTDIV, PLL1_DIV1, PLL1_DIV2, PLL1_DIV3);
 
-    ddr_init();
+    per_ddr_init();
 
     _config_cache_mmu();
 
-    // if (ddr_memtest() != 0) {
+    // if (per_ddr_memtest() != 0) {
     //     _boot_abort();
     // }
 

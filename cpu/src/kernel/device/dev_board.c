@@ -111,7 +111,7 @@ void dev_board_init(void) {
 void dev_board_terminate(void) {
     // Allows handing off to factory bootloader.
     // Factory SBL will hang if DDR already initialised.
-    ddr_terminate();
+    per_ddr_terminate();
 
     // Flush TRS MIDI before terminating MCU.
     per_uart_terminate(1);
