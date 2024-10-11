@@ -72,7 +72,7 @@ static t_delay_state g_blink_delay;
 t_status app_init(void) {
 
     // Initialise delay.
-    delay_start(&g_blink_delay, DELAY_TIME);
+    ft_start_delay(&g_blink_delay, DELAY_TIME);
 
     return SUCCESS;
 }
