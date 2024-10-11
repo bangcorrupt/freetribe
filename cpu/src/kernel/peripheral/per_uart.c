@@ -234,8 +234,8 @@ static inline void _uart_isr(t_uart *uart) {
 
     // Clear all pending interrupts.
     while ((int_id = UARTIntStatus(uart->address))) {
-        switch (int_id) {
 
+        switch (int_id) {
         // Tx interrupt.
         case UART_INTID_TX_EMPTY:
 

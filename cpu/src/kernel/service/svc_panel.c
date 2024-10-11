@@ -265,9 +265,10 @@ static t_status _panel_init(void) {
 
     dev_mcu_tx_enqueue(panel_msg);
 
+    /// TODO: Non blocking / Timeout error?.
+    //
     // Block until MCU acknowledges.
     // System is not useful without MCU running.
-    /// TODO: Non blocking / Timeout error?.
     while (dev_mcu_rx_dequeue(panel_msg) != SUCCESS)
         ;
 
