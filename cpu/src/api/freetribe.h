@@ -76,8 +76,8 @@ extern "C" {
 
 void ft_register_tick_callback(uint32_t divisor, void (*callback)(void));
 
-uint32_t ft_get_delay_current(void);
 bool ft_delay(t_delay_state *state);
+void ft_start_delay(t_delay_state *state, uint32_t time);
 
 void ft_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state);
 

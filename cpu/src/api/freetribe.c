@@ -36,10 +36,11 @@ under the terms of the GNU Affero General Public License as published by
  * A set of wrappers for user applications to access kernel functions.
  */
 
+/// TODO: These should all be inline in freetribe.h.
+
 /*----- Includes -----------------------------------------------------*/
 
 #include "freetribe.h"
-#include "svc_delay.h"
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -71,30 +72,30 @@ void ft_register_tick_callback(uint32_t divisor, void (*callback)(void)) {
 
 // Delay API
 //
-/**
- * @brief   Get the current cycle count from the delay timer.
- *
- * The delay timer runs continuously.
- * Use this API to get the current value to use as
- * start time before calling `ft_delay()`.
- *
- * @return  Current value of delay timer.
- */
-uint32_t ft_get_delay_current(void) {
 
-    /// TODO: Refactor delay functions.
-    //
-    return delay_get_current_count();
+/**
+ * @brief   Non-blocking delay initialisation.
+ *
+ * Initialises state of delay to zero.
+ *
+ * @param[out]  state   State of delay.
+ * @param[in]   time    Time in microseconds.
+ *
+ */
+void ft_start_delay(t_delay_state *state, uint32_t time) {
+
+    delay_start(state, time);
 }
 
 /**
- * @brief   Non-blocking delay from `start_time` for `delay_time`.
+ * @brief   Non-blocking delay.
  *
- * Use `ft_get_delay_current()` to get the start time, then
- * use this API to test if `delay_time` microseconds have passed.
+ *  Define a struct of type `t_delay_state`, then pass it to ft_start_delay().
  *
- * @return  True if at least `delay_time` microseconds have passed since
- * `start_time`.
+ * @param[out]  state   State of delay.
+ *
+ * @return      True if at least `state->delay_time` microseconds
+ *              have passed since `state->start_time`.
  */
 bool ft_delay(t_delay_state *state) { return delay_us(state); }
 
