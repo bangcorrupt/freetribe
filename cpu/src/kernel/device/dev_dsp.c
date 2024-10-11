@@ -295,6 +295,12 @@ static void _dsp_spi_tx_callback(void) {
         _dsp_spi_tx_byte(&byte);
 
     } else {
+
+        /// TODO: Do we need to set or test g_dsp_spi_rx_complete
+        ///       in this callback?
+        ///       If tx complete interrupt always happens before rx interrupt
+        ///       then no.
+
         g_dsp_spi_tx_complete = true;
     }
 }
@@ -304,6 +310,10 @@ static void _dsp_spi_rx_callback(void) {
     _dsp_spi_rx_enqueue(&g_dsp_spi_rx_byte);
 
     if (g_dsp_spi_tx_complete == true) {
+
+        /// TODO: Do we even need this?
+        ///       It's not currently tested anywhere.
+        ///       Rx is complete when tx is complete.
 
         g_dsp_spi_rx_complete = true;
     }

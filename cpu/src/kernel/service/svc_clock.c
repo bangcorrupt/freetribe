@@ -34,7 +34,7 @@ under the terms of the GNU Affero General Public License as published by
  * @brief   Configuration and handling for clock timer.
  */
 
-// TODO: Integrate into system service.
+/// TODO: This should be a device driver.
 
 /*----- Includes -----------------------------------------------------*/
 

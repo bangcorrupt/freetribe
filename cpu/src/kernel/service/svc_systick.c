@@ -34,6 +34,8 @@ under the terms of the GNU Affero General Public License as published by
  * @brief   Configuration and handling for systick timer.
  */
 
+/// TODO: This should be a device driver.
+
 /*----- Includes -----------------------------------------------------*/
 
 #include <stdint.h>
