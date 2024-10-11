@@ -91,11 +91,7 @@ void svc_display_task(void) {
 
         dev_lcd_reset(true);
 
-        reset_delay.start_time = delay_get_current_count();
-        reset_delay.delay_time = 5;
-        reset_delay.elapsed_cycles = 0;
-        reset_delay.elapsed_us = 0;
-        reset_delay.expired = false;
+        delay_start(&reset_delay, 5);
 
         state = STATE_RELEASE_RESET;
         break;
@@ -105,11 +101,7 @@ void svc_display_task(void) {
         if (delay_us(&reset_delay)) {
             dev_lcd_reset(false);
 
-            reset_delay.start_time = delay_get_current_count();
-            reset_delay.delay_time = 5;
-            reset_delay.elapsed_cycles = 0;
-            reset_delay.elapsed_us = 0;
-            reset_delay.expired = false;
+            delay_start(&reset_delay, 5);
 
             state = STATE_INIT;
         }
@@ -166,7 +158,7 @@ void svc_display_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state) {
     // uint16_t page_index = pos_y >> 3;
     // uint16_t byte_index = column_index + (128 * page_index);
 
-    uint16_t byte_index = pos_x + (128 * (pos_y >> 3));
+    uint16_t byte_index = pos_x + ((pos_y >> 3) << 7);
     uint16_t bit_index = pos_y & 7;
 
     // Get current byte from frame buffer.
@@ -203,8 +195,8 @@ int8_t svc_display_fill_frame(uint16_t x_start, uint16_t y_start,
     // uint8_t partial_start = y_start & 7;
     // uint8_t partial_end = y_end & 7;
 
-    uint16_t byte_start = x_start + (128 * (y_start >> 3));
-    uint16_t byte_end = x_end + (128 * (y_end >> 3));
+    uint16_t byte_start = x_start + ((y_start >> 3) << 7);
+    uint16_t byte_end = x_end + ((y_end >> 3) << 7);
 
     if (state) {
         fill = 0;
