@@ -115,19 +115,35 @@ extern "C" {
 
 void GPIODirModeSet(unsigned int baseAdd, unsigned int pinNumber,
                     unsigned int pinDir);
+
 unsigned int GPIODirModeGet(unsigned int baseAdd, unsigned int pinNumber);
+
 void GPIOPinWrite(unsigned int baseAdd, unsigned int pinNumber,
                   unsigned int bitValue);
+
 int GPIOPinRead(unsigned int baseAdd, unsigned int pinNumber);
+
 void GPIOIntTypeSet(unsigned int baseAdd, unsigned int pinNumber,
                     unsigned int intType);
+
 unsigned int GPIOIntTypeGet(unsigned int baseAdd, unsigned int pinNumber);
+
 unsigned int GPIOPinIntStatus(unsigned int baseAdd, unsigned int pinNumber);
+
 void GPIOPinIntClear(unsigned int baseAdd, unsigned int pinNumber);
+
 void GPIOBankIntEnable(unsigned int baseAdd, unsigned int bankNumber);
+
 void GPIOBankIntDisable(unsigned int baseAdd, unsigned int bankNumber);
+
 void GPIOBankPinsWrite(unsigned int baseAdd, unsigned int bankNumber,
                        unsigned int setPins, unsigned int clrPins);
+
+void GPIOBankDirModeSet(unsigned int baseAdd, unsigned int regNumber,
+                        unsigned int pinDirs);
+
+void GPIOBankOutputDataSet(unsigned int baseAdd, unsigned int regNumber,
+                           unsigned int pinData);
 
 #ifdef __cplusplus
 }

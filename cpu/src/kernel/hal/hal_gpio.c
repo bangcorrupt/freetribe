@@ -94,17 +94,6 @@ void GPIODirModeSet(unsigned int baseAdd, unsigned int pinNumber,
     }
 }
 
-/*
- * Set pin direction for entire register.
- *
- * Value of pinDirs is written directly to register.
- */
-void GPIODirModeSetReg(unsigned int baseAdd, unsigned int regNumber,
-                       unsigned int pinDirs) {
-
-    HWREG(baseAdd + GPIO_DIR(regNumber)) = pinDirs;
-}
-
 /**
  * \brief  This function gets the direction of a pin which has been configured
  *         as an input or an output pin.
@@ -519,6 +508,28 @@ void GPIOBankPinsWrite(unsigned int baseAdd, unsigned int bankNumber,
         HWREG(baseAdd + GPIO_SET_DATA(regNumber)) = (setPins & 0xFFFF);
         HWREG(baseAdd + GPIO_CLR_DATA(regNumber)) = (clrPins & 0xFFFF);
     }
+}
+
+/**
+ * \brief   Set pin direction for entire bank.
+ *
+ *
+ */
+void GPIOBankDirModeSet(unsigned int baseAdd, unsigned int regNumber,
+                        unsigned int pinDirs) {
+
+    HWREG(baseAdd + GPIO_DIR(regNumber)) = pinDirs;
+}
+
+/**
+ * \brief   Set output data for entire bank.
+ *
+ *
+ */
+void GPIOBankOutputDataSet(unsigned int baseAdd, unsigned int regNumber,
+                           unsigned int pinData) {
+
+    HWREG(baseAdd + GPIO_OUT_DATA(regNumber)) = pinData;
 }
 
 /*****************************END OF FILE*************************************/

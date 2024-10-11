@@ -70,29 +70,41 @@ under the terms of the GNU Affero General Public License as published by
  */
 void per_gpio_init(void) {
 
-    /// TODO: Refactor to use HAL functions.
+    /// TODO: Use bitmask macros instead of magic numbers.
 
     // Set pin direction and state.
 
     // SPI1 CS0 CS1 outputs, set.
     //      Is this necessary if using pins in SPI mode?
-    HWREG(SOC_GPIO_0_REGS + GPIO_OUT_DATA(1)) = 0xc000;
-    HWREG(SOC_GPIO_0_REGS + GPIO_DIR(1)) = 0xffff3fff;
+    // HWREG(SOC_GPIO_0_REGS + GPIO_OUT_DATA(1)) = 0xc000;
+    GPIOBankOutputDataSet(SOC_GPIO_0_REGS, 1, 0xc000);
+
+    // HWREG(SOC_GPIO_0_REGS + GPIO_DIR(1)) = 0xffff3fff;
+    GPIOBankDirModeSet(SOC_GPIO_0_REGS, 1, 0xffff3fff);
 
     // B5 P14 output, clear.
-    HWREG(SOC_GPIO_0_REGS + GPIO_OUT_DATA(2)) = 0x0;
-    HWREG(SOC_GPIO_0_REGS + GPIO_DIR(2)) = 0xbfffffff;
+    // HWREG(SOC_GPIO_0_REGS + GPIO_OUT_DATA(2)) = 0x0;
+    GPIOBankOutputDataSet(SOC_GPIO_0_REGS, 2, 0x0);
+
+    // HWREG(SOC_GPIO_0_REGS + GPIO_DIR(2)) = 0xbfffffff;
+    GPIOBankDirModeSet(SOC_GPIO_0_REGS, 2, 0xbfffffff);
 
     // B6 0, 1, 7, 13, 14, 15 out.
     // B6 2, 11 set
     // B7 14, 13, 12, 11, 10 out
     // B7 14 Set
-    HWREG(SOC_GPIO_0_REGS + GPIO_OUT_DATA(3)) = 0x40000804;
-    HWREG(SOC_GPIO_0_REGS + GPIO_DIR(3)) = 0x83ffe083;
+    // HWREG(SOC_GPIO_0_REGS + GPIO_OUT_DATA(3)) = 0x40000804;
+    GPIOBankOutputDataSet(SOC_GPIO_0_REGS, 3, 0x40000804);
+
+    // HWREG(SOC_GPIO_0_REGS + GPIO_DIR(3)) = 0x83ffe083;
+    GPIOBankDirModeSet(SOC_GPIO_0_REGS, 3, 0x83ffe083);
 
     // B8 P2 LCD Cmd/Data.
-    HWREG(SOC_GPIO_0_REGS + GPIO_OUT_DATA(4)) = 0x0;
-    HWREG(SOC_GPIO_0_REGS + GPIO_DIR(4)) = 0x0000fffd;
+    // HWREG(SOC_GPIO_0_REGS + GPIO_OUT_DATA(4)) = 0x0;
+    GPIOBankOutputDataSet(SOC_GPIO_0_REGS, 4, 0x0);
+
+    // HWREG(SOC_GPIO_0_REGS + GPIO_DIR(4)) = 0x0000fffd;
+    GPIOBankDirModeSet(SOC_GPIO_0_REGS, 4, 0x0000fffd);
 }
 
 /// TODO: Refactor to always use indexed access.
