@@ -253,6 +253,9 @@ void per_spi_trx_int(uint8_t instance, uint8_t *tx_buffer, uint8_t *rx_buffer,
     }
 }
 
+/// TODO: Do these non-interrupt functions work
+///       if interrupts are not enabled?
+
 /// TODO: Update to use g_spi structs.
 //
 void per_spi_tx(uint32_t spi_base, uint8_t *p_tx, uint32_t len) {
