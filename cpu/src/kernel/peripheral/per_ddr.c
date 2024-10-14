@@ -70,7 +70,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
-#include "hal_psc.h"
+#include "csl_psc.h"
 #include "hw_ddr2_mddr.h"
 #include "hw_syscfg1_AM1808.h"
 #include "hw_types.h"

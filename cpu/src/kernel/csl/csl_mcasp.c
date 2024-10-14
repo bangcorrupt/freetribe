@@ -45,7 +45,7 @@
 #include "hw_types.h"
 
 /* Driver APIs */
-#include "hal_mcasp.h"
+#include "csl_mcasp.h"
 
 /*******************************************************************************
  *                        API FUNCTION DEFINITIONS

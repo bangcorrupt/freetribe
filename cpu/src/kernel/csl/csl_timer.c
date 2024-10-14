@@ -45,7 +45,7 @@
 #include "hw_types.h"
 
 /* Driver APIs */
-#include "hal_timer.h"
+#include "csl_timer.h"
 
 /*******************************************************************************
  *                       INTERNAL MACRO DEFINITIONS

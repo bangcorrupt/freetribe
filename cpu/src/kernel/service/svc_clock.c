@@ -41,7 +41,7 @@ under the terms of the GNU Affero General Public License as published by
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "hal_interrupt.h"
+#include "csl_interrupt.h"
 
 #include "per_timer.h"
 

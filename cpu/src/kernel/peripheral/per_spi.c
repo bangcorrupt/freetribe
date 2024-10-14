@@ -43,14 +43,14 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "startup.h"
 
-#include "hal_cp15.h"
-#include "hal_interrupt.h"
-#include "hal_spi.h"
+#include "csl_cp15.h"
+#include "csl_interrupt.h"
+#include "csl_spi.h"
 
 #include "per_gpio.h"
 #include "per_spi.h"
 
-#include "hal_gpio.h"
+#include "csl_gpio.h"
 
 #include "ring_buffer.h"
 

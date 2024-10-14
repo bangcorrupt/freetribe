@@ -45,7 +45,7 @@ extern "C" {
 
 #include <stdint.h>
 
-#include "hal_timer.h"
+#include "csl_timer.h"
 
 /*----- Macros -------------------------------------------------------*/
 

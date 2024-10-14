@@ -36,8 +36,8 @@
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "hal_interrupt.h"
-#include "hal_cpu.h"
+#include "csl_interrupt.h"
+#include "csl_cpu.h"
 #include "hw_aintc.h"
 #include "hw_types.h"
 #include "soc_AM1808.h"

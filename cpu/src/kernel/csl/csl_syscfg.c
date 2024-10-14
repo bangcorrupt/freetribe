@@ -38,7 +38,7 @@
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "hal_syscfg.h"
+#include "csl_syscfg.h"
 #include "hw_syscfg0_AM1808.h"
 #include "hw_types.h"
 #include "soc_AM1808.h"

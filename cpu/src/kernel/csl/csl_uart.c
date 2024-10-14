@@ -45,7 +45,7 @@
 #include "hw_types.h"
 
 /* Driver APIs */
-#include "hal_uart.h"
+#include "csl_uart.h"
 
 /**************************************************************************/
 /*                     API FUNCTION DEFINITIONS                           */

@@ -36,7 +36,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
-#include "hal_interrupt.h"
+#include "csl_interrupt.h"
 
 #include "per_aintc.h"
 

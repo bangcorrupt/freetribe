@@ -44,11 +44,11 @@
 #include "hw_types.h"
 #include "hw_usb.h"
 
-#include "hal_cp15.h"
-#include "hal_cppi41dma.h"
-#include "hal_usb.h"
+#include "csl_cp15.h"
+#include "csl_cppi41dma.h"
+#include "csl_usb.h"
 
-#include "hal_debug.h"
+#include "csl_debug.h"
 
 /*****************************************************************************
 **                 STATIC FUNCTIONs

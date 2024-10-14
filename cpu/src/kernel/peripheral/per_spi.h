@@ -49,7 +49,7 @@ extern "C" {
 #include "hw_spi.h"
 #include "soc_AM1808.h"
 
-#include "hal_spi.h"
+#include "csl_spi.h"
 
 /*----- Macros -------------------------------------------------------*/
 

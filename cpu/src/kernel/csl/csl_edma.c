@@ -41,7 +41,7 @@
  */
 
 /* Driver APIs */
-#include "hal_edma.h"
+#include "csl_edma.h"
 
 #include "hw_types.h"
 

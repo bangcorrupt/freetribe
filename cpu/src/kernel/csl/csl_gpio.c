@@ -39,7 +39,7 @@
  */
 
 /* Driver APIs */
-#include "hal_gpio.h"
+#include "csl_gpio.h"
 #include "hw_types.h"
 
 /***********************************************************************/

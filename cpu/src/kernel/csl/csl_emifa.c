@@ -40,7 +40,7 @@
  *
  */
 
-#include "hal_emifa.h"
+#include "csl_emifa.h"
 #include "hw_emifa2.h"
 #include "hw_types.h"
 

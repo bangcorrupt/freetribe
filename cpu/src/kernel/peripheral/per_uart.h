@@ -46,7 +46,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "hal_uart.h"
+#include "csl_uart.h"
 
 /*----- Macros -------------------------------------------------------*/
 

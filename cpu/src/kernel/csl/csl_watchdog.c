@@ -40,7 +40,7 @@
  *
  */
 
-#include "hal_watchdog.h"
+#include "csl_watchdog.h"
 #include "hw_types.h"
 
 /*******************************************************************************

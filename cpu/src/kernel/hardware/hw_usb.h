@@ -41,7 +41,7 @@
 #ifndef HW_USB_H
 #define HW_USB_H
 
-#include "hal_psc.h"
+#include "csl_psc.h"
 #include "hw_psc_AM1808.h"
 #include "hw_usbOtg_AM1808.h"
 #include "hw_usbphyGS60.h"

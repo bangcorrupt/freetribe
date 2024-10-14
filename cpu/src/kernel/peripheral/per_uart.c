@@ -41,8 +41,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "soc_AM1808.h"
 
-#include "hal_interrupt.h"
-#include "hal_uart.h"
+#include "csl_interrupt.h"
+#include "csl_uart.h"
 
 #include "per_uart.h"
 

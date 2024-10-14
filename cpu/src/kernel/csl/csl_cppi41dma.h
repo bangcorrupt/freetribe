@@ -47,7 +47,7 @@
 extern "C" {
 #endif
 
-#include "hal_usb.h"
+#include "csl_usb.h"
 
 #ifndef NULL
 #define NULL ((void *)0)

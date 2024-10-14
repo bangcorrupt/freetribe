@@ -80,9 +80,9 @@ under the terms of the GNU Affero General Public License as published by
 #include "hw_types.h"
 #include "soc_AM1808.h"
 
-#include "hal_cp15.h"
-#include "hal_psc.h"
-#include "hal_syscfg.h"
+#include "csl_cp15.h"
+#include "csl_psc.h"
+#include "csl_syscfg.h"
 
 #include "per_ddr.h"
 

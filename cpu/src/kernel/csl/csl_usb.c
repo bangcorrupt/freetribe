@@ -48,10 +48,10 @@
 #include "hw_usb.h"
 
 /* Driver APIs */
-#include "hal_interrupt.h"
-#include "hal_usb.h"
+#include "csl_interrupt.h"
+#include "csl_usb.h"
 
-#include "hal_debug.h"
+#include "csl_debug.h"
 
 /* Amount to shift the RX interrupt sources by in the flags used in the
  * interrupt calls. */
