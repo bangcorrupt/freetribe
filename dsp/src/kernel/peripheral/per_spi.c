@@ -60,12 +60,12 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Static variable definitions ----------------------------------*/
 
 // SPI Rx ring buffer.
-static rbd_t spi_rx_rbd;
-static uint8_t spi_rx_rbmem[SPI_RX_BUF_LEN];
+static rbd_t g_spi_rx_rbd;
+static uint8_t g_spi_rx_rbmem[SPI_RX_BUF_LEN];
 
 // SPI Tx ring buffer.
-static rbd_t spi_tx_rbd;
-static uint8_t spi_tx_rbmem[SPI_TX_BUF_LEN];
+static rbd_t g_spi_tx_rbd;
+static uint8_t g_spi_tx_rbmem[SPI_TX_BUF_LEN];
 
 static bool g_spi_tx_complete = true;
 
@@ -80,21 +80,21 @@ static void _spi_rx_enqueue(uint8_t *spi_byte);
 
 /*----- Extern function implementations ------------------------------*/
 
-void spi_init(void) {
+void per_spi_init(void) {
 
     *pPORTGIO_SET = HWAIT;
 
     // Tx ring buffer attributes.
-    rb_attr_t tx_attr = {sizeof(spi_tx_rbmem[0]), ARRAY_SIZE(spi_tx_rbmem),
-                         spi_tx_rbmem};
+    rb_attr_t tx_attr = {sizeof(g_spi_tx_rbmem[0]), ARRAY_SIZE(g_spi_tx_rbmem),
+                         g_spi_tx_rbmem};
 
     // Rx ring buffer attributes.
-    rb_attr_t rx_attr = {sizeof(spi_rx_rbmem[0]), ARRAY_SIZE(spi_rx_rbmem),
-                         spi_rx_rbmem};
+    rb_attr_t rx_attr = {sizeof(g_spi_rx_rbmem[0]), ARRAY_SIZE(g_spi_rx_rbmem),
+                         g_spi_rx_rbmem};
 
     // Initialise MCU message ring buffers.
-    if (ring_buffer_init(&spi_tx_rbd, &tx_attr) ||
-        ring_buffer_init(&spi_rx_rbd, &rx_attr) == 0) {
+    if (ring_buffer_init(&g_spi_tx_rbd, &tx_attr) ||
+        ring_buffer_init(&g_spi_rx_rbd, &rx_attr) == 0) {
     }
 
     // SPI Rx interrupt IVG11.
@@ -140,14 +140,14 @@ void spi_init(void) {
 
 int per_spi_rx_dequeue(uint8_t *spi_byte) {
 
-    return ring_buffer_get(spi_rx_rbd, spi_byte);
+    return ring_buffer_get(g_spi_rx_rbd, spi_byte);
 }
 
 /// TODO: Check/return status.
 void per_spi_tx_enqueue(uint8_t *spi_byte) {
 
     // Overwrite on overflow?
-    ring_buffer_put_force(spi_tx_rbd, spi_byte);
+    ring_buffer_put_force(g_spi_tx_rbd, spi_byte);
 }
 
 /*----- Static function implementations ------------------------------*/
@@ -179,14 +179,14 @@ __attribute__((interrupt_handler)) static void _spi_rx_isr(void) {
 /// TODO: Check/return status.
 static int _spi_tx_dequeue(uint8_t *spi_byte) {
 
-    return ring_buffer_get(spi_tx_rbd, spi_byte);
+    return ring_buffer_get(g_spi_tx_rbd, spi_byte);
 }
 
 /// TODO: Check/return status.
 static void _spi_rx_enqueue(uint8_t *spi_byte) {
 
     // Overwrite on overflow?
-    ring_buffer_put_force(spi_rx_rbd, spi_byte);
+    ring_buffer_put_force(g_spi_rx_rbd, spi_byte);
 }
 
 /*----- End of file --------------------------------------------------*/
