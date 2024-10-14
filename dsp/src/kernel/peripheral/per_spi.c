@@ -47,27 +47,17 @@ under the terms of the GNU Affero General Public License as published by
 #include "per_gpio.h"
 #include "per_spi.h"
 
-// #include "ring_buffer.h"
-
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
 
 typedef struct {
-    // uint32_t address;
-    // uint32_t system_int;
-    // void (*isr)(void);
 
     uint8_t *tx_byte;
-    // uint32_t tx_length;
-
     uint8_t *rx_byte;
-    // uint32_t rx_length;
 
     void (*tx_callback)(uint8_t *tx_byte);
     void (*rx_callback)(uint8_t *rx_byte);
-
-    // bool initialised;
 
 } t_spi;
 
@@ -75,45 +65,17 @@ typedef struct {
 
 static t_spi g_spi;
 
-// // SPI Rx ring buffer.
-// static rbd_t g_spi_rx_rbd;
-// static uint8_t g_spi_rx_rbmem[SPI_RX_BUF_LEN];
-//
-// // SPI Tx ring buffer.
-// static rbd_t g_spi_tx_rbd;
-// static uint8_t g_spi_tx_rbmem[SPI_TX_BUF_LEN];
-//
-// static bool g_spi_tx_complete = true;
-
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
 
 static void _spi_rx_isr(void) __attribute__((interrupt_handler));
 
-// static int _spi_tx_dequeue(uint8_t *spi_byte);
-// static void _spi_rx_enqueue(uint8_t *spi_byte);
-
 /*----- Extern function implementations ------------------------------*/
 
 void per_spi_init(void) {
 
     *pPORTGIO_SET = HWAIT;
-
-    // // Tx ring buffer attributes.
-    // rb_attr_t tx_attr = {sizeof(g_spi_tx_rbmem[0]),
-    // ARRAY_SIZE(g_spi_tx_rbmem),
-    //                      g_spi_tx_rbmem};
-    //
-    // // Rx ring buffer attributes.
-    // rb_attr_t rx_attr = {sizeof(g_spi_rx_rbmem[0]),
-    // ARRAY_SIZE(g_spi_rx_rbmem),
-    //                      g_spi_rx_rbmem};
-    //
-    // // Initialise MCU message ring buffers.
-    // if (ring_buffer_init(&g_spi_tx_rbd, &tx_attr) ||
-    //     ring_buffer_init(&g_spi_rx_rbd, &rx_attr) == 0) {
-    // }
 
     // SPI Rx interrupt IVG11.
     *pSIC_IAR2 |= P21_IVG(11);
@@ -138,8 +100,6 @@ void per_spi_init(void) {
 
     // 8 bit, MSB first, non-dma rx mode.
     // Interrupt when SPI_RDBR is full.
-    // *pSPI_CTL = CPOL | CPHA | SZ | EMISO;
-    // *pSPI_CTL = CPOL | SZ | EMISO;
     *pSPI_CTL = SZ | EMISO;
     ssync();
 
@@ -156,18 +116,6 @@ void per_spi_init(void) {
 
     *pPORTGIO_CLEAR = HWAIT;
 }
-
-// int per_spi_rx_dequeue(uint8_t *spi_byte) {
-//
-//     return ring_buffer_get(g_spi_rx_rbd, spi_byte);
-// }
-//
-// /// TODO: Check/return status.
-// void per_spi_tx_enqueue(uint8_t *spi_byte) {
-//
-//     // Overwrite on overflow?
-//     ring_buffer_put_force(g_spi_tx_rbd, spi_byte);
-// }
 
 void per_spi_register_callback(t_spi_event event, void (*callback)()) {
 
@@ -213,18 +161,5 @@ __attribute__((interrupt_handler)) static void _spi_rx_isr(void) {
 
     *pPORTGIO_CLEAR = HWAIT;
 }
-
-/// /// TODO: Check/return status.
-/// static int _spi_tx_dequeue(uint8_t *spi_byte) {
-///
-///     return ring_buffer_get(g_spi_tx_rbd, spi_byte);
-/// }
-///
-/// /// TODO: Check/return status.
-/// static void _spi_rx_enqueue(uint8_t *spi_byte) {
-///
-///     // Overwrite on overflow?
-///     ring_buffer_put_force(g_spi_rx_rbd, spi_byte);
-/// }
 
 /*----- End of file --------------------------------------------------*/

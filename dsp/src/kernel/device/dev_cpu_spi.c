@@ -90,17 +90,12 @@ void dev_cpu_spi_init(void) {
     if (ring_buffer_init(&g_spi_tx_rbd, &tx_attr) ||
         ring_buffer_init(&g_spi_rx_rbd, &rx_attr) == 0) {
 
-        per_spi_init();
-
-        // Register Rx callback.
+        // Register callbacks before initialising to catch first interrupts.
         per_spi_register_callback(SPI_TX_COMPLETE, _cpu_spi_tx_callback);
         per_spi_register_callback(SPI_RX_COMPLETE, _cpu_spi_rx_callback);
+
+        per_spi_init();
     }
-}
-
-int dev_cpu_spi_rx_dequeue(uint8_t *spi_byte) {
-
-    return ring_buffer_get(g_spi_rx_rbd, spi_byte);
 }
 
 /// TODO: Check/return status.
@@ -110,9 +105,13 @@ void dev_cpu_spi_tx_enqueue(uint8_t *spi_byte) {
     ring_buffer_put_force(g_spi_tx_rbd, spi_byte);
 }
 
+int dev_cpu_spi_rx_dequeue(uint8_t *spi_byte) {
+
+    return ring_buffer_get(g_spi_rx_rbd, spi_byte);
+}
+
 /*----- Static function implementations ------------------------------*/
 
-/// TODO: Check/return status.
 static int _cpu_spi_tx_dequeue(uint8_t *spi_byte) {
 
     return ring_buffer_get(g_spi_tx_rbd, spi_byte);
