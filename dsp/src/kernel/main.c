@@ -93,7 +93,7 @@ int main(void) {
 
     dma_init();
 
-    spi_init();
+    dev_cpu_spi_init();
 
     sport0_init();
     // sport1_init();

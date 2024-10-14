@@ -92,7 +92,10 @@ extern "C" {
 
 /*----- Typedefs -----------------------------------------------------*/
 
-typedef enum { SPI_TX_COMPLETE, SPI_RX_COMPLETE } t_spi_event;
+typedef enum {
+    SPI_TX_COMPLETE,
+    SPI_RX_COMPLETE,
+} t_spi_event;
 
 typedef struct {
     uint8_t instance;

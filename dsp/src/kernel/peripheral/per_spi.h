@@ -43,19 +43,21 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
-#include <stdint.h>
-
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
+
+typedef enum {
+    SPI_TX_COMPLETE,
+    SPI_RX_COMPLETE,
+} t_spi_event;
 
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
 
 void per_spi_init(void);
-int per_spi_rx_dequeue(uint8_t *spi_byte);
-void per_spi_tx_enqueue(uint8_t *spi_byte);
+void per_spi_register_callback(t_spi_event event, void (*callback)());
 
 #ifdef __cplusplus
 }

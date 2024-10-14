@@ -154,7 +154,7 @@ void svc_cpu_task(void) {
     case STATE_RUN:
 
         // Handle received bytes.
-        if (per_spi_rx_dequeue(&cpu_byte) == SUCCESS) {
+        if (dev_cpu_spi_rx_dequeue(&cpu_byte) == SUCCESS) {
             _cpu_receive(cpu_byte);
         }
         break;
@@ -180,13 +180,13 @@ static void _transmit_message(uint8_t msg_type, uint8_t msg_id,
     //
     uint8_t msg_start = MSG_START;
 
-    per_spi_tx_enqueue(&msg_start);
-    per_spi_tx_enqueue(&msg_type);
-    per_spi_tx_enqueue(&msg_id);
-    per_spi_tx_enqueue(&length);
+    dev_cpu_spi_tx_enqueue(&msg_start);
+    dev_cpu_spi_tx_enqueue(&msg_type);
+    dev_cpu_spi_tx_enqueue(&msg_id);
+    dev_cpu_spi_tx_enqueue(&length);
 
     while (length--) {
-        per_spi_tx_enqueue(payload++);
+        dev_cpu_spi_tx_enqueue(payload++);
     }
 }
 
