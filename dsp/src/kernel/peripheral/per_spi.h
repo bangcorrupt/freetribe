@@ -53,7 +53,7 @@ extern "C" {
 
 /*----- Extern function prototypes -----------------------------------*/
 
-void spi_init(void);
+void per_spi_init(void);
 int per_spi_rx_dequeue(uint8_t *spi_byte);
 void per_spi_tx_enqueue(uint8_t *spi_byte);
 
