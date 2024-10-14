@@ -1,3 +1,6 @@
+[submodule "cpu/lib/am1802-csl"]
+	path = cpu/lib/am1802-csl
+	url = ../am1802-csl
 [submodule "cpu/src/lib/UGUI"]
 	path = cpu/lib/UGUI
 	url = ../UGUI.git
