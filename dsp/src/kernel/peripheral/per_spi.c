@@ -49,6 +49,9 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros -------------------------------------------------------*/
 
+#define SPI_DATA IRQ_DMA7
+#define SPI_ERROR IRQ_SPI_ERR
+
 /*----- Typedefs -----------------------------------------------------*/
 
 typedef struct {
@@ -74,7 +77,12 @@ static t_spi g_spi;
 
 static void _spi_isr(void) __attribute__((interrupt_handler));
 
+static inline void _spi_interrupt_enable(uint32_t int_flags);
+static inline void _spi_interrupt_disable(uint32_t int_flags);
+
 /*----- Extern function implementations ------------------------------*/
+
+/// TODO: Generalise with config struct.
 
 void per_spi_init(void) {
 
@@ -87,8 +95,8 @@ void per_spi_init(void) {
     *pEVT11 = &_spi_isr;
 
     // Enable SPI Rx interrupt.
-    *pSIC_IMASK0 |= IRQ_DMA7; // Not actually using DMA.
-    ssync();
+    // *pSIC_IMASK0 |= IRQ_DMA7; // Not actually using DMA.
+    // ssync();
 
     int i;
     // unmask in the core event processor
@@ -123,14 +131,15 @@ void per_spi_init(void) {
 void per_spi_trx_int(uint8_t *tx_buffer, uint8_t *rx_buffer, uint32_t length) {
 
     if (tx_buffer != NULL && tx_buffer != NULL && length != 0) {
+
         g_spi.rx_buffer = rx_buffer;
         g_spi.tx_buffer = tx_buffer;
 
         g_spi.rx_length = length;
         g_spi.tx_length = length;
-    }
 
-    /// TODO: Only enable interrupt once buffers configured.
+        _spi_interrupt_enable(SPI_DATA);
+    }
 }
 
 void per_spi_register_callback(t_spi_event event, void (*callback)()) {
@@ -154,6 +163,18 @@ void per_spi_register_callback(t_spi_event event, void (*callback)()) {
 
 /*----- Static function implementations ------------------------------*/
 
+static inline void _spi_interrupt_enable(uint32_t int_flags) {
+
+    *pSIC_IMASK0 |= int_flags;
+    ssync();
+}
+
+static inline void _spi_interrupt_disable(uint32_t int_flags) {
+
+    *pSIC_IMASK0 &= ~int_flags;
+    ssync();
+}
+
 __attribute__((interrupt_handler)) static void _spi_isr(void) {
 
     *pPORTGIO_SET = HWAIT;
@@ -166,6 +187,8 @@ __attribute__((interrupt_handler)) static void _spi_isr(void) {
 
         if (g_spi.rx_length == 0) {
 
+            _spi_interrupt_disable(SPI_DATA);
+
             if (g_spi.rx_callback != NULL) {
                 g_spi.rx_callback();
             }
@@ -177,6 +200,8 @@ __attribute__((interrupt_handler)) static void _spi_isr(void) {
         *pSPI_TDBR = *g_spi.tx_buffer++;
 
         if (g_spi.tx_length == 0) {
+
+            _spi_interrupt_disable(SPI_DATA);
 
             if (g_spi.tx_callback != NULL) {
                 g_spi.tx_callback();
