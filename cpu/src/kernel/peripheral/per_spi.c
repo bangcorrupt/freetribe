@@ -341,6 +341,9 @@ static inline void _spi_isr(t_spi *spi) {
         // Tx interrupt.
         case SPI_TX_BUF_EMPTY:
 
+            /// TODO: This test of length may not be necessary
+            ///       as interrupt is only enabled if length > 0.
+            //
             if (spi->tx_length--) {
                 // Write byte to SPI
                 SPITransmitData1(spi->address, *spi->tx_buffer++);

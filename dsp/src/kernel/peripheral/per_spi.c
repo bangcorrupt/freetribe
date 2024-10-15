@@ -94,10 +94,6 @@ void per_spi_init(void) {
 
     *pEVT11 = &_spi_isr;
 
-    // Enable SPI Rx interrupt.
-    // *pSIC_IMASK0 |= IRQ_DMA7; // Not actually using DMA.
-    // ssync();
-
     int i;
     // unmask in the core event processor
     asm volatile("cli %0; bitset(%0, 11); sti %0; csync;" : "+d"(i));
@@ -179,8 +175,9 @@ __attribute__((interrupt_handler)) static void _spi_isr(void) {
 
     *pPORTGIO_SET = HWAIT;
 
-    /// TODO: Disable interrupt once buffers handled.
-
+    /// TODO: This test of length may not be necessary
+    ///       as interrupt is only enabled if length > 0.
+    //
     if (g_spi.rx_length--) {
 
         *g_spi.rx_buffer++ = *pSPI_RDBR;
