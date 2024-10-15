@@ -74,8 +74,7 @@ static bool g_spi_tx_complete = true;
 static int _cpu_spi_tx_dequeue(uint8_t *spi_byte);
 static void _cpu_spi_rx_enqueue(uint8_t *spi_byte);
 
-static void _cpu_spi_tx_callback();
-static void _cpu_spi_rx_callback();
+static void _cpu_spi_trx_callback();
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -94,13 +93,12 @@ void dev_cpu_spi_init(void) {
         ring_buffer_init(&g_spi_rx_rbd, &rx_attr) == 0) {
 
         // Register callbacks before initialising to catch first interrupts.
-        per_spi_register_callback(SPI_TX_COMPLETE, _cpu_spi_tx_callback);
-        per_spi_register_callback(SPI_RX_COMPLETE, _cpu_spi_rx_callback);
-
-        // Set buffers and length in peripheral driver.
-        _cpu_spi_tx_callback();
+        per_spi_register_callback(EVT_SPI_TRX_COMPLETE, _cpu_spi_trx_callback);
 
         per_spi_init();
+
+        // Initialise buffers to catch first interrupt.
+        per_spi_trx_int(&g_cpu_spi_tx_byte, &g_cpu_spi_rx_byte, 1);
     }
 }
 
@@ -130,18 +128,15 @@ static void _cpu_spi_rx_enqueue(uint8_t *spi_byte) {
     ring_buffer_put_force(g_spi_rx_rbd, spi_byte);
 }
 
-static void _cpu_spi_tx_callback() {
+static void _cpu_spi_trx_callback() {
+
+    _cpu_spi_rx_enqueue(&g_cpu_spi_rx_byte);
 
     if (_cpu_spi_tx_dequeue(&g_cpu_spi_tx_byte)) {
         g_cpu_spi_tx_byte = 0;
     };
 
     per_spi_trx_int(&g_cpu_spi_tx_byte, &g_cpu_spi_rx_byte, 1);
-}
-
-static void _cpu_spi_rx_callback() {
-    //
-    _cpu_spi_rx_enqueue(&g_cpu_spi_rx_byte);
 }
 
 /*----- End of file --------------------------------------------------*/

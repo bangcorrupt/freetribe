@@ -50,8 +50,8 @@ extern "C" {
 /*----- Typedefs -----------------------------------------------------*/
 
 typedef enum {
-    SPI_TX_COMPLETE,
-    SPI_RX_COMPLETE,
+    EVT_SPI_TRX_COMPLETE,
+    EVT_SPI_ERROR,
 } t_spi_event;
 
 /*----- Extern variable declarations ---------------------------------*/

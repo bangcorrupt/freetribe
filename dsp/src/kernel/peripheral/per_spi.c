@@ -49,8 +49,8 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros -------------------------------------------------------*/
 
-#define SPI_DATA IRQ_DMA7
-#define SPI_ERROR IRQ_SPI_ERR
+#define SPI_DATA_INT IRQ_DMA7
+#define SPI_ERROR_INT IRQ_SPI_ERR
 
 /*----- Typedefs -----------------------------------------------------*/
 
@@ -59,11 +59,10 @@ typedef struct {
     uint8_t *tx_buffer;
     uint8_t *rx_buffer;
 
-    uint32_t tx_length;
-    uint32_t rx_length;
+    uint32_t trx_length;
 
-    void (*tx_callback)();
-    void (*rx_callback)();
+    void (*trx_callback)();
+    void (*error_callback)();
 
 } t_spi;
 
@@ -131,10 +130,9 @@ void per_spi_trx_int(uint8_t *tx_buffer, uint8_t *rx_buffer, uint32_t length) {
         g_spi.rx_buffer = rx_buffer;
         g_spi.tx_buffer = tx_buffer;
 
-        g_spi.rx_length = length;
-        g_spi.tx_length = length;
+        g_spi.trx_length = length;
 
-        _spi_interrupt_enable(SPI_DATA);
+        _spi_interrupt_enable(SPI_DATA_INT);
     }
 }
 
@@ -142,12 +140,12 @@ void per_spi_register_callback(t_spi_event event, void (*callback)()) {
 
     switch (event) {
 
-    case SPI_TX_COMPLETE:
-        g_spi.tx_callback = callback;
+    case EVT_SPI_TRX_COMPLETE:
+        g_spi.trx_callback = callback;
         break;
 
-    case SPI_RX_COMPLETE:
-        g_spi.rx_callback = callback;
+    case EVT_SPI_ERROR:
+        g_spi.error_callback = callback;
         break;
 
         // case SPI_ERROR:
@@ -175,34 +173,16 @@ __attribute__((interrupt_handler)) static void _spi_isr(void) {
 
     *pPORTGIO_SET = HWAIT;
 
-    /// TODO: This test of length may not be necessary
-    ///       as interrupt is only enabled if length > 0.
-    //
-    if (g_spi.rx_length--) {
+    *g_spi.rx_buffer++ = *pSPI_RDBR;
 
-        *g_spi.rx_buffer++ = *pSPI_RDBR;
+    *pSPI_TDBR = *g_spi.tx_buffer++;
 
-        if (g_spi.rx_length == 0) {
+    if (--g_spi.trx_length == 0) {
 
-            _spi_interrupt_disable(SPI_DATA);
+        _spi_interrupt_disable(SPI_DATA_INT);
 
-            if (g_spi.rx_callback != NULL) {
-                g_spi.rx_callback();
-            }
-        }
-    }
-
-    if (g_spi.tx_length--) {
-
-        *pSPI_TDBR = *g_spi.tx_buffer++;
-
-        if (g_spi.tx_length == 0) {
-
-            _spi_interrupt_disable(SPI_DATA);
-
-            if (g_spi.tx_callback != NULL) {
-                g_spi.tx_callback();
-            }
+        if (g_spi.trx_callback != NULL) {
+            g_spi.trx_callback();
         }
     }
 
