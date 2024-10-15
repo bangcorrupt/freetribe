@@ -74,6 +74,8 @@ static bool g_spi_tx_complete = true;
 static int _cpu_spi_tx_dequeue(uint8_t *spi_byte);
 static void _cpu_spi_rx_enqueue(uint8_t *spi_byte);
 
+static void _cpu_spi_trx_byte(uint8_t *tx_byte, uint8_t *rx_byte);
+
 static void _cpu_spi_trx_callback();
 
 /*----- Extern function implementations ------------------------------*/
@@ -92,13 +94,12 @@ void dev_cpu_spi_init(void) {
     if (ring_buffer_init(&g_spi_tx_rbd, &tx_attr) ||
         ring_buffer_init(&g_spi_rx_rbd, &rx_attr) == 0) {
 
-        // Register callbacks before initialising to catch first interrupts.
-        per_spi_register_callback(EVT_SPI_TRX_COMPLETE, _cpu_spi_trx_callback);
-
         per_spi_init();
 
+        per_spi_register_callback(EVT_SPI_TRX_COMPLETE, _cpu_spi_trx_callback);
+
         // Initialise buffers to catch first interrupt.
-        per_spi_trx_int(&g_cpu_spi_tx_byte, &g_cpu_spi_rx_byte, 1);
+        _cpu_spi_trx_byte(&g_cpu_spi_tx_byte, &g_cpu_spi_rx_byte);
     }
 }
 
@@ -128,15 +129,22 @@ static void _cpu_spi_rx_enqueue(uint8_t *spi_byte) {
     ring_buffer_put_force(g_spi_rx_rbd, spi_byte);
 }
 
+static void _cpu_spi_trx_byte(uint8_t *tx_byte, uint8_t *rx_byte) {
+
+    per_spi_trx_int(tx_byte, rx_byte, 1);
+}
+
 static void _cpu_spi_trx_callback() {
 
     _cpu_spi_rx_enqueue(&g_cpu_spi_rx_byte);
 
+    // Transmit 0 if tx queue empty.
     if (_cpu_spi_tx_dequeue(&g_cpu_spi_tx_byte)) {
         g_cpu_spi_tx_byte = 0;
     };
 
-    per_spi_trx_int(&g_cpu_spi_tx_byte, &g_cpu_spi_rx_byte, 1);
+    // CPU leads, so always re-enable transfer to catch next byte.
+    _cpu_spi_trx_byte(&g_cpu_spi_tx_byte, &g_cpu_spi_rx_byte);
 }
 
 /*----- End of file --------------------------------------------------*/

@@ -250,6 +250,7 @@ void _dsp_spi_init(void) {
                                   _dsp_spi_rx_callback);
 
         g_dsp_spi_tx_complete = true;
+
         _dsp_spi_rx_byte();
     }
 }
