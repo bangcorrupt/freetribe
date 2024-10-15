@@ -43,6 +43,8 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
+#include <stdint.h>
+
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
@@ -58,6 +60,7 @@ typedef enum {
 
 void per_spi_init(void);
 void per_spi_register_callback(t_spi_event event, void (*callback)());
+void per_spi_trx_int(uint8_t *tx_buffer, uint8_t *rx_buffer, uint32_t length);
 
 #ifdef __cplusplus
 }

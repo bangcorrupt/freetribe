@@ -62,6 +62,9 @@ static uint8_t g_spi_rx_rbmem[SPI_RX_BUF_LEN];
 static rbd_t g_spi_tx_rbd;
 static uint8_t g_spi_tx_rbmem[SPI_TX_BUF_LEN];
 
+static uint8_t g_cpu_spi_rx_byte;
+static uint8_t g_cpu_spi_tx_byte;
+
 static bool g_spi_tx_complete = true;
 
 /*----- Extern variable definitions ----------------------------------*/
@@ -71,8 +74,8 @@ static bool g_spi_tx_complete = true;
 static int _cpu_spi_tx_dequeue(uint8_t *spi_byte);
 static void _cpu_spi_rx_enqueue(uint8_t *spi_byte);
 
-static void _cpu_spi_tx_callback(uint8_t *tx_byte);
-static void _cpu_spi_rx_callback(uint8_t *rx_byte);
+static void _cpu_spi_tx_callback();
+static void _cpu_spi_rx_callback();
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -93,6 +96,9 @@ void dev_cpu_spi_init(void) {
         // Register callbacks before initialising to catch first interrupts.
         per_spi_register_callback(SPI_TX_COMPLETE, _cpu_spi_tx_callback);
         per_spi_register_callback(SPI_RX_COMPLETE, _cpu_spi_rx_callback);
+
+        // Set buffers and length in peripheral driver.
+        _cpu_spi_tx_callback();
 
         per_spi_init();
     }
@@ -124,14 +130,18 @@ static void _cpu_spi_rx_enqueue(uint8_t *spi_byte) {
     ring_buffer_put_force(g_spi_rx_rbd, spi_byte);
 }
 
-static void _cpu_spi_tx_callback(uint8_t *tx_byte) {
+static void _cpu_spi_tx_callback() {
 
-    _cpu_spi_tx_dequeue(tx_byte);
+    if (_cpu_spi_tx_dequeue(&g_cpu_spi_tx_byte)) {
+        g_cpu_spi_tx_byte = 0;
+    };
+
+    per_spi_trx_int(&g_cpu_spi_tx_byte, &g_cpu_spi_rx_byte, 1);
 }
 
-static void _cpu_spi_rx_callback(uint8_t *rx_byte) {
-
-    _cpu_spi_rx_enqueue(rx_byte);
+static void _cpu_spi_rx_callback() {
+    //
+    _cpu_spi_rx_enqueue(&g_cpu_spi_rx_byte);
 }
 
 /*----- End of file --------------------------------------------------*/
