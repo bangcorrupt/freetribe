@@ -93,7 +93,8 @@ int main(void) {
 
     dma_init();
 
-    dev_cpu_spi_init();
+    // Initialise communication with CPU.
+    svc_cpu_task();
 
     sport0_init();
     // sport1_init();
@@ -115,6 +116,7 @@ int main(void) {
             // enable_interrupts();
         }
 
+        // Process communication with CPU.
         svc_cpu_task();
     }
 }

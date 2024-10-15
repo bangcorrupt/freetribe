@@ -174,6 +174,22 @@ void svc_cpu_task(void) {
 
 /*----- Static function implementations ------------------------------*/
 
+static t_status _cpu_init(void) {
+
+    t_status result = TASK_INIT_ERROR;
+
+    // Initialise CPU SPI device driver.
+    dev_cpu_spi_init();
+
+    // _transmit_message(MSG_TYPE_SYSTEM, SYSTEM_READY, NULL, 0);
+
+    /// TODO: Handhsake.
+
+    result = SUCCESS;
+
+    return result;
+}
+
 /// TODO: Return status.
 static void _transmit_message(uint8_t msg_type, uint8_t msg_id,
                               uint8_t *payload, uint8_t length) {
@@ -188,19 +204,6 @@ static void _transmit_message(uint8_t msg_type, uint8_t msg_id,
     while (length--) {
         dev_cpu_spi_tx_enqueue(payload++);
     }
-}
-
-static t_status _cpu_init(void) {
-
-    t_status result = TASK_INIT_ERROR;
-
-    // _transmit_message(MSG_TYPE_SYSTEM, SYSTEM_READY, NULL, 0);
-
-    /// TODO: Handhsake.
-
-    result = SUCCESS;
-
-    return result;
 }
 
 /// TODO: Move to separate module.
