@@ -44,6 +44,8 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
+#include "types.h"
+
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
@@ -51,6 +53,10 @@ extern "C" {
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
+
+void dev_codec_init(void);
+void dev_codec_transmit(fract32 *output);
+void dev_codec_receive(fract32 *input);
 
 #ifdef __cplusplus
 }

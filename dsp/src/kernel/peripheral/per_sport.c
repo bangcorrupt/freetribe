@@ -42,6 +42,8 @@ under the terms of the GNU Affero General Public License as published by
 #include <blackfin.h>
 #include <builtins.h>
 
+#include "types.h"
+
 #include "per_sport.h"
 
 /*----- Macros -------------------------------------------------------*/
@@ -51,6 +53,10 @@ under the terms of the GNU Affero General Public License as published by
 #define DTYPE_SIGX 0x0004 /* SPORTx RCR1 Data Format Sign Extend */
 
 /*----- Typedefs -----------------------------------------------------*/
+
+typedef struct {
+
+} t_sport;
 
 /*----- Static variable definitions ----------------------------------*/
 
@@ -221,13 +227,11 @@ __attribute__((interrupt_handler)) static void _sport0_isr(void) {
     *pDMA3_IRQ_STATUS = DMA_DONE;
     ssync();
 
-    // TODO: DMA ping-pong block buffer.
+    /// TODO: DMA ping-pong block buffer.
 
     // Get input from codec.
     g_codec_in[0] = g_codec_rx_buffer[0];
     g_codec_in[1] = g_codec_rx_buffer[1];
-
-    // TODO: Is CPU MCASP clock actually connected?
 
     // Send output to codec.
     g_codec_tx_buffer[0] = g_codec_out[0];
