@@ -130,12 +130,7 @@ void per_spi_trx_int(uint8_t *tx_buffer, uint8_t *rx_buffer, uint32_t length) {
         g_spi.tx_length = length;
     }
 
-    /// TODO: Interrupt is enabled in init function
-    ///       and is never disabled, as the CPU leads
-    ///       the transfer.  When porting to a system
-    ///       where the Blackfin is the main application
-    ///       processor, this driver will need modifying
-    ///       similar to the CPU SPI Peripheral driver.
+    /// TODO: Only enable interrupt once buffers configured.
 }
 
 void per_spi_register_callback(t_spi_event event, void (*callback)()) {
@@ -163,11 +158,13 @@ __attribute__((interrupt_handler)) static void _spi_rx_isr(void) {
 
     *pPORTGIO_SET = HWAIT;
 
+    /// TODO: Disable interrupt once buffers handled.
+
     if (g_spi.rx_length--) {
 
         *g_spi.rx_buffer++ = *pSPI_RDBR;
 
-        if (g_spi.tx_length == 0) {
+        if (g_spi.rx_length == 0) {
 
             if (g_spi.rx_callback != NULL) {
                 g_spi.rx_callback();
