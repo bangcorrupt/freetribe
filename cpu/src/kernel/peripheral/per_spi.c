@@ -372,11 +372,6 @@ static inline void _spi_isr(t_spi *spi) {
                     }
                 }
             }
-            /// TODO: Should disable interrupts if triggered
-            ///       when buffer length is zero.
-            ///       This should never happen,
-            ///       as interrupt is only enabled if
-            ///       buffers set correctly.
             break;
 
         /// TODO: Interrogate source of error and trigger callback.
