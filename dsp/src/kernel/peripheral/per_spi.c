@@ -72,7 +72,7 @@ static t_spi g_spi;
 
 /*----- Static function prototypes -----------------------------------*/
 
-static void _spi_rx_isr(void) __attribute__((interrupt_handler));
+static void _spi_isr(void) __attribute__((interrupt_handler));
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -84,7 +84,7 @@ void per_spi_init(void) {
     *pSIC_IAR2 |= P21_IVG(11);
     ssync();
 
-    *pEVT11 = &_spi_rx_isr;
+    *pEVT11 = &_spi_isr;
 
     // Enable SPI Rx interrupt.
     *pSIC_IMASK0 |= IRQ_DMA7; // Not actually using DMA.
@@ -154,7 +154,7 @@ void per_spi_register_callback(t_spi_event event, void (*callback)()) {
 
 /*----- Static function implementations ------------------------------*/
 
-__attribute__((interrupt_handler)) static void _spi_rx_isr(void) {
+__attribute__((interrupt_handler)) static void _spi_isr(void) {
 
     *pPORTGIO_SET = HWAIT;
 
