@@ -98,7 +98,7 @@ void dev_cpu_spi_init(void) {
 
         per_spi_register_callback(EVT_SPI_TRX_COMPLETE, _cpu_spi_trx_callback);
 
-        // Initialise buffers to catch first interrupt.
+        // Initialise transfer.
         _cpu_spi_trx_byte(&g_cpu_spi_tx_byte, &g_cpu_spi_rx_byte);
     }
 }
