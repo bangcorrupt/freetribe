@@ -114,13 +114,10 @@ static void _tick_callback(void) {
 
     static uint16_t led_count;
 
-    if (led_count >= LED_TICK_DIV) {
+    if (led_count++ >= LED_TICK_DIV) {
 
         g_toggle_led = true;
         led_count = 0;
-
-    } else {
-        led_count++;
     }
 }
 
