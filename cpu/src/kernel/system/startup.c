@@ -67,8 +67,8 @@ under the terms of the GNU Affero General Public License as published by
  *
  * @brief Configures the PLL registers to achieve the required Operating
  *        frequency. Power and sleep controller is activated for UART and
- *        Interuppt controller. Interrupt vector is copied to the shared Ram.
- *        After doing all the above, controller is given to the application.
+ *        Interrupt controller. Interrupt vector is copied to the ARM RAM
+ *        before calling main().
  */
 
 /*----- Includes -----------------------------------------------------*/
