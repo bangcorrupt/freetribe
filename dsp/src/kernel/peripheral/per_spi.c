@@ -87,37 +87,38 @@ void per_spi_init(void) {
 
     *pPORTGIO_SET = HWAIT;
 
-    // SPI Rx interrupt IVG11.
-    *pSIC_IAR2 |= P21_IVG(11);
-    ssync();
-
-    *pEVT11 = &_spi_isr;
-
-    int i;
-    // unmask in the core event processor
-    asm volatile("cli %0; bitset(%0, 11); sti %0; csync;" : "+d"(i));
-    ssync();
-
-    // don't attempt to drive the clock
+    // Don't attempt to drive the clock.
     *pSPI_BAUD = 0;
 
-    // reset the flags register? to defaults?
+    // Reset the flags register to defaults.
     *pSPI_FLG = 0xff00;
 
     // 8 bit, MSB first, non-dma rx mode.
     // Interrupt when SPI_RDBR is full.
     *pSPI_CTL = SZ | EMISO;
+
+    // Clear tx register.
+    *pSPI_TDBR = 0;
+
+    // SPI data interrupt IVG11.
+    *pSIC_IAR2 |= P21_IVG(11);
+
+    *pEVT11 = &_spi_isr;
+
+    int i;
+    // Unmask in the core event processor
+    asm volatile("cli %0; bitset(%0, 11); sti %0; csync;" : "+d"(i));
     ssync();
 
-    // enable spi.
+    // Enable SPI.
     *pSPI_CTL |= SPE;
     ssync();
 
-    // clear the spi rx register by reading from it
+    // Clear the SPI rx register by reading from it.
     int j = *pSPI_RDBR;
     (void)j;
 
-    // clear the rx error bit (sticky - W1C)
+    // Clear the Rx error bit (sticky - W1C).
     *pSPI_STAT |= 0x10;
 
     *pPORTGIO_CLEAR = HWAIT;
