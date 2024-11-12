@@ -106,7 +106,7 @@ void per_spi_init(void) {
     *pEVT11 = &_spi_isr;
 
     int i;
-    // Unmask in the core event processor
+    // Unmask in the core event processor.
     asm volatile("cli %0; bitset(%0, 11); sti %0; csync;" : "+d"(i));
     ssync();
 
