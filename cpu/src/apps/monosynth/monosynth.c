@@ -156,6 +156,7 @@ t_status app_init(void) {
     // Initialise GUI.
     gui_task();
 
+    ft_print("MonoSynth Example");
     gui_print(4, 7, "MonoSynth Example");
 
     status = SUCCESS;
