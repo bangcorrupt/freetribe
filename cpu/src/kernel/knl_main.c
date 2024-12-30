@@ -138,13 +138,15 @@ static t_status _kernel_init(void) {
     // Initialise MIDI early to catch kernel print.
     svc_midi_task();
     svc_system_register_print_callback(_print_callback);
-    //
+
+    svc_system_print("Welcome to Freetribe!\n");
+
     svc_system_print("Hardware initialised.\n");
 
     // Initialise timers.
     systick_init();
     systick_register_callback(_systick_callback);
-    //
+
     svc_panel_register_callback(PANEL_ACK_EVENT, _panel_ack_callback);
     svc_panel_register_callback(HELD_BUTTONS_EVENT, _held_buttons_callback);
 
