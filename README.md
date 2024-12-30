@@ -47,8 +47,7 @@ Some of these are in progress, most should be possible.
 ### Support for You
 
 If you need help with this project, please visit the
-[Freetribe discussion forum](https://github.com/bangcorrupt/freetribe/discussions)
-on Github.
+[Freetribe discussion forum](https://github.com/bangcorrupt/freetribe/discussions).
 
 ### Support for Me
 
