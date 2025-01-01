@@ -44,12 +44,12 @@ Some of these are in progress, most should be possible.
 - Embedded Lua and MicroPython.
 - Support for sync ports.
 
-### Support for You
+## Support for You
 
 If you need help with this project, please visit the
 [Freetribe discussion forum](https://github.com/bangcorrupt/freetribe/discussions).
 
-### Support for Me
+## Support for Me
 
 Freetribe is free (as in GPL) and always will be. If you would like to support
 my work you are most welcome to
@@ -57,7 +57,7 @@ my work you are most welcome to
 because people sponsored Hacktribe. Your support helps keep me motivated,
 fuelled and focussed.
 
-### Acknowledgements
+## Acknowledgements
 
 Freetribe would be almost impossible without other open-source projects. The CPU
 drivers are based on [StarterWare](https://www.ti.com/tool/STARTERWARE-SITARA)
