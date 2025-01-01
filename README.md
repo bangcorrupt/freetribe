@@ -82,6 +82,6 @@ interface for user applications.
 
 Special thanks to countless stackoverflow users.
 
-### License
+## License
 
 AGPL-3.0-or-later.
