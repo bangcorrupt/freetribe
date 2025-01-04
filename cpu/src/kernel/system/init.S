@@ -192,8 +192,3 @@ paint:
 @ End of the file
 @
          .end
-    
-    
-
-
-
