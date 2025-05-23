@@ -53,6 +53,7 @@ extern "C" {
 
 void dev_board_init(void);
 void dev_board_terminate(void);
+void dev_board_power_off(void);
 
 #ifdef __cplusplus
 }

@@ -120,6 +120,8 @@ void dev_board_terminate(void) {
     _hardware_terminate();
 }
 
+void dev_board_power_off(void) { per_gpio_set(7, 14, 0); }
+
 /*
  * @brief   Set GPIO to initialise board hardware?
  *
@@ -130,7 +132,6 @@ void dev_board_terminate(void) {
 static void _hardware_init(void) {
 
     /// TODO: What does each pin represent?
-    ///       Refactor to use GPIO peripheral driver.
 
     // MCU out of reset.
     per_gpio_set_indexed(105, 1); // Set GP6P8
@@ -138,6 +139,7 @@ static void _hardware_init(void) {
     per_gpio_set_indexed(103, 1); // Set GP6P6
 
     // Only red lights if not set.
+    // Something with power controller,
     per_gpio_set_indexed(126, 1); // Set GP7P13
 
     delay_block_us(60);
@@ -158,14 +160,11 @@ static void _hardware_init(void) {
 
     per_gpio_set_indexed(124, 1); // Set GP7P11
 
-    /// TODO: What is this for?
+    /// TODO: What are these for?
     //
     // This is set during boot, then toggles continuously while app running.
     per_gpio_set(6, 11, 1); // Set GP6P11
-
-    /// TODO: What are these for?
     //
-    // per_gpio_set(6, 9, 1);  // Set GP6P9
     // per_gpio_set(6, 12, 1); // Set GP6P12
 }
 
