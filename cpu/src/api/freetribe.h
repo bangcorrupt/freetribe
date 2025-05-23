@@ -106,6 +106,8 @@ void ft_set_module_param(uint16_t module_id, uint16_t param_index,
 
 void ft_get_module_param(uint8_t module_id, uint16_t param_index);
 
+void ft_shutdown(void);
+
 #ifdef __cplusplus
 }
 #endif

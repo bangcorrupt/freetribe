@@ -97,6 +97,8 @@ void svc_system_task(void) {
     }
 }
 
+/// TODO: Implement standard library IO via SysEx.
+//
 void svc_system_print(char *text) {
 
     if (p_print_callback != NULL) {
@@ -109,6 +111,12 @@ void svc_system_register_print_callback(void (*callback)(char *)) {
     if (callback != NULL) {
         p_print_callback = callback;
     }
+}
+
+void svc_system_shutdown(void) {
+
+    dev_board_terminate();
+    dev_board_power_off();
 }
 
 /*----- Static function implementations ------------------------------*/

@@ -257,6 +257,11 @@ void ft_get_module_param(uint8_t module_id, uint16_t param_index) {
     svc_dsp_get_module_param(module_id, param_index);
 }
 
+/**
+ * @brief   Shutdown the system.
+ */
+void ft_shutdown(void) { svc_system_shutdown(); }
+
 /*----- Static function implementations ------------------------------*/
 
 /*----- End of file --------------------------------------------------*/
