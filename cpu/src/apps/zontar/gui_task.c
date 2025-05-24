@@ -52,7 +52,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros -------------------------------------------------------*/
 
-#define GUI_EVENT_BUF_LEN 0x20
+#define GUI_EVENT_QUEUE_LEN 0x20
 #define GUI_MAX_STRING_LEN 18 // FONT_6X8
 
 /*----- Typedefs -----------------------------------------------------*/
@@ -86,7 +86,7 @@ static UG_DEVICE g_device;
 
 // GUI event ring buffer.
 static rbd_t g_gui_rbd;
-static char g_gui_rbmem[GUI_EVENT_BUF_LEN][sizeof(t_gui_event)];
+static char g_gui_rbmem[GUI_EVENT_QUEUE_LEN][sizeof(t_gui_event)];
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -226,7 +226,7 @@ static t_status _init(void) {
 
     t_status result = TASK_INIT_ERROR;
 
-    // Rx ring buffer attributes.
+    // Event queue buffer attributes.
     rb_attr_t rb_attr = {sizeof(g_gui_rbmem[0]), ARRAY_SIZE(g_gui_rbmem),
                          g_gui_rbmem};
 
@@ -274,25 +274,25 @@ static void _run(void) {
     }
 }
 
-t_status _parse_event(t_gui_event *event) {
+t_status _parse_event(t_gui_event *p_event) {
 
     t_status result = ERROR;
 
-    switch (event->type) {
+    switch (p_event->type) {
 
     case GUI_PRINT_STRING:
-        UG_PutString(event->x_start, event->y_start, event->text);
+        UG_PutString(p_event->x_start, p_event->y_start, p_event->text);
         result = SUCCESS;
         break;
 
     case GUI_POST_STRING:
-        UG_ConsolePutString(event->text);
+        UG_ConsolePutString(p_event->text);
         result = SUCCESS;
         break;
 
     case GUI_DRAW_LINE:
-        UG_DrawLine(event->x_start, event->y_start, event->x_end, event->y_end,
-                    event->colour);
+        UG_DrawLine(p_event->x_start, p_event->y_start, p_event->x_end,
+                    p_event->y_end, p_event->colour);
         result = SUCCESS;
         break;
 

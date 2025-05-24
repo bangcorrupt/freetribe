@@ -29,21 +29,32 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    template_task.c
+ * @file    zoia_task.c
  *
- * @brief   Template for task state machine source files.
+ * @brief   Task to control ZOIA via MIDI.
  *
  */
 
 /*----- Includes -----------------------------------------------------*/
 
-#include "ft_error.h"
+#include "freetribe.h"
+#include "zoia_queue.h"
 
 /*----- Macros -------------------------------------------------------*/
 
+// 1 ms in microseconds.
+#define DELAY_TIME 1000
+
+#define ZOIA_BUTTON_BACK 0x2a
+
 /*----- Typedefs -----------------------------------------------------*/
 
-typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } e_template_task_state;
+typedef enum {
+    STATE_INIT,
+    STATE_RUN,
+    STATE_ERROR,
+    STATE_DELAY,
+} e_zoia_task_state;
 
 /*----- Static variable definitions ----------------------------------*/
 
@@ -51,27 +62,65 @@ typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } e_template_task_state;
 
 /*----- Static function prototypes -----------------------------------*/
 
-static t_status _template_init(void);
-static void _template_run(void);
+static t_status _zoia_init(void);
+static void _event_parse(t_zoia_event *event);
 
 /*----- Extern function implementations ------------------------------*/
 
-void svc_template_task(void) {
+void zoia_task(void) {
 
-    static e_template_task_state state = STATE_INIT;
+    static e_zoia_task_state state = STATE_INIT;
+
+    static t_zoia_event event;
+
+    static t_delay_state delay;
 
     switch (state) {
 
-    // Initialise template task.
+    // Initialise zoia task.
     case STATE_INIT:
-        if (error_check(_template_init()) == SUCCESS) {
+
+        if (_zoia_init() == SUCCESS) {
             state = STATE_RUN;
         }
         // Remain in INIT state until initialisation successful.
         break;
 
     case STATE_RUN:
-        _template_run();
+
+        if (zoia_dequeue(&event) == SUCCESS) {
+
+            if (event.value == ZOIA_BUTTON_BACK && event.type == ZOIA_RELEASE) {
+                state = STATE_DELAY;
+
+            } else {
+                _event_parse(&event);
+            }
+
+        } else {
+            state = STATE_ERROR;
+        }
+
+        break;
+
+    case STATE_DELAY:
+
+        // Initialise delay.
+        ft_start_delay(&delay, DELAY_TIME);
+
+        // Wait for delay.
+        if (ft_delay(&delay)) {
+
+            // Parse delayed event.
+            _event_parse(&event);
+
+            // Reset start time.
+            ft_start_delay(&delay, DELAY_TIME);
+
+            // Move back to RUN state.
+            state = STATE_RUN;
+        }
+
         break;
 
     case STATE_ERROR:
@@ -88,20 +137,36 @@ void svc_template_task(void) {
 
 /*----- Static function implementations ------------------------------*/
 
-static t_status _template_init(void) {
+static t_status _zoia_init(void) {
 
     t_status result = TASK_INIT_ERROR;
 
-    // Initialise...
+    zoia_queue_init();
 
     result = SUCCESS;
 
     return result;
 }
 
-static void _template_run(void) {
+static void _event_parse(t_zoia_event *p_event) {
 
-    // Run...
+    switch (p_event->type) {
+
+    case ZOIA_BYPASS:
+        break;
+
+    case ZOIA_PRESS:
+        break;
+
+    case ZOIA_RELEASE:
+        break;
+
+    case ZOIA_TURN:
+        break;
+
+    default:
+        break;
+    }
 }
 
 /*----- End of file --------------------------------------------------*/

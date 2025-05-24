@@ -29,79 +29,52 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    template_task.c
+ * @file    zoia_queue.h
  *
- * @brief   Template for task state machine source files.
+ * @brief   Public API for ZOIA controller event queue..
  *
  */
 
+#ifndef ZOIA_QUEUE_H
+#define ZOIA_QUEUE_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*----- Includes -----------------------------------------------------*/
 
-#include "ft_error.h"
+#include "freetribe.h"
 
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
 
-typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } e_template_task_state;
+typedef enum {
+    ZOIA_BYPASS,
+    ZOIA_PRESS,
+    ZOIA_RELEASE,
+    ZOIA_TURN,
 
-/*----- Static variable definitions ----------------------------------*/
+    ZOIA_EVENT_COUNT
+} e_zoia_event;
 
-/*----- Extern variable definitions ----------------------------------*/
+typedef struct {
+    e_zoia_event type;
+    uint8_t value;
+} t_zoia_event;
 
-/*----- Static function prototypes -----------------------------------*/
+/*----- Extern variable declarations ---------------------------------*/
 
-static t_status _template_init(void);
-static void _template_run(void);
+/*----- Extern function prototypes -----------------------------------*/
 
-/*----- Extern function implementations ------------------------------*/
+t_status zoia_queue_init(void);
+t_status zoia_enqueue(t_zoia_event *event);
+t_status zoia_dequeue(t_zoia_event *event);
 
-void svc_template_task(void) {
-
-    static e_template_task_state state = STATE_INIT;
-
-    switch (state) {
-
-    // Initialise template task.
-    case STATE_INIT:
-        if (error_check(_template_init()) == SUCCESS) {
-            state = STATE_RUN;
-        }
-        // Remain in INIT state until initialisation successful.
-        break;
-
-    case STATE_RUN:
-        _template_run();
-        break;
-
-    case STATE_ERROR:
-        error_check(UNRECOVERABLE_ERROR);
-        break;
-
-    default:
-        if (error_check(UNHANDLED_STATE_ERROR) != SUCCESS) {
-            state = STATE_ERROR;
-        }
-        break;
-    }
+#ifdef __cplusplus
 }
-
-/*----- Static function implementations ------------------------------*/
-
-static t_status _template_init(void) {
-
-    t_status result = TASK_INIT_ERROR;
-
-    // Initialise...
-
-    result = SUCCESS;
-
-    return result;
-}
-
-static void _template_run(void) {
-
-    // Run...
-}
+#endif
+#endif
 
 /*----- End of file --------------------------------------------------*/

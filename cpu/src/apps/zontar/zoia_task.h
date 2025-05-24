@@ -29,22 +29,19 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    zoia-interface.h
+ * @file    zoia_task.h
  *
- * @brief   Public API for ZOIA interface.
- *
+ * @brief   Public API for ZOIA control task.
  */
 
-#ifndef ZOIA_INTERFACE_H
-#define ZOIA_INTERFACE_H
+#ifndef ZOIA_TASK_H
+#define ZOIA_TASK_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*----- Includes -----------------------------------------------------*/
-
-#include <stdint.h>
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -54,9 +51,7 @@ extern "C" {
 
 /*----- Extern function prototypes -----------------------------------*/
 
-void zoia_encoder(int32_t clicks);
-void zoia_home(void);
-void zoia_patch_set(uint8_t patch_index);
+void zoia_task(void);
 
 #ifdef __cplusplus
 }

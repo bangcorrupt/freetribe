@@ -29,21 +29,24 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    template_task.c
+ * @file    zoia_interface.c
  *
- * @brief   Template for task state machine source files.
- *
+ * @brief   MIDI interface to ZOIA.
  */
 
 /*----- Includes -----------------------------------------------------*/
 
-#include "ft_error.h"
+#include <stdint.h>
+#include <stdlib.h>
+
+#include "freetribe.h"
+
+#include "zoia_interface.h"
+#include "zoia_queue.h"
 
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
-
-typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } e_template_task_state;
 
 /*----- Static variable definitions ----------------------------------*/
 
@@ -51,57 +54,68 @@ typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } e_template_task_state;
 
 /*----- Static function prototypes -----------------------------------*/
 
-static t_status _template_init(void);
-static void _template_run(void);
+static void _encoder_inc(uint32_t clicks);
+static void _encoder_dec(uint32_t clicks);
 
 /*----- Extern function implementations ------------------------------*/
 
-void svc_template_task(void) {
+void zoia_encoder(int32_t clicks) {
 
-    static e_template_task_state state = STATE_INIT;
+    if (clicks > 0) {
+        _encoder_inc(clicks);
 
-    switch (state) {
-
-    // Initialise template task.
-    case STATE_INIT:
-        if (error_check(_template_init()) == SUCCESS) {
-            state = STATE_RUN;
-        }
-        // Remain in INIT state until initialisation successful.
-        break;
-
-    case STATE_RUN:
-        _template_run();
-        break;
-
-    case STATE_ERROR:
-        error_check(UNRECOVERABLE_ERROR);
-        break;
-
-    default:
-        if (error_check(UNHANDLED_STATE_ERROR) != SUCCESS) {
-            state = STATE_ERROR;
-        }
-        break;
+    } else if (clicks < 0) {
+        _encoder_dec(abs(clicks));
     }
+}
+
+/// TODO: This triggers a bug in ZOIA.
+//
+void zoia_home(void) {
+
+    int i;
+    for (i = 0; i < 5; i++) {
+
+        ft_send_cc(0, 61, 42);
+        ft_send_cc(0, 62, 42);
+    }
+}
+
+void zoia_patch_set(uint8_t patch_index) {
+
+    patch_index = patch_index > 63 ? 63 : patch_index;
+
+    zoia_home();
+
+    zoia_encoder(-64);
+
+    zoia_encoder(patch_index);
 }
 
 /*----- Static function implementations ------------------------------*/
 
-static t_status _template_init(void) {
+static void _encoder_inc(uint32_t clicks) {
 
-    t_status result = TASK_INIT_ERROR;
+    while (clicks > 63) {
 
-    // Initialise...
+        ft_send_cc(0, 63, 127);
 
-    result = SUCCESS;
+        clicks -= 63;
+    }
 
-    return result;
+    ft_send_cc(0, 63, 64 + clicks);
 }
 
-static void _template_run(void) {
+static void _encoder_dec(uint32_t clicks) {
 
-    // Run...
+    while (clicks > 63) {
+
+        ft_send_cc(0, 63, 0);
+
+        clicks -= 63;
+    }
+
+    ft_send_cc(0, 63, 64 - clicks);
 }
 
 /*----- End of file --------------------------------------------------*/

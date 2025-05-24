@@ -29,92 +29,65 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    zoia-interface.c
+ * @file    zoia_queue.c
  *
- * @brief   MIDI interface to ZOIA.
+ * @brief   Event queue for ZOIA controller.
  */
 
 /*----- Includes -----------------------------------------------------*/
 
-#include <stdint.h>
-#include <stdlib.h>
+#include "ring_buffer.h"
 
-#include "freetribe.h"
-
-#include "zoia-interface.h"
+#include "zoia_queue.h"
 
 /*----- Macros -------------------------------------------------------*/
+
+#define ZOIA_EVENT_QUEUE_LEN 0x20
 
 /*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 
+// Event queue ring buffer.
+static rbd_t g_zoia_rbd;
+static char g_zoia_rbmem[ZOIA_EVENT_QUEUE_LEN][sizeof(t_zoia_event)];
+
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
 
-static void _encoder_inc(uint32_t clicks);
-static void _encoder_dec(uint32_t clicks);
-
 /*----- Extern function implementations ------------------------------*/
 
-void zoia_encoder(int32_t clicks) {
+t_status zoia_queue_init(void) {
 
-    if (clicks > 0) {
-        _encoder_inc(clicks);
+    t_status result = ERROR;
 
-    } else if (clicks < 0) {
-        _encoder_dec(abs(clicks));
+    // Event queue buffer attributes.
+    rb_attr_t rb_attr = {sizeof(g_zoia_rbmem[0]), ARRAY_SIZE(g_zoia_rbmem),
+                         g_zoia_rbmem};
+
+    if (ring_buffer_init(&g_zoia_rbd, &rb_attr) == SUCCESS) {
+
+        // Do any other initialisation...
+
+        result = SUCCESS;
     }
+
+    return result;
 }
 
-/// TODO: This triggers a bug in ZOIA.
-//
-void zoia_home(void) {
+t_status zoia_enqueue(t_zoia_event *p_event) {
 
-    int i;
-    for (i = 0; i < 5; i++) {
-
-        ft_send_cc(0, 61, 42);
-        ft_send_cc(0, 62, 42);
-    }
+    // Returns 0 if SUCCESS.
+    return ring_buffer_put(g_zoia_rbd, p_event);
 }
 
-void zoia_patch_set(uint8_t patch_index) {
+t_status zoia_dequeue(t_zoia_event *p_event) {
 
-    patch_index = patch_index > 63 ? 63 : patch_index;
-
-    zoia_home();
-
-    zoia_encoder(-64);
-
-    zoia_encoder(patch_index);
+    // Returns 0 if SUCCESS.
+    return ring_buffer_get(g_zoia_rbd, p_event);
 }
 
 /*----- Static function implementations ------------------------------*/
-
-static void _encoder_inc(uint32_t clicks) {
-
-    while (clicks > 63) {
-
-        ft_send_cc(0, 63, 127);
-
-        clicks -= 63;
-    }
-
-    ft_send_cc(0, 63, 64 + clicks);
-}
-
-static void _encoder_dec(uint32_t clicks) {
-
-    while (clicks > 63) {
-
-        ft_send_cc(0, 63, 0);
-
-        clicks -= 63;
-    }
-
-    ft_send_cc(0, 63, 64 - clicks);
-}
 
 /*----- End of file --------------------------------------------------*/
