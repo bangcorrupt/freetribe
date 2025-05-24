@@ -18,3 +18,4 @@ compile_commands.json
 *.elf
 *.out
 cpu/src/resources/bfin_ldr.h
+run.sh
