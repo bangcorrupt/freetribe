@@ -72,6 +72,19 @@ void zoia_encoder(int32_t clicks) {
     }
 }
 
+void zoia_enter(void) {
+
+    g_event.value = ZOIA_VALUE_ENCODER;
+
+    g_event.type = ZOIA_EVENT_PRESS;
+
+    zoia_enqueue(&g_event);
+
+    g_event.type = ZOIA_EVENT_RELEASE;
+
+    zoia_enqueue(&g_event);
+}
+
 void zoia_home(void) {
 
     int i;

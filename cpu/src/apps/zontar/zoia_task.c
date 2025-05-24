@@ -45,10 +45,8 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros -------------------------------------------------------*/
 
-// 1 ms in microseconds.
-#define DELAY_TIME 1000
-
-#define ZOIA_BUTTON_BACK 0x2a
+// 50 ms in microseconds.
+#define DELAY_TIME 50000
 
 /*----- Typedefs -----------------------------------------------------*/
 
@@ -93,25 +91,19 @@ void zoia_task(void) {
 
         if (zoia_dequeue(&event) == SUCCESS) {
 
-            if (event.value == ZOIA_BUTTON_BACK &&
-                event.type == ZOIA_EVENT_RELEASE) {
+            if (event.value == ZOIA_VALUE_BACK &&
+                event.type == ZOIA_EVENT_PRESS) {
 
+                ft_start_delay(&delay, DELAY_TIME);
                 state = STATE_DELAY;
 
             } else {
                 _event_parse(&event);
             }
-
-        } else {
-            state = STATE_ERROR;
         }
-
         break;
 
     case STATE_DELAY:
-
-        // Initialise delay.
-        ft_start_delay(&delay, DELAY_TIME);
 
         // Wait for delay.
         if (ft_delay(&delay)) {
@@ -125,7 +117,6 @@ void zoia_task(void) {
             // Move back to RUN state.
             state = STATE_RUN;
         }
-
         break;
 
     case STATE_ERROR:

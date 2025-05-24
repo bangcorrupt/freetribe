@@ -68,6 +68,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #define BUTTON_MENU 0x09
 #define BUTTON_SHIFT 0x0a
+#define BUTTON_EXIT 0x0d
 #define BUTTON_AMP_EG 0x20
 #define BUTTON_LPF 0x12
 #define BUTTON_HPF 0x14
@@ -83,6 +84,8 @@ under the terms of the GNU Affero General Public License as published by
 
 static t_keyboard g_kbd;
 static t_scale g_scale;
+
+static bool g_shift_held;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -266,14 +269,24 @@ static void _button_callback(uint8_t index, bool state) {
 
     case BUTTON_MENU:
         if (state) {
-            //
+            zoia_enter();
+        }
+        break;
+
+    case BUTTON_EXIT:
+        if (state) {
+
+            if (g_shift_held) {
+                zoia_home();
+
+            } else {
+                zoia_back();
+            }
         }
         break;
 
     case BUTTON_SHIFT:
-        if (state) {
-            //
-        }
+        g_shift_held = state;
         break;
 
     case BUTTON_AMP_EG:
@@ -284,7 +297,7 @@ static void _button_callback(uint8_t index, bool state) {
 
     case BUTTON_LPF:
         if (state) {
-            //
+            ft_shutdown();
         }
         break;
 

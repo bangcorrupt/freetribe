@@ -58,6 +58,7 @@ extern "C" {
 #define ZOIA_VALUE_BACK 42
 #define ZOIA_VALUE_SHIFT 43
 #define ZOIA_VALUE_STOMP_RIGHT 124
+#define ZOIA_VALUE_ENCODER 127
 
 /*----- Typedefs -----------------------------------------------------*/
 

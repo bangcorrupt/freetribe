@@ -226,7 +226,7 @@ static t_status _init(void) {
 
     t_status result = TASK_INIT_ERROR;
 
-    // Event queue buffer attributes.
+    // Rx ring buffer attributes.
     rb_attr_t rb_attr = {sizeof(g_gui_rbmem[0]), ARRAY_SIZE(g_gui_rbmem),
                          g_gui_rbmem};
 
@@ -274,25 +274,25 @@ static void _run(void) {
     }
 }
 
-t_status _parse_event(t_gui_event *p_event) {
+t_status _parse_event(t_gui_event *event) {
 
     t_status result = ERROR;
 
-    switch (p_event->type) {
+    switch (event->type) {
 
     case GUI_PRINT_STRING:
-        UG_PutString(p_event->x_start, p_event->y_start, p_event->text);
+        UG_PutString(event->x_start, event->y_start, event->text);
         result = SUCCESS;
         break;
 
     case GUI_POST_STRING:
-        UG_ConsolePutString(p_event->text);
+        UG_ConsolePutString(event->text);
         result = SUCCESS;
         break;
 
     case GUI_DRAW_LINE:
-        UG_DrawLine(p_event->x_start, p_event->y_start, p_event->x_end,
-                    p_event->y_end, p_event->colour);
+        UG_DrawLine(event->x_start, event->y_start, event->x_end, event->y_end,
+                    event->colour);
         result = SUCCESS;
         break;
 
