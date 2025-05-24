@@ -29,14 +29,14 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    zoia_queue.h
+ * @file    zoia_control.h
  *
- * @brief   Public API for ZOIA controller event queue..
+ * @brief   Publice API for ZOIA MIDI control change.
  *
  */
 
-#ifndef ZOIA_QUEUE_H
-#define ZOIA_QUEUE_H
+#ifndef ZOIA_CONTROL_H
+#define ZOIA_CONTROL_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,33 +44,31 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
-#include "freetribe.h"
+#include <stdint.h>
 
 /*----- Macros -------------------------------------------------------*/
 
+#define ZOIA_CC_BYPASS 60
+#define ZOIA_CC_PRESS 61
+#define ZOIA_CC_RELEASE 62
+#define ZOIA_CC_TURN 63
+
+#define ZOIA_VALUE_TOGGLE 64
+
+#define ZOIA_VALUE_BACK 42
+#define ZOIA_VALUE_SHIFT 43
+#define ZOIA_VALUE_STOMP_RIGHT 124
+
 /*----- Typedefs -----------------------------------------------------*/
-
-typedef enum {
-    ZOIA_EVENT_BYPASS,
-    ZOIA_EVENT_PRESS,
-    ZOIA_EVENT_RELEASE,
-    ZOIA_EVENT_TURN,
-
-    ZOIA_EVENT_COUNT
-} e_zoia_event;
-
-typedef struct {
-    e_zoia_event type;
-    uint8_t value;
-} t_zoia_event;
 
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
 
-t_status zoia_queue_init(void);
-t_status zoia_enqueue(t_zoia_event *event);
-t_status zoia_dequeue(t_zoia_event *event);
+void zoia_bypass(uint8_t value);
+void zoia_press(uint8_t value);
+void zoia_release(uint8_t value);
+void zoia_turn(uint8_t value);
 
 #ifdef __cplusplus
 }

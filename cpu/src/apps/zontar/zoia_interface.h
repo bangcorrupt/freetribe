@@ -55,6 +55,7 @@ extern "C" {
 /*----- Extern function prototypes -----------------------------------*/
 
 void zoia_encoder(int32_t clicks);
+void zoia_back(void);
 void zoia_home(void);
 void zoia_patch_set(uint8_t patch_index);
 

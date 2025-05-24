@@ -29,21 +29,16 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    zoia_interface.c
+ * @file    zoia_control.c
  *
- * @brief   MIDI interface to ZOIA.
+ * @brief   Send MIDI control change to ZOIA.
  */
 
 /*----- Includes -----------------------------------------------------*/
 
-#include <stdint.h>
-#include <stdlib.h>
-
 #include "freetribe.h"
 
 #include "zoia_control.h"
-#include "zoia_interface.h"
-#include "zoia_queue.h"
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -51,93 +46,47 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Static variable definitions ----------------------------------*/
 
-static t_zoia_event g_event;
+static uint8_t g_midi_channel;
 
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
 
-static void _encoder_inc(uint32_t clicks);
-static void _encoder_dec(uint32_t clicks);
-
 /*----- Extern function implementations ------------------------------*/
 
-void zoia_encoder(int32_t clicks) {
+void set_midi_channel(uint8_t channel) { g_midi_channel = channel; }
 
-    if (clicks > 0) {
-        _encoder_inc(clicks);
+void zoia_bypass(uint8_t value) {
 
-    } else if (clicks < 0) {
-        _encoder_dec(abs(clicks));
+    // Non zero == ENABLE if not TOGGLE.
+    if (value > 0 && value != ZOIA_VALUE_TOGGLE) {
+        value = 127;
+    }
+
+    ft_send_cc(g_midi_channel, ZOIA_CC_BYPASS, value);
+}
+
+void zoia_press(uint8_t value) {
+
+    if (!(value > ZOIA_VALUE_SHIFT && value < ZOIA_VALUE_STOMP_RIGHT)) {
+
+        ft_send_cc(g_midi_channel, ZOIA_CC_PRESS, value);
     }
 }
 
-void zoia_home(void) {
+void zoia_release(uint8_t value) {
 
-    int i;
-    for (i = 0; i < 5; i++) {
-        zoia_back();
+    if (!(value > ZOIA_VALUE_SHIFT && value < ZOIA_VALUE_STOMP_RIGHT)) {
+
+        ft_send_cc(g_midi_channel, ZOIA_CC_RELEASE, value);
     }
 }
 
-void zoia_back(void) {
+void zoia_turn(uint8_t value) {
 
-    g_event.value = ZOIA_VALUE_BACK;
-
-    g_event.type = ZOIA_EVENT_PRESS;
-
-    zoia_enqueue(&g_event);
-
-    g_event.type = ZOIA_EVENT_RELEASE;
-
-    zoia_enqueue(&g_event);
-}
-
-void zoia_patch_set(uint8_t patch_index) {
-
-    patch_index = patch_index > 63 ? 63 : patch_index;
-
-    zoia_home();
-
-    zoia_encoder(-64);
-
-    zoia_encoder(patch_index);
+    ft_send_cc(g_midi_channel, ZOIA_CC_TURN, value);
 }
 
 /*----- Static function implementations ------------------------------*/
-
-static void _encoder_inc(uint32_t clicks) {
-
-    g_event.type = ZOIA_EVENT_TURN;
-    g_event.value = 127;
-
-    while (clicks > 63) {
-
-        zoia_enqueue(&g_event);
-
-        clicks -= 63;
-    }
-
-    g_event.value = 64 + clicks;
-
-    zoia_enqueue(&g_event);
-}
-
-static void _encoder_dec(uint32_t clicks) {
-
-    g_event.type = ZOIA_EVENT_TURN;
-    g_event.value = 0;
-
-    while (clicks > 63) {
-
-        zoia_enqueue(&g_event);
-
-        clicks -= 63;
-    }
-
-    g_event.value = 64 - clicks;
-
-    zoia_enqueue(&g_event);
-}
 
 /*----- End of file --------------------------------------------------*/

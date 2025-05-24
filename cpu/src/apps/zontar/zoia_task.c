@@ -38,7 +38,10 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Includes -----------------------------------------------------*/
 
 #include "freetribe.h"
+
+#include "zoia_control.h"
 #include "zoia_queue.h"
+#include "zoia_task.h"
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -90,7 +93,9 @@ void zoia_task(void) {
 
         if (zoia_dequeue(&event) == SUCCESS) {
 
-            if (event.value == ZOIA_BUTTON_BACK && event.type == ZOIA_RELEASE) {
+            if (event.value == ZOIA_BUTTON_BACK &&
+                event.type == ZOIA_EVENT_RELEASE) {
+
                 state = STATE_DELAY;
 
             } else {
@@ -141,9 +146,12 @@ static t_status _zoia_init(void) {
 
     t_status result = TASK_INIT_ERROR;
 
-    zoia_queue_init();
+    if (zoia_queue_init() == SUCCESS) {
 
-    result = SUCCESS;
+        // Do any other initialisation...
+
+        result = SUCCESS;
+    }
 
     return result;
 }
@@ -152,16 +160,20 @@ static void _event_parse(t_zoia_event *p_event) {
 
     switch (p_event->type) {
 
-    case ZOIA_BYPASS:
+    case ZOIA_EVENT_BYPASS:
+        zoia_bypass(p_event->value);
         break;
 
-    case ZOIA_PRESS:
+    case ZOIA_EVENT_PRESS:
+        zoia_press(p_event->value);
         break;
 
-    case ZOIA_RELEASE:
+    case ZOIA_EVENT_RELEASE:
+        zoia_release(p_event->value);
         break;
 
-    case ZOIA_TURN:
+    case ZOIA_EVENT_TURN:
+        zoia_turn(p_event->value);
         break;
 
     default:

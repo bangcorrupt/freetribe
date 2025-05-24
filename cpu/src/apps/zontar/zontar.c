@@ -46,7 +46,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "gui_task.h"
 
-#include "zoia-interface.h"
+#include "zoia_interface.h"
+#include "zoia_task.h"
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -132,7 +133,11 @@ t_status app_init(void) {
 /**
  * @brief   Run application.
  */
-void app_run(void) { gui_task(); }
+void app_run(void) {
+
+    zoia_task();
+    gui_task();
+}
 
 /*----- Static function implementations ------------------------------*/
 
