@@ -56,7 +56,7 @@ typedef enum {
     PARSE_MSG_BODY,
     SYSEX_PARSE_ERROR,
     SYSEX_PARSE_COMPLETE
-} t_sysex_parse_result;
+} e_sysex_parse_result;
 
 typedef enum {
     // CURRENT_PATTERN_REQUEST = 0x10,
@@ -76,13 +76,26 @@ typedef enum {
     // DATA_LOAD_ERROR = 0x24,
     WRITE_COMPLETE = 0x21,
     WRITE_ERROR = 0x22,
-} t_msg_id;
+} e_msg_id;
+
+// typedef struct {
+//     uint8_t manu_id;
+//     uint8_t global_channel;
+//     uint8_t product_id[3];
+//     uint8_t msg_id;
+// } t_sysex_header;
+//
+// typedef struct {
+//     t_sysex_header *header;
+//     uint8_t *args;
+//     uint8_t *data;
+// } t_sysex_msg;
 
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
 
-t_sysex_parse_result sysex_parse(uint8_t *msg, uint32_t length);
+e_sysex_parse_result sysex_parse(uint8_t *msg, uint32_t length);
 
 #ifdef __cplusplus
 }

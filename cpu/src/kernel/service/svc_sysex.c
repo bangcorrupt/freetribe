@@ -45,12 +45,17 @@ under the terms of the GNU Affero General Public License as published by
 #include "svc_sysex.h"
 
 #include "midi_fsm.h"
+#include "svc_midi.h"
+#include "svc_panel.h"
 #include "sysex_codec.h"
+
+#include "freetribe.h"
 
 /*----- Macros -------------------------------------------------------*/
 
 // Decoded data length is always less than received message length.
 static uint8_t g_decode_buffer[SYSEX_BUFFER_LENGTH];
+static uint8_t g_encode_buffer[SYSEX_BUFFER_LENGTH * 2];
 
 /*----- Typedefs -----------------------------------------------------*/
 
@@ -60,24 +65,29 @@ static uint8_t g_decode_buffer[SYSEX_BUFFER_LENGTH];
 
 /*----- Static function prototypes -----------------------------------*/
 
-t_sysex_parse_result _parse_msg_body(uint8_t *msg, uint32_t msg_length);
+e_sysex_parse_result _parse_msg_body(uint8_t *msg, uint32_t msg_length);
+
+void _respond_read_cpu_ram(uint8_t *read_address, uint32_t read_length);
+void _respond_search_device(uint8_t echo_id);
 
 /*----- Extern function implementations ------------------------------*/
 
 /// TODO: Abstract this to separate library.
 
-t_sysex_parse_result sysex_parse(uint8_t *msg, uint32_t length) {
+e_sysex_parse_result sysex_parse(uint8_t *msg, uint32_t length) {
 
-    uint32_t i;
+    ft_set_led(LED_REC, 1);
+
     uint32_t product_id;
 
-    t_sysex_parse_result state = PARSE_MANU_ID;
+    e_sysex_parse_result state = PARSE_MANU_ID;
 
     while (length--) {
 
         switch (state) {
 
         case PARSE_MANU_ID:
+
             /// TODO: Use unique manufacturer ID.
             if (*msg++ == 0x42) { /// TODO: Use #define instead of magic number.
                 state = PARSE_GLOBAL_CHANNEL;
@@ -87,14 +97,33 @@ t_sysex_parse_result sysex_parse(uint8_t *msg, uint32_t length) {
             break;
 
         case PARSE_GLOBAL_CHANNEL:
-            if ((*msg++ & 0xf) <= 0xf) {
-                state = PARSE_PRODUCT_ID;
+
+            // Search device.
+            if (*msg++ == 0x50) {
+
+                // Search device request.
+                if (*msg++ == 0) {
+                    _respond_search_device(*msg);
+                }
+
+                /// TODO: Handle received Search Device Response.
+                //
+                // Ignore Search Device Response for now.
+
+                state = SYSEX_PARSE_COMPLETE;
+
             } else {
-                state = SYSEX_PARSE_ERROR;
+
+                if ((*msg & 0xf) <= 0xf) {
+                    state = PARSE_PRODUCT_ID;
+                } else {
+                    state = SYSEX_PARSE_ERROR;
+                }
             }
             break;
 
         case PARSE_PRODUCT_ID:
+
             product_id = *msg++ << 16;
             product_id |= *msg++ << 8;
             product_id |= *msg++;
@@ -127,18 +156,45 @@ t_sysex_parse_result sysex_parse(uint8_t *msg, uint32_t length) {
     return state;
 }
 
+// void sysex_register_callback()
+
 /*----- Static function implementations ------------------------------*/
 
-t_sysex_parse_result _parse_msg_body(uint8_t *msg, uint32_t msg_length) {
+e_sysex_parse_result _parse_msg_body(uint8_t *msg, uint32_t msg_length) {
 
-    t_sysex_parse_result result = SYSEX_PARSE_ERROR;
+    e_sysex_parse_result result = SYSEX_PARSE_ERROR;
 
     static uint8_t *write_address;
     static uint32_t write_length;
 
-    t_msg_id msg_id = *msg++;
+    static uint8_t *read_address;
+    static uint32_t read_length;
+
+    e_msg_id msg_id = *msg++;
 
     switch (msg_id) {
+
+    case READ_CPU_RAM:
+
+        if (msg_length) {
+
+            sysex_decode(msg, g_decode_buffer, msg_length);
+
+            /// TODO: Helper macro to pack/unpack int.
+            //
+            read_address =
+                (uint8_t *)(g_decode_buffer[0] | g_decode_buffer[1] << 8 |
+                            g_decode_buffer[2] << 16 |
+                            g_decode_buffer[3] << 24);
+
+            read_length = g_decode_buffer[4] | g_decode_buffer[5] << 8 |
+                          g_decode_buffer[6] << 16 | g_decode_buffer[7] << 24;
+
+            _respond_read_cpu_ram(read_address, read_length);
+
+            result = SYSEX_PARSE_COMPLETE;
+        }
+        break;
 
     case SET_WRITE_ADDRESS:
 
@@ -146,6 +202,7 @@ t_sysex_parse_result _parse_msg_body(uint8_t *msg, uint32_t msg_length) {
             sysex_decode(msg, g_decode_buffer, msg_length);
 
             /// TODO: Helper macro to pack/unpack int.
+            //
             write_address =
                 (uint8_t *)(g_decode_buffer[0] | g_decode_buffer[1] << 8 |
                             g_decode_buffer[2] << 16 |
@@ -192,6 +249,60 @@ t_sysex_parse_result _parse_msg_body(uint8_t *msg, uint32_t msg_length) {
     }
 
     return result;
+}
+
+void _respond_search_device(uint8_t echo_id) {
+
+    //
+    svc_midi_send_byte(0xf0);
+
+    svc_midi_send_byte(0x42);
+    svc_midi_send_byte(0x50);
+    svc_midi_send_byte(0x01);
+    svc_midi_send_byte(0x30);
+
+    svc_midi_send_byte(echo_id);
+
+    svc_midi_send_byte(0x24);
+    svc_midi_send_byte(0x01);
+    svc_midi_send_byte(0x01);
+    svc_midi_send_byte(0x00);
+
+    svc_midi_send_byte(0x00);
+    svc_midi_send_byte(0x00);
+    svc_midi_send_byte(0x00);
+    svc_midi_send_byte(0x00);
+
+    svc_midi_send_byte(0xf7);
+}
+
+void _respond_read_cpu_ram(uint8_t *read_address, uint32_t read_length) {
+
+    uint32_t tx_length;
+
+    svc_midi_send_byte(0xf0);
+    svc_midi_send_byte(0x30);
+    svc_midi_send_byte(0x42);
+    svc_midi_send_byte(0x00);
+    svc_midi_send_byte(0x01);
+    svc_midi_send_byte(0x24);
+
+    // Message ID.
+    svc_midi_send_byte(0x4c);
+
+    // Padding.
+    svc_midi_send_byte(0x00);
+    svc_midi_send_byte(0x00);
+
+    tx_length = sysex_encode(read_address, g_encode_buffer, read_length);
+
+    int i;
+    for (i = 0; i < tx_length; i++) {
+
+        svc_midi_send_byte(g_encode_buffer[i]);
+    }
+
+    svc_midi_send_byte(0xf7);
 }
 
 /*----- End of file --------------------------------------------------*/

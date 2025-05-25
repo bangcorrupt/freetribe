@@ -45,6 +45,8 @@ extern "C" {
 
 #include <stdint.h>
 
+#include "svc_sysex.h"
+
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
@@ -59,6 +61,7 @@ void svc_midi_send_note_on(char, char, char);
 void svc_midi_send_note_off(char, char, char);
 void svc_midi_send_cc(uint8_t chan, uint8_t idx, uint8_t val);
 void svc_midi_send_string(char *text);
+void svc_midi_send_byte(uint8_t byte);
 
 #ifdef __cplusplus
 }
