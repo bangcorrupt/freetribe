@@ -52,4 +52,13 @@ SECTIONS
 	     . += 0x1000; 
 	} > OC_RAM
 	_stack = .;
+
+    /**
+    .knl_pointer ALIGN(8) :
+    {
+	    . += (0x80020000 - _stack - 4);
+
+        *(.knl_pointer)
+	} > OC_RAM
+    **/
 }

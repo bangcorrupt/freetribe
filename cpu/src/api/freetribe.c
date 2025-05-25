@@ -46,13 +46,29 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Typedefs -----------------------------------------------------*/
 
+typedef void *(*t_get_syscalls)(void);
+
 /*----- Static variable definitions ----------------------------------*/
 
+static t_get_syscalls p_get_syscalls = (void *)0x8001fffc;
+
+static void **g_syscall_table;
+
 /*----- Extern variable definitions ----------------------------------*/
+
+t_put_pixel ft_put_pixel;
 
 /*----- Static function prototypes -----------------------------------*/
 
 /*----- Extern function implementations ------------------------------*/
+
+void ft_init(void) {
+
+    //
+    g_syscall_table = p_get_syscalls();
+
+    ft_put_pixel = *(t_put_pixel)g_syscall_table[0];
+}
 
 // Tick API
 //
@@ -102,10 +118,10 @@ bool ft_delay(t_delay_state *state) { return delay_us(state); }
 // Display API
 //
 //
-void ft_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state) {
-
-    svc_display_put_pixel(pos_x, pos_y, state);
-}
+// void ft_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state) {
+//
+//     svc_display_put_pixel(pos_x, pos_y, state);
+// }
 
 int8_t ft_fill_frame(uint16_t x_start, uint16_t y_start, uint16_t x_end,
                      uint16_t y_end, bool state) {

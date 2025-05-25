@@ -70,16 +70,22 @@ extern "C" {
 
 /*----- Typedefs -----------------------------------------------------*/
 
+typedef void (*t_put_pixel)(uint16_t pos_x, uint16_t pos_y, bool state);
+
 /*----- Extern variable declarations ---------------------------------*/
 
+extern t_put_pixel ft_put_pixel;
+
 /*----- Extern function prototypes -----------------------------------*/
+
+void ft_init(void);
 
 void ft_register_tick_callback(uint32_t divisor, void (*callback)(void));
 
 bool ft_delay(t_delay_state *state);
 void ft_start_delay(t_delay_state *state, uint32_t time);
 
-void ft_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state);
+// void ft_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state);
 
 int8_t ft_fill_frame(uint16_t x_start, uint16_t y_start, uint16_t x_end,
                      uint16_t y_end, bool state);
