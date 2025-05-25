@@ -106,6 +106,8 @@ void zoia_back(void) {
     zoia_enqueue(&g_event);
 }
 
+/// TODO: Use Program Change instead.
+//
 void zoia_patch_set(uint8_t patch_index) {
 
     patch_index = patch_index > 63 ? 63 : patch_index;

@@ -95,7 +95,7 @@ static char g_gui_rbmem[GUI_EVENT_QUEUE_LEN][sizeof(t_gui_event)];
 static t_status _init(void);
 static void _run(void);
 
-t_status _parse_event(t_gui_event *event);
+static t_status _parse_event(t_gui_event *event);
 static void _put_pixel(UG_S16 x, UG_S16 y, UG_COLOR c);
 
 /*----- Extern function implementations ------------------------------*/
@@ -274,7 +274,7 @@ static void _run(void) {
     }
 }
 
-t_status _parse_event(t_gui_event *event) {
+static t_status _parse_event(t_gui_event *event) {
 
     t_status result = ERROR;
 

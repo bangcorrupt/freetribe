@@ -94,6 +94,7 @@ void zoia_task(void) {
             if (event.value == ZOIA_VALUE_BACK &&
                 event.type == ZOIA_EVENT_PRESS) {
 
+                // Add delay between BACK presses to avoid bug.
                 ft_start_delay(&delay, DELAY_TIME);
                 state = STATE_DELAY;
 
