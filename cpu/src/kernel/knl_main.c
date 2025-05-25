@@ -40,9 +40,6 @@ under the terus of the GNU Affero General Public License as published by
 #include <stddef.h>
 #include <stdint.h>
 
-#include "dev_board.h"
-#include "dev_flash.h"
-
 #include "svc_clock.h"
 #include "svc_delay.h"
 #include "svc_display.h"
@@ -62,7 +59,6 @@ typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } t_kernel_task_state;
 
 /*----- Static variable definitions ----------------------------------*/
 
-volatile static bool g_display_update = false;
 volatile static bool g_user_tick = false;
 
 static uint32_t g_user_tick_div;
@@ -96,6 +92,7 @@ void knl_main_task(void) {
             state = STATE_RUN;
 
             /// TODO: Implement sysex_printf
+            //
             svc_system_print("Kernel task initialised.\n");
         }
         // Remain in INIT state until initialisation successful.
@@ -113,6 +110,7 @@ void knl_main_task(void) {
 
     default:
         /// TODO: Record unhandled state.
+        //
         if (error_check(UNHANDLED_STATE_ERROR) != SUCCESS) {
             state = STATE_ERROR;
         }
@@ -168,30 +166,16 @@ static void _kernel_run(void) {
     svc_dsp_task();
     svc_midi_task();
     svc_display_task();
-    //
+
     if (g_user_tick && p_user_tick_callback != NULL) {
         (*p_user_tick_callback)();
         g_user_tick = false;
     }
-    //
-    // if (g_display_update) {
-    //     svc_display_task();
-    //     g_display_update = false;
-    // }
 }
 
 static void _systick_callback(uint32_t systick) {
 
     static uint8_t user_tick;
-    static uint8_t display_update;
-
-    // Set flag to run display task.
-    // if (display_update >= DISPLAY_TICK_DIV) {
-    //     g_display_update = true;
-    //     display_update = 0;
-    // } else {
-    //     display_update++;
-    // }
 
     // Set flag to run user tick callback.
     if (user_tick >= g_user_tick_div) {
@@ -218,9 +202,8 @@ static void _held_buttons_callback(uint32_t *held_buttons) {
     svc_panel_register_callback(HELD_BUTTONS_EVENT, NULL);
 }
 
-/// TODO: User print callback should trigger this callback.
-//          Get function pointer via api/freetribe.c
-//       Function to enable/disable midi printing.
+/// TODO: Implement Newlib syscalls.
+//
 static void _print_callback(char *text) { svc_midi_send_string(text); }
 
 /*----- End of file --------------------------------------------------*/

@@ -66,6 +66,7 @@ int main(void) {
     }
 
     /// TODO: Implement scheduler.
+    //
     while (true) {
 
         knl_main_task();

@@ -40,10 +40,6 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "freetribe.h"
 
-#include "keyboard.h"
-
-// #include "svc_panel.h"
-
 #include "gui_task.h"
 
 #include "zoia_interface.h"
@@ -51,6 +47,8 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros -------------------------------------------------------*/
 
+/// TODO: These should be in svc_panel.
+//
 #define KNOB_LEVEL 0x00
 #define KNOB_PITCH 0x02
 #define KNOB_RES 0x03
@@ -74,16 +72,9 @@ under the terms of the GNU Affero General Public License as published by
 #define BUTTON_HPF 0x14
 #define BUTTON_BPF 0x16
 
-#define DEFAULT_SCALE_NOTES NOTES_PHRYGIAN_DOMINANT
-#define DEFAULT_SCALE_TONES 12
-#define DEFAULT_SCALE_MODE 0
-
 /*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
-
-static t_keyboard g_kbd;
-static t_scale g_scale;
 
 static bool g_shift_held;
 
@@ -112,9 +103,6 @@ t_status app_init(void) {
 
     t_status status = ERROR;
 
-    // scale_init(&g_scale, DEFAULT_SCALE_NOTES, DEFAULT_SCALE_TONES);
-    // keyboard_init(&g_kbd, &g_scale);
-
     ft_register_panel_callback(KNOB_EVENT, _knob_callback);
     ft_register_panel_callback(ENCODER_EVENT, _encoder_callback);
     ft_register_panel_callback(BUTTON_EVENT, _button_callback);
@@ -125,6 +113,9 @@ t_status app_init(void) {
 
     // Initialise GUI.
     gui_task();
+
+    // Initialise ZOIA control.
+    zoia_task();
 
     ft_print("ZONTAR");
     gui_print(4, 7, "ZONTAR");
@@ -159,8 +150,6 @@ static void _knob_callback(uint8_t index, uint8_t value) {
     switch (index) {
 
     case KNOB_PITCH:
-        // module_set_param(PARAM_TUNE, g_octave_tune_lut[value] / 2.0);
-        // gui_post_param("Pitch: ", value);
         break;
 
     case KNOB_ATTACK:
@@ -217,9 +206,6 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
         } else {
             //
         }
-        // module_set_param(PARAM_FILTER_BASE_CUTOFF,
-        // g_midi_pitch_cv_lut[cutoff]); gui_post_param("Cutoff: ", cutoff);
-
         break;
 
     case ENCODER_OSC:
@@ -229,9 +215,6 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
         } else {
             //
         }
-        // module_set_param(PARAM_OSC_TYPE, (1.0 / OSC_TYPE_COUNT) * osc_type);
-        // gui_post_param("Osc Type: ", osc_type);
-
         break;
 
     case ENCODER_MOD:
