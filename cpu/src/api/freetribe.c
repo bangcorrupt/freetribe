@@ -62,6 +62,7 @@ static t_syscall _fill_frame;
 static t_syscall _set_led;
 static t_syscall _init_delay;
 static t_syscall _test_delay;
+static t_syscall _register_callback;
 static t_syscall _shutdown;
 
 /*----- Extern variable definitions ----------------------------------*/
@@ -82,6 +83,7 @@ void ft_init(void) {
     _set_led = g_syscall_table[SYSCALL_SET_LED];
     _init_delay = g_syscall_table[SYSCALL_INIT_DELAY];
     _test_delay = g_syscall_table[SYSCALL_TEST_DELAY];
+    _register_callback = g_syscall_table[SYSCALL_REGISTER_CALLBACK];
     _shutdown = g_syscall_table[SYSCALL_SHUTDOWN];
 }
 
@@ -98,9 +100,9 @@ void ft_init(void) {
  */
 void ft_register_tick_callback(uint32_t divisor, void (*callback)(void)) {
 
-    t_callback cb = {.id = CALLBACK_TICK, .handler = callback};
+    t_callback cb = {.id = CALLBACK_TICK, .arg = divisor, .handler = callback};
 
-    knl_register_user_tick_callback(divisor, callback);
+    _register_callback(&cb);
 }
 
 // Delay API

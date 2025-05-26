@@ -61,11 +61,12 @@ static int _fill_frame(void *p);
 static int _set_led(void *p);
 static int _init_delay(void *p);
 static int _test_delay(void *p);
+static int _register_callback(void *p);
 static int _shutdown(void *p);
 
 static t_syscall knl_syscall_table[] = {
-    _print,      _put_pixel,  _fill_frame, _set_led,
-    _init_delay, _test_delay, _shutdown,   NULL,
+    _print,      _put_pixel,         _fill_frame, _set_led, _init_delay,
+    _test_delay, _register_callback, _shutdown,   NULL,
 };
 
 /*----- Extern variable definitions ----------------------------------*/
@@ -138,7 +139,7 @@ static int _test_delay(void *p) {
 }
 
 static int _register_callback(void *p) {
-    //
+
     t_callback *callback = p;
 
     switch (callback->id) {
