@@ -78,6 +78,21 @@ typedef struct {
 } t_led;
 
 typedef enum {
+    CALLBACK_TICK,
+    CALLBACK_PANEL,
+    CALLBACK_MIDI,
+
+    NUM_CALLBACKS,
+} e_event_id;
+
+typedef struct {
+    e_event_id id;
+    uint32_t arg;
+    void *handler;
+
+} t_callback;
+
+typedef enum {
     SYSCALL_PRINT,
     SYSCALL_PUT_PIXEL,
     SYSCALL_FILL_FRAME,
@@ -86,7 +101,7 @@ typedef enum {
     SYSCALL_TEST_DELAY,
     SYSCALL_SHUTDOWN,
 
-    SYSCALL_COUNT,
+    NUM_SYSCALLS,
 } e_syscall;
 
 /*----- Extern variable declarations ---------------------------------*/

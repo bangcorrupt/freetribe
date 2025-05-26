@@ -46,6 +46,7 @@ under the terms of the GNU Affero General Public License as published by
 #include "svc_panel.h"
 #include "svc_system.h"
 
+#include "knl_main.h"
 #include "knl_syscalls.h"
 
 /*----- Macros -------------------------------------------------------*/
@@ -134,6 +135,27 @@ static int _test_delay(void *p) {
     delay_us(delay);
 
     return 0;
+}
+
+static int _register_callback(void *p) {
+    //
+    t_callback *callback = p;
+
+    switch (callback->id) {
+
+    case CALLBACK_TICK:
+        knl_register_user_tick_callback(callback->arg, callback->handler);
+        break;
+
+    case CALLBACK_PANEL:
+        break;
+
+    case CALLBACK_MIDI:
+        break;
+
+    default:
+        break;
+    }
 }
 
 static int _shutdown(void *p) {

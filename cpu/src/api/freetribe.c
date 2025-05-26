@@ -98,6 +98,8 @@ void ft_init(void) {
  */
 void ft_register_tick_callback(uint32_t divisor, void (*callback)(void)) {
 
+    t_callback cb = {.id = CALLBACK_TICK, .handler = callback};
+
     knl_register_user_tick_callback(divisor, callback);
 }
 
