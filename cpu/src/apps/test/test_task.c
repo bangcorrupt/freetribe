@@ -68,6 +68,7 @@ static bool g_test_confirmed;
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
+
 static void _button_callback(uint8_t button, bool state);
 static t_status _init(void);
 static t_status _test_print(void);
@@ -151,7 +152,6 @@ static t_status _init(void) {
     ft_register_panel_callback(BUTTON_EVENT, _button_callback);
 
     result = SUCCESS;
-
     return result;
 }
 
