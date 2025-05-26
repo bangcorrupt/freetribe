@@ -63,8 +63,8 @@ typedef struct {
 /*----- Extern function prototypes -----------------------------------*/
 
 void delay_init(void);
-bool delay_us(t_delay *state);
-void delay_start(t_delay *state);
+bool delay_us(t_delay *delay);
+void delay_start(t_delay *delay);
 void delay_block_us(uint32_t time);
 void delay_block_ms(uint32_t time);
 uint32_t delay_get_current_count(void);

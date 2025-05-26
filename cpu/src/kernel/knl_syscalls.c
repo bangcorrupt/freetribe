@@ -40,9 +40,10 @@ under the terms of the GNU Affero General Public License as published by
 #include <stdint.h>
 #include <stdio.h>
 
-#include "service/svc_panel.h"
+#include "svc_delay.h"
 #include "svc_display.h"
 #include "svc_midi.h"
+#include "svc_panel.h"
 #include "svc_system.h"
 
 #include "knl_syscalls.h"
@@ -109,7 +110,7 @@ static int _init_delay(void *p) {
 
     t_delay *delay = p;
 
-    delay_start(p);
+    delay_start(delay);
 
     return 0;
 }
@@ -118,7 +119,7 @@ static int _test_delay(void *p) {
 
     t_delay *delay = p;
 
-    delay_us(p);
+    delay_us(delay);
 
     return 0;
 }

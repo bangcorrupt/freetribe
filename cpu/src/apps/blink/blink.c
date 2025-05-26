@@ -75,6 +75,8 @@ t_status app_init(void) {
     ft_init();
 
     // Initialise delay.
+    g_blink_delay.delay_time = DELAY_TIME;
+
     ft_start_delay(&g_blink_delay);
 
     return SUCCESS;
