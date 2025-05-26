@@ -86,7 +86,6 @@ t_status test_display(void) {
 
             passed_set = true;
             reset_test();
-            ft_print("Passed set.");
 
             state = STATE_CLEAR_INIT;
         }
@@ -104,7 +103,6 @@ t_status test_display(void) {
 
             passed_clear = true;
             reset_test();
-            ft_print("Passed clear.");
 
             state = STATE_RESULT;
         }
@@ -114,7 +112,6 @@ t_status test_display(void) {
 
         if (passed_set && passed_clear) {
             result = SUCCESS;
-            ft_print("Return result.");
         }
         break;
 

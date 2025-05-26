@@ -108,12 +108,10 @@ void test_task(void) {
         break;
 
     case STATE_KNOB:
-        ft_print("Knob.");
         state = STATE_SHUTDOWN;
         break;
 
     case STATE_SHUTDOWN:
-        ft_print("Shutdown.");
         ft_shutdown();
         break;
 
