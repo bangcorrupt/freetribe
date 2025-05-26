@@ -31,7 +31,7 @@ under the terms of the GNU Affero General Public License as published by
 /**
  * @file    knl_syscalls.h
  *
- * @brief   Public API for Freetribe Kernel system calls.
+ * @brief   Public API for Freetribe kernel system calls.
  *
  */
 
@@ -44,15 +44,35 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
+#include <stdbool.h>
+#include <stdint.h>
+
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
+
+typedef int (*t_syscall)(void *);
+
+typedef t_syscall *(*t_get_syscalls)(void);
+
+typedef struct {
+    uint16_t x;
+    uint16_t y;
+    bool state;
+} t_pixel;
+
+typedef enum {
+    SYSCALL_PUT_PIXEL,
+    SYSCALL_PRINT,
+
+    SYSCALL_COUNT,
+} e_syscall;
 
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
 
-void *knl_get_syscalls(void);
+t_syscall *knl_get_syscalls(void);
 
 #ifdef __cplusplus
 }

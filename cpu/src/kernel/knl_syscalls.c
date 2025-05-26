@@ -31,7 +31,7 @@ under the terms of the GNU Affero General Public License as published by
 /**
  * @file    knl_syscalls.c
  *
- * @brief   Freetribe kernal system calls.
+ * @brief   Freetribe kernel system calls.
  */
 
 /*----- Includes -----------------------------------------------------*/
@@ -41,16 +41,20 @@ under the terms of the GNU Affero General Public License as published by
 #include <stdio.h>
 
 #include "svc_display.h"
+#include "svc_midi.h"
+
+#include "knl_syscalls.h"
 
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
 
-typedef void (*t_syscall_put_pixel)(uint16_t pos_x, uint16_t pos_y, bool state);
-
 /*----- Static variable definitions ----------------------------------*/
 
-static void *knl_syscall_table[] = {&svc_display_put_pixel, NULL};
+static int _put_pixel(void *p);
+static int _print(void *p);
+
+static t_syscall knl_syscall_table[] = {_put_pixel, _print, NULL};
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -58,12 +62,30 @@ static void *knl_syscall_table[] = {&svc_display_put_pixel, NULL};
 
 /*----- Extern function implementations ------------------------------*/
 
-void *knl_get_syscalls(void) {
+t_syscall *knl_get_syscalls(void) {
 
     // Return pointer to syscall jump table.
-    return &knl_syscall_table;
+    return knl_syscall_table;
 }
 
 /*----- Static function implementations ------------------------------*/
+
+static int _put_pixel(void *p) {
+
+    t_pixel *pixel = p;
+
+    svc_display_put_pixel(pixel->x, pixel->y, pixel->state);
+
+    return 0;
+}
+
+static int _print(void *p) {
+
+    char *text = p;
+
+    svc_midi_send_string(text);
+
+    return 0;
+}
 
 /*----- End of file --------------------------------------------------*/

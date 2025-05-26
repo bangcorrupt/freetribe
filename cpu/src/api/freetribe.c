@@ -40,23 +40,24 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
+#include "knl_syscalls.h"
+
 #include "freetribe.h"
 
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
 
-typedef void *(*t_get_syscalls)(void);
-
 /*----- Static variable definitions ----------------------------------*/
 
-static t_get_syscalls p_get_syscalls = (void *)0x8001fffc;
+static t_syscall *g_syscall_table;
 
-static void **g_syscall_table;
+static t_get_syscalls *p_get_syscalls = (t_get_syscalls *)0x8001fffc;
+
+static t_syscall _put_pixel;
+static t_syscall _print;
 
 /*----- Extern variable definitions ----------------------------------*/
-
-t_put_pixel ft_put_pixel;
 
 /*----- Static function prototypes -----------------------------------*/
 
@@ -64,10 +65,12 @@ t_put_pixel ft_put_pixel;
 
 void ft_init(void) {
 
-    //
-    g_syscall_table = p_get_syscalls();
+    t_get_syscalls _get_syscalls = *p_get_syscalls;
 
-    ft_put_pixel = *(t_put_pixel)g_syscall_table[0];
+    g_syscall_table = _get_syscalls();
+
+    _put_pixel = g_syscall_table[SYSCALL_PUT_PIXEL];
+    _print = g_syscall_table[SYSCALL_PRINT];
 }
 
 // Tick API
@@ -118,10 +121,12 @@ bool ft_delay(t_delay_state *state) { return delay_us(state); }
 // Display API
 //
 //
-// void ft_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state) {
-//
-//     svc_display_put_pixel(pos_x, pos_y, state);
-// }
+void ft_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state) {
+
+    t_pixel pixel = {.x = pos_x, .y = pos_y, .state = state};
+
+    _put_pixel(&pixel);
+}
 
 int8_t ft_fill_frame(uint16_t x_start, uint16_t y_start, uint16_t x_end,
                      uint16_t y_end, bool state) {
@@ -146,7 +151,10 @@ void ft_register_print_callback(void (*callback)(char *)) {
  * @param[in]   text    String to be printed.
  *
  */
-void ft_print(char *text) { svc_midi_send_string(text); }
+void ft_print(char *text) {
+    //
+    _print(text);
+}
 
 // Panel API
 //
