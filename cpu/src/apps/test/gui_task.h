@@ -29,14 +29,13 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    knl_syscalls.h
+ * @file    gui_task.h
  *
- * @brief   Public API for Freetribe kernel system calls.
- *
+ * @brief   Public API for GUI task.
  */
 
-#ifndef KNL_SYSCALLS_H
-#define KNL_SYSCALLS_H
+#ifndef GUI_TASK_H
+#define GUI_TASK_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,29 +50,17 @@ extern "C" {
 
 /*----- Typedefs -----------------------------------------------------*/
 
-typedef int (*t_syscall)(void *);
-
-typedef t_syscall *(*t_get_syscalls)(void);
-
-typedef struct {
-    uint16_t x;
-    uint16_t y;
-    bool state;
-} t_pixel;
-
-typedef enum {
-    SYSCALL_PUT_PIXEL,
-    SYSCALL_PRINT,
-    SYSCALL_SHUTDOWN,
-
-    SYSCALL_COUNT,
-} e_syscall;
-
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
 
-t_syscall *knl_get_syscalls(void);
+void gui_task(void);
+void gui_print(uint8_t pos_x, uint8_t pos_y, char *text);
+void gui_post(char *text);
+void gui_post_param(char *label, uint8_t value);
+void gui_print_int(uint8_t x_start, uint8_t y_start, uint8_t value);
+void gui_draw_line(uint8_t x_start, uint8_t y_start, uint8_t x_end,
+                   uint8_t y_end, bool colour);
 
 #ifdef __cplusplus
 }

@@ -40,6 +40,8 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
+#include <stdio.h>
+
 #include "knl_syscalls.h"
 
 #include "freetribe.h"
@@ -56,6 +58,7 @@ static t_get_syscalls *p_get_syscalls = (t_get_syscalls *)0x8001fffc;
 
 static t_syscall _put_pixel;
 static t_syscall _print;
+static t_syscall _shutdown;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -71,6 +74,7 @@ void ft_init(void) {
 
     _put_pixel = g_syscall_table[SYSCALL_PUT_PIXEL];
     _print = g_syscall_table[SYSCALL_PRINT];
+    _shutdown = g_syscall_table[SYSCALL_SHUTDOWN];
 }
 
 // Tick API
@@ -284,7 +288,12 @@ void ft_get_module_param(uint8_t module_id, uint16_t param_index) {
 /**
  * @brief   Shutdown the system.
  */
-void ft_shutdown(void) { svc_system_shutdown(); }
+void ft_shutdown(void) {
+
+    void *p = NULL;
+
+    _shutdown(p);
+}
 
 /*----- Static function implementations ------------------------------*/
 

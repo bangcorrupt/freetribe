@@ -24,60 +24,67 @@ under the terms of the GNU Affero General Public License as published by
    You should have received a copy of the GNU General Public License
  along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-                       Copyright bangcorrupt 2023
+                       Copyright bangcorrupt 2024
 
 ----------------------------------------------------------------------*/
 
 /**
- * @file    knl_syscalls.h
+ * @file    test.c
  *
- * @brief   Public API for Freetribe kernel system calls.
- *
+ * @brief   Test kernel system calls via Freetribe API.
  */
-
-#ifndef KNL_SYSCALLS_H
-#define KNL_SYSCALLS_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /*----- Includes -----------------------------------------------------*/
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "freetribe.h"
+
+#include "gui_task.h"
+#include "test_task.h"
 
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
 
-typedef int (*t_syscall)(void *);
+/*----- Static variable definitions ----------------------------------*/
 
-typedef t_syscall *(*t_get_syscalls)(void);
+/*----- Extern variable definitions ----------------------------------*/
 
-typedef struct {
-    uint16_t x;
-    uint16_t y;
-    bool state;
-} t_pixel;
+/*----- Static function prototypes -----------------------------------*/
 
-typedef enum {
-    SYSCALL_PUT_PIXEL,
-    SYSCALL_PRINT,
-    SYSCALL_SHUTDOWN,
+/*----- Extern function implementations ------------------------------*/
 
-    SYSCALL_COUNT,
-} e_syscall;
+/**
+ * @brief   Initialise application.
+ *
+ * @return status   Status code indicating success:
+ *                  - SUCCESS
+ *                  - WARNING
+ *                  - ERROR
+ */
+t_status app_init(void) {
 
-/*----- Extern variable declarations ---------------------------------*/
+    t_status status = ERROR;
 
-/*----- Extern function prototypes -----------------------------------*/
+    // Initalise API.
+    ft_init();
 
-t_syscall *knl_get_syscalls(void);
+    // Initialise GUI.
+    gui_task();
 
-#ifdef __cplusplus
+    status = SUCCESS;
+
+    return status;
 }
-#endif
-#endif
+
+/**
+ * @brief   Run application.
+ */
+void app_run(void) {
+
+    gui_task();
+    test_task();
+}
+
+/*----- Static function implementations ------------------------------*/
 
 /*----- End of file --------------------------------------------------*/

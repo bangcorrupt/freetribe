@@ -29,55 +29,73 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    knl_syscalls.h
+ * @file    test_button.c
  *
- * @brief   Public API for Freetribe kernel system calls.
+ * @brief   Test buttons.
  *
  */
 
-#ifndef KNL_SYSCALLS_H
-#define KNL_SYSCALLS_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /*----- Includes -----------------------------------------------------*/
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "freetribe.h"
+
+#include "gui_task.h"
+#include "test_task.h"
 
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
 
-typedef int (*t_syscall)(void *);
+typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } e_test_state;
 
-typedef t_syscall *(*t_get_syscalls)(void);
+/*----- Static variable definitions ----------------------------------*/
 
-typedef struct {
-    uint16_t x;
-    uint16_t y;
-    bool state;
-} t_pixel;
+/*----- Extern variable definitions ----------------------------------*/
 
-typedef enum {
-    SYSCALL_PUT_PIXEL,
-    SYSCALL_PRINT,
-    SYSCALL_SHUTDOWN,
+/*----- Static function prototypes -----------------------------------*/
 
-    SYSCALL_COUNT,
-} e_syscall;
+/*----- Extern function implementations ------------------------------*/
 
-/*----- Extern variable declarations ---------------------------------*/
+t_status test_button(void) {
 
-/*----- Extern function prototypes -----------------------------------*/
+    static e_test_state state = STATE_INIT;
 
-t_syscall *knl_get_syscalls(void);
+    t_status result = ERROR;
 
-#ifdef __cplusplus
+    switch (state) {
+
+    // Initialise test.
+    case STATE_INIT:
+
+        ft_print("Press [Play].");
+        gui_print(8, 32, "Press [Play].");
+
+        state = STATE_RUN;
+        break;
+
+    case STATE_RUN:
+
+        if (test_confirmed()) {
+
+            result = SUCCESS;
+            reset_test();
+        }
+        break;
+
+    case STATE_ERROR:
+        error_check(UNRECOVERABLE_ERROR);
+        break;
+
+    default:
+        if (error_check(UNHANDLED_STATE_ERROR) != SUCCESS) {
+            state = STATE_ERROR;
+        }
+        break;
+    }
+
+    return result;
 }
-#endif
-#endif
+
+/*----- Static function implementations ------------------------------*/
 
 /*----- End of file --------------------------------------------------*/

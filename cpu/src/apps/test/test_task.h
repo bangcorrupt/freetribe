@@ -29,14 +29,14 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    knl_syscalls.h
+ * @file    template.h
  *
- * @brief   Public API for Freetribe kernel system calls.
+ * @brief   Template for header files.
  *
  */
 
-#ifndef KNL_SYSCALLS_H
-#define KNL_SYSCALLS_H
+#ifndef TEMPLATE_H
+#define TEMPLATE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,35 +45,19 @@ extern "C" {
 /*----- Includes -----------------------------------------------------*/
 
 #include <stdbool.h>
-#include <stdint.h>
 
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
 
-typedef int (*t_syscall)(void *);
-
-typedef t_syscall *(*t_get_syscalls)(void);
-
-typedef struct {
-    uint16_t x;
-    uint16_t y;
-    bool state;
-} t_pixel;
-
-typedef enum {
-    SYSCALL_PUT_PIXEL,
-    SYSCALL_PRINT,
-    SYSCALL_SHUTDOWN,
-
-    SYSCALL_COUNT,
-} e_syscall;
-
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
 
-t_syscall *knl_get_syscalls(void);
+void test_task(void);
+bool test_confirmed(void);
+void confirm_test(void);
+void reset_test(void);
 
 #ifdef __cplusplus
 }
