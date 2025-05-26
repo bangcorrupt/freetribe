@@ -161,6 +161,8 @@ static int _register_callback(void *p) {
     default:
         break;
     }
+
+    return 0;
 }
 
 static int _shutdown(void *p) {
