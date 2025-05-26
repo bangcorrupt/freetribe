@@ -65,13 +65,22 @@ typedef struct {
 } t_pixel;
 
 typedef struct {
+    uint16_t x_start;
+    uint16_t y_start;
+    uint16_t x_end;
+    uint16_t y_end;
+    bool state;
+} t_frame;
+
+typedef struct {
     t_led_index index;
     uint8_t value;
 } t_led;
 
 typedef enum {
-    SYSCALL_PUT_PIXEL,
     SYSCALL_PRINT,
+    SYSCALL_PUT_PIXEL,
+    SYSCALL_FILL_FRAME,
     SYSCALL_SET_LED,
     SYSCALL_INIT_DELAY,
     SYSCALL_TEST_DELAY,

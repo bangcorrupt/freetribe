@@ -54,15 +54,17 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Static variable definitions ----------------------------------*/
 
-static int _put_pixel(void *p);
 static int _print(void *p);
+static int _put_pixel(void *p);
+static int _fill_frame(void *p);
 static int _set_led(void *p);
 static int _init_delay(void *p);
 static int _test_delay(void *p);
 static int _shutdown(void *p);
 
 static t_syscall knl_syscall_table[] = {
-    _put_pixel, _print, _set_led, _init_delay, _test_delay, _shutdown, NULL,
+    _print,      _put_pixel,  _fill_frame, _set_led,
+    _init_delay, _test_delay, _shutdown,   NULL,
 };
 
 /*----- Extern variable definitions ----------------------------------*/
@@ -79,6 +81,15 @@ t_syscall *knl_get_syscalls(void) {
 
 /*----- Static function implementations ------------------------------*/
 
+static int _print(void *p) {
+
+    char *text = p;
+
+    svc_midi_send_string(text);
+
+    return 0;
+}
+
 static int _put_pixel(void *p) {
 
     t_pixel *pixel = p;
@@ -88,11 +99,12 @@ static int _put_pixel(void *p) {
     return 0;
 }
 
-static int _print(void *p) {
+static int _fill_frame(void *p) {
 
-    char *text = p;
+    t_frame *frame = p;
 
-    svc_midi_send_string(text);
+    svc_display_fill_frame(frame->x_start, frame->y_start, frame->x_end,
+                           frame->y_end, frame->state);
 
     return 0;
 }

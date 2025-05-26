@@ -56,8 +56,9 @@ static t_syscall *g_syscall_table;
 
 static t_get_syscalls *p_get_syscalls = (t_get_syscalls *)0x8001fffc;
 
-static t_syscall _put_pixel;
 static t_syscall _print;
+static t_syscall _put_pixel;
+static t_syscall _fill_frame;
 static t_syscall _set_led;
 static t_syscall _init_delay;
 static t_syscall _test_delay;
@@ -75,8 +76,9 @@ void ft_init(void) {
 
     g_syscall_table = _get_syscalls();
 
-    _put_pixel = g_syscall_table[SYSCALL_PUT_PIXEL];
     _print = g_syscall_table[SYSCALL_PRINT];
+    _put_pixel = g_syscall_table[SYSCALL_PUT_PIXEL];
+    _fill_frame = g_syscall_table[SYSCALL_FILL_FRAME];
     _set_led = g_syscall_table[SYSCALL_SET_LED];
     _init_delay = g_syscall_table[SYSCALL_INIT_DELAY];
     _test_delay = g_syscall_table[SYSCALL_TEST_DELAY];
@@ -148,7 +150,16 @@ void ft_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state) {
 
 int8_t ft_fill_frame(uint16_t x_start, uint16_t y_start, uint16_t x_end,
                      uint16_t y_end, bool state) {
-    return svc_display_fill_frame(x_start, y_start, x_end, y_end, state);
+
+    t_frame frame = {.x_start = x_start,
+                     .y_start = y_start,
+                     .x_end = x_end,
+                     .y_end = y_end,
+                     .state = state};
+
+    _fill_frame(&frame);
+
+    return 0;
 }
 
 // Print API
