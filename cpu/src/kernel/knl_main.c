@@ -80,7 +80,6 @@ static void _kernel_run(void);
 static void _systick_callback(uint32_t systick);
 static void _panel_ack_callback(uint32_t version);
 static void _held_buttons_callback(uint32_t *held_buttons);
-static void _print_callback(char *text);
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -98,7 +97,7 @@ void knl_main_task(void) {
 
             /// TODO: Implement sysex_printf
             //
-            svc_system_print("Kernel task initialised.\n");
+            svc_midi_send_string("Kernel task initialised.\n");
         }
         // Remain in INIT state until initialisation successful.
         break;
@@ -142,11 +141,10 @@ static t_status _kernel_init(void) {
 
     // Initialise MIDI early to catch kernel print.
     svc_midi_task();
-    svc_system_register_print_callback(_print_callback);
 
-    svc_system_print("Welcome to Freetribe!\n");
+    svc_midi_send_string("Welcome to Freetribe!\n");
 
-    svc_system_print("Hardware initialised.\n");
+    svc_midi_send_string("Hardware initialised.\n");
 
     // Initialise timers.
     systick_init();
@@ -208,9 +206,5 @@ static void _held_buttons_callback(uint32_t *held_buttons) {
     // Clear callback registration.
     svc_panel_register_callback(HELD_BUTTONS_EVENT, NULL);
 }
-
-/// TODO: Implement Newlib syscalls.
-//
-static void _print_callback(char *text) { svc_midi_send_string(text); }
 
 /*----- End of file --------------------------------------------------*/

@@ -52,8 +52,6 @@ extern "C" {
 /*----- Extern function prototypes -----------------------------------*/
 
 void svc_system_task(void);
-void svc_system_print(char *text);
-void svc_system_register_print_callback(void (*callback)());
 void svc_system_shutdown(void);
 
 #ifdef __cplusplus

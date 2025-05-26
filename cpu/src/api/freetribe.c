@@ -164,13 +164,6 @@ int8_t ft_fill_frame(uint16_t x_start, uint16_t y_start, uint16_t x_end,
 
 // Print API
 //
-/// TODO: What is going on with print?
-//
-void ft_register_print_callback(void (*callback)(char *)) {
-
-    svc_system_register_print_callback(callback);
-}
-
 /**
  * @brief   Print ASCII string as MIDI system exclusive message.
  *
