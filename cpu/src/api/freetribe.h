@@ -100,7 +100,7 @@ void ft_send_cc(char chan, char index, char val);
 //
 void ft_register_panel_callback(t_panel_event event, void *callback);
 void ft_toggle_led(t_led_index led_index);
-void ft_set_led(t_led_index led_index, bool state);
+void ft_set_led(t_led_index led_index, uint8_t value);
 void ft_set_trigger_mode(uint8_t mode);
 
 void ft_set_module_param(uint16_t module_id, uint16_t param_index,

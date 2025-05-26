@@ -71,6 +71,9 @@ static t_delay_state g_blink_delay;
  */
 t_status app_init(void) {
 
+    // Initialise Freetribe API.
+    ft_init();
+
     // Initialise delay.
     ft_start_delay(&g_blink_delay, DELAY_TIME);
 

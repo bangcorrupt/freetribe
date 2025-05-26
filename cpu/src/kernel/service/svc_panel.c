@@ -233,7 +233,11 @@ void svc_panel_set_led(t_led_index led_index, uint8_t brightness) {
 /**
  * Toggle LED.
  */
-/// TODO: Toggle to specific brightness.
+/// FIX: DEPRECATED
+///         Kernel should not keep track of LED state.
+//
+/// TODO: Move this to application library.
+//
 void svc_panel_toggle_led(t_led_index led_index) {
 
     uint8_t mcu_msg[5] = {0, 0, 0, 0, 0};

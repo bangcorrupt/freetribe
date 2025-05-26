@@ -40,6 +40,7 @@ under the terms of the GNU Affero General Public License as published by
 #include <stdint.h>
 #include <stdio.h>
 
+#include "service/svc_panel.h"
 #include "svc_display.h"
 #include "svc_midi.h"
 #include "svc_system.h"
@@ -54,9 +55,14 @@ under the terms of the GNU Affero General Public License as published by
 
 static int _put_pixel(void *p);
 static int _print(void *p);
+static int _set_led(void *p);
+static int _init_delay(void *p);
+static int _test_delay(void *p);
 static int _shutdown(void *p);
 
-static t_syscall knl_syscall_table[] = {_put_pixel, _print, _shutdown, NULL};
+static t_syscall knl_syscall_table[] = {
+    _put_pixel, _print, _set_led, _init_delay, _test_delay, _shutdown, NULL,
+};
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -86,6 +92,33 @@ static int _print(void *p) {
     char *text = p;
 
     svc_midi_send_string(text);
+
+    return 0;
+}
+
+static int _set_led(void *p) {
+
+    t_led *led = p;
+
+    svc_panel_set_led(led->index, led->value);
+
+    return 0;
+}
+
+static int _init_delay(void *p) {
+
+    t_delay *delay = p;
+
+    delay_start(&delay->state, delay->time);
+
+    return 0;
+}
+
+static int _test_delay(void *p) {
+
+    t_delay *delay = p;
+
+    delay_us(&delay->state);
 
     return 0;
 }

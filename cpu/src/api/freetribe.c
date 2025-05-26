@@ -58,6 +58,9 @@ static t_get_syscalls *p_get_syscalls = (t_get_syscalls *)0x8001fffc;
 
 static t_syscall _put_pixel;
 static t_syscall _print;
+static t_syscall _set_led;
+static t_syscall _init_delay;
+static t_syscall _test_delay;
 static t_syscall _shutdown;
 
 /*----- Extern variable definitions ----------------------------------*/
@@ -74,6 +77,9 @@ void ft_init(void) {
 
     _put_pixel = g_syscall_table[SYSCALL_PUT_PIXEL];
     _print = g_syscall_table[SYSCALL_PRINT];
+    _set_led = g_syscall_table[SYSCALL_SET_LED];
+    _init_delay = g_syscall_table[SYSCALL_INIT_DELAY];
+    _test_delay = g_syscall_table[SYSCALL_TEST_DELAY];
     _shutdown = g_syscall_table[SYSCALL_SHUTDOWN];
 }
 
@@ -96,6 +102,8 @@ void ft_register_tick_callback(uint32_t divisor, void (*callback)(void)) {
 // Delay API
 //
 
+/// TODO: Set time in state struct, not as separate argument.
+//
 /**
  * @brief   Non-blocking delay initialisation.
  *
@@ -107,7 +115,9 @@ void ft_register_tick_callback(uint32_t divisor, void (*callback)(void)) {
  */
 void ft_start_delay(t_delay_state *state, uint32_t time) {
 
-    delay_start(state, time);
+    t_delay delay = {.state = *state, .time = time};
+
+    _init_delay(&delay);
 }
 
 /**
@@ -120,7 +130,14 @@ void ft_start_delay(t_delay_state *state, uint32_t time) {
  * @return      True if at least `state->delay_time` microseconds
  *              have passed since `state->start_time`.
  */
-bool ft_delay(t_delay_state *state) { return delay_us(state); }
+bool ft_delay(t_delay_state *state) {
+
+    t_delay delay = {.state = *state, .time = state->delay_time};
+
+    _test_delay(&delay);
+
+    return delay.state.expired;
+}
 
 // Display API
 //
@@ -236,6 +253,13 @@ void ft_send_cc(char chan, char index, char val) {
 
 // LED API
 //
+
+/// FIX: DEPRECATED
+///         Kernel should not keep track of LED state.
+///         Move this to application library.
+//
+/// TODO: Update examples.
+//
 /**
  * @brief   Toggle LED into the opposite state.
  *
@@ -244,14 +268,19 @@ void ft_send_cc(char chan, char index, char val) {
  */
 void ft_toggle_led(t_led_index led_index) { svc_panel_toggle_led(led_index); }
 
+/// TODO: Enums should be prefixed with e_, not t_.
+//
 /**
  * @brief   Set LED.
  *
  * @param[in]   led_index   Index of LED to toggle.
  *
  */
-void ft_set_led(t_led_index led_index, bool state) {
-    svc_panel_set_led(led_index, state);
+void ft_set_led(t_led_index led_index, uint8_t value) {
+
+    t_led led = {.index = led_index, .value = value};
+
+    _set_led(&led);
 }
 
 // DSP Command API

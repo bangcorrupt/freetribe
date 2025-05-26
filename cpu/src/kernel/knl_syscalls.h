@@ -47,6 +47,9 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "svc_delay.h"
+#include "svc_panel.h"
+
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
@@ -61,9 +64,22 @@ typedef struct {
     bool state;
 } t_pixel;
 
+typedef struct {
+    t_led_index index;
+    uint8_t value;
+} t_led;
+
+typedef struct {
+    t_delay_state state;
+    uint32_t time;
+} t_delay;
+
 typedef enum {
     SYSCALL_PUT_PIXEL,
     SYSCALL_PRINT,
+    SYSCALL_SET_LED,
+    SYSCALL_INIT_DELAY,
+    SYSCALL_TEST_DELAY,
     SYSCALL_SHUTDOWN,
 
     SYSCALL_COUNT,
