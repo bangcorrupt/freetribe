@@ -46,6 +46,8 @@ under the terms of the GNU Affero General Public License as published by
 #include "svc_panel.h"
 #include "svc_system.h"
 
+#include "midi_fsm.h"
+
 #include "knl_main.h"
 #include "knl_syscalls.h"
 
@@ -149,9 +151,11 @@ static int _register_callback(void *p) {
         break;
 
     case CALLBACK_PANEL:
+        svc_panel_register_callback(callback->arg, callback->handler);
         break;
 
     case CALLBACK_MIDI:
+        midi_register_event_handler(callback->arg, callback->handler);
         break;
 
     default:

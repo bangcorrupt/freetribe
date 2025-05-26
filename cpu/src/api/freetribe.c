@@ -195,7 +195,9 @@ void ft_print(char *text) {
 //
 void ft_register_panel_callback(t_panel_event event, void *callback) {
 
-    svc_panel_register_callback(event, callback);
+    t_callback cb = {.id = CALLBACK_PANEL, .arg = event, .handler = callback};
+
+    _register_callback(&cb);
 }
 
 void ft_set_trigger_mode(uint8_t mode) { svc_panel_set_trigger_mode(mode); }
@@ -214,7 +216,9 @@ void ft_set_trigger_mode(uint8_t mode) { svc_panel_set_trigger_mode(mode); }
 void ft_register_midi_callback(event_type event,
                                t_midi_event_callback callback) {
 
-    midi_register_event_handler(event, callback);
+    t_callback cb = {.id = CALLBACK_MIDI, .arg = event, .handler = callback};
+
+    _register_callback(&cb);
 }
 
 /**
