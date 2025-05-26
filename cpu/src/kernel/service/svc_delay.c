@@ -132,52 +132,51 @@ void delay_block_us(uint32_t time) {
 ///       May cause issues when debugging,
 ///       check timer emulation mode.
 //
-bool delay_us(t_delay_state *state) {
+bool delay_us(t_delay *delay) {
 
     uint32_t current_count = 0;
     uint32_t delta = 0;
 
-    if (!state->expired) {
+    if (!delay->expired) {
 
-        if (state->elapsed_us < state->delay_time) {
+        if (delay->elapsed_us < delay->delay_time) {
 
             current_count = delay_get_current_count();
 
-            if (current_count >= state->start_time) {
-                delta = current_count - state->start_time;
+            if (current_count >= delay->start_time) {
+                delta = current_count - delay->start_time;
 
             } else {
-                delta = (DELAY_PERIOD - state->start_time) + current_count + 1;
+                delta = (DELAY_PERIOD - delay->start_time) + current_count + 1;
             }
 
-            state->elapsed_cycles += delta;
+            delay->elapsed_cycles += delta;
 
             /// TODO: Optimise.
 
-            while (state->elapsed_cycles >= CYCLES_PER_US) {
-                state->elapsed_us++;
-                state->elapsed_cycles -= CYCLES_PER_US;
+            while (delay->elapsed_cycles >= CYCLES_PER_US) {
+                delay->elapsed_us++;
+                delay->elapsed_cycles -= CYCLES_PER_US;
             }
 
-            state->start_time = current_count;
+            delay->start_time = current_count;
 
         } else {
-            state->elapsed_us = 0;
-            state->elapsed_cycles = 0;
-            state->expired = true;
+            delay->elapsed_us = 0;
+            delay->elapsed_cycles = 0;
+            delay->expired = true;
         }
     }
 
-    return state->expired;
+    return delay->expired;
 }
 
-void delay_start(t_delay_state *state, uint32_t time) {
+void delay_start(t_delay *delay) {
 
-    state->start_time = delay_get_current_count();
-    state->delay_time = time;
-    state->elapsed_cycles = 0;
-    state->elapsed_us = 0;
-    state->expired = false;
+    delay->start_time = delay_get_current_count();
+    delay->elapsed_cycles = 0;
+    delay->elapsed_us = 0;
+    delay->expired = false;
 }
 
 void delay_block_ms(uint32_t time) { delay_block_us(time * 1000); }

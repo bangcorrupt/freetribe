@@ -113,11 +113,10 @@ void ft_register_tick_callback(uint32_t divisor, void (*callback)(void)) {
  * @param[in]   time    Time in microseconds.
  *
  */
-void ft_start_delay(t_delay_state *state, uint32_t time) {
+void ft_start_delay(t_delay *delay) {
 
-    t_delay delay = {.state = *state, .time = time};
-
-    _init_delay(&delay);
+    //
+    _init_delay(delay);
 }
 
 /**
@@ -130,13 +129,11 @@ void ft_start_delay(t_delay_state *state, uint32_t time) {
  * @return      True if at least `state->delay_time` microseconds
  *              have passed since `state->start_time`.
  */
-bool ft_delay(t_delay_state *state) {
+bool ft_delay(t_delay *delay) {
 
-    t_delay delay = {.state = *state, .time = state->delay_time};
+    _test_delay(delay);
 
-    _test_delay(&delay);
-
-    return delay.state.expired;
+    return delay->expired;
 }
 
 // Display API

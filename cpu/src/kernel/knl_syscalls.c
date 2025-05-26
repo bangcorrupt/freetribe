@@ -109,7 +109,7 @@ static int _init_delay(void *p) {
 
     t_delay *delay = p;
 
-    delay_start(&delay->state, delay->time);
+    delay_start(p);
 
     return 0;
 }
@@ -118,7 +118,7 @@ static int _test_delay(void *p) {
 
     t_delay *delay = p;
 
-    delay_us(&delay->state);
+    delay_us(p);
 
     return 0;
 }

@@ -50,7 +50,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Static variable definitions ----------------------------------*/
 
-static t_delay_state g_blink_delay;
+static t_delay g_blink_delay;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -75,7 +75,7 @@ t_status app_init(void) {
     ft_init();
 
     // Initialise delay.
-    ft_start_delay(&g_blink_delay, DELAY_TIME);
+    ft_start_delay(&g_blink_delay);
 
     return SUCCESS;
 }
@@ -95,7 +95,7 @@ void app_run(void) {
         ft_toggle_led(LED_TAP);
 
         // Reset start time.
-        ft_start_delay(&g_blink_delay, DELAY_TIME);
+        ft_start_delay(&g_blink_delay);
     }
 }
 

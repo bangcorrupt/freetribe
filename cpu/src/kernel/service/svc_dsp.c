@@ -128,7 +128,7 @@ void svc_dsp_task(void) {
 
     static t_dsp_task_state state = STATE_INIT;
 
-    static t_delay_state reset_delay;
+    static t_delay reset_delay;
 
     static uint8_t dsp_byte;
 
@@ -146,7 +146,8 @@ void svc_dsp_task(void) {
 
         dev_dsp_reset(true);
 
-        delay_start(&reset_delay, 2100);
+        reset_delay.delay_time = 2100;
+        delay_start(&reset_delay);
 
         state = STATE_RELEASE_RESET;
         break;
@@ -158,7 +159,8 @@ void svc_dsp_task(void) {
 
             dev_dsp_reset(false);
 
-            delay_start(&reset_delay, 1000);
+            reset_delay.delay_time = 1000;
+            delay_start(&reset_delay);
 
             state = STATE_BOOT;
         }

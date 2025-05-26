@@ -78,7 +78,7 @@ void svc_display_task(void) {
 
     static t_display_task_state state = STATE_ASSERT_RESET;
 
-    static t_delay_state reset_delay;
+    static t_delay reset_delay;
 
     static uint8_t page_index;
 
@@ -91,7 +91,8 @@ void svc_display_task(void) {
 
         dev_lcd_reset(true);
 
-        delay_start(&reset_delay, 5);
+        reset_delay.delay_time = 5;
+        delay_start(&reset_delay);
 
         state = STATE_RELEASE_RESET;
         break;
@@ -101,7 +102,7 @@ void svc_display_task(void) {
         if (delay_us(&reset_delay)) {
             dev_lcd_reset(false);
 
-            delay_start(&reset_delay, 5);
+            delay_start(&reset_delay);
 
             state = STATE_INIT;
         }

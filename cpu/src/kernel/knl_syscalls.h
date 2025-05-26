@@ -69,11 +69,6 @@ typedef struct {
     uint8_t value;
 } t_led;
 
-typedef struct {
-    t_delay_state state;
-    uint32_t time;
-} t_delay;
-
 typedef enum {
     SYSCALL_PUT_PIXEL,
     SYSCALL_PRINT,
