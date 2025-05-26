@@ -63,6 +63,8 @@ typedef enum {
 
 /*----- Extern function implementations ------------------------------*/
 
+/// TODO: Test _put_pixel system call.
+
 t_status test_display(void) {
 
     static e_test_state state = STATE_SET_INIT;
