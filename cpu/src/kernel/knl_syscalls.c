@@ -42,6 +42,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "svc_delay.h"
 #include "svc_display.h"
+#include "svc_dsp.h"
 #include "svc_midi.h"
 #include "svc_panel.h"
 #include "svc_system.h"
@@ -64,11 +65,24 @@ static int _set_led(void *p);
 static int _init_delay(void *p);
 static int _test_delay(void *p);
 static int _register_callback(void *p);
+static int _send_midi_msg(void *p);
+static int _set_module_param(void *p);
+static int _get_module_param(void *p);
 static int _shutdown(void *p);
 
 static t_syscall knl_syscall_table[] = {
-    _print,      _put_pixel,         _fill_frame, _set_led, _init_delay,
-    _test_delay, _register_callback, _shutdown,   NULL,
+    _print,
+    _put_pixel,
+    _fill_frame,
+    _set_led,
+    _init_delay,
+    _test_delay,
+    _register_callback,
+    _send_midi_msg,
+    _set_module_param,
+    _get_module_param,
+    _shutdown,
+    NULL,
 };
 
 /*----- Extern variable definitions ----------------------------------*/
@@ -161,6 +175,52 @@ static int _register_callback(void *p) {
     default:
         break;
     }
+
+    return 0;
+}
+
+static int _send_midi_msg(void *p) {
+
+    t_midi_msg *msg = p;
+
+    uint8_t stat = msg->status & 0xf0;
+    uint8_t chan = msg->status & 0x0f;
+
+    switch (stat) {
+
+    case MIDI_STATUS_NOTE_OFF:
+        svc_midi_send_note_off(chan, msg->byte_1, msg->byte_2);
+        break;
+
+    case MIDI_STATUS_NOTE_ON:
+        svc_midi_send_note_on(chan, msg->byte_1, msg->byte_2);
+        break;
+
+    case MIDI_STATUS_CC:
+        svc_midi_send_cc(chan, msg->byte_1, msg->byte_2);
+        break;
+
+    default:
+        break;
+    }
+
+    return 0;
+}
+
+static int _set_module_param(void *p) {
+
+    t_param *param = p;
+
+    svc_dsp_set_module_param(param->module_id, param->index, param->value);
+
+    return 0;
+}
+
+static int _get_module_param(void *p) {
+
+    t_param *param = p;
+
+    svc_dsp_get_module_param(param->module_id, param->index);
 
     return 0;
 }

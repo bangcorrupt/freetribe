@@ -52,6 +52,8 @@ extern "C" {
 
 /*----- Macros -------------------------------------------------------*/
 
+#define PTR_GET_SYSCALLS 0x8001fffc
+
 /*----- Typedefs -----------------------------------------------------*/
 
 typedef int (*t_syscall)(void *);
@@ -77,6 +79,24 @@ typedef struct {
     uint8_t value;
 } t_led;
 
+typedef struct {
+    uint16_t module_id;
+    uint16_t index;
+    uint32_t value;
+} t_param;
+
+typedef struct {
+    uint8_t status;
+    uint8_t byte_1;
+    uint8_t byte_2;
+} t_midi_msg;
+
+typedef enum {
+    MIDI_STATUS_NOTE_OFF = 0x80,
+    MIDI_STATUS_NOTE_ON = 0x90,
+    MIDI_STATUS_CC = 0xb0,
+} e_midi_status;
+
 typedef enum {
     CALLBACK_TICK,
     CALLBACK_PANEL,
@@ -100,6 +120,9 @@ typedef enum {
     SYSCALL_INIT_DELAY,
     SYSCALL_TEST_DELAY,
     SYSCALL_REGISTER_CALLBACK,
+    SYSCALL_SEND_MIDI_MSG,
+    SYSCALL_SET_MODULE_PARAM,
+    SYSCALL_GET_MODULE_PARAM,
     SYSCALL_SHUTDOWN,
 
     NUM_SYSCALLS,

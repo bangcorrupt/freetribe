@@ -54,8 +54,6 @@ under the terms of the GNU Affero General Public License as published by
 
 static t_syscall *g_syscall_table;
 
-static t_get_syscalls *p_get_syscalls = (t_get_syscalls *)0x8001fffc;
-
 static t_syscall _print;
 static t_syscall _put_pixel;
 static t_syscall _fill_frame;
@@ -63,6 +61,9 @@ static t_syscall _set_led;
 static t_syscall _init_delay;
 static t_syscall _test_delay;
 static t_syscall _register_callback;
+static t_syscall _send_midi_msg;
+static t_syscall _set_module_param;
+static t_syscall _get_module_param;
 static t_syscall _shutdown;
 
 /*----- Extern variable definitions ----------------------------------*/
@@ -73,9 +74,7 @@ static t_syscall _shutdown;
 
 void ft_init(void) {
 
-    t_get_syscalls _get_syscalls = *p_get_syscalls;
-
-    g_syscall_table = _get_syscalls();
+    g_syscall_table = (*(t_get_syscalls *)PTR_GET_SYSCALLS)();
 
     _print = g_syscall_table[SYSCALL_PRINT];
     _put_pixel = g_syscall_table[SYSCALL_PUT_PIXEL];
@@ -84,6 +83,9 @@ void ft_init(void) {
     _init_delay = g_syscall_table[SYSCALL_INIT_DELAY];
     _test_delay = g_syscall_table[SYSCALL_TEST_DELAY];
     _register_callback = g_syscall_table[SYSCALL_REGISTER_CALLBACK];
+    _send_midi_msg = g_syscall_table[SYSCALL_SEND_MIDI_MSG];
+    _set_module_param = g_syscall_table[SYSCALL_SET_MODULE_PARAM];
+    _get_module_param = g_syscall_table[SYSCALL_GET_MODULE_PARAM];
     _shutdown = g_syscall_table[SYSCALL_SHUTDOWN];
 }
 
@@ -108,7 +110,7 @@ void ft_register_tick_callback(uint32_t divisor, void (*callback)(void)) {
 // Delay API
 //
 
-/// TODO: Set time in state struct, not as separate argument.
+/// TODO: Set time as separate argument, not in state struct.
 //
 /**
  * @brief   Non-blocking delay initialisation.
@@ -231,7 +233,9 @@ void ft_register_midi_callback(event_type event,
  */
 void ft_send_note_on(char chan, char note, char vel) {
 
-    svc_midi_send_note_on(chan, note, vel);
+    t_midi_msg msg = {.status = 0x90 & chan, .byte_1 = note, .byte_2 = vel};
+
+    _send_midi_msg(&msg);
 }
 
 /**
@@ -244,7 +248,9 @@ void ft_send_note_on(char chan, char note, char vel) {
  */
 void ft_send_note_off(char chan, char note, char vel) {
 
-    svc_midi_send_note_off(chan, note, vel);
+    t_midi_msg msg = {.status = 0x80 & chan, .byte_1 = note, .byte_2 = vel};
+
+    _send_midi_msg(&msg);
 }
 
 /**
@@ -257,7 +263,9 @@ void ft_send_note_off(char chan, char note, char vel) {
  */
 void ft_send_cc(char chan, char index, char val) {
 
-    svc_midi_send_cc(chan, index, val);
+    t_midi_msg msg = {.status = 0xB0 & chan, .byte_1 = index, .byte_2 = val};
+
+    _send_midi_msg(&msg);
 }
 
 // LED API
@@ -305,7 +313,10 @@ void ft_set_led(t_led_index led_index, uint8_t value) {
 void ft_set_module_param(uint16_t module_id, uint16_t param_index,
                          int32_t param_value) {
 
-    svc_dsp_set_module_param(module_id, param_index, param_value);
+    t_param param = {
+        .module_id = module_id, .index = param_index, .value = param_value};
+
+    _set_module_param(&param);
 }
 
 /**
@@ -320,7 +331,9 @@ void ft_set_module_param(uint16_t module_id, uint16_t param_index,
  */
 void ft_get_module_param(uint8_t module_id, uint16_t param_index) {
 
-    svc_dsp_get_module_param(module_id, param_index);
+    t_param param = {.module_id = module_id, .index = param_index};
+
+    _get_module_param(&param);
 }
 
 /**

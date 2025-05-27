@@ -40,8 +40,6 @@ under the terus of the GNU Affero General Public License as published by
 #include <stddef.h>
 #include <stdint.h>
 
-#include "knl_syscalls.h"
-
 #include "svc_clock.h"
 #include "svc_delay.h"
 #include "svc_display.h"
@@ -50,7 +48,8 @@ under the terus of the GNU Affero General Public License as published by
 #include "svc_panel.h"
 #include "svc_system.h"
 #include "svc_systick.h"
-#include "sys/types.h"
+
+#include "knl_syscalls.h"
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -67,8 +66,6 @@ volatile static bool g_user_tick = false;
 static uint32_t g_user_tick_div;
 
 static void (*p_user_tick_callback)(void) = NULL;
-
-static uint32_t *p_knl_get_syscalls = (uint32_t *)0x8001fffc;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -134,7 +131,7 @@ void knl_register_user_tick_callback(uint32_t divisor, void (*callback)(void)) {
 
 static t_status _kernel_init(void) {
 
-    *p_knl_get_syscalls = (uint32_t)&knl_get_syscalls;
+    (*(t_get_syscalls *)PTR_GET_SYSCALLS) = (t_get_syscalls)&knl_get_syscalls;
 
     // System task only runs initialisation stage.
     svc_system_task();
