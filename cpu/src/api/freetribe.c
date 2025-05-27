@@ -36,8 +36,6 @@ under the terms of the GNU Affero General Public License as published by
  * A set of wrappers for user applications to access kernel functions.
  */
 
-/// TODO: These should all be inline in freetribe.h.
-
 /*----- Includes -----------------------------------------------------*/
 
 #include <stdio.h>

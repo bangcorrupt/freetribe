@@ -55,7 +55,7 @@ under the terms of the GNU Affero General Public License as published by
 
 // Decoded data length is always less than received message length.
 static uint8_t g_decode_buffer[SYSEX_BUFFER_LENGTH];
-static uint8_t g_encode_buffer[SYSEX_BUFFER_LENGTH * 2];
+static uint8_t g_encode_buffer[SYSEX_BUFFER_LENGTH];
 
 /*----- Typedefs -----------------------------------------------------*/
 
