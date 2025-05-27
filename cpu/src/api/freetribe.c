@@ -64,6 +64,7 @@ static t_syscall _register_callback;
 static t_syscall _send_midi_msg;
 static t_syscall _set_module_param;
 static t_syscall _get_module_param;
+static t_syscall _set_trigger_mode;
 static t_syscall _shutdown;
 
 /*----- Extern variable definitions ----------------------------------*/
@@ -86,6 +87,7 @@ void ft_init(void) {
     _send_midi_msg = g_syscall_table[SYSCALL_SEND_MIDI_MSG];
     _set_module_param = g_syscall_table[SYSCALL_SET_MODULE_PARAM];
     _get_module_param = g_syscall_table[SYSCALL_GET_MODULE_PARAM];
+    _set_trigger_mode = g_syscall_table[SYSCALL_SET_TRIGGER_MODE];
     _shutdown = g_syscall_table[SYSCALL_SHUTDOWN];
 }
 
@@ -193,7 +195,7 @@ void ft_print(char *text) {
  * @param[in]   callback    Function to call.
  *
  */
-/// TODO: Separate function for each event type.
+/// TODO: Central event queue.
 //
 void ft_register_panel_callback(t_panel_event event, void *callback) {
 
@@ -202,7 +204,10 @@ void ft_register_panel_callback(t_panel_event event, void *callback) {
     _register_callback(&cb);
 }
 
-void ft_set_trigger_mode(uint8_t mode) { svc_panel_set_trigger_mode(mode); }
+void ft_set_trigger_mode(uint8_t mode) {
+    //
+    _set_trigger_mode(&mode);
+}
 
 // MIDI API
 //
@@ -213,8 +218,6 @@ void ft_set_trigger_mode(uint8_t mode) { svc_panel_set_trigger_mode(mode); }
  * @param[in]   callback    Function to call.
  *
  */
-/// TODO: Separate function for each event type.
-//
 void ft_register_midi_callback(event_type event,
                                t_midi_event_callback callback) {
 

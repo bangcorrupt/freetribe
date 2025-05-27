@@ -68,6 +68,7 @@ static int _register_callback(void *p);
 static int _send_midi_msg(void *p);
 static int _set_module_param(void *p);
 static int _get_module_param(void *p);
+static int _set_trigger_mode(void *p);
 static int _shutdown(void *p);
 
 static t_syscall knl_syscall_table[] = {
@@ -81,6 +82,7 @@ static t_syscall knl_syscall_table[] = {
     _send_midi_msg,
     _set_module_param,
     _get_module_param,
+    _set_trigger_mode,
     _shutdown,
     NULL,
 };
@@ -221,6 +223,15 @@ static int _get_module_param(void *p) {
     t_param *param = p;
 
     svc_dsp_get_module_param(param->module_id, param->index);
+
+    return 0;
+}
+
+static int _set_trigger_mode(void *p) {
+
+    uint8_t *mode = p;
+
+    svc_panel_set_trigger_mode(*mode);
 
     return 0;
 }
