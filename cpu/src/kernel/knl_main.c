@@ -131,7 +131,7 @@ void knl_register_user_tick_callback(uint32_t divisor, void (*callback)(void)) {
 
 static t_status _kernel_init(void) {
 
-    (*(t_get_syscalls *)PTR_GET_SYSCALLS) = (t_get_syscalls)&knl_get_syscalls;
+    (*(t_get_syscalls *)PTR_GET_SYSCALLS) = knl_get_syscalls;
 
     // System task only runs initialisation stage.
     svc_system_task();
