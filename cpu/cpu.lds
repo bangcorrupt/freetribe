@@ -7,7 +7,8 @@ OUTPUT_ARCH(arm)
 
 MEMORY
 {
-    OC_RAM (rwx)    : ORIGIN = 0x80000000, LENGTH = 0x20000
+    OC_RAM (rwx)    : ORIGIN = 0x80000000, LENGTH = 0x1fffc
+    KNL_PTR (r)     : ORIGIN = 0x8001fffc, LENGTH = 0x4
     ARM_RAM (rwx)   : ORIGIN = 0xFFFF0000, LENGTH = 0x2000
 }
 
@@ -46,19 +47,25 @@ SECTIONS
 
 	_bss_end = .;
 	
+    _heap_start = .;
+	.heap ALIGN(8) :
+	{
+	     . += 0x4000; 
+
+	} > OC_RAM
+    _heap_end = .;
+
 	.stack ALIGN(8) :
 	{
-	    /* . += (0x80020000 - _bss_end); */
+	    /* . += (0x80020000 - _heap_end); */
+
 	     . += 0x1000; 
+
 	} > OC_RAM
 	_stack = .;
 
-    /**
-    .knl_pointer ALIGN(8) :
+    .knl_pointer ALIGN(4) :
     {
-	    . += (0x80020000 - _stack - 4);
-
         *(.knl_pointer)
-	} > OC_RAM
-    **/
+	} > KNL_PTR
 }
