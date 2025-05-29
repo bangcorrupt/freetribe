@@ -53,17 +53,30 @@ extern "C" {
 /*----- Typedefs -----------------------------------------------------*/
 
 typedef struct {
-    uint16_t id;
+    uint8_t id;
     uint16_t len;
     uint8_t *data;
 
 } t_event;
 
+typedef enum {
+    KNL_EVENT_UART_DATA_RX,
+    KNL_EVENT_UART_DATA_TX,
+
+    KNL_EVENT_MIDI_MSG_RX,
+    KNL_EVENT_MIDI_MSG_TX,
+
+    KNL_EVENT_COUNT,
+} e_event_id;
+
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
 
-t_status knl_event_dequeue(t_event *event);
+t_status knl_event_publish(t_event *event);
+
+void knl_enter_critical(void);
+void knl_exit_critical(void);
 
 #ifdef __cplusplus
 }

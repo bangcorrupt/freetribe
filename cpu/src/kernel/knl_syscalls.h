@@ -103,10 +103,10 @@ typedef enum {
     CALLBACK_MIDI,
 
     NUM_CALLBACKS,
-} e_event_id;
+} e_callback_id;
 
 typedef struct {
-    e_event_id id;
+    e_callback_id id;
     uint32_t arg;
     void *handler;
 
