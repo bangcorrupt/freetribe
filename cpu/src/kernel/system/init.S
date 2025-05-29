@@ -68,6 +68,8 @@
         .global _stack                  
         .global _bss_start
         .global _bss_end
+        .global _heap_start
+        .global _heap_end
         .global start_boot
 
 @************************ Internal Definitions ********************************
@@ -161,6 +163,21 @@ BSS_Loop:
          STR   r2, [r0], #4                    @ Clear one word in BSS
          CMP   r0, r1
          BLE   BSS_Loop                        @ Clear till BSS end
+
+
+@
+@ Clear the Heap section here
+@
+Clear_Heap_Section:
+
+         LDR   r0, =_heap_start                @ Start address of Heap
+         LDR   r1, =(_heap_end - 0x04)         @ End address of Heap
+         MOV   r2, #0
+Heap_Loop: 
+         STR   r2, [r0], #4                    @ Clear one word in Heap
+         CMP   r0, r1
+         BLE   Heap_Loop                       @ Clear till Heap end
+
 
 @
 @ Paint the Stack section here
