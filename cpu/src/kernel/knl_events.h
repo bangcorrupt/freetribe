@@ -29,14 +29,14 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    template.h
+ * @file    knl_events.h
  *
- * @brief   Template for header files.
+ * @brief   Public API for kernel event queue.
  *
  */
 
-#ifndef TEMPLATE_H
-#define TEMPLATE_H
+#ifndef KNL_EVENTS_H
+#define KNL_EVENTS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,13 +44,26 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
+#include <stdint.h>
+
+#include "ft_error.h"
+
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
 
+typedef struct {
+    uint16_t id;
+    uint16_t len;
+    uint8_t *data;
+
+} t_event;
+
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
+
+t_status knl_event_dequeue(t_event *event);
 
 #ifdef __cplusplus
 }

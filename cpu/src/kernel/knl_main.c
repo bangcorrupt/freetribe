@@ -49,6 +49,7 @@ under the terus of the GNU Affero General Public License as published by
 #include "svc_system.h"
 #include "svc_systick.h"
 
+#include "knl_events.h"
 #include "knl_syscalls.h"
 
 /*----- Macros -------------------------------------------------------*/
@@ -163,6 +164,10 @@ static t_status _kernel_init(void) {
 }
 
 static void _kernel_run(void) {
+
+    t_event event;
+
+    knl_event_dequeue(&event);
 
     svc_panel_task();
     svc_dsp_task();
