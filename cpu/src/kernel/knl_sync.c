@@ -29,60 +29,41 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    knl_events.h
+ * @file    knl_sync.c
  *
- * @brief   Public API for kernel event queue.
- *
+ * @brief   Kernel synchronisation primitives.
  */
-
-#ifndef KNL_EVENTS_H
-#define KNL_EVENTS_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /*----- Includes -----------------------------------------------------*/
 
-#include <stdint.h>
-
-#include "ft_error.h"
+#include "csl_interrupt.h"
 
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
 
-typedef struct {
-    uint8_t id;
-    uint16_t len;
-    uint8_t *data;
+/*----- Static variable definitions ----------------------------------*/
 
-} t_event;
+static char g_int_status;
 
-typedef enum {
-    KNL_EVENT_UART_DATA_RX,
-    KNL_EVENT_UART_DATA_TX,
+/*----- Extern variable definitions ----------------------------------*/
 
-    KNL_EVENT_MIDI_CC_RX,
-    KNL_EVENT_MIDI_CC_TX,
+/*----- Static function prototypes -----------------------------------*/
 
-    KNL_EVENT_COUNT,
-} e_event_id;
+/*----- Extern function implementations ------------------------------*/
 
-typedef void (*t_listener)(const t_event *);
+void knl_enter_critical(void) {
 
-/*----- Extern variable declarations ---------------------------------*/
-
-/*----- Extern function prototypes -----------------------------------*/
-
-void knl_event_task(void);
-
-t_status knl_event_publish(t_event *event);
-t_status knl_event_subscribe(e_event_id id, t_listener listener);
-
-#ifdef __cplusplus
+    // Disable interrupts.
+    g_int_status = IntDisable();
 }
-#endif
-#endif
+
+void knl_exit_critical(void) {
+
+    // Enable interrupts.
+    IntEnable(g_int_status);
+}
+
+/*----- Static function implementations ------------------------------*/
 
 /*----- End of file --------------------------------------------------*/

@@ -29,14 +29,14 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    knl_events.h
+ * @file    knl_sync.h
  *
- * @brief   Public API for kernel event queue.
+ * @brief   Public API for kernel synchronisation primitives.
  *
  */
 
-#ifndef KNL_EVENTS_H
-#define KNL_EVENTS_H
+#ifndef KNL_SYNC_H
+#define KNL_SYNC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,41 +44,16 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
-#include <stdint.h>
-
-#include "ft_error.h"
-
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
-
-typedef struct {
-    uint8_t id;
-    uint16_t len;
-    uint8_t *data;
-
-} t_event;
-
-typedef enum {
-    KNL_EVENT_UART_DATA_RX,
-    KNL_EVENT_UART_DATA_TX,
-
-    KNL_EVENT_MIDI_CC_RX,
-    KNL_EVENT_MIDI_CC_TX,
-
-    KNL_EVENT_COUNT,
-} e_event_id;
-
-typedef void (*t_listener)(const t_event *);
 
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
 
-void knl_event_task(void);
-
-t_status knl_event_publish(t_event *event);
-t_status knl_event_subscribe(e_event_id id, t_listener listener);
+void knl_enter_critical(void);
+void knl_exit_critical(void);
 
 #ifdef __cplusplus
 }

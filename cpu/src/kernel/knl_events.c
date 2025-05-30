@@ -38,11 +38,10 @@ under the terms of the GNU Affero General Public License as published by
 
 #include <stdlib.h>
 
-#include "csl_interrupt.h"
-
 #include "ring_buffer.h"
 
 #include "knl_events.h"
+#include "knl_sync.h"
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -67,8 +66,6 @@ typedef struct {
 t_listener_row g_listener_table[KNL_EVENT_COUNT];
 
 /*----- Static variable definitions ----------------------------------*/
-
-static char g_int_status;
 
 // Event queue.
 static rbd_t g_event_rbd;
@@ -135,18 +132,6 @@ t_status knl_event_publish(t_event *event) {
     }
 
     return result;
-}
-
-void knl_enter_critical(void) {
-
-    // Disable interrupts.
-    g_int_status = IntDisable();
-}
-
-void knl_exit_critical(void) {
-
-    // Enable interrupts.
-    IntEnable(g_int_status);
 }
 
 t_status knl_event_subscribe(e_event_id id, t_listener listener) {
