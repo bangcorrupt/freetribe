@@ -63,6 +63,7 @@ extern "C" {
 
 #include "midi_fsm.h"
 
+#include "knl_events.h"
 #include "knl_main.h"
 #include "usr_main.h"
 
@@ -91,6 +92,8 @@ void ft_print(char *text);
 
 void ft_register_midi_callback(event_type event,
                                t_midi_event_callback callback);
+
+void ft_event_subscribe(e_event_id id, t_listener listener);
 
 void ft_send_note_on(char chan, char note, char vel);
 void ft_send_note_off(char chan, char note, char vel);

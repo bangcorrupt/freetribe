@@ -59,6 +59,7 @@ static t_syscall _set_led;
 static t_syscall _init_delay;
 static t_syscall _test_delay;
 static t_syscall _register_callback;
+static t_syscall _event_subscribe;
 static t_syscall _send_midi_msg;
 static t_syscall _set_module_param;
 static t_syscall _get_module_param;
@@ -82,6 +83,7 @@ void ft_init(void) {
     _init_delay = g_syscall_table[SYSCALL_INIT_DELAY];
     _test_delay = g_syscall_table[SYSCALL_TEST_DELAY];
     _register_callback = g_syscall_table[SYSCALL_REGISTER_CALLBACK];
+    _event_subscribe = g_syscall_table[SYSCALL_EVENT_SUBSCRIBE];
     _send_midi_msg = g_syscall_table[SYSCALL_SEND_MIDI_MSG];
     _set_module_param = g_syscall_table[SYSCALL_SET_MODULE_PARAM];
     _get_module_param = g_syscall_table[SYSCALL_GET_MODULE_PARAM];
@@ -205,6 +207,27 @@ void ft_register_panel_callback(t_panel_event event, void *callback) {
 void ft_set_trigger_mode(uint8_t mode) {
     //
     _set_trigger_mode(&mode);
+}
+
+// EVENT API
+//
+/**
+ * @brief   Register a kernel events.
+ *
+ * @param[in]   id          ID of event to catch.
+ * @param[in]   listener    Function to call.
+ *
+ */
+void ft_event_subscribe(e_event_id id, t_listener listener) {
+
+    struct params {
+        e_event_id id;
+        t_listener listener;
+    };
+
+    struct params p = {.id = id, .listener = listener};
+
+    _event_subscribe(&p);
 }
 
 // MIDI API

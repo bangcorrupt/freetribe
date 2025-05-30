@@ -151,7 +151,7 @@ static t_status _init(void) {
 
     t_status result = TASK_INIT_ERROR;
 
-    knl_event_subscribe(KNL_EVENT_PANEL_BUTTON, _button_listener);
+    ft_event_subscribe(KNL_EVENT_PANEL_BUTTON, _button_listener);
 
     result = SUCCESS;
     return result;

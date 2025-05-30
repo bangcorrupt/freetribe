@@ -186,7 +186,14 @@ static int _register_callback(void *p) {
 
 static int _event_subscribe(void *p) {
 
-    //
+    struct params {
+        e_event_id id;
+        t_listener listener;
+    };
+
+    knl_event_subscribe(((struct params *)p)->id,
+                        ((struct params *)p)->listener);
+
     return 0;
 }
 
