@@ -46,16 +46,14 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros -------------------------------------------------------*/
 
-#define KNL_EVENT_QUEUE_LEN 0x200
-#define KNL_DATA_QUEUE_LEN 0x200
+#define KNL_EVENT_QUEUE_LEN 0x100
+#define KNL_DATA_QUEUE_LEN 0x400
 
 #define KNL_MAX_EVENT_LISTENER 255
 
 /*----- Typedefs -----------------------------------------------------*/
 
 typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } e_event_task_state;
-
-typedef void (*t_listener)(t_event *);
 
 typedef struct {
     // Array of function pointers to event listeners.

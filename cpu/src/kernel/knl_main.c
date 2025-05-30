@@ -39,6 +39,11 @@ under the terus of the GNU Affero General Public License as published by
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
+
+#include "midi_fsm.h"
+
+#include "dev_trs.h"
 
 #include "svc_clock.h"
 #include "svc_delay.h"
@@ -78,6 +83,12 @@ static void _kernel_run(void);
 static void _systick_callback(uint32_t systick);
 static void _panel_ack_callback(uint32_t version);
 static void _held_buttons_callback(uint32_t *held_buttons);
+
+static void _serial_data_rx_callback(void);
+static void _serial_data_rx_listener(const t_event *event);
+
+static void _midi_cc_rx_callback(char chan, char index, char value);
+static void _midi_cc_rx_listener(const t_event *event);
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -160,18 +171,24 @@ static t_status _kernel_init(void) {
     // Initialise display.
     svc_display_task();
 
+    knl_event_task();
+
+    dev_trs_register_callback(0, _serial_data_rx_callback);
+    knl_event_subscribe(KNL_EVENT_UART_DATA_RX, _serial_data_rx_listener);
+
+    midi_register_event_handler(EVT_CHAN_CONTROL_CHANGE, _midi_cc_rx_callback);
+    knl_event_subscribe(KNL_EVENT_MIDI_CC_RX, _midi_cc_rx_listener);
+
     return SUCCESS;
 }
 
 static void _kernel_run(void) {
 
-    t_event event;
-
-    knl_event_dequeue(&event);
+    knl_event_task();
 
     svc_panel_task();
     svc_dsp_task();
-    svc_midi_task();
+    // svc_midi_task();
     svc_display_task();
 
     if (g_user_tick && p_user_tick_callback != NULL) {
@@ -207,6 +224,41 @@ static void _held_buttons_callback(uint32_t *held_buttons) {
 
     // Clear callback registration.
     svc_panel_register_callback(HELD_BUTTONS_EVENT, NULL);
+}
+
+static void _serial_data_rx_callback(void) {
+
+    t_event event = {.id = KNL_EVENT_UART_DATA_RX, .len = 0, .data = NULL};
+
+    knl_event_publish(&event);
+}
+
+static void _serial_data_rx_listener(const t_event *event) {
+    //
+    svc_midi_task();
+}
+
+static void _midi_cc_rx_callback(char chan, char index, char value) {
+
+    uint8_t msg[] = {chan, index, value};
+
+    t_event event = {
+        .id = KNL_EVENT_MIDI_CC_RX, .len = sizeof(msg), .data = msg};
+
+    knl_event_publish(&event);
+}
+
+static void _midi_cc_rx_listener(const t_event *event) {
+
+    char snum[5];
+
+    const uint8_t *msg = event->data;
+
+    itoa(msg[1], snum, 16);
+    svc_midi_send_string(snum);
+
+    itoa(msg[2], snum, 16);
+    svc_midi_send_string(snum);
 }
 
 /*----- End of file --------------------------------------------------*/

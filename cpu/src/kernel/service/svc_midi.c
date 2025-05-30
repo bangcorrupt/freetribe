@@ -73,9 +73,11 @@ void svc_midi_task(void) {
 
     // Initialise MIDI task.
     case STATE_INIT:
-        if (error_check(_midi_init()) == SUCCESS) {
-            state = STATE_RUN;
-        }
+        // if (error_check(_midi_init()) == SUCCESS) {
+        while (error_check(_midi_init()) != SUCCESS)
+            ;
+
+        state = STATE_RUN;
         // Remain in INIT state until initialisation successful.
         break;
 

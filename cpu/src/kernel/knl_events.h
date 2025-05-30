@@ -63,17 +63,22 @@ typedef enum {
     KNL_EVENT_UART_DATA_RX,
     KNL_EVENT_UART_DATA_TX,
 
-    KNL_EVENT_MIDI_MSG_RX,
-    KNL_EVENT_MIDI_MSG_TX,
+    KNL_EVENT_MIDI_CC_RX,
+    KNL_EVENT_MIDI_CC_TX,
 
     KNL_EVENT_COUNT,
 } e_event_id;
+
+typedef void (*t_listener)(const t_event *);
 
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
 
+void knl_event_task(void);
+
 t_status knl_event_publish(t_event *event);
+t_status knl_event_subscribe(e_event_id id, t_listener listener);
 
 void knl_enter_critical(void);
 void knl_exit_critical(void);
