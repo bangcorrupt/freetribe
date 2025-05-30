@@ -210,7 +210,7 @@ static void _event_dispatch(t_event *event) {
         }
     }
 
-    if (event->data != NULL && event->len > 0) {
+    if (event->data != NULL) {
 
         free(event->data);
     }
