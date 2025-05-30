@@ -38,6 +38,7 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Includes -----------------------------------------------------*/
 
 #include "freetribe.h"
+#include "knl_events.h"
 
 #include "gui_task.h"
 
@@ -69,7 +70,8 @@ static bool g_test_confirmed;
 
 /*----- Static function prototypes -----------------------------------*/
 
-static void _button_callback(uint8_t button, bool state);
+static void _button_listener(const t_event *event);
+
 static t_status _init(void);
 static t_status _test_print(void);
 static t_status _test_display(void);
@@ -149,15 +151,18 @@ static t_status _init(void) {
 
     t_status result = TASK_INIT_ERROR;
 
-    ft_register_panel_callback(BUTTON_EVENT, _button_callback);
+    knl_event_subscribe(KNL_EVENT_PANEL_BUTTON, _button_listener);
 
     result = SUCCESS;
     return result;
 }
 
-static void _button_callback(uint8_t button, bool state) {
+static void _button_listener(const t_event *event) {
 
-    switch (button) {
+    uint8_t index = event->data[0];
+    bool state = event->data[1];
+
+    switch (index) {
 
     case BUTTON_PLAY:
         if (state) {

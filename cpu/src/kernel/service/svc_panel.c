@@ -102,9 +102,10 @@ void svc_panel_task(void) {
     switch (state) {
 
     case STATE_INIT:
-        if (error_check(_panel_init()) == SUCCESS) {
-            state = STATE_RUN;
-        }
+        while (error_check(_panel_init()) != SUCCESS)
+            ;
+
+        state = STATE_RUN;
         // Remain in INIT state until initialisation successful.
         break;
 

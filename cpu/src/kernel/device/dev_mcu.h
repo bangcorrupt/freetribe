@@ -57,6 +57,7 @@ extern "C" {
 void dev_mcu_init(void);
 void dev_mcu_tx_enqueue(uint8_t *mcu_msg);
 int dev_mcu_rx_dequeue(uint8_t *mcu_msg);
+void dev_mcu_register_callback(uint8_t callback_id, void *callback);
 
 #ifdef __cplusplus
 }

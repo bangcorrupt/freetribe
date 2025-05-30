@@ -40,6 +40,7 @@ under the terms of the GNU Affero General Public License as published by
 #include <stdint.h>
 #include <stdio.h>
 
+#include "knl_events.h"
 #include "svc_delay.h"
 #include "svc_display.h"
 #include "svc_dsp.h"
@@ -65,6 +66,7 @@ static int _set_led(void *p);
 static int _init_delay(void *p);
 static int _test_delay(void *p);
 static int _register_callback(void *p);
+static int _event_subscribe(void *p);
 static int _send_midi_msg(void *p);
 static int _set_module_param(void *p);
 static int _get_module_param(void *p);
@@ -79,6 +81,7 @@ static t_syscall knl_syscall_table[] = {
     _init_delay,
     _test_delay,
     _register_callback,
+    _event_subscribe,
     _send_midi_msg,
     _set_module_param,
     _get_module_param,
@@ -178,6 +181,12 @@ static int _register_callback(void *p) {
         break;
     }
 
+    return 0;
+}
+
+static int _event_subscribe(void *p) {
+
+    //
     return 0;
 }
 

@@ -61,6 +61,8 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Typedefs -----------------------------------------------------*/
 
+typedef void (*t_data_ready_callback)(void);
+
 /*----- Static variable definitions ----------------------------------*/
 
 // MCU RX ring buffer.
@@ -87,6 +89,8 @@ static void _mcu_rx_msg(void);
 
 static void _mcu_tx_callback(void);
 static void _mcu_rx_callback(void);
+
+static t_data_ready_callback p_data_ready_callback;
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -148,6 +152,13 @@ int dev_mcu_rx_dequeue(uint8_t *mcu_msg) {
     return ring_buffer_get(mcu_rx_rbd, mcu_msg);
 }
 
+void dev_mcu_register_callback(uint8_t callback_id, void *callback) {
+
+    /// TODO: Handle callback_id.
+    //
+    p_data_ready_callback = (t_data_ready_callback)callback;
+}
+
 /*----- Static function implementations ------------------------------*/
 
 static int _mcu_tx_dequeue(uint8_t *mcu_msg) {
@@ -159,6 +170,11 @@ static void _mcu_rx_enqueue(uint8_t *mcu_msg) {
 
     // Overwrite on overflow.
     ring_buffer_put_force(mcu_rx_rbd, mcu_msg);
+
+    if (p_data_ready_callback != NULL) {
+
+        p_data_ready_callback();
+    }
 }
 
 static void _mcu_tx_msg(uint8_t *mcu_msg) {

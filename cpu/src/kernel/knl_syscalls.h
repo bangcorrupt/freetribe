@@ -50,6 +50,8 @@ extern "C" {
 #include "svc_delay.h"
 #include "svc_panel.h"
 
+#include "knl_events.h"
+
 /*----- Macros -------------------------------------------------------*/
 
 #define PTR_GET_SYSCALLS 0x8001fffc
@@ -120,6 +122,7 @@ typedef enum {
     SYSCALL_INIT_DELAY,
     SYSCALL_TEST_DELAY,
     SYSCALL_REGISTER_CALLBACK,
+    SYSCALL_EVENT_SUBSCRIBE,
     SYSCALL_SEND_MIDI_MSG,
     SYSCALL_SET_MODULE_PARAM,
     SYSCALL_GET_MODULE_PARAM,

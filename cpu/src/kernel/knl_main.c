@@ -43,6 +43,7 @@ under the terus of the GNU Affero General Public License as published by
 
 #include "midi_fsm.h"
 
+#include "dev_mcu.h"
 #include "dev_trs.h"
 
 #include "svc_clock.h"
@@ -81,14 +82,23 @@ static t_status _kernel_init(void);
 static void _kernel_run(void);
 
 static void _systick_callback(uint32_t systick);
-static void _panel_ack_callback(uint32_t version);
-static void _held_buttons_callback(uint32_t *held_buttons);
 
-static void _serial_data_rx_callback(void);
-static void _serial_data_rx_listener(const t_event *event);
+static void _trs_data_rx_callback(void);
+static void _trs_data_rx_listener(const t_event *event);
+
+static void _mcu_data_rx_callback(void);
+static void _mcu_data_rx_listener(const t_event *event);
 
 static void _midi_cc_rx_callback(char chan, char index, char value);
 static void _midi_cc_rx_listener(const t_event *event);
+
+static void _panel_ack_callback(uint32_t version);
+static void _panel_ack_listener(const t_event *event);
+
+static void _held_buttons_callback(uint32_t *held_buttons);
+static void _held_buttons_listener(const t_event *event);
+
+static void _button_callback(uint8_t button, bool state);
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -159,9 +169,6 @@ static t_status _kernel_init(void) {
     systick_init();
     systick_register_callback(_systick_callback);
 
-    svc_panel_register_callback(PANEL_ACK_EVENT, _panel_ack_callback);
-    svc_panel_register_callback(HELD_BUTTONS_EVENT, _held_buttons_callback);
-
     // Initialise control panel.
     svc_panel_task();
 
@@ -173,11 +180,22 @@ static t_status _kernel_init(void) {
 
     knl_event_task();
 
-    dev_trs_register_callback(0, _serial_data_rx_callback);
-    knl_event_subscribe(KNL_EVENT_UART_DATA_RX, _serial_data_rx_listener);
+    dev_trs_register_callback(0, _trs_data_rx_callback);
+    knl_event_subscribe(KNL_EVENT_TRS_DATA_RX, _trs_data_rx_listener);
 
     midi_register_event_handler(EVT_CHAN_CONTROL_CHANGE, _midi_cc_rx_callback);
     knl_event_subscribe(KNL_EVENT_MIDI_CC_RX, _midi_cc_rx_listener);
+
+    dev_mcu_register_callback(0, _mcu_data_rx_callback);
+    knl_event_subscribe(KNL_EVENT_MCU_DATA_RX, _mcu_data_rx_listener);
+
+    svc_panel_register_callback(PANEL_ACK_EVENT, _panel_ack_callback);
+    knl_event_subscribe(KNL_EVENT_PANEL_ACK, _panel_ack_listener);
+
+    svc_panel_register_callback(HELD_BUTTONS_EVENT, _held_buttons_callback);
+    knl_event_subscribe(KNL_EVENT_HELD_BUTTONS, _held_buttons_listener);
+
+    svc_panel_register_callback(BUTTON_EVENT, _button_callback);
 
     return SUCCESS;
 }
@@ -186,7 +204,7 @@ static void _kernel_run(void) {
 
     knl_event_task();
 
-    svc_panel_task();
+    // svc_panel_task();
     svc_dsp_task();
     // svc_midi_task();
     svc_display_task();
@@ -212,7 +230,20 @@ static void _systick_callback(uint32_t systick) {
 
 static void _panel_ack_callback(uint32_t version) {
 
+    t_event event = {
+        .id = KNL_EVENT_PANEL_ACK,
+        .len = sizeof(version),
+        .data = (uint8_t *)version,
+    };
+
+    knl_event_publish(&event);
+}
+
+static void _panel_ack_listener(const t_event *event) {
+
     /// TODO: Store version with get method exposed to user.
+
+    // uint32_t version = (uint32_t)event->data;
 
     // Clear callback registration.
     svc_panel_register_callback(PANEL_ACK_EVENT, NULL);
@@ -220,22 +251,55 @@ static void _panel_ack_callback(uint32_t version) {
 
 static void _held_buttons_callback(uint32_t *held_buttons) {
 
+    t_event event = {
+        .id = KNL_EVENT_HELD_BUTTONS,
+        .len = 8,
+        .data = (uint8_t *)held_buttons,
+    };
+
+    knl_event_publish(&event);
+}
+
+static void _held_buttons_listener(const t_event *event) {
+
     /// TODO: Store buttons with get method exposed to user.
+
+    // uint32_t *buttons = (uint32_t *)event->data;
 
     // Clear callback registration.
     svc_panel_register_callback(HELD_BUTTONS_EVENT, NULL);
 }
 
-static void _serial_data_rx_callback(void) {
+static void _trs_data_rx_callback(void) {
 
-    t_event event = {.id = KNL_EVENT_UART_DATA_RX, .len = 0, .data = NULL};
+    t_event event = {
+        .id = KNL_EVENT_TRS_DATA_RX,
+        .len = 0,
+        .data = NULL,
+    };
 
     knl_event_publish(&event);
 }
 
-static void _serial_data_rx_listener(const t_event *event) {
+static void _trs_data_rx_listener(const t_event *event) {
     //
     svc_midi_task();
+}
+
+static void _mcu_data_rx_callback(void) {
+
+    t_event event = {
+        .id = KNL_EVENT_MCU_DATA_RX,
+        .len = 0,
+        .data = NULL,
+    };
+
+    knl_event_publish(&event);
+}
+
+static void _mcu_data_rx_listener(const t_event *event) {
+    //
+    svc_panel_task();
 }
 
 static void _midi_cc_rx_callback(char chan, char index, char value) {
@@ -243,7 +307,10 @@ static void _midi_cc_rx_callback(char chan, char index, char value) {
     uint8_t msg[] = {chan, index, value};
 
     t_event event = {
-        .id = KNL_EVENT_MIDI_CC_RX, .len = sizeof(msg), .data = msg};
+        .id = KNL_EVENT_MIDI_CC_RX,
+        .len = sizeof(msg),
+        .data = msg,
+    };
 
     knl_event_publish(&event);
 }
@@ -259,6 +326,19 @@ static void _midi_cc_rx_listener(const t_event *event) {
 
     itoa(msg[2], snum, 16);
     svc_midi_send_string(snum);
+}
+
+static void _button_callback(uint8_t button, bool state) {
+
+    uint8_t data[2] = {button, state};
+
+    t_event event = {
+        .id = KNL_EVENT_PANEL_BUTTON,
+        .len = sizeof(data),
+        .data = data,
+    };
+
+    knl_event_publish(&event);
 }
 
 /*----- End of file --------------------------------------------------*/
