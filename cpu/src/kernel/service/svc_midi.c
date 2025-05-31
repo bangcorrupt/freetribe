@@ -37,6 +37,7 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Includes -----------------------------------------------------*/
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #include "dev_trs.h"
@@ -45,6 +46,8 @@ under the terms of the GNU Affero General Public License as published by
 #include "svc_midi.h"
 
 #include "midi_fsm.h"
+
+#include "svc_event.h"
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -58,6 +61,11 @@ typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } t_midi_task_state;
 
 /*----- Static function prototypes -----------------------------------*/
 
+static void _trs_data_rx_callback(void);
+static void _trs_data_rx_listener(const t_event *event);
+
+static void _midi_cc_rx_callback(char chan, char index, char value);
+
 static t_status _midi_init(void);
 static void _midi_out(uint8_t midi_byte);
 
@@ -66,8 +74,6 @@ static void _midi_out(uint8_t midi_byte);
 void svc_midi_task(void) {
 
     static t_midi_task_state state = STATE_INIT;
-
-    uint8_t midi_byte = 0;
 
     switch (state) {
 
@@ -83,9 +89,9 @@ void svc_midi_task(void) {
 
     case STATE_RUN:
         // Fetch and parse single MIDI byte.
-        if (dev_trs_rx_dequeue(&midi_byte) == SUCCESS) {
-            midi_receive_byte(midi_byte);
-        }
+        // if (dev_trs_rx_dequeue(&midi_byte) == SUCCESS) {
+        //     midi_receive_byte(midi_byte);
+        // }
         // No error if MIDI message not available.
         break;
 
@@ -170,6 +176,12 @@ static t_status _midi_init(void) {
 
         dev_trs_init();
 
+        dev_trs_register_callback(0, _trs_data_rx_callback);
+        svc_event_subscribe(SVC_EVENT_TRS_DATA_RX, _trs_data_rx_listener);
+
+        midi_register_event_handler(EVT_CHAN_CONTROL_CHANGE,
+                                    _midi_cc_rx_callback);
+
         midi_register_sysex_handler((t_midi_sysex_callback)sysex_parse);
 
         // Do any other initialisation.
@@ -177,6 +189,39 @@ static t_status _midi_init(void) {
     }
 
     return result;
+}
+
+static void _trs_data_rx_callback(void) {
+
+    t_event event = {
+        .id = SVC_EVENT_TRS_DATA_RX,
+        .len = 0,
+        .data = NULL,
+    };
+
+    svc_event_publish(&event);
+}
+
+static void _trs_data_rx_listener(const t_event *event) {
+
+    uint8_t midi_byte = 0;
+
+    if (dev_trs_rx_dequeue(&midi_byte) == SUCCESS) {
+        midi_receive_byte(midi_byte);
+    }
+}
+
+static void _midi_cc_rx_callback(char chan, char index, char value) {
+
+    uint8_t msg[] = {chan, index, value};
+
+    t_event event = {
+        .id = SVC_EVENT_MIDI_CC_RX,
+        .len = sizeof(msg),
+        .data = msg,
+    };
+
+    svc_event_publish(&event);
 }
 
 static void _midi_tx_buffer(uint8_t *data, uint32_t length) {

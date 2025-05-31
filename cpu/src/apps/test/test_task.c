@@ -37,8 +37,9 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
+#include <stdlib.h>
+
 #include "freetribe.h"
-#include "svc_event.h"
 
 #include "gui_task.h"
 
@@ -71,6 +72,7 @@ static bool g_test_confirmed;
 /*----- Static function prototypes -----------------------------------*/
 
 static void _button_listener(const t_event *event);
+static void _midi_cc_rx_listener(const t_event *event);
 
 static t_status _init(void);
 static t_status _test_print(void);
@@ -152,6 +154,7 @@ static t_status _init(void) {
     t_status result = TASK_INIT_ERROR;
 
     ft_event_subscribe(SVC_EVENT_PANEL_BUTTON, _button_listener);
+    ft_event_subscribe(SVC_EVENT_MIDI_CC_RX, _midi_cc_rx_listener);
 
     result = SUCCESS;
     return result;
@@ -173,6 +176,19 @@ static void _button_listener(const t_event *event) {
     default:
         break;
     }
+}
+
+static void _midi_cc_rx_listener(const t_event *event) {
+
+    char snum[5];
+
+    const uint8_t *msg = event->data;
+
+    itoa(msg[1], snum, 16);
+    svc_midi_send_string(snum);
+
+    itoa(msg[2], snum, 16);
+    svc_midi_send_string(snum);
 }
 
 static t_status _test_print(void) {

@@ -39,7 +39,6 @@ under the terus of the GNU Affero General Public License as published by
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdlib.h>
 
 #include "midi_fsm.h"
 
@@ -84,14 +83,8 @@ static void _kernel_run(void);
 
 static void _systick_callback(uint32_t systick);
 
-static void _trs_data_rx_callback(void);
-static void _trs_data_rx_listener(const t_event *event);
-
 static void _mcu_data_rx_callback(void);
 static void _mcu_data_rx_listener(const t_event *event);
-
-static void _midi_cc_rx_callback(char chan, char index, char value);
-static void _midi_cc_rx_listener(const t_event *event);
 
 static void _panel_ack_callback(uint32_t version);
 static void _panel_ack_listener(const t_event *event);
@@ -184,12 +177,6 @@ static t_status _kernel_init(void) {
 
     svc_event_task();
 
-    dev_trs_register_callback(0, _trs_data_rx_callback);
-    svc_event_subscribe(SVC_EVENT_TRS_DATA_RX, _trs_data_rx_listener);
-
-    midi_register_event_handler(EVT_CHAN_CONTROL_CHANGE, _midi_cc_rx_callback);
-    svc_event_subscribe(SVC_EVENT_MIDI_CC_RX, _midi_cc_rx_listener);
-
     dev_mcu_register_callback(0, _mcu_data_rx_callback);
     svc_event_subscribe(SVC_EVENT_MCU_DATA_RX, _mcu_data_rx_listener);
 
@@ -277,22 +264,6 @@ static void _held_buttons_listener(const t_event *event) {
     svc_panel_register_callback(HELD_BUTTONS_EVENT, NULL);
 }
 
-static void _trs_data_rx_callback(void) {
-
-    t_event event = {
-        .id = SVC_EVENT_TRS_DATA_RX,
-        .len = 0,
-        .data = NULL,
-    };
-
-    svc_event_publish(&event);
-}
-
-static void _trs_data_rx_listener(const t_event *event) {
-    //
-    svc_midi_task();
-}
-
 static void _mcu_data_rx_callback(void) {
 
     t_event event = {
@@ -307,32 +278,6 @@ static void _mcu_data_rx_callback(void) {
 static void _mcu_data_rx_listener(const t_event *event) {
     //
     svc_panel_task();
-}
-
-static void _midi_cc_rx_callback(char chan, char index, char value) {
-
-    uint8_t msg[] = {chan, index, value};
-
-    t_event event = {
-        .id = SVC_EVENT_MIDI_CC_RX,
-        .len = sizeof(msg),
-        .data = msg,
-    };
-
-    svc_event_publish(&event);
-}
-
-static void _midi_cc_rx_listener(const t_event *event) {
-
-    char snum[5];
-
-    const uint8_t *msg = event->data;
-
-    itoa(msg[1], snum, 16);
-    svc_midi_send_string(snum);
-
-    itoa(msg[2], snum, 16);
-    svc_midi_send_string(snum);
 }
 
 static void _button_callback(uint8_t button, bool state) {
