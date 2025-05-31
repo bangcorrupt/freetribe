@@ -79,8 +79,12 @@ typedef enum {
     SVC_EVENT_MIDI_CC_RX,
     SVC_EVENT_MIDI_CC_TX,
 
+    /// TODO: Refactor _DISPLAY_.
+    //
     SVC_EVENT_PUT_PIXEL,
     SVC_EVENT_FILL_FRAME,
+
+    SVC_EVENT_SYSTEM_PRINT,
 
     SVC_EVENT_COUNT,
 } e_event_id;
