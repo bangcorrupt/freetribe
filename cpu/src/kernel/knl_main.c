@@ -86,9 +86,6 @@ static void _systick_callback(uint32_t systick);
 static void _panel_ack_listener(const t_event *event);
 static void _held_buttons_listener(const t_event *event);
 
-static void _put_pixel_listener(const t_event *event);
-static void _fill_frame_listener(const t_event *event);
-
 /*----- Extern function implementations ------------------------------*/
 
 void knl_main_task(void) {
@@ -172,9 +169,6 @@ static t_status _kernel_init(void) {
     svc_event_subscribe(SVC_EVENT_PANEL_ACK, _panel_ack_listener);
     svc_event_subscribe(SVC_EVENT_HELD_BUTTONS, _held_buttons_listener);
 
-    svc_event_subscribe(SVC_EVENT_PUT_PIXEL, _put_pixel_listener);
-    svc_event_subscribe(SVC_EVENT_FILL_FRAME, _fill_frame_listener);
-
     return SUCCESS;
 }
 
@@ -182,9 +176,7 @@ static void _kernel_run(void) {
 
     svc_event_task();
 
-    // svc_panel_task();
     svc_dsp_task();
-    // svc_midi_task();
     svc_display_task();
 
     if (g_user_tick && p_user_tick_callback != NULL) {
@@ -223,21 +215,6 @@ static void _held_buttons_listener(const t_event *event) {
 
     // Unsubscribe.
     svc_event_subscribe(SVC_EVENT_HELD_BUTTONS, NULL);
-}
-
-static void _put_pixel_listener(const t_event *event) {
-
-    t_pixel *pixel = (t_pixel *)event->data;
-
-    svc_display_put_pixel(pixel->x, pixel->y, pixel->state);
-}
-
-static void _fill_frame_listener(const t_event *event) {
-
-    t_frame *frame = (t_frame *)event->data;
-
-    svc_display_fill_frame(frame->x_start, frame->y_start, frame->x_end,
-                           frame->y_end, frame->state);
 }
 
 /*----- End of file --------------------------------------------------*/

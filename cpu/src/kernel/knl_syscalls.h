@@ -48,6 +48,7 @@ extern "C" {
 #include <stdint.h>
 
 #include "svc_delay.h"
+#include "svc_display.h"
 #include "svc_panel.h"
 
 #include "svc_event.h"
@@ -61,20 +62,6 @@ extern "C" {
 typedef int (*t_syscall)(void *);
 
 typedef t_syscall *(*t_get_syscalls)(void);
-
-typedef struct {
-    uint16_t x;
-    uint16_t y;
-    bool state;
-} t_pixel;
-
-typedef struct {
-    uint16_t x_start;
-    uint16_t y_start;
-    uint16_t x_end;
-    uint16_t y_end;
-    bool state;
-} t_frame;
 
 typedef struct {
     t_led_index index;
