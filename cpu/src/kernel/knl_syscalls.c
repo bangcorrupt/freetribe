@@ -117,9 +117,11 @@ static int _put_pixel(void *p) {
 
     t_pixel *pixel = p;
 
-    t_event event = {.id = SVC_EVENT_PUT_PIXEL,
-                     .len = sizeof(t_pixel),
-                     .data = (uint8_t *)pixel};
+    t_event event = {
+        .id = SVC_EVENT_PUT_PIXEL,
+        .len = sizeof(t_pixel),
+        .data = (uint8_t *)pixel,
+    };
 
     return svc_event_publish(&event);
 }
@@ -128,9 +130,11 @@ static int _fill_frame(void *p) {
 
     t_frame *frame = p;
 
-    t_event event = {.id = SVC_EVENT_FILL_FRAME,
-                     .len = sizeof(t_frame),
-                     .data = (uint8_t *)frame};
+    t_event event = {
+        .id = SVC_EVENT_FILL_FRAME,
+        .len = sizeof(t_frame),
+        .data = (uint8_t *)frame,
+    };
 
     return svc_event_publish(&event);
 }
@@ -139,9 +143,11 @@ static int _set_led(void *p) {
 
     t_led *led = p;
 
-    t_event event = {.id = SVC_EVENT_PANEL_LED,
-                     .len = sizeof(t_led),
-                     .data = (uint8_t *)led};
+    t_event event = {
+        .id = SVC_EVENT_PANEL_LED,
+        .len = sizeof(t_led),
+        .data = (uint8_t *)led,
+    };
 
     return svc_event_publish(&event);
 }
@@ -248,9 +254,13 @@ static int _set_trigger_mode(void *p) {
 
     uint8_t *mode = p;
 
-    svc_panel_set_trigger_mode(*mode);
+    t_event event = {
+        .id = SVC_EVENT_PANEL_TRIGGER_MODE,
+        .len = sizeof(uint8_t),
+        .data = mode,
+    };
 
-    return 0;
+    return svc_event_publish(&event);
 }
 
 static int _shutdown(void *p) {

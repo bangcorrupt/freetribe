@@ -167,7 +167,7 @@ static t_status _kernel_init(void) {
     svc_event_task();
 
     svc_event_subscribe(SVC_EVENT_PANEL_ACK, _panel_ack_listener);
-    svc_event_subscribe(SVC_EVENT_HELD_BUTTONS, _held_buttons_listener);
+    svc_event_subscribe(SVC_EVENT_PANEL_HELD_BUTTONS, _held_buttons_listener);
 
     return SUCCESS;
 }
@@ -214,7 +214,7 @@ static void _held_buttons_listener(const t_event *event) {
     // uint32_t *buttons = (uint32_t *)event->data;
 
     // Unsubscribe.
-    svc_event_subscribe(SVC_EVENT_HELD_BUTTONS, NULL);
+    svc_event_subscribe(SVC_EVENT_PANEL_HELD_BUTTONS, NULL);
 }
 
 /*----- End of file --------------------------------------------------*/

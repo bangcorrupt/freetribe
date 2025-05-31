@@ -65,14 +65,7 @@ typedef enum {
     MSG_ID_BUTTONS_MSW = 0x92  // High word.
 } t_panel_msg_id;
 
-typedef void (*t_undefined_callback)(void);
-typedef void (*t_xy_pad_callback)(uint32_t x_val, uint32_t y_val);
-
 /*----- Static variable definitions ----------------------------------*/
-
-static uint8_t g_led_current_brightness[LED_COUNT] = {0};
-
-static t_undefined_callback p_undefined_callback = NULL;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -85,6 +78,7 @@ static t_status _publish_data_rx_event(void);
 static void _data_rx_listener(const t_event *event);
 
 static void _led_listener(const t_event *event);
+static void _trigger_mode_listener(const t_event *event);
 
 static t_status _publish_button_event(uint8_t index, bool state);
 static t_status _publish_encoder_event(uint8_t index, int8_t value);
@@ -158,58 +152,6 @@ void svc_panel_calib_xy(uint32_t xcal, uint32_t ycal) {
     dev_mcu_tx_enqueue(msg);
 }
 
-void svc_panel_set_trigger_mode(uint8_t mode) {
-
-    uint8_t msg[5] = {0};
-
-    if (mode != 0) {
-        mode = 1;
-    }
-
-    msg[0] = 0x84;
-    msg[1] = mode;
-
-    dev_mcu_tx_enqueue(msg);
-}
-
-/**
- * Set LED.
- */
-// void svc_panel_set_led(t_led_index led_index, uint8_t brightness) {
-//
-//     uint8_t mcu_msg[5] = {0, 0, 0, 0, 0};
-//
-//     mcu_msg[1] = led_index;
-//     mcu_msg[2] = brightness;
-//
-//     dev_mcu_tx_enqueue(mcu_msg);
-//     g_led_current_brightness[led_index] = brightness;
-// }
-
-/**
- * Toggle LED.
- */
-/// FIX: DEPRECATED
-///         Kernel should not keep track of LED state.
-//
-/// TODO: Move this to application library.
-//
-// void svc_panel_toggle_led(t_led_index led_index) {
-//
-//     uint8_t mcu_msg[5] = {0, 0, 0, 0, 0};
-//
-//     mcu_msg[1] = led_index;
-//
-//     if (g_led_current_brightness[led_index] != 0) {
-//         mcu_msg[2] = 0x00;
-//     } else {
-//         mcu_msg[2] = 0xff;
-//     }
-//
-//     dev_mcu_tx_enqueue(mcu_msg);
-//     g_led_current_brightness[led_index] = mcu_msg[2];
-// }
-
 /*----- Static function implementations ------------------------------*/
 
 static t_status _panel_init(void) {
@@ -237,6 +179,7 @@ static t_status _panel_init(void) {
     dev_mcu_register_callback(0, _publish_data_rx_event);
     svc_event_subscribe(SVC_EVENT_MCU_DATA_RX, _data_rx_listener);
     svc_event_subscribe(SVC_EVENT_PANEL_LED, _led_listener);
+    svc_event_subscribe(SVC_EVENT_PANEL_TRIGGER_MODE, _trigger_mode_listener);
 
     result = SUCCESS;
 
@@ -275,6 +218,16 @@ static void _led_listener(const t_event *event) {
     dev_mcu_tx_enqueue(mcu_msg);
 }
 
+static void _trigger_mode_listener(const t_event *event) {
+
+    uint8_t msg[5] = {0};
+
+    msg[0] = 0x84;
+    msg[1] = *event->data > 0;
+
+    dev_mcu_tx_enqueue(msg);
+}
+
 static t_status _panel_parse(uint8_t *msg) {
 
     t_status result = PANEL_PARSE_ERROR;
@@ -306,12 +259,9 @@ static t_status _panel_parse(uint8_t *msg) {
         }
         break;
 
-        /// TODO: Undefined message ID event.
+    /// TODO: Undefined message ID event.
     case UNDEFINED_EVENT:
-        if (p_undefined_callback != NULL) {
-            (p_undefined_callback)();
-        }
-        result = SUCCESS;
+        result = WARNING;
         break;
 
     case TRIGGER_EVENT:
@@ -351,8 +301,8 @@ static t_status _panel_parse(uint8_t *msg) {
         result = _publish_held_buttons_event(held_buttons);
         break;
 
+    /// TODO: Unknown message ID event.
     default:
-        /// TODO: Unknown message ID event.
         result = WARNING;
         break;
     }
@@ -436,7 +386,7 @@ static t_status _publish_held_buttons_event(uint32_t *buttons) {
 
     t_event event;
 
-    event.id = SVC_EVENT_HELD_BUTTONS;
+    event.id = SVC_EVENT_PANEL_HELD_BUTTONS;
     event.len = 8;
     event.data = (uint8_t *)&buttons;
 
