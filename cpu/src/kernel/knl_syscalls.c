@@ -174,10 +174,6 @@ static int _register_callback(void *p) {
         knl_register_user_tick_callback(callback->arg, callback->handler);
         break;
 
-    case CALLBACK_PANEL:
-        svc_panel_register_callback(callback->arg, callback->handler);
-        break;
-
     case CALLBACK_MIDI:
         midi_register_event_handler(callback->arg, callback->handler);
         break;

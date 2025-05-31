@@ -45,7 +45,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros -------------------------------------------------------*/
 
-#define SVC_EVENT_QUEUE_LEN 0x400
+#define SVC_EVENT_QUEUE_LEN 0x200
 #define SVC_DATA_QUEUE_LEN 0x1000
 
 #define SVC_MAX_EVENT_LISTENER 255

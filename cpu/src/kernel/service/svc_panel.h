@@ -169,15 +169,37 @@ typedef struct {
     bool state;
 } t_button;
 
+typedef struct {
+    uint8_t index;
+    uint8_t value;
+    bool state;
+} t_trigger;
+
+typedef struct {
+    uint8_t index;
+    uint8_t value;
+} t_knob;
+
+typedef struct {
+    uint8_t index;
+    int8_t value;
+} t_encoder;
+
+typedef struct {
+    uint16_t x;
+    uint16_t y;
+} t_touchpad;
+
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
 
 void svc_panel_task(void);
 void svc_panel_enqueue(uint8_t *msg);
-void svc_panel_register_callback(t_panel_event event, void *callback);
+
 void svc_panel_set_trigger_mode(uint8_t mode);
 void svc_panel_set_led(t_led_index led_index, uint8_t brightness);
+
 void svc_panel_toggle_led(t_led_index led_index);
 void svc_panel_request_buttons(void);
 void svc_panel_calib_xy(uint32_t xcal, uint32_t ycal);

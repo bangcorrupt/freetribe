@@ -65,21 +65,14 @@ typedef enum {
     MSG_ID_BUTTONS_MSW = 0x92  // High word.
 } t_panel_msg_id;
 
-typedef void (*t_encoder_callback)(uint8_t enc, int8_t val);
-typedef void (*t_knob_callback)(uint8_t knob, uint8_t val);
 typedef void (*t_undefined_callback)(void);
-typedef void (*t_trigger_callback)(uint8_t pad, uint8_t vel, bool state);
 typedef void (*t_xy_pad_callback)(uint32_t x_val, uint32_t y_val);
 
 /*----- Static variable definitions ----------------------------------*/
 
 static uint8_t g_led_current_brightness[LED_COUNT] = {0};
 
-static t_encoder_callback p_encoder_callback = NULL;
-static t_knob_callback p_knob_callback = NULL;
 static t_undefined_callback p_undefined_callback = NULL;
-static t_trigger_callback p_trigger_callback = NULL;
-static t_xy_pad_callback p_xy_pad_callback = NULL;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -91,9 +84,13 @@ static t_status _panel_parse(uint8_t *msg);
 static void _publish_data_rx_event(void);
 static void _data_rx_listener(const t_event *event);
 
-t_status _publish_button_event(uint8_t index, bool state);
-t_status _publish_held_buttons_event(uint32_t *buttons);
-t_status _publish_ack_event(uint32_t version);
+static t_status _publish_button_event(uint8_t index, bool state);
+static t_status _publish_encoder_event(uint8_t index, int8_t value);
+static t_status _publish_knob_event(uint8_t index, uint8_t value);
+static t_status _publish_trigger_event(uint8_t index, uint8_t vel, bool state);
+static t_status _publish_touchpad_event(uint16_t x, uint16_t y);
+static t_status _publish_held_buttons_event(uint32_t *buttons);
+static t_status _publish_ack_event(uint32_t version);
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -126,37 +123,6 @@ void svc_panel_task(void) {
             state = STATE_ERROR;
         }
         break;
-    }
-}
-
-void svc_panel_register_callback(t_panel_event event, void *callback) {
-
-    if (callback != NULL) {
-        switch (event) {
-
-        case ENCODER_EVENT:
-            p_encoder_callback = (t_encoder_callback)callback;
-            break;
-
-        case KNOB_EVENT:
-            p_knob_callback = (t_knob_callback)callback;
-            break;
-
-        case UNDEFINED_EVENT:
-            p_undefined_callback = (t_undefined_callback)callback;
-            break;
-
-        case TRIGGER_EVENT:
-            p_trigger_callback = (t_trigger_callback)callback;
-            break;
-
-        case XY_PAD_EVENT:
-            p_xy_pad_callback = (t_xy_pad_callback)callback;
-            break;
-
-        default:
-            break;
-        }
     }
 }
 
@@ -309,27 +275,23 @@ static t_status _panel_parse(uint8_t *msg) {
         break;
 
     case ENCODER_EVENT:
-        if (p_encoder_callback != NULL) {
-            (p_encoder_callback)(msg[1], (int8_t)(msg[3]));
-        }
-        result = SUCCESS;
+        result = _publish_encoder_event(msg[1], msg[3]);
         break;
 
     case KNOB_EVENT:
         // In continuous mode, trigger pads use KNOB_EVENT message ID.
         if (msg[1] >= 0x11) {
-            if (p_trigger_callback != NULL) {
-                (p_trigger_callback)(msg[1], msg[3], (bool)msg[4]);
-            }
+
+            /// TODO: Modify pad index to match trigger mode?
+            //
+            result = _publish_trigger_event(msg[1], msg[3], (bool)msg[4]);
 
         } else {
-            if (p_knob_callback != NULL) {
-                (p_knob_callback)(msg[1], msg[3]);
-            }
+            result = _publish_knob_event(msg[1], msg[3]);
         }
-        result = SUCCESS;
         break;
 
+        /// TODO: Undefined message ID event.
     case UNDEFINED_EVENT:
         if (p_undefined_callback != NULL) {
             (p_undefined_callback)();
@@ -338,19 +300,12 @@ static t_status _panel_parse(uint8_t *msg) {
         break;
 
     case TRIGGER_EVENT:
-        if (p_trigger_callback != NULL) {
-            (p_trigger_callback)(msg[1], msg[3], (bool)msg[4]);
-        }
-        result = SUCCESS;
+        result = _publish_trigger_event(msg[1], msg[3], (bool)msg[4]);
         break;
 
     case XY_PAD_EVENT:
-        if (p_xy_pad_callback != NULL) {
-            uint32_t x = msg[1] << 8 | msg[2];
-            uint32_t y = msg[3] << 8 | msg[4];
-            (p_xy_pad_callback)(x, y);
-        }
-        result = SUCCESS;
+        result = _publish_touchpad_event((msg[1] << 8 | msg[2]),
+                                         (msg[3] << 8 | msg[4]));
         break;
 
     case MSG_ID_ACK:
@@ -382,7 +337,7 @@ static t_status _panel_parse(uint8_t *msg) {
         break;
 
     default:
-        /// TODO: Handle unknown msg_id.
+        /// TODO: Unknown message ID event.
         result = WARNING;
         break;
     }
@@ -390,7 +345,7 @@ static t_status _panel_parse(uint8_t *msg) {
     return result;
 }
 
-t_status _publish_button_event(uint8_t index, bool state) {
+static t_status _publish_button_event(uint8_t index, bool state) {
 
     t_event event;
     t_button button;
@@ -405,7 +360,53 @@ t_status _publish_button_event(uint8_t index, bool state) {
     return svc_event_publish(&event);
 }
 
-t_status _publish_ack_event(uint32_t version) {
+static t_status _publish_encoder_event(uint8_t index, int8_t value) {
+
+    t_event event;
+    t_encoder encoder;
+
+    encoder.index = index;
+    encoder.value = value;
+
+    event.id = SVC_EVENT_PANEL_ENCODER;
+    event.len = sizeof(encoder);
+    event.data = (uint8_t *)&encoder;
+
+    return svc_event_publish(&event);
+}
+
+static t_status _publish_knob_event(uint8_t index, uint8_t value) {
+
+    t_event event;
+    t_knob knob;
+
+    knob.index = index;
+    knob.value = value;
+
+    event.id = SVC_EVENT_PANEL_KNOB;
+    event.len = sizeof(knob);
+    event.data = (uint8_t *)&knob;
+
+    return svc_event_publish(&event);
+}
+
+static t_status _publish_trigger_event(uint8_t index, uint8_t vel, bool state) {
+
+    t_event event;
+    t_trigger trigger;
+
+    trigger.index = index;
+    trigger.value = index;
+    trigger.state = state;
+
+    event.id = SVC_EVENT_PANEL_TRIGGER;
+    event.len = sizeof(trigger);
+    event.data = (uint8_t *)&trigger;
+
+    return svc_event_publish(&event);
+}
+
+static t_status _publish_ack_event(uint32_t version) {
 
     t_event event;
 
@@ -416,13 +417,26 @@ t_status _publish_ack_event(uint32_t version) {
     return svc_event_publish(&event);
 }
 
-t_status _publish_held_buttons_event(uint32_t *buttons) {
+static t_status _publish_held_buttons_event(uint32_t *buttons) {
 
     t_event event;
 
     event.id = SVC_EVENT_HELD_BUTTONS;
     event.len = 8;
     event.data = (uint8_t *)&buttons;
+
+    return svc_event_publish(&event);
+}
+
+static t_status _publish_touchpad_event(uint16_t x, uint16_t y) {
+
+    t_event event;
+
+    t_touchpad touchpad = {.x = x, .y = y};
+
+    event.id = SVC_EVENT_TOUCHPAD;
+    event.len = sizeof(touchpad);
+    event.data = (uint8_t *)&touchpad;
 
     return svc_event_publish(&event);
 }
