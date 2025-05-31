@@ -164,6 +164,11 @@ typedef enum {
 
 } t_led_index;
 
+typedef struct {
+    uint8_t index;
+    bool state;
+} t_button;
+
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/

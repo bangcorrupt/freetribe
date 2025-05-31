@@ -83,16 +83,11 @@ static void _kernel_run(void);
 
 static void _systick_callback(uint32_t systick);
 
-static void _mcu_data_rx_callback(void);
-static void _mcu_data_rx_listener(const t_event *event);
-
 static void _panel_ack_callback(uint32_t version);
 static void _panel_ack_listener(const t_event *event);
 
 static void _held_buttons_callback(uint32_t *held_buttons);
 static void _held_buttons_listener(const t_event *event);
-
-static void _button_callback(uint8_t button, bool state);
 
 static void _put_pixel_listener(const t_event *event);
 static void _fill_frame_listener(const t_event *event);
@@ -177,16 +172,10 @@ static t_status _kernel_init(void) {
 
     svc_event_task();
 
-    dev_mcu_register_callback(0, _mcu_data_rx_callback);
-    svc_event_subscribe(SVC_EVENT_MCU_DATA_RX, _mcu_data_rx_listener);
-
-    svc_panel_register_callback(PANEL_ACK_EVENT, _panel_ack_callback);
     svc_event_subscribe(SVC_EVENT_PANEL_ACK, _panel_ack_listener);
 
     svc_panel_register_callback(HELD_BUTTONS_EVENT, _held_buttons_callback);
     svc_event_subscribe(SVC_EVENT_HELD_BUTTONS, _held_buttons_listener);
-
-    svc_panel_register_callback(BUTTON_EVENT, _button_callback);
 
     svc_event_subscribe(SVC_EVENT_PUT_PIXEL, _put_pixel_listener);
     svc_event_subscribe(SVC_EVENT_FILL_FRAME, _fill_frame_listener);
@@ -222,25 +211,11 @@ static void _systick_callback(uint32_t systick) {
     }
 }
 
-static void _panel_ack_callback(uint32_t version) {
-
-    t_event event = {
-        .id = SVC_EVENT_PANEL_ACK,
-        .len = sizeof(version),
-        .data = (uint8_t *)version,
-    };
-
-    svc_event_publish(&event);
-}
-
 static void _panel_ack_listener(const t_event *event) {
 
     /// TODO: Store version with get method exposed to user.
 
     // uint32_t version = (uint32_t)event->data;
-
-    // Clear callback registration.
-    svc_panel_register_callback(PANEL_ACK_EVENT, NULL);
 }
 
 static void _held_buttons_callback(uint32_t *held_buttons) {
@@ -262,35 +237,6 @@ static void _held_buttons_listener(const t_event *event) {
 
     // Clear callback registration.
     svc_panel_register_callback(HELD_BUTTONS_EVENT, NULL);
-}
-
-static void _mcu_data_rx_callback(void) {
-
-    t_event event = {
-        .id = SVC_EVENT_MCU_DATA_RX,
-        .len = 0,
-        .data = NULL,
-    };
-
-    svc_event_publish(&event);
-}
-
-static void _mcu_data_rx_listener(const t_event *event) {
-    //
-    svc_panel_task();
-}
-
-static void _button_callback(uint8_t button, bool state) {
-
-    uint8_t data[2] = {button, state};
-
-    t_event event = {
-        .id = SVC_EVENT_PANEL_BUTTON,
-        .len = sizeof(data),
-        .data = data,
-    };
-
-    svc_event_publish(&event);
 }
 
 static void _put_pixel_listener(const t_event *event) {

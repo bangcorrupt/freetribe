@@ -44,6 +44,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "svc_panel.h"
 
+#include "svc_event.h"
+
 #include "ft_error.h"
 
 /*----- Macros -------------------------------------------------------*/
@@ -63,26 +65,22 @@ typedef enum {
     MSG_ID_BUTTONS_MSW = 0x92  // High word.
 } t_panel_msg_id;
 
-typedef void (*t_button_callback)(uint8_t button, bool state);
 typedef void (*t_encoder_callback)(uint8_t enc, int8_t val);
 typedef void (*t_knob_callback)(uint8_t knob, uint8_t val);
 typedef void (*t_undefined_callback)(void);
 typedef void (*t_trigger_callback)(uint8_t pad, uint8_t vel, bool state);
 typedef void (*t_xy_pad_callback)(uint32_t x_val, uint32_t y_val);
-typedef void (*t_panel_ack_callback)(uint32_t version);
 typedef void (*t_held_buttons_callback)(uint32_t *held_buttons);
 
 /*----- Static variable definitions ----------------------------------*/
 
 static uint8_t g_led_current_brightness[LED_COUNT] = {0};
 
-static t_button_callback p_button_callback = NULL;
 static t_encoder_callback p_encoder_callback = NULL;
 static t_knob_callback p_knob_callback = NULL;
 static t_undefined_callback p_undefined_callback = NULL;
 static t_trigger_callback p_trigger_callback = NULL;
 static t_xy_pad_callback p_xy_pad_callback = NULL;
-static t_panel_ack_callback p_panel_ack_callback = NULL;
 static t_held_buttons_callback p_held_buttons_callback = NULL;
 
 /*----- Extern variable definitions ----------------------------------*/
@@ -92,12 +90,17 @@ static t_held_buttons_callback p_held_buttons_callback = NULL;
 static t_status _panel_init(void);
 static t_status _panel_parse(uint8_t *msg);
 
+static void _mcu_data_rx_callback(void);
+static void _mcu_data_rx_listener(const t_event *event);
+
+t_status _publish_button_event(uint8_t index, bool state);
+t_status _publish_ack_event(uint32_t version);
+
 /*----- Extern function implementations ------------------------------*/
 
 void svc_panel_task(void) {
 
     static t_panel_task_state state = STATE_INIT;
-    static uint8_t panel_msg[5] = {0};
 
     switch (state) {
 
@@ -111,9 +114,6 @@ void svc_panel_task(void) {
 
     case STATE_RUN:
 
-        if (dev_mcu_rx_dequeue(panel_msg) == SUCCESS) {
-            _panel_parse(panel_msg);
-        }
         // No error if MCU message not available.
         break;
 
@@ -135,10 +135,6 @@ void svc_panel_register_callback(t_panel_event event, void *callback) {
     if (callback != NULL) {
         switch (event) {
 
-        case BUTTON_EVENT:
-            p_button_callback = (t_button_callback)callback;
-            break;
-
         case ENCODER_EVENT:
             p_encoder_callback = (t_encoder_callback)callback;
             break;
@@ -157,10 +153,6 @@ void svc_panel_register_callback(t_panel_event event, void *callback) {
 
         case XY_PAD_EVENT:
             p_xy_pad_callback = (t_xy_pad_callback)callback;
-            break;
-
-        case PANEL_ACK_EVENT:
-            p_panel_ack_callback = (t_panel_ack_callback)callback;
             break;
 
         case HELD_BUTTONS_EVENT:
@@ -270,7 +262,7 @@ static t_status _panel_init(void) {
 
     dev_mcu_tx_enqueue(panel_msg);
 
-    /// TODO: Non blocking / Timeout error?.
+    /// TODO: Use ACK event listener to tell kernel MCU is ready.
     //
     // Block until MCU acknowledges.
     // System is not useful without MCU running.
@@ -279,9 +271,32 @@ static t_status _panel_init(void) {
 
     _panel_parse(panel_msg);
 
+    dev_mcu_register_callback(0, _mcu_data_rx_callback);
+    svc_event_subscribe(SVC_EVENT_MCU_DATA_RX, _mcu_data_rx_listener);
+
     result = SUCCESS;
 
     return result;
+}
+
+static void _mcu_data_rx_callback(void) {
+
+    t_event event = {
+        .id = SVC_EVENT_MCU_DATA_RX,
+        .len = 0,
+        .data = NULL,
+    };
+
+    svc_event_publish(&event);
+}
+
+static void _mcu_data_rx_listener(const t_event *event) {
+
+    uint8_t panel_msg[5] = {0};
+
+    if (dev_mcu_rx_dequeue(panel_msg) == SUCCESS) {
+        _panel_parse(panel_msg);
+    }
 }
 
 static t_status _panel_parse(uint8_t *msg) {
@@ -293,10 +308,7 @@ static t_status _panel_parse(uint8_t *msg) {
     switch (msg[0]) {
 
     case BUTTON_EVENT:
-        if (p_button_callback != NULL) {
-            (p_button_callback)(msg[1], (bool)msg[2]);
-        }
-        result = SUCCESS;
+        _publish_button_event(msg[1], msg[2]);
         break;
 
     case ENCODER_EVENT:
@@ -345,13 +357,13 @@ static t_status _panel_parse(uint8_t *msg) {
         break;
 
     case MSG_ID_ACK:
+
         /// TODO: Is this actually version number?
+        ///         Think this is a checksum.
+        //
         version = msg[1] << 0x18 | msg[2] << 0x10 | msg[3] << 0x8 | msg[4];
 
-        if (p_panel_ack_callback != NULL) {
-            p_panel_ack_callback(version);
-        }
-        result = SUCCESS;
+        result = _publish_ack_event(version);
         break;
 
     case MSG_ID_BUTTONS_LSW:
@@ -383,6 +395,32 @@ static t_status _panel_parse(uint8_t *msg) {
     }
 
     return result;
+}
+
+t_status _publish_button_event(uint8_t index, bool state) {
+
+    t_event event;
+    t_button button;
+
+    button.index = index;
+    button.state = state;
+
+    event.id = SVC_EVENT_PANEL_BUTTON;
+    event.len = sizeof(button);
+    event.data = (uint8_t *)&button;
+
+    return svc_event_publish(&event);
+}
+
+t_status _publish_ack_event(uint32_t version) {
+
+    t_event event;
+
+    event.id = SVC_EVENT_PANEL_ACK;
+    event.len = sizeof(version);
+    event.data = (uint8_t *)&version;
+
+    return svc_event_publish(&event);
 }
 
 /*----- End of file --------------------------------------------------*/
