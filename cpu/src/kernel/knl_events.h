@@ -73,6 +73,9 @@ typedef enum {
     KNL_EVENT_MIDI_CC_RX,
     KNL_EVENT_MIDI_CC_TX,
 
+    KNL_EVENT_PUT_PIXEL,
+    KNL_EVENT_FILL_FRAME,
+
     KNL_EVENT_COUNT,
 } e_event_id;
 

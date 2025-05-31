@@ -57,7 +57,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Typedefs -----------------------------------------------------*/
 
-typedef void (*t_data_ready_callback)(void);
+typedef void (*t_data_rx_callback)(void);
 
 /*----- Static variable definitions ----------------------------------*/
 
@@ -73,7 +73,7 @@ static uint8_t g_trs_rx_byte;
 
 static bool g_trs_tx_complete = false;
 
-static t_data_ready_callback p_data_ready_callback;
+static t_data_rx_callback p_data_rx_callback;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -151,7 +151,7 @@ void dev_trs_register_callback(uint8_t callback_id, void *callback) {
 
     /// TODO: Handle callback_id.
     //
-    p_data_ready_callback = (t_data_ready_callback)callback;
+    p_data_rx_callback = (t_data_rx_callback)callback;
 }
 
 /*----- Static function implementations ------------------------------*/
@@ -163,12 +163,14 @@ static int _trs_tx_dequeue(uint8_t *byte) {
 
 static void _trs_rx_enqueue(uint8_t *byte) {
 
+    /// TODO: Separate callbacks for SUCCESS or ERROR.
+
     // Overwrite on overflow.
     ring_buffer_put_force(trs_rx_rbd, byte);
 
-    if (p_data_ready_callback != NULL) {
+    if (p_data_rx_callback != NULL) {
 
-        p_data_ready_callback();
+        p_data_rx_callback();
     }
 }
 

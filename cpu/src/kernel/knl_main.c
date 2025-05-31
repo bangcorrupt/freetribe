@@ -100,6 +100,9 @@ static void _held_buttons_listener(const t_event *event);
 
 static void _button_callback(uint8_t button, bool state);
 
+static void _put_pixel_listener(const t_event *event);
+static void _fill_frame_listener(const t_event *event);
+
 /*----- Extern function implementations ------------------------------*/
 
 void knl_main_task(void) {
@@ -196,6 +199,9 @@ static t_status _kernel_init(void) {
     knl_event_subscribe(KNL_EVENT_HELD_BUTTONS, _held_buttons_listener);
 
     svc_panel_register_callback(BUTTON_EVENT, _button_callback);
+
+    knl_event_subscribe(KNL_EVENT_PUT_PIXEL, _put_pixel_listener);
+    knl_event_subscribe(KNL_EVENT_FILL_FRAME, _fill_frame_listener);
 
     return SUCCESS;
 }
@@ -339,6 +345,21 @@ static void _button_callback(uint8_t button, bool state) {
     };
 
     knl_event_publish(&event);
+}
+
+static void _put_pixel_listener(const t_event *event) {
+
+    t_pixel *pixel = (t_pixel *)event->data;
+
+    svc_display_put_pixel(pixel->x, pixel->y, pixel->state);
+}
+
+static void _fill_frame_listener(const t_event *event) {
+
+    t_frame *frame = (t_frame *)event->data;
+
+    svc_display_fill_frame(frame->x_start, frame->y_start, frame->x_end,
+                           frame->y_end, frame->state);
 }
 
 /*----- End of file --------------------------------------------------*/

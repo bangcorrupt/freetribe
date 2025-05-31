@@ -149,11 +149,11 @@ bool ft_delay(t_delay *delay) {
 // Display API
 //
 //
-void ft_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state) {
+t_status ft_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state) {
 
     t_pixel pixel = {.x = pos_x, .y = pos_y, .state = state};
 
-    _put_pixel(&pixel);
+    return _put_pixel(&pixel);
 }
 
 int8_t ft_fill_frame(uint16_t x_start, uint16_t y_start, uint16_t x_end,

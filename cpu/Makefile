@@ -1,6 +1,6 @@
 # Thanks to Job Vranish (https://spin.atomicobject.com/2016/08/26/makefile-c-projects/)
 
-APP ?= demo
+APP ?= default
 
 TARGET_EXEC := cpu.elf
 TARGET_BIN := cpu.bin

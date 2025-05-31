@@ -117,17 +117,22 @@ static int _put_pixel(void *p) {
 
     t_pixel *pixel = p;
 
-    svc_display_put_pixel(pixel->x, pixel->y, pixel->state);
+    t_event event = {.id = KNL_EVENT_PUT_PIXEL,
+                     .len = sizeof(t_pixel),
+                     .data = (uint8_t *)pixel};
 
-    return 0;
+    return knl_event_publish(&event);
 }
 
 static int _fill_frame(void *p) {
 
     t_frame *frame = p;
 
-    svc_display_fill_frame(frame->x_start, frame->y_start, frame->x_end,
-                           frame->y_end, frame->state);
+    t_event event = {.id = KNL_EVENT_FILL_FRAME,
+                     .len = sizeof(t_frame),
+                     .data = (uint8_t *)frame};
+
+    return knl_event_publish(&event);
 
     return 0;
 }

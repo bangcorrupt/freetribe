@@ -45,8 +45,8 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Macros -------------------------------------------------------*/
 
-#define KNL_EVENT_QUEUE_LEN 0x100
-#define KNL_DATA_QUEUE_LEN 0x400
+#define KNL_EVENT_QUEUE_LEN 0x400
+#define KNL_DATA_QUEUE_LEN 0x1000
 
 #define KNL_MAX_EVENT_LISTENER 255
 
