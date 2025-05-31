@@ -63,7 +63,8 @@ extern "C" {
 
 #include "midi_fsm.h"
 
-#include "knl_events.h"
+#include "svc_event.h"
+
 #include "knl_main.h"
 #include "usr_main.h"
 

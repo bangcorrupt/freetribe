@@ -40,10 +40,10 @@ under the terms of the GNU Affero General Public License as published by
 #include <stdint.h>
 #include <stdio.h>
 
-#include "knl_events.h"
 #include "svc_delay.h"
 #include "svc_display.h"
 #include "svc_dsp.h"
+#include "svc_event.h"
 #include "svc_midi.h"
 #include "svc_panel.h"
 #include "svc_system.h"
@@ -117,22 +117,22 @@ static int _put_pixel(void *p) {
 
     t_pixel *pixel = p;
 
-    t_event event = {.id = KNL_EVENT_PUT_PIXEL,
+    t_event event = {.id = SVC_EVENT_PUT_PIXEL,
                      .len = sizeof(t_pixel),
                      .data = (uint8_t *)pixel};
 
-    return knl_event_publish(&event);
+    return svc_event_publish(&event);
 }
 
 static int _fill_frame(void *p) {
 
     t_frame *frame = p;
 
-    t_event event = {.id = KNL_EVENT_FILL_FRAME,
+    t_event event = {.id = SVC_EVENT_FILL_FRAME,
                      .len = sizeof(t_frame),
                      .data = (uint8_t *)frame};
 
-    return knl_event_publish(&event);
+    return svc_event_publish(&event);
 
     return 0;
 }
@@ -196,7 +196,7 @@ static int _event_subscribe(void *p) {
         t_listener listener;
     };
 
-    knl_event_subscribe(((struct params *)p)->id,
+    svc_event_subscribe(((struct params *)p)->id,
                         ((struct params *)p)->listener);
 
     return 0;

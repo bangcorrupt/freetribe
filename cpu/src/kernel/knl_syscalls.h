@@ -50,7 +50,7 @@ extern "C" {
 #include "svc_delay.h"
 #include "svc_panel.h"
 
-#include "knl_events.h"
+#include "svc_event.h"
 
 /*----- Macros -------------------------------------------------------*/
 

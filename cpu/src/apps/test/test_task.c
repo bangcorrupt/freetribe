@@ -38,7 +38,7 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Includes -----------------------------------------------------*/
 
 #include "freetribe.h"
-#include "knl_events.h"
+#include "svc_event.h"
 
 #include "gui_task.h"
 
@@ -151,7 +151,7 @@ static t_status _init(void) {
 
     t_status result = TASK_INIT_ERROR;
 
-    ft_event_subscribe(KNL_EVENT_PANEL_BUTTON, _button_listener);
+    ft_event_subscribe(SVC_EVENT_PANEL_BUTTON, _button_listener);
 
     result = SUCCESS;
     return result;

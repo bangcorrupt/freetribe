@@ -52,6 +52,10 @@ extern "C" {
 /*----- Extern function prototypes -----------------------------------*/
 
 void svc_system_task(void);
+
+void svc_system_enter_critical(void);
+void svc_system_exit_critical(void);
+
 void svc_system_shutdown(void);
 
 #ifdef __cplusplus

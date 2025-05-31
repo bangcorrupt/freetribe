@@ -29,7 +29,7 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    knl_events.c
+ * @file    svc_event.c
  *
  * @brief   Central event queue.
  */
@@ -40,15 +40,15 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "ring_buffer.h"
 
-#include "knl_events.h"
-#include "knl_sync.h"
+#include "svc_event.h"
+#include "svc_system.h"
 
 /*----- Macros -------------------------------------------------------*/
 
-#define KNL_EVENT_QUEUE_LEN 0x400
-#define KNL_DATA_QUEUE_LEN 0x1000
+#define SVC_EVENT_QUEUE_LEN 0x400
+#define SVC_DATA_QUEUE_LEN 0x1000
 
-#define KNL_MAX_EVENT_LISTENER 255
+#define SVC_MAX_EVENT_LISTENER 255
 
 /*----- Typedefs -----------------------------------------------------*/
 
@@ -56,24 +56,24 @@ typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } e_event_task_state;
 
 typedef struct {
     // Array of function pointers to event listeners.
-    t_listener listener[KNL_MAX_EVENT_LISTENER];
+    t_listener listener[SVC_MAX_EVENT_LISTENER];
 
     // Maximum subscribed listener.
     uint8_t top;
 
 } t_listener_row;
 
-t_listener_row g_listener_table[KNL_EVENT_COUNT];
+t_listener_row g_listener_table[SVC_EVENT_COUNT];
 
 /*----- Static variable definitions ----------------------------------*/
 
 // Event queue.
 static rbd_t g_event_rbd;
-static uint8_t g_event_rbmem[KNL_EVENT_QUEUE_LEN][sizeof(t_event)];
+static uint8_t g_event_rbmem[SVC_EVENT_QUEUE_LEN][sizeof(t_event)];
 
 // Data queue.
 static rbd_t g_data_rbd;
-static uint8_t g_data_rbmem[KNL_DATA_QUEUE_LEN];
+static uint8_t g_data_rbmem[SVC_DATA_QUEUE_LEN];
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -87,7 +87,7 @@ static void _event_dispatch(t_event *event);
 
 /*----- Extern function implementations ------------------------------*/
 
-void knl_event_task(void) {
+void svc_event_task(void) {
 
     static e_event_task_state state = STATE_INIT;
 
@@ -122,11 +122,11 @@ void knl_event_task(void) {
     }
 }
 
-t_status knl_event_publish(t_event *event) {
+t_status svc_event_publish(t_event *event) {
 
     t_status result = ERROR;
 
-    if (event->id < KNL_EVENT_COUNT) {
+    if (event->id < SVC_EVENT_COUNT) {
 
         result = _event_enqueue(event);
     }
@@ -134,7 +134,7 @@ t_status knl_event_publish(t_event *event) {
     return result;
 }
 
-t_status knl_event_subscribe(e_event_id id, t_listener listener) {
+t_status svc_event_subscribe(e_event_id id, t_listener listener) {
 
     t_status result = ERROR;
 
@@ -158,7 +158,7 @@ t_status knl_event_subscribe(e_event_id id, t_listener listener) {
     }
 
     // If not found, attempt to extend row.
-    if (entry == NULL && ++row->top <= KNL_MAX_EVENT_LISTENER) {
+    if (entry == NULL && ++row->top <= SVC_MAX_EVENT_LISTENER) {
 
         entry = &row->listener[row->top];
     }
@@ -220,7 +220,7 @@ t_status _event_enqueue(t_event *event) {
 
     t_status result = ERROR;
 
-    knl_enter_critical();
+    svc_system_enter_critical();
 
     result = ring_buffer_put(g_event_rbd, event);
 
@@ -236,7 +236,7 @@ t_status _event_enqueue(t_event *event) {
         }
     }
 
-    knl_exit_critical();
+    svc_system_exit_critical();
 
     return result;
 }

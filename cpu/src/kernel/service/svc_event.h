@@ -29,41 +29,70 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    knl_sync.c
+ * @file    svc_event.h
  *
- * @brief   Kernel synchronisation primitives.
+ * @brief   Public API for kernel event queue.
+ *
  */
+
+#ifndef SVC_EVENT_H
+#define SVC_EVENT_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*----- Includes -----------------------------------------------------*/
 
-#include "csl_interrupt.h"
+#include <stdint.h>
+
+#include "ft_error.h"
 
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
 
-/*----- Static variable definitions ----------------------------------*/
+typedef struct {
+    uint8_t id;
+    uint16_t len;
+    uint8_t *data;
 
-static char g_int_status;
+} t_event;
 
-/*----- Extern variable definitions ----------------------------------*/
+typedef enum {
+    SVC_EVENT_TRS_DATA_RX,
+    SVC_EVENT_TRS_DATA_TX,
 
-/*----- Static function prototypes -----------------------------------*/
+    SVC_EVENT_MCU_DATA_RX,
+    SVC_EVENT_MCU_DATA_TX,
 
-/*----- Extern function implementations ------------------------------*/
+    SVC_EVENT_PANEL_ACK,
+    SVC_EVENT_HELD_BUTTONS,
+    SVC_EVENT_PANEL_BUTTON,
 
-void knl_enter_critical(void) {
+    SVC_EVENT_MIDI_CC_RX,
+    SVC_EVENT_MIDI_CC_TX,
 
-    // Disable interrupts.
-    g_int_status = IntDisable();
+    SVC_EVENT_PUT_PIXEL,
+    SVC_EVENT_FILL_FRAME,
+
+    SVC_EVENT_COUNT,
+} e_event_id;
+
+typedef void (*t_listener)(const t_event *);
+
+/*----- Extern variable declarations ---------------------------------*/
+
+/*----- Extern function prototypes -----------------------------------*/
+
+void svc_event_task(void);
+
+t_status svc_event_publish(t_event *event);
+t_status svc_event_subscribe(e_event_id id, t_listener listener);
+
+#ifdef __cplusplus
 }
-
-void knl_exit_critical(void) {
-
-    // Enable interrupts.
-    IntEnable(g_int_status);
-}
-
-/*----- Static function implementations ------------------------------*/
+#endif
+#endif
 
 /*----- End of file --------------------------------------------------*/
