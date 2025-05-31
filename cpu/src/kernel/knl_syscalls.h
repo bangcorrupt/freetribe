@@ -64,11 +64,6 @@ typedef int (*t_syscall)(void *);
 typedef t_syscall *(*t_get_syscalls)(void);
 
 typedef struct {
-    t_led_index index;
-    uint8_t value;
-} t_led;
-
-typedef struct {
     uint16_t module_id;
     uint16_t index;
     uint32_t value;

@@ -52,6 +52,8 @@ under the terms of the GNU Affero General Public License as published by
 
 static t_delay g_blink_delay;
 
+static bool g_led_state;
+
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
@@ -93,8 +95,11 @@ void app_run(void) {
     // Wait for delay.
     if (ft_delay(&g_blink_delay)) {
 
+        // Invert LED state.
+        g_led_state = !g_led_state;
+
         // Toggle LED.
-        ft_toggle_led(LED_TAP);
+        ft_set_led(LED_TAP, g_led_state);
 
         // Reset start time.
         ft_start_delay(&g_blink_delay);

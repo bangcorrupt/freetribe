@@ -135,16 +135,20 @@ void dev_mcu_init(void) {
     }
 }
 
-void dev_mcu_tx_enqueue(uint8_t *mcu_msg) {
+t_status dev_mcu_tx_enqueue(uint8_t *mcu_msg) {
+
+    t_status result = ERROR;
 
     // Overwrite on overflow.
-    ring_buffer_put_force(mcu_tx_rbd, mcu_msg);
+    result = ring_buffer_put_force(mcu_tx_rbd, mcu_msg);
 
     if (g_mcu_tx_complete) {
 
         // Start transmission.
         _mcu_tx_callback();
     }
+
+    return result;
 }
 
 int dev_mcu_rx_dequeue(uint8_t *mcu_msg) {

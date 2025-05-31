@@ -46,6 +46,8 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "ft_error.h"
+
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
@@ -55,7 +57,7 @@ extern "C" {
 /*----- Extern function prototypes -----------------------------------*/
 
 void dev_mcu_init(void);
-void dev_mcu_tx_enqueue(uint8_t *mcu_msg);
+t_status dev_mcu_tx_enqueue(uint8_t *mcu_msg);
 int dev_mcu_rx_dequeue(uint8_t *mcu_msg);
 void dev_mcu_register_callback(uint8_t callback_id, void *callback);
 

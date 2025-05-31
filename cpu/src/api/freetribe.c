@@ -295,21 +295,6 @@ void ft_send_cc(char chan, char index, char val) {
 // LED API
 //
 
-/// FIX: DEPRECATED
-///         Kernel should not keep track of LED state.
-///         Move this to application library.
-//
-/// TODO: Update examples.
-//
-/**
- * @brief   Toggle LED into the opposite state.
- *
- * @param[in]   led_index   Index of LED to toggle.
- *
- */
-void ft_toggle_led(t_led_index led_index) { svc_panel_toggle_led(led_index); }
-
-/// TODO: Enums should be prefixed with e_, not t_.
 //
 /**
  * @brief   Set LED.
@@ -317,7 +302,7 @@ void ft_toggle_led(t_led_index led_index) { svc_panel_toggle_led(led_index); }
  * @param[in]   led_index   Index of LED to toggle.
  *
  */
-void ft_set_led(t_led_index led_index, uint8_t value) {
+void ft_set_led(e_led_index led_index, uint8_t value) {
 
     t_led led = {.index = led_index, .value = value};
 

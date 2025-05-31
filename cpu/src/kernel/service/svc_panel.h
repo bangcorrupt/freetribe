@@ -162,7 +162,12 @@ typedef enum {
     LED_RGB_3_GREEN = 0x50,
     LED_RGB_3_BLUE = 0x51
 
-} t_led_index;
+} e_led_index;
+
+typedef struct {
+    e_led_index index;
+    uint8_t value;
+} t_led;
 
 typedef struct {
     uint8_t index;
@@ -198,9 +203,7 @@ void svc_panel_task(void);
 void svc_panel_enqueue(uint8_t *msg);
 
 void svc_panel_set_trigger_mode(uint8_t mode);
-void svc_panel_set_led(t_led_index led_index, uint8_t brightness);
 
-void svc_panel_toggle_led(t_led_index led_index);
 void svc_panel_request_buttons(void);
 void svc_panel_calib_xy(uint32_t xcal, uint32_t ycal);
 

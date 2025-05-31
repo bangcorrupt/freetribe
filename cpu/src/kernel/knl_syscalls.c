@@ -133,17 +133,17 @@ static int _fill_frame(void *p) {
                      .data = (uint8_t *)frame};
 
     return svc_event_publish(&event);
-
-    return 0;
 }
 
 static int _set_led(void *p) {
 
     t_led *led = p;
 
-    svc_panel_set_led(led->index, led->value);
+    t_event event = {.id = SVC_EVENT_PANEL_LED,
+                     .len = sizeof(t_led),
+                     .data = (uint8_t *)led};
 
-    return 0;
+    return svc_event_publish(&event);
 }
 
 static int _init_delay(void *p) {

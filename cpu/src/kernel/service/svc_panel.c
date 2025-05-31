@@ -81,8 +81,10 @@ static t_undefined_callback p_undefined_callback = NULL;
 static t_status _panel_init(void);
 static t_status _panel_parse(uint8_t *msg);
 
-static void _publish_data_rx_event(void);
+static t_status _publish_data_rx_event(void);
 static void _data_rx_listener(const t_event *event);
+
+static void _led_listener(const t_event *event);
 
 static t_status _publish_button_event(uint8_t index, bool state);
 static t_status _publish_encoder_event(uint8_t index, int8_t value);
@@ -173,16 +175,16 @@ void svc_panel_set_trigger_mode(uint8_t mode) {
 /**
  * Set LED.
  */
-void svc_panel_set_led(t_led_index led_index, uint8_t brightness) {
-
-    uint8_t mcu_msg[5] = {0, 0, 0, 0, 0};
-
-    mcu_msg[1] = led_index;
-    mcu_msg[2] = brightness;
-
-    dev_mcu_tx_enqueue(mcu_msg);
-    g_led_current_brightness[led_index] = brightness;
-}
+// void svc_panel_set_led(t_led_index led_index, uint8_t brightness) {
+//
+//     uint8_t mcu_msg[5] = {0, 0, 0, 0, 0};
+//
+//     mcu_msg[1] = led_index;
+//     mcu_msg[2] = brightness;
+//
+//     dev_mcu_tx_enqueue(mcu_msg);
+//     g_led_current_brightness[led_index] = brightness;
+// }
 
 /**
  * Toggle LED.
@@ -192,21 +194,21 @@ void svc_panel_set_led(t_led_index led_index, uint8_t brightness) {
 //
 /// TODO: Move this to application library.
 //
-void svc_panel_toggle_led(t_led_index led_index) {
-
-    uint8_t mcu_msg[5] = {0, 0, 0, 0, 0};
-
-    mcu_msg[1] = led_index;
-
-    if (g_led_current_brightness[led_index] != 0) {
-        mcu_msg[2] = 0x00;
-    } else {
-        mcu_msg[2] = 0xff;
-    }
-
-    dev_mcu_tx_enqueue(mcu_msg);
-    g_led_current_brightness[led_index] = mcu_msg[2];
-}
+// void svc_panel_toggle_led(t_led_index led_index) {
+//
+//     uint8_t mcu_msg[5] = {0, 0, 0, 0, 0};
+//
+//     mcu_msg[1] = led_index;
+//
+//     if (g_led_current_brightness[led_index] != 0) {
+//         mcu_msg[2] = 0x00;
+//     } else {
+//         mcu_msg[2] = 0xff;
+//     }
+//
+//     dev_mcu_tx_enqueue(mcu_msg);
+//     g_led_current_brightness[led_index] = mcu_msg[2];
+// }
 
 /*----- Static function implementations ------------------------------*/
 
@@ -234,13 +236,14 @@ static t_status _panel_init(void) {
 
     dev_mcu_register_callback(0, _publish_data_rx_event);
     svc_event_subscribe(SVC_EVENT_MCU_DATA_RX, _data_rx_listener);
+    svc_event_subscribe(SVC_EVENT_PANEL_LED, _led_listener);
 
     result = SUCCESS;
 
     return result;
 }
 
-static void _publish_data_rx_event(void) {
+static t_status _publish_data_rx_event(void) {
 
     t_event event = {
         .id = SVC_EVENT_MCU_DATA_RX,
@@ -248,7 +251,7 @@ static void _publish_data_rx_event(void) {
         .data = NULL,
     };
 
-    svc_event_publish(&event);
+    return svc_event_publish(&event);
 }
 
 static void _data_rx_listener(const t_event *event) {
@@ -258,6 +261,18 @@ static void _data_rx_listener(const t_event *event) {
     if (dev_mcu_rx_dequeue(panel_msg) == SUCCESS) {
         _panel_parse(panel_msg);
     }
+}
+
+static void _led_listener(const t_event *event) {
+
+    uint8_t mcu_msg[5] = {0, 0, 0, 0, 0};
+
+    t_led *led = (t_led *)event->data;
+
+    mcu_msg[1] = led->index;
+    mcu_msg[2] = led->value;
+
+    dev_mcu_tx_enqueue(mcu_msg);
 }
 
 static t_status _panel_parse(uint8_t *msg) {
@@ -434,7 +449,7 @@ static t_status _publish_touchpad_event(uint16_t x, uint16_t y) {
 
     t_touchpad touchpad = {.x = x, .y = y};
 
-    event.id = SVC_EVENT_TOUCHPAD;
+    event.id = SVC_EVENT_PANEL_TOUCHPAD;
     event.len = sizeof(touchpad);
     event.data = (uint8_t *)&touchpad;
 
