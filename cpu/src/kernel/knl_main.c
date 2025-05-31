@@ -83,10 +83,7 @@ static void _kernel_run(void);
 
 static void _systick_callback(uint32_t systick);
 
-static void _panel_ack_callback(uint32_t version);
 static void _panel_ack_listener(const t_event *event);
-
-static void _held_buttons_callback(uint32_t *held_buttons);
 static void _held_buttons_listener(const t_event *event);
 
 static void _put_pixel_listener(const t_event *event);
@@ -173,8 +170,6 @@ static t_status _kernel_init(void) {
     svc_event_task();
 
     svc_event_subscribe(SVC_EVENT_PANEL_ACK, _panel_ack_listener);
-
-    svc_panel_register_callback(HELD_BUTTONS_EVENT, _held_buttons_callback);
     svc_event_subscribe(SVC_EVENT_HELD_BUTTONS, _held_buttons_listener);
 
     svc_event_subscribe(SVC_EVENT_PUT_PIXEL, _put_pixel_listener);
@@ -216,17 +211,8 @@ static void _panel_ack_listener(const t_event *event) {
     /// TODO: Store version with get method exposed to user.
 
     // uint32_t version = (uint32_t)event->data;
-}
 
-static void _held_buttons_callback(uint32_t *held_buttons) {
-
-    t_event event = {
-        .id = SVC_EVENT_HELD_BUTTONS,
-        .len = 8,
-        .data = (uint8_t *)held_buttons,
-    };
-
-    svc_event_publish(&event);
+    svc_event_subscribe(SVC_EVENT_PANEL_ACK, NULL);
 }
 
 static void _held_buttons_listener(const t_event *event) {
@@ -235,8 +221,8 @@ static void _held_buttons_listener(const t_event *event) {
 
     // uint32_t *buttons = (uint32_t *)event->data;
 
-    // Clear callback registration.
-    svc_panel_register_callback(HELD_BUTTONS_EVENT, NULL);
+    // Unsubscribe.
+    svc_event_subscribe(SVC_EVENT_HELD_BUTTONS, NULL);
 }
 
 static void _put_pixel_listener(const t_event *event) {

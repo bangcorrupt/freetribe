@@ -70,7 +70,6 @@ typedef void (*t_knob_callback)(uint8_t knob, uint8_t val);
 typedef void (*t_undefined_callback)(void);
 typedef void (*t_trigger_callback)(uint8_t pad, uint8_t vel, bool state);
 typedef void (*t_xy_pad_callback)(uint32_t x_val, uint32_t y_val);
-typedef void (*t_held_buttons_callback)(uint32_t *held_buttons);
 
 /*----- Static variable definitions ----------------------------------*/
 
@@ -81,7 +80,6 @@ static t_knob_callback p_knob_callback = NULL;
 static t_undefined_callback p_undefined_callback = NULL;
 static t_trigger_callback p_trigger_callback = NULL;
 static t_xy_pad_callback p_xy_pad_callback = NULL;
-static t_held_buttons_callback p_held_buttons_callback = NULL;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -90,10 +88,11 @@ static t_held_buttons_callback p_held_buttons_callback = NULL;
 static t_status _panel_init(void);
 static t_status _panel_parse(uint8_t *msg);
 
-static void _mcu_data_rx_callback(void);
-static void _mcu_data_rx_listener(const t_event *event);
+static void _publish_data_rx_event(void);
+static void _data_rx_listener(const t_event *event);
 
 t_status _publish_button_event(uint8_t index, bool state);
+t_status _publish_held_buttons_event(uint32_t *buttons);
 t_status _publish_ack_event(uint32_t version);
 
 /*----- Extern function implementations ------------------------------*/
@@ -153,10 +152,6 @@ void svc_panel_register_callback(t_panel_event event, void *callback) {
 
         case XY_PAD_EVENT:
             p_xy_pad_callback = (t_xy_pad_callback)callback;
-            break;
-
-        case HELD_BUTTONS_EVENT:
-            p_held_buttons_callback = (t_held_buttons_callback)callback;
             break;
 
         default:
@@ -271,15 +266,15 @@ static t_status _panel_init(void) {
 
     _panel_parse(panel_msg);
 
-    dev_mcu_register_callback(0, _mcu_data_rx_callback);
-    svc_event_subscribe(SVC_EVENT_MCU_DATA_RX, _mcu_data_rx_listener);
+    dev_mcu_register_callback(0, _publish_data_rx_event);
+    svc_event_subscribe(SVC_EVENT_MCU_DATA_RX, _data_rx_listener);
 
     result = SUCCESS;
 
     return result;
 }
 
-static void _mcu_data_rx_callback(void) {
+static void _publish_data_rx_event(void) {
 
     t_event event = {
         .id = SVC_EVENT_MCU_DATA_RX,
@@ -290,7 +285,7 @@ static void _mcu_data_rx_callback(void) {
     svc_event_publish(&event);
 }
 
-static void _mcu_data_rx_listener(const t_event *event) {
+static void _data_rx_listener(const t_event *event) {
 
     uint8_t panel_msg[5] = {0};
 
@@ -302,7 +297,9 @@ static void _mcu_data_rx_listener(const t_event *event) {
 static t_status _panel_parse(uint8_t *msg) {
 
     t_status result = PANEL_PARSE_ERROR;
+
     static uint32_t held_buttons[2];
+
     uint32_t version;
 
     switch (msg[0]) {
@@ -369,7 +366,7 @@ static t_status _panel_parse(uint8_t *msg) {
     case MSG_ID_BUTTONS_LSW:
         held_buttons[0] =
             msg[1] << 0x18 | msg[2] << 0x10 | msg[3] << 0x8 | msg[4];
-        // Callback not triggered until MSW received.
+        // Event not published until MSW received.
         result = SUCCESS;
         break;
 
@@ -377,15 +374,11 @@ static t_status _panel_parse(uint8_t *msg) {
         held_buttons[1] =
             msg[1] << 0x18 | msg[2] << 0x10 | msg[3] << 0x8 | msg[4];
 
-        if (p_held_buttons_callback != NULL) {
-            p_held_buttons_callback(held_buttons);
-        }
-
         /// TODO: Clear state?
         // held_buttons[0] = 0;
         // held_buttons[1] = 0;
 
-        result = SUCCESS;
+        result = _publish_held_buttons_event(held_buttons);
         break;
 
     default:
@@ -419,6 +412,17 @@ t_status _publish_ack_event(uint32_t version) {
     event.id = SVC_EVENT_PANEL_ACK;
     event.len = sizeof(version);
     event.data = (uint8_t *)&version;
+
+    return svc_event_publish(&event);
+}
+
+t_status _publish_held_buttons_event(uint32_t *buttons) {
+
+    t_event event;
+
+    event.id = SVC_EVENT_HELD_BUTTONS;
+    event.len = 8;
+    event.data = (uint8_t *)&buttons;
 
     return svc_event_publish(&event);
 }
