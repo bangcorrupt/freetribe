@@ -55,7 +55,6 @@ under the terms of the GNU Affero General Public License as published by
 
 // Decoded data length is always less than received message length.
 static uint8_t g_decode_buffer[SYSEX_BUFFER_LENGTH];
-static uint8_t g_encode_buffer[SYSEX_BUFFER_LENGTH];
 
 /*----- Typedefs -----------------------------------------------------*/
 
@@ -294,12 +293,12 @@ void _respond_read_cpu_ram(uint8_t *read_address, uint32_t read_length) {
     svc_midi_send_byte(0x00);
     svc_midi_send_byte(0x00);
 
-    tx_length = sysex_encode(read_address, g_encode_buffer, read_length);
+    tx_length = sysex_encode(read_address, g_decode_buffer, read_length);
 
     int i;
     for (i = 0; i < tx_length; i++) {
 
-        svc_midi_send_byte(g_encode_buffer[i]);
+        svc_midi_send_byte(g_decode_buffer[i]);
     }
 
     svc_midi_send_byte(0xf7);
