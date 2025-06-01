@@ -46,10 +46,21 @@ SECTIONS
 
 	_bss_end = .;
 	
+    _heap_start = .;
+	.heap ALIGN(8) :
+	{
+	     . += 0x2000; 
+
+	} > OC_RAM
+    _heap_end = .;
+
 	.stack ALIGN(8) :
 	{
-	    /* . += (0x80020000 - _bss_end); */
-	     . += 0x1000; 
+	    . += (0x80020000 - _heap_end);
+
+	    /* . += 0x400; */
+
 	} > OC_RAM
 	_stack = .;
+
 }
