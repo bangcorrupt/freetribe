@@ -43,7 +43,6 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "ft_error.h"
 #include "svc_midi.h"
-#include "svc_sysex.h"
 
 #include "midi_fsm.h"
 
@@ -144,6 +143,8 @@ void sysex_response(uint8_t msg_id) {
     _midi_out(0xf7);
 }
 
+void svc_midi_send_byte(uint8_t byte) { _midi_out(byte); }
+
 /*----- Static function implementations ------------------------------*/
 
 static t_status _midi_init(void) {
@@ -154,11 +155,21 @@ static t_status _midi_init(void) {
 
         dev_trs_init();
 
+        midi_register_sysex_handler((t_midi_sysex_callback)sysex_parse);
+
         // Do any other initialisation.
         result = SUCCESS;
     }
 
     return result;
+}
+
+static void _midi_tx_buffer(uint8_t *data, uint32_t length) {
+
+    while (length--) {
+
+        dev_trs_tx_enqueue(data++);
+    }
 }
 
 static void _midi_out(uint8_t midi_byte) {
