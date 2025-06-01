@@ -86,7 +86,7 @@ extern "C" {
 #define MIDI_BAUD_RATE 31250
 
 // Length of buffer to hold incoming system exclusive data bytes.
-#define SYSEX_BUFFER_LENGTH 0x2000
+#define SYSEX_BUFFER_LENGTH 0x400
 
 /*
  * This library uses an event-driven paradigm for receiving data: callers
