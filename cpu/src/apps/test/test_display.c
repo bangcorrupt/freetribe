@@ -63,8 +63,6 @@ typedef enum {
 
 /*----- Extern function implementations ------------------------------*/
 
-/// TODO: Test _put_pixel system call.
-
 t_status test_display(void) {
 
     static e_test_state state = STATE_SET_INIT;
@@ -77,6 +75,8 @@ t_status test_display(void) {
     switch (state) {
 
     case STATE_SET_INIT:
+
+        ft_print("Display test:");
 
         ft_fill_frame(0, 0, 127, 63, 0);
         ft_print("Press [Play] if all pixels set.");
@@ -113,6 +113,8 @@ t_status test_display(void) {
     case STATE_RESULT:
 
         if (passed_set && passed_clear) {
+            ft_print("Display test passed.");
+
             result = SUCCESS;
         }
         break;

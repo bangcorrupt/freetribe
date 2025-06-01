@@ -117,6 +117,8 @@ void zoia_patch_set(uint8_t patch_index) {
     zoia_encoder(-64);
 
     zoia_encoder(patch_index);
+
+    zoia_press(ZOIA_VALUE_ENCODER);
 }
 
 /*----- Static function implementations ------------------------------*/

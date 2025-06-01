@@ -151,19 +151,6 @@ void sysex_response(uint8_t msg_id) {
     _midi_out(0xf7);
 }
 
-/// TODO: malloc.
-//
-// void svc_midi_send_sysex(t_sysex_msg *msg) {
-//
-//     _midi_out(0xf0);
-//
-//     _midi_tx_buffer((uint8_t *)msg->header, sizeof(*msg->header));
-//     _midi_tx_buffer((uint8_t *)msg->args, sizeof(*msg->args));
-//     _midi_tx_buffer((uint8_t *)msg->data, sizeof(*msg->data));
-//
-//     _midi_out(0xf7);
-// }
-
 void svc_midi_send_byte(uint8_t byte) { _midi_out(byte); }
 
 /*----- Static function implementations ------------------------------*/

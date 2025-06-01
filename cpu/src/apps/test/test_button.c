@@ -67,7 +67,8 @@ t_status test_button(void) {
     // Initialise test.
     case STATE_INIT:
 
-        ft_print("Press [Play].");
+        ft_print("Button test:");
+        ft_print("Press [Play] to confirm pass.");
         gui_print(8, 32, "Press [Play].");
 
         state = STATE_RUN;
@@ -76,6 +77,7 @@ t_status test_button(void) {
     case STATE_RUN:
 
         if (test_confirmed()) {
+            ft_print("Button test passed.");
 
             result = SUCCESS;
             reset_test();

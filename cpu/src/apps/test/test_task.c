@@ -49,6 +49,7 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Macros -------------------------------------------------------*/
 
 #define BUTTON_PLAY 0x02
+#define BUTTON_EXIT 0x0d
 
 /*----- Typedefs -----------------------------------------------------*/
 
@@ -59,6 +60,7 @@ typedef enum {
     STATE_BUTTON,
     STATE_KNOB,
     STATE_SHUTDOWN,
+    STATE_WAIT,
 
     STATE_ERROR
 } e_template_task_state;
@@ -77,6 +79,10 @@ static void _midi_cc_rx_listener(const t_event *event);
 static t_status _init(void);
 static t_status _test_print(void);
 static t_status _test_display(void);
+static t_status _init(void);
+
+static t_status _test_print(void);
+static t_status _test_shutdown(void);
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -117,7 +123,11 @@ void test_task(void) {
         break;
 
     case STATE_SHUTDOWN:
-        ft_shutdown();
+        _test_shutdown();
+        state = STATE_WAIT;
+        break;
+
+    case STATE_WAIT:
         break;
 
     case STATE_ERROR:
@@ -156,6 +166,8 @@ static t_status _init(void) {
     ft_event_subscribe(SVC_EVENT_PANEL_BUTTON, _button_listener);
     ft_event_subscribe(SVC_EVENT_MIDI_CC_RX, _midi_cc_rx_listener);
 
+    ft_print("Freetribe Test");
+
     result = SUCCESS;
     return result;
 }
@@ -172,6 +184,11 @@ static void _button_listener(const t_event *event) {
             confirm_test();
         }
         break;
+
+    case BUTTON_EXIT:
+        if (state) {
+            ft_shutdown();
+        }
 
     default:
         break;
@@ -193,10 +210,19 @@ static void _midi_cc_rx_listener(const t_event *event) {
 
 static t_status _test_print(void) {
 
-    ft_print("Test print.");
+    ft_print("Test print:");
+    ft_print("Print test passed.");
 
     // Assume success to move on to next test.
     return SUCCESS;
+}
+
+static t_status _test_shutdown(void) {
+
+    ft_print("Test complete.");
+    ft_print("Press [Exit] to power off.");
+
+    return ERROR;
 }
 
 /*----- End of file --------------------------------------------------*/

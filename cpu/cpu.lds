@@ -5,6 +5,10 @@
 OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 
+HEAP_SIZE = 0x800;
+STACK_SIZE = 0x1f7c;
+VECTOR_TABLE_SIZE = 0x80;
+
 MEMORY
 {
     OC_RAM (rwx)    : ORIGIN = 0x80000000, LENGTH = 0x1fffc
@@ -47,22 +51,49 @@ SECTIONS
 
 	_bss_end = .;
 	
-    _heap_start = .;
 	.heap ALIGN(8) :
 	{
-	     . += 0x2000; 
+        _heap_start = .;
 
+	     . += HEAP_SIZE;
+
+        _heap_end = .;
 	} > OC_RAM
-    _heap_end = .;
 
-	.stack ALIGN(8) :
+    /*
+     * Vector table is moved to 
+     * ARM RAM by startup code.
+     */
+	.vector_table :
 	{
-	    /* . += (0x80020000 - _heap_end); */
+        . = ALIGN(8); 
+        _vector_table = .;
 
-	     . += 0x400; 
 
-	} > OC_RAM
-	_stack = .;
+	    . += VECTOR_TABLE_SIZE; 
+
+	} > ARM_RAM
+
+    /*
+     * Put the stack in ARM RAM for now.
+     * This is VERY BAD as it grows 
+     * toward the vector table.
+     *
+     * Once the app is compiled standalone
+     * and loaded into external DDR,
+     * the stack goes back in On-Chip RAM
+     * and we use ARM RAM for interrupt handling.
+     */
+	.stack :
+	{
+        . = ALIGN(8); 
+        _stack_low = .;
+
+
+	     . += STACK_SIZE; 
+
+        _stack = .;
+	} > ARM_RAM
 
     .knl_pointer ALIGN(4) :
     {
