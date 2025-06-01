@@ -31,7 +31,7 @@ under the terms of the GNU Affero General Public License as published by
 /**
  * @file    syscalls.c
  *
- * @brief   Implementations of stub Newlib stub functions.
+ * @brief   Implementation of Newlib stub functions.
  */
 
 /*----- Includes -----------------------------------------------------*/
