@@ -47,6 +47,7 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Macros -------------------------------------------------------*/
 
 #define BUTTON_PLAY 0x02
+#define BUTTON_EXIT 0x0d
 
 /*----- Typedefs -----------------------------------------------------*/
 
@@ -57,6 +58,7 @@ typedef enum {
     STATE_BUTTON,
     STATE_KNOB,
     STATE_SHUTDOWN,
+    STATE_WAIT,
 
     STATE_ERROR
 } e_template_task_state;
@@ -69,10 +71,12 @@ static bool g_test_confirmed;
 
 /*----- Static function prototypes -----------------------------------*/
 
-static void _button_callback(uint8_t button, bool state);
 static t_status _init(void);
+
+static void _button_callback(uint8_t button, bool state);
+
 static t_status _test_print(void);
-static t_status _test_display(void);
+static t_status _test_shutdown(void);
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -113,7 +117,11 @@ void test_task(void) {
         break;
 
     case STATE_SHUTDOWN:
-        ft_shutdown();
+        _test_shutdown();
+        state = STATE_WAIT;
+        break;
+
+    case STATE_WAIT:
         break;
 
     case STATE_ERROR:
@@ -151,6 +159,8 @@ static t_status _init(void) {
 
     ft_register_panel_callback(BUTTON_EVENT, _button_callback);
 
+    ft_print("Freetribe Test");
+
     result = SUCCESS;
     return result;
 }
@@ -165,6 +175,11 @@ static void _button_callback(uint8_t button, bool state) {
         }
         break;
 
+    case BUTTON_EXIT:
+        if (state) {
+            ft_shutdown();
+        }
+
     default:
         break;
     }
@@ -172,10 +187,18 @@ static void _button_callback(uint8_t button, bool state) {
 
 static t_status _test_print(void) {
 
-    ft_print("Test print.");
+    ft_print("Print test passed.");
 
     // Assume success to move on to next test.
     return SUCCESS;
+}
+
+static t_status _test_shutdown(void) {
+
+    ft_print("Test complete.");
+    ft_print("Press [Exit] to power off.");
+
+    return ERROR;
 }
 
 /*----- End of file --------------------------------------------------*/
