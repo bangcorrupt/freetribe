@@ -49,7 +49,7 @@ SECTIONS
     _heap_start = .;
 	.heap ALIGN(8) :
 	{
-	     . += 0x2000;
+	     . += 0x800;
 
 	} > OC_RAM
     _heap_end = .;
