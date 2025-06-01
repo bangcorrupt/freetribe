@@ -29,79 +29,42 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    template_task.c
+ * @file    gui_task.h
  *
- * @brief   Template for task state machine source files.
- *
+ * @brief   Public API for GUI task.
  */
+
+#ifndef GUI_TASK_H
+#define GUI_TASK_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*----- Includes -----------------------------------------------------*/
 
-#include "ft_error.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
 
-typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } e_template_task_state;
+/*----- Extern variable declarations ---------------------------------*/
 
-/*----- Static variable definitions ----------------------------------*/
+/*----- Extern function prototypes -----------------------------------*/
 
-/*----- Extern variable definitions ----------------------------------*/
+void gui_task(void);
+void gui_print(uint8_t pos_x, uint8_t pos_y, char *text);
+void gui_post(char *text);
+void gui_post_param(char *label, uint8_t value);
+void gui_print_int(uint8_t x_start, uint8_t y_start, uint8_t value);
+void gui_draw_line(uint8_t x_start, uint8_t y_start, uint8_t x_end,
+                   uint8_t y_end, bool colour);
 
-/*----- Static function prototypes -----------------------------------*/
-
-static t_status _template_init(void);
-static void _template_run(void);
-
-/*----- Extern function implementations ------------------------------*/
-
-void svc_template_task(void) {
-
-    static e_template_task_state state = STATE_INIT;
-
-    switch (state) {
-
-    // Initialise template task.
-    case STATE_INIT:
-        if (error_check(_template_init()) == SUCCESS) {
-            state = STATE_RUN;
-        }
-        // Remain in INIT state until initialisation successful.
-        break;
-
-    case STATE_RUN:
-        _template_run();
-        break;
-
-    case STATE_ERROR:
-        error_check(UNRECOVERABLE_ERROR);
-        break;
-
-    default:
-        if (error_check(UNHANDLED_STATE_ERROR) != SUCCESS) {
-            state = STATE_ERROR;
-        }
-        break;
-    }
+#ifdef __cplusplus
 }
-
-/*----- Static function implementations ------------------------------*/
-
-static t_status _template_init(void) {
-
-    t_status result = TASK_INIT_ERROR;
-
-    // Initialise...
-
-    result = SUCCESS;
-
-    return result;
-}
-
-static void _template_run(void) {
-
-    // Run...
-}
+#endif
+#endif
 
 /*----- End of file --------------------------------------------------*/

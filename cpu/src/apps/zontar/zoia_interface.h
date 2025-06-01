@@ -29,79 +29,40 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    template_task.c
+ * @file    zoia_interface.h
  *
- * @brief   Template for task state machine source files.
+ * @brief   Public API for ZOIA interface.
  *
  */
 
+#ifndef ZOIA_INTERFACE_H
+#define ZOIA_INTERFACE_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*----- Includes -----------------------------------------------------*/
 
-#include "ft_error.h"
+#include <stdint.h>
 
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
 
-typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } e_template_task_state;
+/*----- Extern variable declarations ---------------------------------*/
 
-/*----- Static variable definitions ----------------------------------*/
+/*----- Extern function prototypes -----------------------------------*/
 
-/*----- Extern variable definitions ----------------------------------*/
+void zoia_encoder(int32_t clicks);
+void zoia_enter(void);
+void zoia_back(void);
+void zoia_home(void);
+void zoia_patch_set(uint8_t patch_index);
 
-/*----- Static function prototypes -----------------------------------*/
-
-static t_status _template_init(void);
-static void _template_run(void);
-
-/*----- Extern function implementations ------------------------------*/
-
-void svc_template_task(void) {
-
-    static e_template_task_state state = STATE_INIT;
-
-    switch (state) {
-
-    // Initialise template task.
-    case STATE_INIT:
-        if (error_check(_template_init()) == SUCCESS) {
-            state = STATE_RUN;
-        }
-        // Remain in INIT state until initialisation successful.
-        break;
-
-    case STATE_RUN:
-        _template_run();
-        break;
-
-    case STATE_ERROR:
-        error_check(UNRECOVERABLE_ERROR);
-        break;
-
-    default:
-        if (error_check(UNHANDLED_STATE_ERROR) != SUCCESS) {
-            state = STATE_ERROR;
-        }
-        break;
-    }
+#ifdef __cplusplus
 }
-
-/*----- Static function implementations ------------------------------*/
-
-static t_status _template_init(void) {
-
-    t_status result = TASK_INIT_ERROR;
-
-    // Initialise...
-
-    result = SUCCESS;
-
-    return result;
-}
-
-static void _template_run(void) {
-
-    // Run...
-}
+#endif
+#endif
 
 /*----- End of file --------------------------------------------------*/

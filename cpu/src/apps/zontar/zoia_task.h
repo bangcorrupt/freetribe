@@ -29,53 +29,33 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    main.c
+ * @file    zoia_task.h
  *
- * @brief   Main function for Freetribe CPU firmware.
+ * @brief   Public API for ZOIA control task.
  */
 
+#ifndef ZOIA_TASK_H
+#define ZOIA_TASK_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*----- Includes -----------------------------------------------------*/
-
-#include <stdbool.h>
-
-#include "knl_main.h"
-#include "usr_main.h"
-
-#include "svc_dsp.h"
 
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
 
-/*----- Static variable definitions ----------------------------------*/
+/*----- Extern variable declarations ---------------------------------*/
 
-/*----- Extern variable definitions ----------------------------------*/
+/*----- Extern function prototypes -----------------------------------*/
 
-/*----- Static function prototypes -----------------------------------*/
+void zoia_task(void);
 
-/*----- Extern function implementations ------------------------------*/
-
-/**
- * @brief  Run kernel and app.
- *
- */
-int main(void) {
-
-    while (!svc_dsp_ready()) {
-        knl_main_task();
-    }
-
-    /// TODO: Implement scheduler.
-    //
-    while (true) {
-
-        knl_main_task();
-        usr_main_task();
-    }
-
-    return 0;
+#ifdef __cplusplus
 }
-
-/*----- Static function implementations ------------------------------*/
+#endif
+#endif
 
 /*----- End of file --------------------------------------------------*/

@@ -29,21 +29,19 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    template_task.c
+ * @file    syscalls.c
  *
- * @brief   Template for task state machine source files.
- *
+ * @brief   Implementation of Newlib stub functions.
  */
 
 /*----- Includes -----------------------------------------------------*/
 
-#include "ft_error.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
-
-typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } e_template_task_state;
 
 /*----- Static variable definitions ----------------------------------*/
 
@@ -51,57 +49,32 @@ typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } e_template_task_state;
 
 /*----- Static function prototypes -----------------------------------*/
 
-static t_status _template_init(void);
-static void _template_run(void);
-
 /*----- Extern function implementations ------------------------------*/
 
-void svc_template_task(void) {
+void *_sbrk(int incr) {
 
-    static e_template_task_state state = STATE_INIT;
+    extern uint8_t _heap_end; /* Defined by the linker */
 
-    switch (state) {
+    static uint8_t *heap_end;
 
-    // Initialise template task.
-    case STATE_INIT:
-        if (error_check(_template_init()) == SUCCESS) {
-            state = STATE_RUN;
-        }
-        // Remain in INIT state until initialisation successful.
-        break;
+    uint8_t *prev_heap_end;
 
-    case STATE_RUN:
-        _template_run();
-        break;
-
-    case STATE_ERROR:
-        error_check(UNRECOVERABLE_ERROR);
-        break;
-
-    default:
-        if (error_check(UNHANDLED_STATE_ERROR) != SUCCESS) {
-            state = STATE_ERROR;
-        }
-        break;
+    if (heap_end == 0) {
+        heap_end = &_heap_end;
     }
+    prev_heap_end = heap_end;
+
+    /// TODO: Check for collision.
+    //
+    // if (heap_end + incr > stack_ptr) {
+    //     // write(1, "Heap and stack collision\n", 25);
+    //     // abort();
+    // }
+
+    heap_end += incr;
+    return (void *)prev_heap_end;
 }
 
 /*----- Static function implementations ------------------------------*/
-
-static t_status _template_init(void) {
-
-    t_status result = TASK_INIT_ERROR;
-
-    // Initialise...
-
-    result = SUCCESS;
-
-    return result;
-}
-
-static void _template_run(void) {
-
-    // Run...
-}
 
 /*----- End of file --------------------------------------------------*/

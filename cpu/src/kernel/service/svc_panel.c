@@ -38,13 +38,13 @@ under the terms of the GNU Affero General Public License as published by
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "dev_mcu.h"
 
 #include "svc_panel.h"
 
 #include "ft_error.h"
-#include "ring_buffer.h"
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -63,10 +63,6 @@ typedef enum {
     MSG_ID_BUTTONS_MSW = 0x92  // High word.
 } t_panel_msg_id;
 
-/*----- Static variable definitions ----------------------------------*/
-
-static uint8_t g_led_current_brightness[LED_COUNT] = {0};
-
 typedef void (*t_button_callback)(uint8_t button, bool state);
 typedef void (*t_encoder_callback)(uint8_t enc, int8_t val);
 typedef void (*t_knob_callback)(uint8_t knob, uint8_t val);
@@ -75,6 +71,10 @@ typedef void (*t_trigger_callback)(uint8_t pad, uint8_t vel, bool state);
 typedef void (*t_xy_pad_callback)(uint32_t x_val, uint32_t y_val);
 typedef void (*t_panel_ack_callback)(uint32_t version);
 typedef void (*t_held_buttons_callback)(uint32_t *held_buttons);
+
+/*----- Static variable definitions ----------------------------------*/
+
+static uint8_t g_led_current_brightness[LED_COUNT] = {0};
 
 static t_button_callback p_button_callback = NULL;
 static t_encoder_callback p_encoder_callback = NULL;

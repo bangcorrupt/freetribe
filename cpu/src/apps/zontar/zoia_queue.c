@@ -29,79 +29,65 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    template_task.c
+ * @file    zoia_queue.c
  *
- * @brief   Template for task state machine source files.
- *
+ * @brief   Event queue for ZOIA controller.
  */
 
 /*----- Includes -----------------------------------------------------*/
 
-#include "ft_error.h"
+#include "ring_buffer.h"
+
+#include "zoia_queue.h"
 
 /*----- Macros -------------------------------------------------------*/
 
+#define ZOIA_EVENT_QUEUE_LEN 0x20
+
 /*----- Typedefs -----------------------------------------------------*/
 
-typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } e_template_task_state;
-
 /*----- Static variable definitions ----------------------------------*/
+
+// Event queue ring buffer.
+static rbd_t g_zoia_rbd;
+static char g_zoia_rbmem[ZOIA_EVENT_QUEUE_LEN][sizeof(t_zoia_event)];
 
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
 
-static t_status _template_init(void);
-static void _template_run(void);
-
 /*----- Extern function implementations ------------------------------*/
 
-void svc_template_task(void) {
+t_status zoia_queue_init(void) {
 
-    static e_template_task_state state = STATE_INIT;
+    t_status result = ERROR;
 
-    switch (state) {
+    // Event queue buffer attributes.
+    rb_attr_t rb_attr = {sizeof(g_zoia_rbmem[0]), ARRAY_SIZE(g_zoia_rbmem),
+                         g_zoia_rbmem};
 
-    // Initialise template task.
-    case STATE_INIT:
-        if (error_check(_template_init()) == SUCCESS) {
-            state = STATE_RUN;
-        }
-        // Remain in INIT state until initialisation successful.
-        break;
+    if (ring_buffer_init(&g_zoia_rbd, &rb_attr) == SUCCESS) {
 
-    case STATE_RUN:
-        _template_run();
-        break;
+        // Do any other initialisation...
 
-    case STATE_ERROR:
-        error_check(UNRECOVERABLE_ERROR);
-        break;
-
-    default:
-        if (error_check(UNHANDLED_STATE_ERROR) != SUCCESS) {
-            state = STATE_ERROR;
-        }
-        break;
+        result = SUCCESS;
     }
-}
-
-/*----- Static function implementations ------------------------------*/
-
-static t_status _template_init(void) {
-
-    t_status result = TASK_INIT_ERROR;
-
-    // Initialise...
-
-    result = SUCCESS;
 
     return result;
 }
 
-static void _template_run(void) {
+t_status zoia_enqueue(t_zoia_event *p_event) {
 
-    // Run...
+    // Returns 0 if SUCCESS.
+    return ring_buffer_put(g_zoia_rbd, p_event);
 }
+
+t_status zoia_dequeue(t_zoia_event *p_event) {
+
+    // Returns 0 if SUCCESS.
+    return ring_buffer_get(g_zoia_rbd, p_event);
+}
+
+/*----- Static function implementations ------------------------------*/
 
 /*----- End of file --------------------------------------------------*/

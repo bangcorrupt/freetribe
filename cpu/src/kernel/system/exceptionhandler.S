@@ -139,7 +139,7 @@ SWIHandler:
         LDR      r0, [r14, #-4]           @ R0 points to SWI instruction
         BIC      r0, r0, #MASK_SWI_NUM    @ Get the SWI number
         CMP      r0, #458752
-        MRSEQ    r1, spsr                 @ Copy SPSR  
+        MRSEQ    r1, spsr                 @ Copy SPSR
         ORREQ    r1, r1, #0x1F            @ Change the mode to System
         MSREQ    spsr_cf, r1              @ Restore SPSR
         LDMFD    r13!, {r0-r1, pc}^       @ Restore registers from IRQ stack
@@ -253,7 +253,7 @@ IRQHandler:
         STMFD    r13!, {r0-r3, r12, r14}  @ Save context in IRQ stack
         LDR      r0, =ADDR_HIPVR2         @ R0 points to address of HIPVR2
         LDR      r1, [r0]                 @ R1 contains address of ISR
-        ADD      r14, pc, #0              @ Save return address in LR 
+        ADD      r14, pc, #0              @ Save return address in LR
         LDR      pc, [r1]                 @ Go to ISR (still in IRQ mode)
         LDMFD    r13!, {r0-r3, r12, r14}  @ Restore registers from IRQ stack
         SUBS     pc, r14, #0x4            @ Return to program before IRQ

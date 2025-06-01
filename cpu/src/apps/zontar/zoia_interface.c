@@ -29,79 +29,132 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    template_task.c
+ * @file    zoia_interface.c
  *
- * @brief   Template for task state machine source files.
- *
+ * @brief   MIDI interface to ZOIA.
  */
 
 /*----- Includes -----------------------------------------------------*/
 
-#include "ft_error.h"
+#include <stdint.h>
+#include <stdlib.h>
+
+#include "freetribe.h"
+
+#include "zoia_control.h"
+#include "zoia_interface.h"
+#include "zoia_queue.h"
 
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
 
-typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } e_template_task_state;
-
 /*----- Static variable definitions ----------------------------------*/
+
+static t_zoia_event g_event;
 
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
 
-static t_status _template_init(void);
-static void _template_run(void);
+static void _encoder_inc(uint32_t clicks);
+static void _encoder_dec(uint32_t clicks);
 
 /*----- Extern function implementations ------------------------------*/
 
-void svc_template_task(void) {
+void zoia_encoder(int32_t clicks) {
 
-    static e_template_task_state state = STATE_INIT;
+    if (clicks > 0) {
+        _encoder_inc(clicks);
 
-    switch (state) {
-
-    // Initialise template task.
-    case STATE_INIT:
-        if (error_check(_template_init()) == SUCCESS) {
-            state = STATE_RUN;
-        }
-        // Remain in INIT state until initialisation successful.
-        break;
-
-    case STATE_RUN:
-        _template_run();
-        break;
-
-    case STATE_ERROR:
-        error_check(UNRECOVERABLE_ERROR);
-        break;
-
-    default:
-        if (error_check(UNHANDLED_STATE_ERROR) != SUCCESS) {
-            state = STATE_ERROR;
-        }
-        break;
+    } else if (clicks < 0) {
+        _encoder_dec(abs(clicks));
     }
+}
+
+void zoia_enter(void) {
+
+    g_event.value = ZOIA_VALUE_ENCODER;
+
+    g_event.type = ZOIA_EVENT_PRESS;
+
+    zoia_enqueue(&g_event);
+
+    g_event.type = ZOIA_EVENT_RELEASE;
+
+    zoia_enqueue(&g_event);
+}
+
+void zoia_home(void) {
+
+    int i;
+    for (i = 0; i < 5; i++) {
+        zoia_back();
+    }
+}
+
+void zoia_back(void) {
+
+    g_event.value = ZOIA_VALUE_BACK;
+
+    g_event.type = ZOIA_EVENT_PRESS;
+
+    zoia_enqueue(&g_event);
+
+    g_event.type = ZOIA_EVENT_RELEASE;
+
+    zoia_enqueue(&g_event);
+}
+
+/// TODO: Use Program Change instead.
+//
+void zoia_patch_set(uint8_t patch_index) {
+
+    patch_index = patch_index > 63 ? 63 : patch_index;
+
+    zoia_home();
+
+    zoia_encoder(-64);
+
+    zoia_encoder(patch_index);
+
+    zoia_press(ZOIA_VALUE_ENCODER);
 }
 
 /*----- Static function implementations ------------------------------*/
 
-static t_status _template_init(void) {
+static void _encoder_inc(uint32_t clicks) {
 
-    t_status result = TASK_INIT_ERROR;
+    g_event.type = ZOIA_EVENT_TURN;
+    g_event.value = 127;
 
-    // Initialise...
+    while (clicks > 63) {
 
-    result = SUCCESS;
+        zoia_enqueue(&g_event);
 
-    return result;
+        clicks -= 63;
+    }
+
+    g_event.value = 64 + clicks;
+
+    zoia_enqueue(&g_event);
 }
 
-static void _template_run(void) {
+static void _encoder_dec(uint32_t clicks) {
 
-    // Run...
+    g_event.type = ZOIA_EVENT_TURN;
+    g_event.value = 0;
+
+    while (clicks > 63) {
+
+        zoia_enqueue(&g_event);
+
+        clicks -= 63;
+    }
+
+    g_event.value = 64 - clicks;
+
+    zoia_enqueue(&g_event);
 }
 
 /*----- End of file --------------------------------------------------*/

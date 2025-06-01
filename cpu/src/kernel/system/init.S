@@ -68,6 +68,8 @@
         .global _stack                  
         .global _bss_start
         .global _bss_end
+        .global _heap_start
+        .global _heap_end
         .global start_boot
 
 @************************ Internal Definitions ********************************
@@ -162,18 +164,33 @@ BSS_Loop:
          CMP   r0, r1
          BLE   BSS_Loop                        @ Clear till BSS end
 
+
+@
+@ Clear the Heap section here
+@
+Clear_Heap_Section:
+
+         LDR   r0, =_heap_start                @ Start address of heap
+         LDR   r1, =(_heap_end - 0x04)         @ End address of heap
+         MOV   r2, #0
+Heap_Loop: 
+         STR   r2, [r0], #4                    @ Clear one word in heap
+         CMP   r0, r1
+         BLE   Heap_Loop                       @ Clear till heap end
+
+
 @
 @ Paint the Stack section here
 @
 Paint_Stack_Section:
 
-         LDR   r0, =_stack                     @ Start address of Stack
-         LDR   r1, =(_bss_end)                 @ End address of BSS
+         LDR   r0, =_stack                     @ Start address of stack
+         LDR   r1, =(_stack_low)               @ Lowest address of stack
          LDR   r2, paint
 Stack_Loop: 
-         STR   r2, [r0], #-4                   @ Paint one word in Stack
+         STR   r2, [r0], #-4                   @ Paint one word in stack
          CMP   r0, r1
-         BGT   Stack_Loop                      @ Paint till BSS end
+         BGT   Stack_Loop                      @ Paint until lowest address of stack
 
 @
 @ Enter the start_boot function. The execution still happens in system mode

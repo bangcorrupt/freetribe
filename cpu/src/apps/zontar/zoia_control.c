@@ -29,79 +29,64 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    template_task.c
+ * @file    zoia_control.c
  *
- * @brief   Template for task state machine source files.
- *
+ * @brief   Send MIDI control change to ZOIA.
  */
 
 /*----- Includes -----------------------------------------------------*/
 
-#include "ft_error.h"
+#include "freetribe.h"
+
+#include "zoia_control.h"
 
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
 
-typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } e_template_task_state;
-
 /*----- Static variable definitions ----------------------------------*/
+
+static uint8_t g_midi_channel;
 
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
 
-static t_status _template_init(void);
-static void _template_run(void);
-
 /*----- Extern function implementations ------------------------------*/
 
-void svc_template_task(void) {
+void set_midi_channel(uint8_t channel) { g_midi_channel = channel; }
 
-    static e_template_task_state state = STATE_INIT;
+void zoia_bypass(uint8_t value) {
 
-    switch (state) {
+    // Non zero == ENABLE if not TOGGLE.
+    if (value > 0 && value != ZOIA_VALUE_TOGGLE) {
+        value = 127;
+    }
 
-    // Initialise template task.
-    case STATE_INIT:
-        if (error_check(_template_init()) == SUCCESS) {
-            state = STATE_RUN;
-        }
-        // Remain in INIT state until initialisation successful.
-        break;
+    ft_send_cc(g_midi_channel, ZOIA_CC_BYPASS, value);
+}
 
-    case STATE_RUN:
-        _template_run();
-        break;
+void zoia_press(uint8_t value) {
 
-    case STATE_ERROR:
-        error_check(UNRECOVERABLE_ERROR);
-        break;
+    if (!(value > ZOIA_VALUE_SHIFT && value < ZOIA_VALUE_STOMP_RIGHT)) {
 
-    default:
-        if (error_check(UNHANDLED_STATE_ERROR) != SUCCESS) {
-            state = STATE_ERROR;
-        }
-        break;
+        ft_send_cc(g_midi_channel, ZOIA_CC_PRESS, value);
     }
 }
 
+void zoia_release(uint8_t value) {
+
+    if (!(value > ZOIA_VALUE_SHIFT && value < ZOIA_VALUE_STOMP_RIGHT)) {
+
+        ft_send_cc(g_midi_channel, ZOIA_CC_RELEASE, value);
+    }
+}
+
+void zoia_turn(uint8_t value) {
+
+    ft_send_cc(g_midi_channel, ZOIA_CC_TURN, value);
+}
+
 /*----- Static function implementations ------------------------------*/
-
-static t_status _template_init(void) {
-
-    t_status result = TASK_INIT_ERROR;
-
-    // Initialise...
-
-    result = SUCCESS;
-
-    return result;
-}
-
-static void _template_run(void) {
-
-    // Run...
-}
 
 /*----- End of file --------------------------------------------------*/

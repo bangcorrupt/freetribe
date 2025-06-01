@@ -29,53 +29,51 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    main.c
+ * @file    zoia_control.h
  *
- * @brief   Main function for Freetribe CPU firmware.
+ * @brief   Publice API for ZOIA MIDI control change.
+ *
  */
+
+#ifndef ZOIA_CONTROL_H
+#define ZOIA_CONTROL_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*----- Includes -----------------------------------------------------*/
 
-#include <stdbool.h>
-
-#include "knl_main.h"
-#include "usr_main.h"
-
-#include "svc_dsp.h"
+#include <stdint.h>
 
 /*----- Macros -------------------------------------------------------*/
 
+#define ZOIA_CC_BYPASS 60
+#define ZOIA_CC_PRESS 61
+#define ZOIA_CC_RELEASE 62
+#define ZOIA_CC_TURN 63
+
+#define ZOIA_VALUE_TOGGLE 64
+
+#define ZOIA_VALUE_BACK 42
+#define ZOIA_VALUE_SHIFT 43
+#define ZOIA_VALUE_STOMP_RIGHT 124
+#define ZOIA_VALUE_ENCODER 127
+
 /*----- Typedefs -----------------------------------------------------*/
 
-/*----- Static variable definitions ----------------------------------*/
+/*----- Extern variable declarations ---------------------------------*/
 
-/*----- Extern variable definitions ----------------------------------*/
+/*----- Extern function prototypes -----------------------------------*/
 
-/*----- Static function prototypes -----------------------------------*/
+void zoia_bypass(uint8_t value);
+void zoia_press(uint8_t value);
+void zoia_release(uint8_t value);
+void zoia_turn(uint8_t value);
 
-/*----- Extern function implementations ------------------------------*/
-
-/**
- * @brief  Run kernel and app.
- *
- */
-int main(void) {
-
-    while (!svc_dsp_ready()) {
-        knl_main_task();
-    }
-
-    /// TODO: Implement scheduler.
-    //
-    while (true) {
-
-        knl_main_task();
-        usr_main_task();
-    }
-
-    return 0;
+#ifdef __cplusplus
 }
-
-/*----- Static function implementations ------------------------------*/
+#endif
+#endif
 
 /*----- End of file --------------------------------------------------*/
