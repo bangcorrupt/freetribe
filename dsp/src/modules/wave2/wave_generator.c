@@ -4,7 +4,7 @@
 
 // Genera onda cuadrada suave usando square_polyblep (todo en fract32)
 void generate_soft_square(int wave_index) {
-    if (wave_index >= WAVE_SHAPE_NUM) return;
+    
     
     fract32 duty_cycle = float_to_fract32(0.5f); // duty cycle fijo al 50%
     fract32 softness = float_to_fract32(0.05f);  // suavizado fijo
@@ -60,12 +60,12 @@ void generate_soft_square(int wave_index) {
         sample = mult_fr1x32x32(sample, float_to_fract32(0.95f));
         
         // Almacenar en wavtab global
-        wavtab[wave_index][i] = sample;
+        wavtab[i] = sample;
     }
 }
 // Genera diente de sierra suave usando saw_polyblep (todo en fract32)
 void generate_soft_sawtooth(int wave_index) {
-    if (wave_index >= WAVE_SHAPE_NUM) return;
+    
 
     int direction = 1; // 1 para ascendente, -1 para descendente
     fract32 softness = float_to_fract32(0.05f); // valor fijo de suavizado
@@ -106,6 +106,6 @@ void generate_soft_sawtooth(int wave_index) {
         sample = mult_fr1x32x32(sample, float_to_fract32(0.95f));
         
         // Almacenar en wavtab global
-        wavtab[wave_index][i] = sample;
+        wavtab[i] = sample;
     }
 }

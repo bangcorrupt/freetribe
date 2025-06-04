@@ -10,20 +10,16 @@
  * @return Muestra interpolada de 16-bit fractional
  */
 fract16 wavetable_lookup(fract32 p, fract32 dp, uint8_t wave_shape) {
-    // Limitar el índice de forma de onda
-    if (wave_shape >= WAVE_SHAPE_NUM) {
-        wave_shape = 0;
-    }
     
     // Trabajar directamente con p sin normalización adicional
     // p ya está en el rango correcto de fract32
     
     // Usar los 10 bits más significativos para el índice (sin contar el bit de signo)
     uint32_t phase_uint = (uint32_t)p;
-    uint32_t index = (phase_uint >> (32 - 10)) & (WAVE_TAB_SIZE - 1);
+    uint32_t index = (phase_uint >> (32 - 10)) & (WAVE_TAB_CYCLE_IN_SAMPLES - 1);
     
     // Calcular índice siguiente (con wrap-around)
-    uint32_t next_index = (index + 1) & (WAVE_TAB_SIZE - 1);
+    uint32_t next_index = (index + 1) & (WAVE_TAB_CYCLE_IN_SAMPLES - 1);
     
     // Obtener fracción para interpolación
     // Usar los bits restantes después del índice
@@ -31,8 +27,8 @@ fract16 wavetable_lookup(fract32 p, fract32 dp, uint8_t wave_shape) {
     fract32 fraction = (fract32)frac_bits; // Ya está en formato fract32
     
     // Leer muestras de la tabla
-    fract32 sample1 = wavtab[wave_shape][index];
-    fract32 sample2 = wavtab[wave_shape][next_index];
+    fract32 sample1 = wavtab[index];
+    fract32 sample2 = wavtab[next_index];
     
     // Interpolación lineal: sample1 + (sample2 - sample1) * fraction
     fract32 diff = sub_fr1x32(sample2, sample1);
@@ -44,27 +40,42 @@ fract16 wavetable_lookup(fract32 p, fract32 dp, uint8_t wave_shape) {
 /**
  * @brief Versión simplificada sin interpolación (más rápida, menos calidad)
  * @param p Fase actual
- * @param dp Delta de fase (no usado en esta versión)
  * @param wave_shape Índice de la forma de onda
  * @return Muestra directa de 16-bit fractional
  */
-fract16 wavetable_lookup_simple(fract32 p, fract32 dp, uint8_t wave_shape) {
-    // Limitar el índice de forma de onda
-    if (wave_shape >= WAVE_SHAPE_NUM) {
-        wave_shape = 0;
-    }
+fract16 wavetable_lookup_simple(fract32 p, uint8_t wave_shape) {
     
     // Convertir fase a índice
     uint32_t phase_norm = (uint32_t)(p + FR32_MAX);
-    uint32_t index = (phase_norm >> (32 - 10)) & (WAVE_TAB_SIZE - 1);
+    uint32_t index = (phase_norm >> (32 - 10)) & (WAVE_TAB_CYCLE_IN_SAMPLES - 1);
     
     // Leer directamente de la tabla
-    fract32 sample = wavtab[wave_shape][index];
+    fract32 sample = wavtab[index];
     
     // Convertir a 16-bit y retornar
     return (fract16)shr_fr1x32(sample, 16);
 }
 
+/**
+ * @brief Versión simplificada usando delta de fase para ajuste de índice
+ * @param p Fase actual
+ * @param dp Delta de fase (usado para ajuste de índice)
+ * @param wave_shape Índice de la forma de onda
+ * @return Muestra directa de 16-bit fractional
+ */
+fract16 wavetable_lookup_delta(fract32 p, fract32 dp, uint8_t wave_shape) {
+    
+    // Convertir fase ajustada a índice
+    uint32_t phase_norm = (uint32_t)(p + FR32_MAX);
+    uint32_t index = (phase_norm >> (32 - 10)) & (WAVE_TAB_CYCLE_IN_SAMPLES - 1);
+    index += wave_shape*WAVE_TAB_CYCLE_IN_SAMPLES; // Ajustar índice con delta de fase
+    
+    // Leer directamente de la tabla
+    fract32 sample = wavtab[index];
+    
+    // Convertir a 16-bit y retornar
+    return (fract16)shr_fr1x32(sample, 16);
+}
 
 /**
  * @brief Versión con morfing entre dos formas de onda

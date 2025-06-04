@@ -47,16 +47,17 @@
 
 /*----- Static function prototypes -----------------------------------*/
 //static const 
-fract32 wavtab[WAVE_SHAPE_NUM][WAVE_TAB_SIZE] = {
-    #include "util/j8saw.data"
-};
+fract32 wavtab[WAVE_TAB_SIZE] = 
+    #include "util/sylenthva.data"
 
+int wavtab_index = 0;
 
 /*----- Extern function implementations ------------------------------*/
 
 void Custom_Aleph_MonoVoice_init(Custom_Aleph_MonoVoice *const synth, t_Aleph *const aleph) {
 
     Custom_Aleph_MonoVoice_init_to_pool(synth, &aleph->mempool);
+    wavtab_index = 0;
 }
 
 void Custom_Aleph_MonoVoice_init_to_pool(Custom_Aleph_MonoVoice *const synth,
@@ -114,13 +115,8 @@ fract32 custom_Aleph_Waveform_next(Aleph_Waveform *const wave, fract32 morph_amo
     fract32 next;
 
     Aleph_Phasor_next(&wv->phasor);
-    if (wv->shape == WAVEFORM_SHAPE_SAW){
-        next =  wavetable_lookup_simple(wv->phasor->phase, wv->phasor->freq,0);
-    } else if (wv->shape == WAVEFORM_SHAPE_SQUARE){
-        next =  wavetable_lookup_simple(wv->phasor->phase, wv->phasor->freq,1);
-    } else {
-        next = wavetable_morph(wv->phasor->phase, wv->phasor->freq, 0, 1, morph_amount);
-    }
+        next =  wavetable_lookup_delta(wv->phasor->phase, morph_amount,wv->shape);
+    
     return shl_fr1x32(next, 16);
 }
 fract32 Custom_Aleph_MonoVoice_next(Custom_Aleph_MonoVoice *const synth) {
@@ -273,7 +269,13 @@ void Custom_Aleph_MonoVoice_set_cutoff_slew(Custom_Aleph_MonoVoice *const synth,
 
     Aleph_LPFOnePole_set_coeff(&syn->cutoff_slew, cutoff_slew);
 }
-
+void Custom_Aleph_MonoVoice_record(fract32 data) {
+    wavtab_index++;
+    if (wavtab_index >= WAVE_TAB_SIZE) {
+        wavtab_index = 0;  
+    }
+    wavtab[wavtab_index] = data;
+}
 /*----- Static function implementations ------------------------------*/
 
 /*----- End of file --------------------------------------------------*/

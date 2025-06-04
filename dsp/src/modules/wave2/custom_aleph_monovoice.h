@@ -48,8 +48,9 @@ extern "C" {
 #define Custom_Aleph_MonoVoice_DEFAULT_RES (FR32_MAX)
 #define Custom_Aleph_MonoVoice_DEFAULT_FILTER_TYPE ALEPH_FILTERSVF_TYPE_LPF
 
-#define WAVE_SHAPE_NUM 1
-#define WAVE_TAB_SIZE 1024
+
+#define WAVE_TAB_SIZE 4096
+#define WAVE_TAB_CYCLE_IN_SAMPLES 1024
 
 
 /*----- Typedefs -----------------------------------------------------*/
@@ -76,7 +77,7 @@ typedef struct {
 typedef t_Custom_Aleph_MonoVoice *Custom_Aleph_MonoVoice;
 
 /*----- Extern variable declarations ---------------------------------*/
-extern fract32 wavtab[WAVE_SHAPE_NUM][WAVE_TAB_SIZE];
+extern fract32 wavtab[WAVE_TAB_SIZE];
 
 /*----- Extern function prototypes -----------------------------------*/
 
@@ -113,6 +114,9 @@ void Custom_Aleph_MonoVoice_set_cutoff_slew(Custom_Aleph_MonoVoice *const synth,
 void Custom_Aleph_MonoVoice_set_shape(Custom_Aleph_MonoVoice *const synth, e_Aleph_Waveform_shape shape) ;
 
 void Custom_Aleph_MonoVoice_set_morph_amount(Custom_Aleph_MonoVoice *const synth,fract32 morph_amount) ;
+void Custom_Aleph_MonoVoice_record(fract32 data) ;
+
+
 #ifdef __cplusplus
 }
 #endif
