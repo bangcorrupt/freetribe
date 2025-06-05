@@ -118,6 +118,7 @@ typedef enum {
     PARAM_FILTER_BASE_CUTOFF,
     PARAM_PHASE_RESET,
     PARAM_RETRIGGER,
+    SAMPLE_LOAD,
 
     PARAM_COUNT
 } e_param;

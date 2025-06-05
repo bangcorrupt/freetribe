@@ -51,6 +51,7 @@ under the terms of the GNU Affero General Public License as published by
 #include "leaf.h"
 
 #include "module_interface.h"
+#include "sysex_manager.h"
 
 
 /*----- Macros -------------------------------------------------------*/
@@ -118,7 +119,6 @@ static void _encoder_callback(uint8_t index, uint8_t value);
 static void _button_callback(uint8_t index, bool state);
 static void _trigger_callback_2(uint8_t pad, uint8_t vel, bool state);
 static void _note_on_callback(char chan, char note, char vel);
-static void _sysex_callback(char *msg, unsigned long length) ;
 static void _note_off_callback(char chan, char note, char vel);
 static void process_note_event(uint8_t note, uint8_t vel, bool state) ;
 
@@ -611,46 +611,12 @@ static void _set_mod_speed(uint32_t mod_speed) {
     }
 }
 
-// Función de callback modificada
-static void _sysex_callback(char *msg, unsigned long length) {
-    // Verificar que el mensaje sea válido
-    if (msg == NULL || length < 2) {
-        return; // Mensaje inválido
-    }
-    
-    // Verificar que sea un mensaje SysEx válido
-    if (msg[0] != 0xF0) {
-        return; // No es un mensaje SysEx
-    }
-    
-    // Verificar que termine correctamente
-    if (msg[length - 1] != 0xF7) {
-        return; // Mensaje SysEx incompleto
-    }
-    
-    // Procesar el mensaje SysEx
-    // msg[0] = 0xF0 (inicio SysEx)
-    // msg[1] = Manufacturer ID (primer byte)
-    // msg[2...] = Manufacturer ID adicional (si es necesario) + datos
-    // msg[length-1] = 0xF7 (fin SysEx)
-    
-    // Ejemplo de procesamiento:
-    unsigned char manufacturer_id = msg[1];
-    
-    // Determinar si es un manufacturer ID de 1 o 3 bytes
-    int data_start_index = 2;
-    if (manufacturer_id == 0x00) {
-        // Manufacturer ID de 3 bytes
-        data_start_index = 4;
-    }
-    
-    // Procesar los datos específicos del dispositivo
-    for (unsigned long i = data_start_index; i < length - 1; i++) {
-        // Procesar cada byte de datos
-        // msg[i] contiene los datos específicos del mensaje SysEx
-    }
-}
+void print_param(char value){
+        char val_string[4];
+    itoa(value, val_string, 10);
+    ft_print(val_string);
 
+}
 
 
 /**

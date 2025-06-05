@@ -123,6 +123,7 @@ typedef enum {
     PARAM_FILTER_BASE_CUTOFF,
     PARAM_PHASE_RESET,
     PARAM_RETRIGGER,
+    SAMPLE_LOAD,
 
     PARAM_COUNT
 } e_param;
@@ -157,21 +158,6 @@ static t_module g_module;
 #define NUM_FRACT32_ELEMENTS  (FOUR_MB / FRACT32_BYTES) // Cantidad de elementos fract32
 
 
-void copy_sample_to_sdram(){
-    memcpy(data_sdram, wavtab, WAVE_TAB_SIZE * sizeof(fract32));
-}
-void write_to_sdram_4mb(void) {
-    // Inicializa el puntero para que apunte al origen de la SDRAM
-    data_sdram = (fract32 *)SDRAM_ADDRESS;
-
-    // Bucle para escribir 4MB de datos en la SDRAM
-    // Escribirá un patrón simple (índice del elemento) para que sea fácil de
-    // verificar
-    int i;
-    for (i = 0; i < NUM_FRACT32_ELEMENTS; i++) {
-        data_sdram[i] = (fract32)i; // Escribe el índice como el valor
-    }
-}
 
 /**
  * @brief   Initialise module.
@@ -183,7 +169,7 @@ void module_init(void) {
 
     
 
-    copy_sample_to_sdram();
+    
     // write_to_sdram_4mb();
     // wavtab_big_counter = 0;
     Aleph_init(&g_aleph, SAMPLERATE, g_mempool, MEMPOOL_SIZE, NULL);
@@ -201,17 +187,7 @@ void module_init(void) {
         module_set_param_voice(i, PARAM_RES, FR32_MAX);
     }
 }
-bool is_above_half_max(fract32 value) {
-    // Para Q31: máximo/2 = 0x3FFFFFFF (0.5 en valor absoluto)
-    // Usar máscara para obtener valor absoluto y comparar
-    fract32 abs_value = value & 0x7FFFFFFF;  // Eliminar bit de signo
-    return abs_value > 0x3FFFFFFF;
-}
-static inline int is_above_75_percent_max(fract32 value) {
-    // Para 75%: necesitamos |value| > 0x5FFFFFFF
-    // Esto significa que los bits 30 Y 29 deben estar en 1
-    return ((value & 0x7FFFFFFF) & 0x60000000) == 0x60000000;
-}
+
 /**
  * @brief   Process audio.
  *
@@ -263,9 +239,12 @@ void module_set_param(uint16_t param_index_with_offset, int32_t value) {
     uint16_t param_index =
         REMOVE_PARAM_OFFSET(param_index_with_offset, PARAM_COUNT);
     int voice_number = PARAM_VOICE_NUMBER(param_index_with_offset, PARAM_COUNT);
-    // voice_number = 1;
 
     switch (param_index) {
+
+    case SAMPLE_LOAD:
+        Custom_Aleph_MonoVoice_record(value);
+        break;  
 
     case PARAM_AMP:
         Custom_Aleph_MonoVoice_set_amp(&g_module.voice[voice_number], value);
