@@ -47,6 +47,7 @@ extern "C" {
 #define Custom_Aleph_MonoVoice_DEFAULT_CUTOFF (20000 << 16)
 #define Custom_Aleph_MonoVoice_DEFAULT_RES (FR32_MAX)
 #define Custom_Aleph_MonoVoice_DEFAULT_FILTER_TYPE ALEPH_FILTERSVF_TYPE_LPF
+#define MAP_255_TO_WAVE_TAB(valor) (((valor) * (WAVE_TAB_SIZE - 1)) >> 8)
 
 
 #define WAVE_TAB_SIZE 4096
