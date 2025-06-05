@@ -159,7 +159,7 @@ voice_manager_init();
     ft_register_panel_callback(TRIGGER_EVENT, _trigger_callback_2);
     ft_register_midi_callback(EVT_CHAN_NOTE_ON, _note_on_callback);
     ft_register_midi_callback(EVT_CHAN_NOTE_OFF, _note_off_callback);
-    //midi_register_sysex_handler(_sysex_callback);
+    midi_register_sysex_handler(_sysex_callback);
 
     ft_register_tick_callback(0, _tick_callback);
 

@@ -50,6 +50,8 @@
 fract32 wavtab[WAVE_TAB_SIZE] = 
     #include "util/sylenthva.data"
 
+    fract32 *data_sdram;
+
 int wavtab_index = 0;
 
 /*----- Extern function implementations ------------------------------*/
@@ -58,6 +60,7 @@ void Custom_Aleph_MonoVoice_init(Custom_Aleph_MonoVoice *const synth, t_Aleph *c
 
     Custom_Aleph_MonoVoice_init_to_pool(synth, &aleph->mempool);
     wavtab_index = 0;
+    data_sdram = (fract32 *)SDRAM_ADDRESS;
 }
 
 void Custom_Aleph_MonoVoice_init_to_pool(Custom_Aleph_MonoVoice *const synth,

@@ -52,6 +52,7 @@ extern "C" {
 
 #define WAVE_TAB_SIZE 4096
 #define WAVE_TAB_CYCLE_IN_SAMPLES 1024
+#define SDRAM_ADDRESS 0x00000000
 
 
 /*----- Typedefs -----------------------------------------------------*/
@@ -79,6 +80,7 @@ typedef t_Custom_Aleph_MonoVoice *Custom_Aleph_MonoVoice;
 
 /*----- Extern variable declarations ---------------------------------*/
 extern fract32 wavtab[WAVE_TAB_SIZE];
+extern fract32 *data_sdram;
 
 /*----- Extern function prototypes -----------------------------------*/
 

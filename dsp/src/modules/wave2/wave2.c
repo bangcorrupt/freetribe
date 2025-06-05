@@ -73,7 +73,7 @@ void module_set_param_voice(uint16_t voice_index, uint16_t param_index,
 #define PARAM_VOICE_NUMBER(param_index_with_offset, paramCount)                \
     ((param_index_with_offset) / paramCount)
 
-#define SDRAM_ADDRESS 0x00000000
+
 
 /// TODO: Move to common location.
 /**
@@ -150,13 +150,16 @@ static t_module g_module;
 /*----- Static function prototypes -----------------------------------*/
 /*----- Extern function implementations ------------------------------*/
 
-static fract32 *data_sdram;
-int data_sdram_counter;
+
+
 #define FOUR_MB (440 * 1024 * 1024)   // 40 Megabytes en bytes
 #define FRACT32_BYTES sizeof(fract32) // Tamaño de un fract32 en bytes
-#define NUM_FRACT32_ELEMENTS                                                   \
-    (FOUR_MB / FRACT32_BYTES) // Cantidad de elementos fract32
+#define NUM_FRACT32_ELEMENTS  (FOUR_MB / FRACT32_BYTES) // Cantidad de elementos fract32
 
+
+void copy_sample_to_sdram(){
+    memcpy(data_sdram, wavtab, WAVE_TAB_SIZE * sizeof(fract32));
+}
 void write_to_sdram_4mb(void) {
     // Inicializa el puntero para que apunte al origen de la SDRAM
     data_sdram = (fract32 *)SDRAM_ADDRESS;
@@ -178,7 +181,9 @@ void module_init(void) {
     // generate_soft_sawtooth(0);
     // generate_soft_square(1);
 
-    data_sdram = (fract32 *)SDRAM_ADDRESS;
+    
+
+    copy_sample_to_sdram();
     // write_to_sdram_4mb();
     // wavtab_big_counter = 0;
     Aleph_init(&g_aleph, SAMPLERATE, g_mempool, MEMPOOL_SIZE, NULL);
