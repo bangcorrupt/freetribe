@@ -89,7 +89,8 @@ def send_sysex_chunked(midiout, sysex_data, manufacturer_id=0x7D, chunk_size=256
             progress = ((end_idx) / total_data_bytes) * 100
             print(f"Progreso: {progress:.1f}% (Fragmento {i+1}/{num_chunks}, {end_idx}/{total_data_bytes} bytes de datos enviados)")
             
-            time.sleep(0.05)
+            # Esperar un poco para evitar saturar el puerto MIDI
+            time.sleep(0.2)
         
         print("\nEnvío de SysEx completado exitosamente.")
         return True

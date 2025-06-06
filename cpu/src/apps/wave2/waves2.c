@@ -54,6 +54,7 @@ under the terms of the GNU Affero General Public License as published by
 #include "sysex_manager.h"
 
 
+
 /*----- Macros -------------------------------------------------------*/
 
 #define CONTROL_RATE (1000)

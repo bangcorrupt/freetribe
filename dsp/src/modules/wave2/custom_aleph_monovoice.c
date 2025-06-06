@@ -52,7 +52,7 @@ fract32 wavtab[WAVE_TAB_SIZE] =
 
     fract32 *data_sdram;
 
-int wavtab_index = 0;
+unsigned long wavtab_index = 0;
 
 /*----- Extern function implementations ------------------------------*/
 

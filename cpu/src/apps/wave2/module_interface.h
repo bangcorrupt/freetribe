@@ -47,6 +47,7 @@ extern "C" {
 
 #include "leaf.h"
 #include "voice_manager.h"
+#include "params.h"
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -79,49 +80,6 @@ extern "C" {
 
 /// TODO: Move to common location.
 //
-typedef enum {
-    PARAM_AMP,
-    PARAM_FREQ,
-    PARAM_OSC_PHASE,
-    PARAM_LFO_PHASE,
-    PARAM_GATE,
-    PARAM_VEL,
-    PARAM_AMP_LEVEL,
-    PARAM_AMP_ENV_ATTACK,
-    PARAM_AMP_ENV_DECAY,
-    PARAM_AMP_ENV_SUSTAIN,
-    PARAM_AMP_ENV_RELEASE,
-    PARAM_AMP_ENV_DEPTH,
-    PARAM_FILTER_ENV_DEPTH,
-    PARAM_FILTER_ENV_ATTACK,
-    PARAM_FILTER_ENV_DECAY,
-    PARAM_FILTER_ENV_SUSTAIN,
-    PARAM_FILTER_ENV_RELEASE,
-    PARAM_PITCH_ENV_DEPTH,
-    PARAM_PITCH_ENV_ATTACK,
-    PARAM_PITCH_ENV_DECAY,
-    PARAM_PITCH_ENV_SUSTAIN,
-    PARAM_PITCH_ENV_RELEASE,
-    PARAM_CUTOFF,
-    PARAM_RES,
-    PARAM_TUNE,
-    PARAM_OSC_TYPE,
-    PARAM_OSC_2_TYPE,
-    PARAM_FILTER_TYPE,
-    PARAM_AMP_LFO_DEPTH,
-    PARAM_AMP_LFO_SPEED,
-    PARAM_FILTER_LFO_DEPTH,
-    PARAM_FILTER_LFO_SPEED,
-    PARAM_PITCH_LFO_DEPTH,
-    PARAM_PITCH_LFO_SPEED,
-    PARAM_OSC_BASE_FREQ,
-    PARAM_FILTER_BASE_CUTOFF,
-    PARAM_PHASE_RESET,
-    PARAM_RETRIGGER,
-    SAMPLE_LOAD,
-
-    PARAM_COUNT
-} e_param;
 
 typedef enum {
     OSC_TYPE_SINE,
