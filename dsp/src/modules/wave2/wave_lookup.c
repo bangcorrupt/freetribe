@@ -84,6 +84,8 @@ fract16 wavetable_lookup_delta(fract32 p, fract32 dp) {
     //valor_entero = MAP_255_TO_WAVE_TAB(valor_entero);  // Mapear a rango de tabla de ondas // FOR STATIC MEMORY
     //valor_entero = MAP_255_TO_WAVE_TAB_SDRAM(valor_entero);   // FOR SDRAM
     index +=  valor_entero;  // Ajustar índice con delta de fase
+    index = index & 0x3FFFF; //Esto garantiza que valor_limitado esté siempre en el rango [0, 262143], que es menor que 262144.
+
     
     // Leer directamente de la tabla
     //fract32 sample = wavtab[index]; // FOR STATIC MEMORY

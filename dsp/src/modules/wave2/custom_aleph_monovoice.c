@@ -282,7 +282,7 @@ void Custom_Aleph_MonoVoice_record(fract32 data) {
     }
     wavtab[wavtab_index] = data;*/
 
-    if (wavtab_index >= WAVE_TAB_SIZE_SDRAM) {
+    if (wavtab_index >= WAVE_TAB_SIZE_SDRAM) { 
             wavtab_index = 0;  
         }
         // store data in SDRAM
