@@ -56,14 +56,20 @@ fract16 wavetable_lookup_simple(fract32 p, uint8_t wave_shape) {
     return (fract16)shr_fr1x32(sample, 16);
 }
 
+uint32_t mapear_fract32_int(fract32 p) {
+    // Adaptando tu fórmula para rango 0-262144 (que es 2^18)
+    uint32_t phase_norm = (uint32_t)(p + FR32_MAX);
+    uint32_t index = phase_norm >> (32 - 18);  // Tomar 18 bits superiores
+    return index;
+}
+
 /**
  * @brief Versión simplificada usando delta de fase para ajuste de índice
  * @param p Fase actual
  * @param dp Delta de fase (usado para ajuste de índice)
- * @param wave_shape Índice de la forma de onda
  * @return Muestra directa de 16-bit fractional
  */
-fract16 wavetable_lookup_delta(fract32 p, fract32 dp, uint8_t wave_shape) {
+fract16 wavetable_lookup_delta(fract32 p, fract32 dp) {
     
     // Convertir fase ajustada a índice
     uint32_t phase_norm = (uint32_t)(p + FR32_MAX);
@@ -71,11 +77,12 @@ fract16 wavetable_lookup_delta(fract32 p, fract32 dp, uint8_t wave_shape) {
 
        // Convertir fract32 a entero
     
-    int32_t valor_entero = fix16_to_int(dp);  // fix16 a entero
+    //int32_t valor_entero = fix16_to_int(dp);  // fix16 a entero // para morph amoount con pitch, valores de 0 a 255
+    uint32_t valor_entero = fix16_to_int(dp);  // fix16 a entero // cutoff tambien usa fix16, no se que valores aun
     
     // map to DATA SIZE
     //valor_entero = MAP_255_TO_WAVE_TAB(valor_entero);  // Mapear a rango de tabla de ondas // FOR STATIC MEMORY
-    valor_entero = MAP_255_TO_WAVE_TAB_SDRAM(valor_entero);   // FOR SDRAM
+    //valor_entero = MAP_255_TO_WAVE_TAB_SDRAM(valor_entero);   // FOR SDRAM
     index +=  valor_entero;  // Ajustar índice con delta de fase
     
     // Leer directamente de la tabla

@@ -118,7 +118,7 @@ fract32 custom_Aleph_Waveform_next(Aleph_Waveform *const wave, fract32 morph_amo
     fract32 next;
 
     Aleph_Phasor_next(&wv->phasor);
-        next =  wavetable_lookup_delta(wv->phasor->phase, morph_amount,wv->shape);
+        next =  wavetable_lookup_delta(wv->phasor->phase, morph_amount);
     
     return shl_fr1x32(next, 16);
 }
@@ -140,8 +140,12 @@ fract32 Custom_Aleph_MonoVoice_next(Custom_Aleph_MonoVoice *const synth) {
     // Set oscillator frequency.
     Aleph_Waveform_set_freq(&syn->waveform, freq);
 
+       // Get slewed cutoff.
+    cutoff = Aleph_LPFOnePole_next(&syn->cutoff_slew);
+
     // Generate waveforms.
-    output = custom_Aleph_Waveform_next(&syn->waveform,syn->morph_amount);
+    //output = custom_Aleph_Waveform_next(&syn->waveform,syn->morph_amount);
+    output = custom_Aleph_Waveform_next(&syn->waveform,cutoff);
 
     // Shift right to prevent clipping.
     output = shr_fr1x32(output, 1);
@@ -152,9 +156,8 @@ fract32 Custom_Aleph_MonoVoice_next(Custom_Aleph_MonoVoice *const synth) {
     // Apply amp modulation.
     output = mult_fr1x32x32(output, amp);
 
-    // Get slewed cutoff.
-    cutoff = Aleph_LPFOnePole_next(&syn->cutoff_slew);
-
+ 
+    /*
     // Set filter cutoff.
     Aleph_FilterSVF_set_coeff(&syn->filter, cutoff);
 
@@ -178,7 +181,7 @@ fract32 Custom_Aleph_MonoVoice_next(Custom_Aleph_MonoVoice *const synth) {
         output = Aleph_FilterSVF_lpf_next(&syn->filter, output);
         break;
     }    // Block DC.
-    output = Aleph_HPF_dc_block(&syn->dc_block, output);
+    output = Aleph_HPF_dc_block(&syn->dc_block, output);*/
 
     return output;
 }
