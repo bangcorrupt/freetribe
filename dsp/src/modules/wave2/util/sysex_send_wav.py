@@ -9,6 +9,7 @@ import time
 # Un valor más pequeño es más seguro para evitar sobrecargar el búfer del receptor.
 SAMPLES_PER_CHUNK = 128 
 
+
 def seleccionar_puerto_midi():
     """
     Muestra los puertos MIDI de salida disponibles y pide al usuario que seleccione uno.

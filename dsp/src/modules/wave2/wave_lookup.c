@@ -72,14 +72,15 @@ fract16 wavetable_lookup_delta(fract32 p, fract32 dp, uint8_t wave_shape) {
        // Convertir fract32 a entero
     
     int32_t valor_entero = fix16_to_int(dp);  // fix16 a entero
-    // map to 4096
-    valor_entero = MAP_255_TO_WAVE_TAB(valor_entero);  // Mapear a rango de tabla de ondas
-
-    //index += (wave_shape*WAVE_TAB_CYCLE_IN_SAMPLES)  + valor_entero;  // Ajustar índice con delta de fase
+    
+    // map to DATA SIZE
+    //valor_entero = MAP_255_TO_WAVE_TAB(valor_entero);  // Mapear a rango de tabla de ondas // FOR STATIC MEMORY
+    valor_entero = MAP_255_TO_WAVE_TAB_SDRAM(valor_entero);   // FOR SDRAM
     index +=  valor_entero;  // Ajustar índice con delta de fase
     
     // Leer directamente de la tabla
-    fract32 sample = wavtab[index];
+    //fract32 sample = wavtab[index]; // FOR STATIC MEMORY
+    fract32 sample = data_sdram[index]; // FOR SDRAM
     
     // Convertir a 16-bit y retornar
     return (fract16)shr_fr1x32(sample, 16);

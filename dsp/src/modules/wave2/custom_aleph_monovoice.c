@@ -274,11 +274,18 @@ void Custom_Aleph_MonoVoice_set_cutoff_slew(Custom_Aleph_MonoVoice *const synth,
 }
 void Custom_Aleph_MonoVoice_record(fract32 data) {
     wavtab_index++;
-    if (wavtab_index >= WAVE_TAB_SIZE) {
+    /*if (wavtab_index >= WAVE_TAB_SIZE) {
         wavtab_index = 0;  
     }
-    wavtab[wavtab_index] = data;
+    wavtab[wavtab_index] = data;*/
+
+    if (wavtab_index >= WAVE_TAB_SIZE_SDRAM) {
+            wavtab_index = 0;  
+        }
+        // store data in SDRAM
+        data_sdram[wavtab_index] = data;
 }
+
 /*----- Static function implementations ------------------------------*/
 
 /*----- End of file --------------------------------------------------*/

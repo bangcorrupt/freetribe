@@ -49,8 +49,12 @@ extern "C" {
 #define Custom_Aleph_MonoVoice_DEFAULT_FILTER_TYPE ALEPH_FILTERSVF_TYPE_LPF
 #define MAP_255_TO_WAVE_TAB(valor) (((valor) * (WAVE_TAB_SIZE - 1)) >> 8)
 
+// valor * WAVE_TAB_SIZE_SDRAM - WAVE_TAB_CYCLE_IN_SAMPLES / 255
+#define MAP_255_TO_WAVE_TAB_SDRAM(valor) (((valor) * (252)) )
+
 
 #define WAVE_TAB_SIZE 4096
+#define WAVE_TAB_SIZE_SDRAM 65536
 #define WAVE_TAB_CYCLE_IN_SAMPLES 1024
 #define SDRAM_ADDRESS 0x00000000
 
