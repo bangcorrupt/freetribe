@@ -85,6 +85,7 @@ typedef t_Custom_Aleph_MonoVoice *Custom_Aleph_MonoVoice;
 /*----- Extern variable declarations ---------------------------------*/
 extern fract32 wavtab[WAVE_TAB_SIZE];
 extern fract32 *data_sdram;
+extern unsigned long wavtab_index;
 
 /*----- Extern function prototypes -----------------------------------*/
 

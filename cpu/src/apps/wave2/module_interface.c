@@ -78,7 +78,8 @@ typedef struct {
     tTriLFO amp_lfo;
     float amp_lfo_depth;
 
-    tTriLFO filter_lfo;
+    //tTriLFO filter_lfo;
+    tSineTriLFO filter_lfo;
     float filter_lfo_depth;
 
     float filter_cutoff;
