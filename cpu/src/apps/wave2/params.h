@@ -41,6 +41,7 @@ typedef enum {
     PARAM_PHASE_RESET,
     PARAM_RETRIGGER,
     SAMPLE_LOAD,
+    SAMPLE_RECORD_START,
 
     PARAM_COUNT
 } e_param;

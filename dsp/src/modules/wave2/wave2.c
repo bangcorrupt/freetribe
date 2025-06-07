@@ -124,6 +124,7 @@ typedef enum {
     PARAM_PHASE_RESET,
     PARAM_RETRIGGER,
     SAMPLE_LOAD,
+    SAMPLE_RECORD_START,
 
     PARAM_COUNT
 } e_param;
@@ -242,7 +243,11 @@ void module_set_param(uint16_t param_index_with_offset, int32_t value) {
 
     switch (param_index) {
 
-    case SAMPLE_LOAD:
+    case SAMPLE_RECORD_START:
+        Custom_Aleph_MonoVoice_record_reset();
+        break;  
+
+        case SAMPLE_LOAD:
         Custom_Aleph_MonoVoice_record(value);
         break;  
 

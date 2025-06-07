@@ -288,7 +288,9 @@ void Custom_Aleph_MonoVoice_record(fract32 data) {
         // store data in SDRAM
         data_sdram[wavtab_index] = data;
 }
-
+void Custom_Aleph_MonoVoice_record_reset() {
+    wavtab_index = 0;
+}
 /*----- Static function implementations ------------------------------*/
 
 /*----- End of file --------------------------------------------------*/

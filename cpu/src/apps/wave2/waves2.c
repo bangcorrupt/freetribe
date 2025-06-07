@@ -481,6 +481,9 @@ case BUTTON_EXIT:
         }
         break;
     case BUTTON_MENU:
+        // donesnt matter wich voice, send voice 0
+        ft_set_module_param(0, SAMPLE_RECORD_START, 1);
+        gui_post_param("recording ", 1);
         g_menu_held = state;
         break;
 

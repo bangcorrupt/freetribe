@@ -122,7 +122,7 @@ void Custom_Aleph_MonoVoice_set_shape(Custom_Aleph_MonoVoice *const synth, e_Ale
 
 void Custom_Aleph_MonoVoice_set_morph_amount(Custom_Aleph_MonoVoice *const synth,fract32 morph_amount) ;
 void Custom_Aleph_MonoVoice_record(fract32 data) ;
-
+void Custom_Aleph_MonoVoice_record_reset();
 
 #ifdef __cplusplus
 }
