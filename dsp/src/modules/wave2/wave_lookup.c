@@ -85,6 +85,7 @@ fract16 wavetable_lookup_delta(fract32 p, fract32 dp) {
     
     //int32_t valor_entero = fix16_to_int(dp);  // fix16 a entero // para morph amoount con pitch, valores de 0 a 255
     uint32_t morph_offset = fix16_to_int(dp);  // fix16 a entero // cutoff tambien usa fix16, no se que valores aun
+    //int32_t morph_offset = (int32_t)(dp); // testing
     
     // map to DATA SIZE
     //valor_entero = MAP_255_TO_WAVE_TAB(valor_entero);  // Mapear a rango de tabla de ondas // FOR STATIC MEMORY
@@ -93,7 +94,7 @@ fract16 wavetable_lookup_delta(fract32 p, fract32 dp) {
     if (index>=wavtab_index-WAVE_TAB_CYCLE_IN_SAMPLES){
         index = wavtab_index-WAVE_TAB_CYCLE_IN_SAMPLES; // Evitar overflow
     }
-    uint32_t index2 = (index + 1);
+    //uint32_t index2 = (index + 1);
     
     // Leer directamente de la tabla
     //fract32 sample = wavtab[index]; // FOR STATIC MEMORY

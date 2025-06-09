@@ -243,8 +243,8 @@ void module_set_param_voice(uint16_t voice_index,uint16_t param_index_without_of
         break;
 
     case PARAM_FREQ:
-        ft_set_module_param(0, param_index,
-                            float_to_fix16(cv_to_osc_freq(value)));
+        ft_set_module_param(0, param_index,float_to_fix16(cv_to_osc_freq(value)));
+        //ft_set_module_param(0, param_index,value);
         break;
 
     case PARAM_OSC_PHASE:

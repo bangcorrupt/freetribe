@@ -42,6 +42,7 @@ typedef enum {
     PARAM_RETRIGGER,
     SAMPLE_LOAD,
     SAMPLE_RECORD_START,
+    PARAM_MORPH_AMOUNT,
 
     PARAM_COUNT
 } e_param;

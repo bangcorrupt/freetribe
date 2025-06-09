@@ -57,7 +57,7 @@ extern "C" {
 void gui_task(void);
 void gui_print(uint8_t pos_x, uint8_t pos_y, char *text);
 void gui_post(char *text);
-void gui_post_param(char *label, uint8_t value);
+void gui_post_param(char *label, uint32_t value);
 void gui_print_int(uint8_t x_start, uint8_t y_start, uint8_t value);
 void gui_draw_line(uint8_t x_start, uint8_t y_start, uint8_t x_end,
                    uint8_t y_end, bool colour);

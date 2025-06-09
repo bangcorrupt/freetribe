@@ -125,6 +125,7 @@ typedef enum {
     PARAM_RETRIGGER,
     SAMPLE_LOAD,
     SAMPLE_RECORD_START,
+    PARAM_MORPH_AMOUNT,
 
     PARAM_COUNT
 } e_param;
@@ -263,11 +264,10 @@ void module_set_param(uint16_t param_index_with_offset, int32_t value) {
         Custom_Aleph_MonoVoice_set_phase(&g_module.voice[voice_number], value);
         break;
 
-    case PARAM_TUNE:
+    case PARAM_MORPH_AMOUNT:
         // Custom_Aleph_MonoVoice_set_freq_offset(&g_module.voice[voice_number],
         // value);
-        Custom_Aleph_MonoVoice_set_morph_amount(&g_module.voice[voice_number],
-                                                value);
+        Custom_Aleph_MonoVoice_set_morph_amount(&g_module.voice[voice_number], value);
         break;
 
     case PARAM_AMP_LEVEL:
