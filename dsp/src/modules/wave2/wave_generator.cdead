@@ -2,6 +2,7 @@
 
 #include "wave_generator.h"
 
+
 // Genera onda cuadrada suave usando square_polyblep (todo en fract32)
 void generate_soft_square(int wave_index) {
     

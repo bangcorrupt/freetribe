@@ -47,14 +47,11 @@ extern "C" {
 #define Custom_Aleph_MonoVoice_DEFAULT_CUTOFF (20000 << 16)
 #define Custom_Aleph_MonoVoice_DEFAULT_RES (FR32_MAX)
 #define Custom_Aleph_MonoVoice_DEFAULT_FILTER_TYPE ALEPH_FILTERSVF_TYPE_LPF
-#define MAP_255_TO_WAVE_TAB(valor) (((valor) * (WAVE_TAB_SIZE - 1)) >> 8)
-
-// valor * WAVE_TAB_SIZE_SDRAM - WAVE_TAB_CYCLE_IN_SAMPLES / 255
-#define MAP_255_TO_WAVE_TAB_SDRAM(valor) (((valor) << 10 ) )
 
 
-#define WAVE_TAB_SIZE 4096
-#define WAVE_TAB_SIZE_SDRAM 262144
+
+
+
 #define WAVE_TAB_CYCLE_IN_SAMPLES 1024
 #define SDRAM_ADDRESS 0x00000000
 
@@ -83,9 +80,9 @@ typedef struct {
 typedef t_Custom_Aleph_MonoVoice *Custom_Aleph_MonoVoice;
 
 /*----- Extern variable declarations ---------------------------------*/
-extern fract32 wavtab[WAVE_TAB_SIZE];
+
 extern fract32 *data_sdram;
-extern unsigned long wavtab_index;
+extern int wavtab_index;
 
 /*----- Extern function prototypes -----------------------------------*/
 

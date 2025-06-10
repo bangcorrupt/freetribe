@@ -3,6 +3,8 @@
 #include "gui_task.h"
 #include "module_interface.h"
 
+int loaded_samples = 0;
+
 void _sysex_callback(char *msg, unsigned long length) {
     // ft_print("sysex callback");
     //  Verificar que el mensaje sea válido
@@ -67,6 +69,7 @@ void _sysex_callback(char *msg, unsigned long length) {
 
         // ft_print("reconstructed_value");
         ft_set_module_param(0, SAMPLE_LOAD, reconstructed_value);
+        loaded_samples ++;
         ////print_param(reconstructed_value);
     }
 }

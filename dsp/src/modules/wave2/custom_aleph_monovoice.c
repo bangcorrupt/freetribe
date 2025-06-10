@@ -47,12 +47,10 @@
 
 /*----- Static function prototypes -----------------------------------*/
 //static const 
-fract32 wavtab[WAVE_TAB_SIZE] = 
-    #include "util/sylenthva.data"
 
-    fract32 *data_sdram;
+fract32 *data_sdram;
 
-unsigned long wavtab_index = 0;
+int wavtab_index = 0;
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -277,15 +275,6 @@ void Custom_Aleph_MonoVoice_set_cutoff_slew(Custom_Aleph_MonoVoice *const synth,
 }
 void Custom_Aleph_MonoVoice_record(fract32 data) {
     wavtab_index++;
-    /*if (wavtab_index >= WAVE_TAB_SIZE) {
-        wavtab_index = 0;  
-    }
-    wavtab[wavtab_index] = data;*/
-
-/*    if (wavtab_index >= WAVE_TAB_SIZE_SDRAM) { 
-            wavtab_index = 0;  
-        }*/
-        // store data in SDRAM
         data_sdram[wavtab_index] = data;
 }
 void Custom_Aleph_MonoVoice_record_reset() {

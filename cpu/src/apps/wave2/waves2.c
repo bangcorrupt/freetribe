@@ -304,7 +304,10 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
         }
 
         if (value == 0x01) {
+            if (morph_amount + amt < (loaded_samples-1024)){ 
             morph_amount+=amt;
+
+            }
             if (cutoff < 0x7f) {
                 cutoff++;
             }
@@ -320,13 +323,13 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
                 cutoff--;
             }
         }
-        if (g_shift_held) {
+        //if (g_shift_held) {
             gui_post_param("morph: ", morph_amount);
             module_set_param_all_voices(PARAM_MORPH_AMOUNT, morph_amount); // also ok
-        } else {
+        /*} else {
             gui_post_param("Cutoff: ", cutoff);
             module_set_param_all_voices(PARAM_FILTER_BASE_CUTOFF, g_midi_pitch_cv_lut[cutoff]);
-        }
+        }*/
         break;
 
     case ENCODER_OSC:
@@ -499,6 +502,7 @@ case BUTTON_EXIT:
     case BUTTON_MENU:
         // donesnt matter wich voice, send voice 0
         ft_set_module_param(0, SAMPLE_RECORD_START, 1);
+        loaded_samples = 0;
         gui_post_param("recording ", 1);
         g_menu_held = state;
         break;
