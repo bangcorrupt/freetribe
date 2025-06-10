@@ -188,7 +188,7 @@ void gui_print_int(uint8_t x_start, uint8_t y_start, uint8_t value) {
     gui_print(x_start, y_start, text);
 }
 
-void gui_post_param(char *label, uint32_t value) {
+void gui_post_param(char *label, int32_t value) {
 
     /// TODO: Eww.  Sort out string ops.
 
