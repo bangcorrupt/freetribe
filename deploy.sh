@@ -1,0 +1,1 @@
+sudo docker-compose exec freetribe make APP=wave2 MODULE=wave2 && python ../hacktribe/scripts/execute_freetribe.py cpu/build/cpu.bin

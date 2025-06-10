@@ -143,7 +143,6 @@ fract32 Custom_Aleph_MonoVoice_next(Custom_Aleph_MonoVoice *const synth) {
 
     // Generate waveforms.
     output = custom_Aleph_Waveform_next(&syn->waveform,syn->morph_amount);
-    //output = custom_Aleph_Waveform_next(&syn->waveform,cutoff);
 
     // Shift right to prevent clipping.
     output = shr_fr1x32(output, 1);
