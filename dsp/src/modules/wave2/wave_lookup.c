@@ -15,9 +15,11 @@ fract16 wavetable_lookup_delta(fract32 phase, fract32 dp) {
     uint32_t phase_norm = (uint32_t)(phase);
 
     int index = (phase_norm >> (32 - 10)); // this index is ok up to 1024 samples, because it inside the cycle
-    int morph_offset = (int)(dp ) ; // x 10 or x even x 100 works
+    //int morph_offset = (int)(dp) ; // x 10 or x even x 100 works
+    // int morph_offset = (int)(dp) ; // x 10 or x even x 100 works
     
-    index = index +  morph_offset;  // adjust index with morph amount
+    int morph_offset = fract32_smul(1000000, dp); // scale the delta phase to 1000 for better resolution
+    index += morph_offset;
     
     fract32 sample0 = data_sdram[index]; 
 

@@ -292,12 +292,12 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
     static uint8_t cutoff = DEFAULT_CUTOFF;
     static int8_t osc_type = DEFAULT_OSC_TYPE;
     static int8_t mod_type;
-    static int32_t morph_amount = 0;
+    static int16_t morph_amount,amt = 0;
 
     switch (index) {
 
     case ENCODER_CUTOFF:
-    int amt = 1;
+        amt = 1;
         if (g_shift_held) {
             // Shift held, adjust morph amount instead of cutoff
             amt = 100; // Adjust morph amount by 100 when shift is held   
@@ -324,8 +324,10 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
             }
         }
         //if (g_shift_held) {
-            gui_post_param("morph: ", morph_amount);
-            module_set_param_all_voices(PARAM_MORPH_AMOUNT, morph_amount); // also ok
+            
+            
+            module_set_param_all_voices(PARAM_MORPH_AMOUNT, morph_amount*0.00001f); // also ok
+            gui_post_param("m: ", morph_amount);
         /*} else {
             gui_post_param("Cutoff: ", cutoff);
             module_set_param_all_voices(PARAM_FILTER_BASE_CUTOFF, g_midi_pitch_cv_lut[cutoff]);

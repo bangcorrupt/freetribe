@@ -17,3 +17,5 @@ Primeros 16 bytes: ['0xf0', '0x7d', '0x12', '0x13', '0x3f', '0x1', '0x7f', '0xf7
 
 
 ver que valores envia cutoff
+
+probar con ft_set_module_param(0, param_index,float_to_fix16(cv_to_osc_freq(value)));
