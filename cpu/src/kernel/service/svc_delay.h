@@ -56,15 +56,15 @@ typedef struct {
     uint32_t elapsed_cycles;
     uint32_t elapsed_us;
     bool expired;
-} t_delay_state;
+} t_delay;
 
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
 
 void delay_init(void);
-bool delay_us(t_delay_state *state);
-void delay_start(t_delay_state *state, uint32_t time);
+bool delay_us(t_delay *delay);
+void delay_start(t_delay *delay);
 void delay_block_us(uint32_t time);
 void delay_block_ms(uint32_t time);
 uint32_t delay_get_current_count(void);

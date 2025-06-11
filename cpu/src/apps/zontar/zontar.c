@@ -103,6 +103,8 @@ t_status app_init(void) {
 
     t_status status = ERROR;
 
+    ft_init();
+
     ft_register_panel_callback(KNOB_EVENT, _knob_callback);
     ft_register_panel_callback(ENCODER_EVENT, _encoder_callback);
     ft_register_panel_callback(BUTTON_EVENT, _button_callback);

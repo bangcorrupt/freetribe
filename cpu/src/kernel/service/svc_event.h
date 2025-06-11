@@ -29,13 +29,14 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    svc_system.h
+ * @file    svc_event.h
  *
- * @brief   Public API for svc_system.c.
+ * @brief   Public API for kernel event queue.
+ *
  */
 
-#ifndef SVC_SYSTEM_H
-#define SVC_SYSTEM_H
+#ifndef SVC_EVENT_H
+#define SVC_EVENT_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,20 +44,61 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
+#include <stdint.h>
+
+#include "ft_error.h"
+
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
+
+typedef struct {
+    uint8_t id;
+    uint16_t len;
+    uint8_t *data;
+
+} t_event;
+
+typedef enum {
+    SVC_EVENT_TRS_DATA_RX,
+    SVC_EVENT_TRS_DATA_TX,
+
+    SVC_EVENT_MCU_DATA_RX,
+    SVC_EVENT_MCU_DATA_TX,
+
+    SVC_EVENT_PANEL_ACK,
+    SVC_EVENT_PANEL_HELD_BUTTONS,
+    SVC_EVENT_PANEL_BUTTON,
+    SVC_EVENT_PANEL_ENCODER,
+    SVC_EVENT_PANEL_TRIGGER,
+    SVC_EVENT_PANEL_KNOB,
+    SVC_EVENT_PANEL_TOUCHPAD,
+    SVC_EVENT_PANEL_LED,
+    SVC_EVENT_PANEL_TRIGGER_MODE,
+
+    SVC_EVENT_MIDI_CC_RX,
+    SVC_EVENT_MIDI_CC_TX,
+
+    /// TODO: Refactor _DISPLAY_.
+    //
+    SVC_EVENT_PUT_PIXEL,
+    SVC_EVENT_FILL_FRAME,
+
+    SVC_EVENT_SYSTEM_PRINT,
+
+    SVC_EVENT_COUNT,
+} e_event_id;
+
+typedef void (*t_listener)(const t_event *);
 
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
 
-void svc_system_task(void);
+void svc_event_task(void);
 
-void svc_system_enter_critical(void);
-void svc_system_exit_critical(void);
-
-void svc_system_shutdown(void);
+t_status svc_event_publish(t_event *event);
+t_status svc_event_subscribe(e_event_id id, t_listener listener);
 
 #ifdef __cplusplus
 }

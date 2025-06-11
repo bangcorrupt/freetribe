@@ -55,11 +55,13 @@ under the terms of the GNU Affero General Public License as published by
 
 #define MCU_UART_INT_CHANNEL 7
 
-#define MCU_TX_BUF_LEN 0x200
-#define MCU_RX_BUF_LEN 0x200
+#define MCU_TX_BUF_LEN 0x100
+#define MCU_RX_BUF_LEN 0x100
 #define MCU_MSG_LEN 0x5
 
 /*----- Typedefs -----------------------------------------------------*/
+
+typedef void (*t_data_rx_callback)(void);
 
 /*----- Static variable definitions ----------------------------------*/
 
@@ -79,14 +81,16 @@ static bool g_mcu_tx_complete = true;
 
 /*----- Static function prototypes -----------------------------------*/
 
-static int _mcu_tx_dequeue(uint8_t *mcu_msg);
-static void _mcu_rx_enqueue(uint8_t *mcu_msg);
+static t_status _mcu_tx_dequeue(uint8_t *mcu_msg);
+static t_status _mcu_rx_enqueue(uint8_t *mcu_msg);
 
 static void _mcu_tx_msg(uint8_t *mcu_msg);
 static void _mcu_rx_msg(void);
 
 static void _mcu_tx_callback(void);
 static void _mcu_rx_callback(void);
+
+static t_data_rx_callback p_data_rx_callback;
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -131,34 +135,58 @@ void dev_mcu_init(void) {
     }
 }
 
-void dev_mcu_tx_enqueue(uint8_t *mcu_msg) {
+t_status dev_mcu_tx_enqueue(uint8_t *mcu_msg) {
 
+    t_status result = ERROR;
+
+    /// TODO: Error on overflow.
+    //
     // Overwrite on overflow.
-    ring_buffer_put_force(mcu_tx_rbd, mcu_msg);
+    result = ring_buffer_put_force(mcu_tx_rbd, mcu_msg);
 
     if (g_mcu_tx_complete) {
 
         // Start transmission.
         _mcu_tx_callback();
     }
+
+    return result;
 }
 
-int dev_mcu_rx_dequeue(uint8_t *mcu_msg) {
+t_status dev_mcu_rx_dequeue(uint8_t *mcu_msg) {
 
     return ring_buffer_get(mcu_rx_rbd, mcu_msg);
 }
 
+void dev_mcu_register_callback(uint8_t callback_id, void *callback) {
+
+    /// TODO: Handle callback_id.
+    //
+    p_data_rx_callback = (t_data_rx_callback)callback;
+}
+
 /*----- Static function implementations ------------------------------*/
 
-static int _mcu_tx_dequeue(uint8_t *mcu_msg) {
+static t_status _mcu_tx_dequeue(uint8_t *mcu_msg) {
 
     return ring_buffer_get(mcu_tx_rbd, mcu_msg);
 }
 
-static void _mcu_rx_enqueue(uint8_t *mcu_msg) {
+static t_status _mcu_rx_enqueue(uint8_t *mcu_msg) {
 
+    t_status result = ERROR;
+
+    /// TODO: Error on overflow.
+    //
     // Overwrite on overflow.
-    ring_buffer_put_force(mcu_rx_rbd, mcu_msg);
+    result = ring_buffer_put_force(mcu_rx_rbd, mcu_msg);
+
+    if (p_data_rx_callback != NULL) {
+
+        p_data_rx_callback();
+    }
+
+    return result;
 }
 
 static void _mcu_tx_msg(uint8_t *mcu_msg) {

@@ -65,6 +65,9 @@ t_status app_init(void) {
 
     t_status status = ERROR;
 
+    // Initalise API.
+    ft_init();
+
     // Initialise GUI.
     gui_task();
 

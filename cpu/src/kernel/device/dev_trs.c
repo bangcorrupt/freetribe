@@ -57,6 +57,8 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Typedefs -----------------------------------------------------*/
 
+typedef void (*t_data_rx_callback)(void);
+
 /*----- Static variable definitions ----------------------------------*/
 
 // TRS RX ring buffer.
@@ -70,6 +72,8 @@ static char trs_tx_rbmem[TRS_TX_BUF_LEN];
 static uint8_t g_trs_rx_byte;
 
 static bool g_trs_tx_complete = false;
+
+static t_data_rx_callback p_data_rx_callback;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -143,6 +147,13 @@ int dev_trs_rx_dequeue(uint8_t *byte) {
     return ring_buffer_get(trs_rx_rbd, byte);
 }
 
+void dev_trs_register_callback(uint8_t callback_id, void *callback) {
+
+    /// TODO: Handle callback_id.
+    //
+    p_data_rx_callback = (t_data_rx_callback)callback;
+}
+
 /*----- Static function implementations ------------------------------*/
 
 static int _trs_tx_dequeue(uint8_t *byte) {
@@ -152,8 +163,15 @@ static int _trs_tx_dequeue(uint8_t *byte) {
 
 static void _trs_rx_enqueue(uint8_t *byte) {
 
+    /// TODO: Separate callbacks for SUCCESS or ERROR.
+
     // Overwrite on overflow.
     ring_buffer_put_force(trs_rx_rbd, byte);
+
+    if (p_data_rx_callback != NULL) {
+
+        p_data_rx_callback();
+    }
 }
 
 static void _trs_tx_byte(uint8_t *byte) {
@@ -163,12 +181,12 @@ static void _trs_tx_byte(uint8_t *byte) {
 }
 
 static void _trs_rx_byte(void) {
-    //
+
     per_uart_receive_int(TRS_UART, &g_trs_rx_byte, 1);
 }
 
 static void _trs_tx_callback(void) {
-    //
+
     static uint8_t byte;
 
     // Send next queued byte.

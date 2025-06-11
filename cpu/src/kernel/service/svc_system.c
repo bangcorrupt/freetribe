@@ -43,6 +43,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "svc_delay.h"
 
+#include "csl_interrupt.h"
+
 #include "dev_board.h"
 #include "dev_flash.h"
 
@@ -56,7 +58,7 @@ typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } t_system_task_state;
 
 /*----- Static variable definitions ----------------------------------*/
 
-static void (*p_print_callback)(char *text) = NULL;
+static char g_int_status;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -97,20 +99,16 @@ void svc_system_task(void) {
     }
 }
 
-/// TODO: Implement standard library IO via SysEx.
-//
-void svc_system_print(char *text) {
+void svc_system_enter_critical(void) {
 
-    if (p_print_callback != NULL) {
-        (p_print_callback)(text);
-    }
+    // Disable interrupts.
+    g_int_status = IntDisable();
 }
 
-void svc_system_register_print_callback(void (*callback)(char *)) {
+void svc_system_exit_critical(void) {
 
-    if (callback != NULL) {
-        p_print_callback = callback;
-    }
+    // Restore previous interrupt enabled status.
+    IntEnable(g_int_status);
 }
 
 void svc_system_shutdown(void) {

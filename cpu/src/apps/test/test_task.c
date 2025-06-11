@@ -37,6 +37,8 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
+#include <stdlib.h>
+
 #include "freetribe.h"
 
 #include "gui_task.h"
@@ -71,9 +73,13 @@ static bool g_test_confirmed;
 
 /*----- Static function prototypes -----------------------------------*/
 
-static t_status _init(void);
+static void _button_listener(const t_event *event);
+static void _midi_cc_rx_listener(const t_event *event);
 
-static void _button_callback(uint8_t button, bool state);
+static t_status _init(void);
+static t_status _test_print(void);
+static t_status _test_display(void);
+static t_status _init(void);
 
 static t_status _test_print(void);
 static t_status _test_shutdown(void);
@@ -157,7 +163,8 @@ static t_status _init(void) {
 
     t_status result = TASK_INIT_ERROR;
 
-    ft_register_panel_callback(BUTTON_EVENT, _button_callback);
+    ft_event_subscribe(SVC_EVENT_PANEL_BUTTON, _button_listener);
+    ft_event_subscribe(SVC_EVENT_MIDI_CC_RX, _midi_cc_rx_listener);
 
     ft_print("Freetribe Test");
 
@@ -165,9 +172,12 @@ static t_status _init(void) {
     return result;
 }
 
-static void _button_callback(uint8_t button, bool state) {
+static void _button_listener(const t_event *event) {
 
-    switch (button) {
+    uint8_t index = event->data[0];
+    bool state = event->data[1];
+
+    switch (index) {
 
     case BUTTON_PLAY:
         if (state) {
@@ -185,8 +195,22 @@ static void _button_callback(uint8_t button, bool state) {
     }
 }
 
+static void _midi_cc_rx_listener(const t_event *event) {
+
+    char snum[5];
+
+    const uint8_t *msg = event->data;
+
+    itoa(msg[1], snum, 16);
+    svc_midi_send_string(snum);
+
+    itoa(msg[2], snum, 16);
+    svc_midi_send_string(snum);
+}
+
 static t_status _test_print(void) {
 
+    ft_print("Test print:");
     ft_print("Print test passed.");
 
     // Assume success to move on to next test.

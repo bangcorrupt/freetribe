@@ -114,6 +114,7 @@ t_status test_display(void) {
 
         if (passed_set && passed_clear) {
             ft_print("Display test passed.");
+
             result = SUCCESS;
         }
         break;

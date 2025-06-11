@@ -50,7 +50,9 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Static variable definitions ----------------------------------*/
 
-static t_delay_state g_blink_delay;
+static t_delay g_blink_delay;
+
+static bool g_led_state;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -71,8 +73,13 @@ static t_delay_state g_blink_delay;
  */
 t_status app_init(void) {
 
+    // Initialise Freetribe API.
+    ft_init();
+
     // Initialise delay.
-    ft_start_delay(&g_blink_delay, DELAY_TIME);
+    g_blink_delay.delay_time = DELAY_TIME;
+
+    ft_start_delay(&g_blink_delay);
 
     return SUCCESS;
 }
@@ -88,11 +95,14 @@ void app_run(void) {
     // Wait for delay.
     if (ft_delay(&g_blink_delay)) {
 
+        // Invert LED state.
+        g_led_state = !g_led_state;
+
         // Toggle LED.
-        ft_toggle_led(LED_TAP);
+        ft_set_led(LED_TAP, g_led_state);
 
         // Reset start time.
-        ft_start_delay(&g_blink_delay, DELAY_TIME);
+        ft_start_delay(&g_blink_delay);
     }
 }
 

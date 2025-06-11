@@ -77,7 +77,6 @@ t_status test_button(void) {
     case STATE_RUN:
 
         if (test_confirmed()) {
-
             ft_print("Button test passed.");
 
             result = SUCCESS;

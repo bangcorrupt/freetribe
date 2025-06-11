@@ -29,13 +29,14 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    svc_system.h
+ * @file    knl_syscalls.h
  *
- * @brief   Public API for svc_system.c.
+ * @brief   Public API for Freetribe kernel system calls.
+ *
  */
 
-#ifndef SVC_SYSTEM_H
-#define SVC_SYSTEM_H
+#ifndef KNL_SYSCALLS_H
+#define KNL_SYSCALLS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,20 +44,81 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "svc_delay.h"
+#include "svc_display.h"
+#include "svc_panel.h"
+
+#include "svc_event.h"
+
 /*----- Macros -------------------------------------------------------*/
 
+#define PTR_GET_SYSCALLS 0x8001fffc
+
 /*----- Typedefs -----------------------------------------------------*/
+
+typedef int (*t_syscall)(void *);
+
+typedef t_syscall *(*t_get_syscalls)(void);
+
+typedef struct {
+    uint16_t module_id;
+    uint16_t index;
+    uint32_t value;
+} t_param;
+
+typedef struct {
+    uint8_t status;
+    uint8_t byte_1;
+    uint8_t byte_2;
+} t_midi_msg;
+
+typedef enum {
+    MIDI_STATUS_NOTE_OFF = 0x80,
+    MIDI_STATUS_NOTE_ON = 0x90,
+    MIDI_STATUS_CC = 0xb0,
+} e_midi_status;
+
+typedef enum {
+    CALLBACK_TICK,
+    CALLBACK_PANEL,
+    CALLBACK_MIDI,
+
+    NUM_CALLBACKS,
+} e_callback_id;
+
+typedef struct {
+    e_callback_id id;
+    uint32_t arg;
+    void *handler;
+
+} t_callback;
+
+typedef enum {
+    SYSCALL_PRINT,
+    SYSCALL_PUT_PIXEL,
+    SYSCALL_FILL_FRAME,
+    SYSCALL_SET_LED,
+    SYSCALL_INIT_DELAY,
+    SYSCALL_TEST_DELAY,
+    SYSCALL_REGISTER_CALLBACK,
+    SYSCALL_EVENT_SUBSCRIBE,
+    SYSCALL_SEND_MIDI_MSG,
+    SYSCALL_SET_MODULE_PARAM,
+    SYSCALL_GET_MODULE_PARAM,
+    SYSCALL_SET_TRIGGER_MODE,
+    SYSCALL_SHUTDOWN,
+
+    NUM_SYSCALLS,
+} e_syscall;
 
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
 
-void svc_system_task(void);
-
-void svc_system_enter_critical(void);
-void svc_system_exit_critical(void);
-
-void svc_system_shutdown(void);
+t_syscall *knl_get_syscalls(void);
 
 #ifdef __cplusplus
 }

@@ -50,6 +50,20 @@ extern "C" {
 
 /*----- Typedefs -----------------------------------------------------*/
 
+typedef struct {
+    uint16_t x;
+    uint16_t y;
+    bool state;
+} t_pixel;
+
+typedef struct {
+    uint16_t x_start;
+    uint16_t y_start;
+    uint16_t x_end;
+    uint16_t y_end;
+    bool state;
+} t_frame;
+
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/

@@ -1,6 +1,6 @@
 # Thanks to Job Vranish (https://spin.atomicobject.com/2016/08/26/makefile-c-projects/)
 
-APP ?= demo
+APP ?= default
 
 TARGET_EXEC := cpu.elf
 TARGET_BIN := cpu.bin
@@ -31,8 +31,8 @@ BIN=$(PREFIX)objcopy
 
 # C compilation options.
 NEST_INT ?= 0
-OPTIMISE ?= -g3 -Og
-# OPTIMISE ?= -O3
+# OPTIMISE ?= -g3 -Og
+OPTIMISE ?= -O3
 CPU ?= arm926ej-s
 CFLAGS := -mcpu=$(CPU) $(OPTIMISE)  -fdata-sections -ffunction-sections -fanalyzer -fstack-usage -Wstack-usage=128 -Wall
 

@@ -43,7 +43,10 @@ under the terms of the GNU Affero General Public License as published by
 #include "dev_lcd.h"
 
 #include "ft_error.h"
+
 #include "svc_delay.h"
+#include "svc_event.h"
+
 #include "svc_display.h"
 
 /*----- Macros -------------------------------------------------------*/
@@ -72,13 +75,21 @@ static t_status _display_init(void);
 
 /*----- Static function prototypes -----------------------------------*/
 
+static void _put_pixel_listener(const t_event *event);
+static void _fill_frame_listener(const t_event *event);
+
+static void _put_pixel(uint16_t pos_x, uint16_t pos_y, bool state);
+
+static int8_t _fill_frame(uint16_t x_start, uint16_t y_start, uint16_t x_end,
+                          uint16_t y_end, bool state);
+
 /*----- Extern function implementations ------------------------------*/
 
 void svc_display_task(void) {
 
     static t_display_task_state state = STATE_ASSERT_RESET;
 
-    static t_delay_state reset_delay;
+    static t_delay reset_delay;
 
     static uint8_t page_index;
 
@@ -91,7 +102,8 @@ void svc_display_task(void) {
 
         dev_lcd_reset(true);
 
-        delay_start(&reset_delay, 5);
+        reset_delay.delay_time = 5;
+        delay_start(&reset_delay);
 
         state = STATE_RELEASE_RESET;
         break;
@@ -101,7 +113,7 @@ void svc_display_task(void) {
         if (delay_us(&reset_delay)) {
             dev_lcd_reset(false);
 
-            delay_start(&reset_delay, 5);
+            delay_start(&reset_delay);
 
             state = STATE_INIT;
         }
@@ -151,7 +163,48 @@ void svc_display_task(void) {
     }
 }
 
-void svc_display_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state) {
+void svc_display_set_contrast(uint8_t contrast) {
+
+    dev_lcd_set_contrast(contrast);
+}
+
+/*----- Static function implementations ------------------------------*/
+
+static t_status _display_init(void) {
+
+    uint8_t *page_buffer;
+    uint8_t page_index;
+
+    dev_lcd_init();
+
+    for (page_index = 0; page_index < 8; page_index++) {
+
+        page_buffer = g_frame_buffer_b + page_index * LCD_COLUMNS;
+        dev_lcd_set_page(page_index, page_buffer);
+    }
+
+    svc_event_subscribe(SVC_EVENT_PUT_PIXEL, _put_pixel_listener);
+    svc_event_subscribe(SVC_EVENT_FILL_FRAME, _fill_frame_listener);
+
+    return SUCCESS;
+}
+
+static void _put_pixel_listener(const t_event *event) {
+
+    t_pixel *pixel = (t_pixel *)event->data;
+
+    _put_pixel(pixel->x, pixel->y, pixel->state);
+}
+
+static void _fill_frame_listener(const t_event *event) {
+
+    t_frame *frame = (t_frame *)event->data;
+
+    _fill_frame(frame->x_start, frame->y_start, frame->x_end, frame->y_end,
+                frame->state);
+}
+
+static void _put_pixel(uint16_t pos_x, uint16_t pos_y, bool state) {
 
     // Calculate pixel location in buffer.
     // uint16_t column_index = pos_x;
@@ -184,8 +237,8 @@ void svc_display_put_pixel(uint16_t pos_x, uint16_t pos_y, bool state) {
     // }
 }
 
-int8_t svc_display_fill_frame(uint16_t x_start, uint16_t y_start,
-                              uint16_t x_end, uint16_t y_end, bool state) {
+static int8_t _fill_frame(uint16_t x_start, uint16_t y_start, uint16_t x_end,
+                          uint16_t y_end, bool state) {
 
     /// TODO: Handle partial bytes.
 
@@ -223,29 +276,6 @@ int8_t svc_display_fill_frame(uint16_t x_start, uint16_t y_start,
     memset(g_frame_buffer_a + byte_start, fill, length);
 
     return 0;
-}
-
-void svc_display_set_contrast(uint8_t contrast) {
-
-    dev_lcd_set_contrast(contrast);
-}
-
-/*----- Static function implementations ------------------------------*/
-
-static t_status _display_init(void) {
-
-    uint8_t *page_buffer;
-    uint8_t page_index;
-
-    dev_lcd_init();
-
-    for (page_index = 0; page_index < 8; page_index++) {
-
-        page_buffer = g_frame_buffer_b + page_index * LCD_COLUMNS;
-        dev_lcd_set_page(page_index, page_buffer);
-    }
-
-    return SUCCESS;
 }
 
 /*----- End of file --------------------------------------------------*/

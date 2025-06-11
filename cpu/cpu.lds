@@ -6,12 +6,13 @@ OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 
 HEAP_SIZE = 0x800;
-STACK_SIZE = 0x1f80;
+STACK_SIZE = 0x1f7c;
 VECTOR_TABLE_SIZE = 0x80;
 
 MEMORY
 {
-    OC_RAM (rwx)    : ORIGIN = 0x80000000, LENGTH = 0x20000
+    OC_RAM (rwx)    : ORIGIN = 0x80000000, LENGTH = 0x1fffc
+    KNL_PTR (r)     : ORIGIN = 0x8001fffc, LENGTH = 0x4
     ARM_RAM (rwx)   : ORIGIN = 0xFFFF0000, LENGTH = 0x2000
 }
 
@@ -94,4 +95,8 @@ SECTIONS
         _stack = .;
 	} > ARM_RAM
 
+    .knl_pointer ALIGN(4) :
+    {
+        *(.knl_pointer)
+	} > KNL_PTR
 }
