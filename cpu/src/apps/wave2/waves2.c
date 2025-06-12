@@ -323,15 +323,13 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
                 cutoff--;
             }
         }
-        //if (g_shift_held) {
-            
-            
-            module_set_param_all_voices(PARAM_MORPH_AMOUNT, morph_amount*0.00001f); // also ok
+        if (g_shift_held) {
+            module_set_param_all_voices(PARAM_BASE_MORPH_AMOUNT, morph_amount*0.00001f); // also ok
             gui_post_param("m: ", morph_amount);
-        /*} else {
+        } else {
             gui_post_param("Cutoff: ", cutoff);
             module_set_param_all_voices(PARAM_FILTER_BASE_CUTOFF, g_midi_pitch_cv_lut[cutoff]);
-        }*/
+        }
         break;
 
     case ENCODER_OSC:
@@ -608,6 +606,11 @@ static void _set_mod_depth(uint32_t mod_depth) {
         gui_post_param("P.LFO Dpt: ", mod_depth);
         break;
 
+    case MOD_MORPH_LFO:
+        module_set_param_all_voices(PARAM_MORPH_LFO_DEPTH, g_knob_cv_lut[mod_depth]);
+        gui_post_param("M.LFO Dpt: ", mod_depth);
+        break;
+
     default:
         break;
     }
@@ -631,6 +634,12 @@ static void _set_mod_speed(uint32_t mod_speed) {
         module_set_param_all_voices(PARAM_PITCH_LFO_SPEED, g_knob_cv_lut[mod_speed]);
         gui_post_param("P.LFO Spd: ", mod_speed);
         break;
+
+    case MOD_MORPH_LFO:
+        module_set_param_all_voices(PARAM_MORPH_LFO_SPEED, g_knob_cv_lut[mod_speed]);
+        gui_post_param("M.LFO Spd: ", mod_speed);
+        break;
+
 
     default:
         break;

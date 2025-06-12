@@ -102,6 +102,7 @@ typedef enum {
     MOD_AMP_LFO,
     MOD_FILTER_LFO,
     MOD_PITCH_LFO,
+    MOD_MORPH_LFO,
 
     MOD_TYPE_COUNT
 } e_mod_type;

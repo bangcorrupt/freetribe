@@ -47,7 +47,7 @@ under the terms of the GNU Affero General Public License as published by
 #include "aleph.h"
 
 #include "custom_aleph_monovoice.h"
-#include "wave_generator.h"
+
 
 void module_set_param_voice(uint16_t voice_index, uint16_t param_index,
                             int32_t value);
@@ -126,6 +126,10 @@ typedef enum {
     SAMPLE_LOAD,
     SAMPLE_RECORD_START,
     PARAM_MORPH_AMOUNT,
+    PARAM_BASE_MORPH_AMOUNT,
+    PARAM_MORPH_LFO_DEPTH,
+    PARAM_MORPH_LFO_SPEED,
+
 
     PARAM_COUNT
 } e_param;
@@ -265,8 +269,6 @@ void module_set_param(uint16_t param_index_with_offset, int32_t value) {
         break;
 
     case PARAM_MORPH_AMOUNT:
-        // Custom_Aleph_MonoVoice_set_freq_offset(&g_module.voice[voice_number],
-        // value);
         Custom_Aleph_MonoVoice_set_morph_amount(&g_module.voice[voice_number], value);
         break;
 
