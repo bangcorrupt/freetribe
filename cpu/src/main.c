@@ -73,6 +73,7 @@ static void _set_backlight(bool red, bool green, bool blue);
 
 static void _serial_init(void);
 static void _serial_echo(void);
+static void _serial_parse(uint8_t *byte);
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -131,8 +132,52 @@ static void _serial_echo(void) {
     // Block until byte received.
     per_uart_receive(TRS_UART, &rx_byte, 1);
 
+    _serial_parse(&rx_byte);
+
     // Echo received byte.
     per_uart_transmit(TRS_UART, &rx_byte, 1);
+}
+
+static void _serial_parse(uint8_t *byte) {
+    //
+    switch (*byte) {
+
+    case 0xf8:
+        _set_backlight(BACKLIGHT_BLUE);
+        break;
+
+    case 0xf9:
+        // Ignore.
+        break;
+
+    case 0xfa:
+        _set_backlight(BACKLIGHT_CYAN);
+        break;
+
+    case 0xfb:
+        _set_backlight(BACKLIGHT_YELLOW);
+        break;
+
+    case 0xfc:
+        _set_backlight(BACKLIGHT_RED);
+        break;
+
+    case 0xfd:
+        // Ignore.
+        break;
+
+    case 0xfe:
+        _set_backlight(BACKLIGHT_MAGENTA);
+        break;
+
+    case 0xff:
+        _set_backlight(BACKLIGHT_GREEN);
+        break;
+
+    default:
+        // Ignore.
+        break;
+    }
 }
 
 /*----- End of file --------------------------------------------------*/
