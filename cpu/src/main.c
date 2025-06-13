@@ -39,6 +39,7 @@ under the terms of the GNU Affero General Public License as published by
 #include <stdbool.h>
 
 #include "per_gpio.h"
+#include "per_uart.h"
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -56,6 +57,8 @@ under the terms of the GNU Affero General Public License as published by
 #define BACKLIGHT_CYAN false, true, true
 #define BACKLIGHT_MAGENTA true, false, true
 
+#define TRS_UART UART_1
+
 /*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
@@ -64,26 +67,30 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Static function prototypes -----------------------------------*/
 
+static void _board_init(void);
+
 static void _set_backlight(bool red, bool green, bool blue);
+
+static void _serial_init(void);
+static void _serial_echo(void);
 
 /*----- Extern function implementations ------------------------------*/
 
 /**
- * @brief  Set backlight LED green.
+ * @brief  Echo serial bytes.
  *
  */
 int main(void) {
 
-    per_gpio_init();
+    _board_init();
 
-    // LEDs will not light unless this pin is high.
-    per_gpio_set_indexed(GPIO_BOARD_POWER, true); // Set GP7P13
+    _serial_init();
 
     _set_backlight(BACKLIGHT_GREEN);
 
     while (true) {
 
-        //
+        _serial_echo();
     }
 
     return 0;
@@ -91,11 +98,43 @@ int main(void) {
 
 /*----- Static function implementations ------------------------------*/
 
+static void _board_init(void) {
+
+    per_gpio_init();
+
+    // LEDs will not light unless this pin is high.
+    per_gpio_set_indexed(GPIO_BOARD_POWER, true); // Set GP7P13
+}
+
 static void _set_backlight(bool red, bool green, bool blue) {
 
     per_gpio_set_indexed(GPIO_LCD_RED, red);     // Set GP6P3: LCD Red
     per_gpio_set_indexed(GPIO_LCD_GREEN, green); // Set GP6P4: LCD Green
     per_gpio_set_indexed(GPIO_LCD_BLUE, blue);   // Set GP6P5: LCD Blue
+}
+
+static void _serial_init(void) {
+
+    t_uart_config uart_cfg = {.instance = TRS_UART,
+                              .baud = 31250,
+                              .word_length = 8,
+                              .int_enable = true,
+                              .fifo_enable = true,
+                              .oversample = OVERSAMPLE_16};
+
+    // Initialise UART for MIDI, polling mode.
+    per_uart_init(&uart_cfg);
+}
+
+static void _serial_echo(void) {
+
+    uint8_t rx_byte = 0;
+
+    // Block until byte received.
+    per_uart_receive(TRS_UART, &rx_byte, 1);
+
+    // Echo received byte.
+    per_uart_transmit(TRS_UART, &rx_byte, 1);
 }
 
 /*----- End of file --------------------------------------------------*/
