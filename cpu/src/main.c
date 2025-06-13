@@ -118,8 +118,6 @@ static void _serial_init(void) {
     t_uart_config uart_cfg = {.instance = TRS_UART,
                               .baud = 31250,
                               .word_length = 8,
-                              .int_enable = true,
-                              .fifo_enable = true,
                               .oversample = OVERSAMPLE_16};
 
     // Initialise UART for MIDI, polling mode.
