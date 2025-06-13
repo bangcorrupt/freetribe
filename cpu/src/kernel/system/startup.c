@@ -504,31 +504,9 @@ static void _config_cache_mmu() {
 }
 
 static void _boot_abort(void) {
+
     while (1)
         ;
 }
-
-// void privileged_mode(void) { asm("    SWI   458752"); }
-//
-// void system_mode(void) {
-//     asm("    mrs     r0, CPSR\n\t"
-//         "    bic     r0, #0x0F\n\t"
-//         "    orr     r0, #0x10\n\t "
-//         "    msr     CPSR, r0");
-// }
-//
-
-/// TODO: Read and write CPSR.
-//
-// unsigned int read_cpsr(void) {
-//     asm volatile("eor     r3, %1, %1, ror #16\n\t"
-//                  "bic     r3, r3, #0x00FF0000\n\t"
-//                  "mov     %0, %1, ror #8\n\t"
-//                  "eor     %0, %0, r3, lsr #8"
-//                  : "=r"(val)
-//                  : "0"(val)
-//                  : "r3");
-//     return val;
-// }
 
 /*----- End of file --------------------------------------------------*/
