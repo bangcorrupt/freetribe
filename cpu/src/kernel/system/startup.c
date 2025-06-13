@@ -85,6 +85,7 @@ under the terms of the GNU Affero General Public License as published by
 #include "csl_syscfg.h"
 
 #include "per_ddr.h"
+#include "per_pinmux.h"
 
 #include "startup.h"
 
@@ -170,8 +171,6 @@ void start_boot(void) {
 
     _pll1_init(PLL1_MUL, PLL1_POSTDIV, PLL1_DIV1, PLL1_DIV2, PLL1_DIV3);
 
-    /// TODO: Pinmux config before main?
-
     per_ddr_init();
 
     _config_cache_mmu();
@@ -182,6 +181,8 @@ void start_boot(void) {
 
     // Initialize the vector table with opcodes.
     _copy_vector_table();
+
+    per_pinmux_init();
 
     main();
 

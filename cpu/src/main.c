@@ -36,7 +36,17 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
+#include "per_gpio.h"
+
 /*----- Macros -------------------------------------------------------*/
+
+#define GPIO_LCD_RED 100
+#define GPIO_LCD_GREEN 101
+#define GPIO_LCD_BLUE 102
+
+#define BACKLIGHT_RED true, false, false
+#define BACKLIGHT_GREEN false, true, false
+#define BACKLIGHT_BLUE false, false, true
 
 /*----- Typedefs -----------------------------------------------------*/
 
@@ -46,6 +56,8 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Static function prototypes -----------------------------------*/
 
+static void _set_backlight(bool red, bool green, bool blue);
+
 /*----- Extern function implementations ------------------------------*/
 
 /**
@@ -54,10 +66,19 @@ under the terms of the GNU Affero General Public License as published by
  */
 int main(void) {
 
+    _set_backlight(BACKLIGHT_GREEN);
+
     //
     return 0;
 }
 
 /*----- Static function implementations ------------------------------*/
+
+static void _set_backlight(bool red, bool green, bool blue) {
+
+    per_gpio_set_indexed(GPIO_LCD_RED, red);     // Set GP6P3: LCD Red
+    per_gpio_set_indexed(GPIO_LCD_GREEN, green); // Set GP6P4: LCD Green
+    per_gpio_set_indexed(GPIO_LCD_BLUE, blue);   // Set GP6P5: LCD Blue
+}
 
 /*----- End of file --------------------------------------------------*/
