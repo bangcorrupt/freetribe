@@ -36,13 +36,6 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
-#include <stdbool.h>
-
-#include "knl_main.h"
-#include "usr_main.h"
-
-#include "svc_dsp.h"
-
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
@@ -61,18 +54,7 @@ under the terms of the GNU Affero General Public License as published by
  */
 int main(void) {
 
-    while (!svc_dsp_ready()) {
-        knl_main_task();
-    }
-
-    /// TODO: Implement scheduler.
     //
-    while (true) {
-
-        knl_main_task();
-        usr_main_task();
-    }
-
     return 0;
 }
 
