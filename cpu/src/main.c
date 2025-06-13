@@ -69,7 +69,7 @@ static void _set_backlight(bool red, bool green, bool blue);
 /*----- Extern function implementations ------------------------------*/
 
 /**
- * @brief  Run kernel and app.
+ * @brief  Set backlight LED green.
  *
  */
 int main(void) {
