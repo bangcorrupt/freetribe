@@ -173,7 +173,9 @@ void start_boot(void) {
 
     per_ddr_init();
 
-    _config_cache_mmu();
+    /// TODO: Implement debugger before enabling cache.
+    //
+    // _config_cache_mmu();
 
     // if (per_ddr_memtest() != 0) {
     //     _boot_abort();

@@ -77,7 +77,8 @@ static void _hardware_terminate(void);
  */
 void dev_board_init(void) {
 
-    per_pinmux_init();
+    /// TODO: Pinmux initialised in startup.c
+    // per_pinmux_init();
 
     per_aintc_init();
 

@@ -36,6 +36,8 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
+#include <stdbool.h>
+
 #include "per_gpio.h"
 
 /*----- Macros -------------------------------------------------------*/
@@ -43,6 +45,8 @@ under the terms of the GNU Affero General Public License as published by
 #define GPIO_LCD_RED 100
 #define GPIO_LCD_GREEN 101
 #define GPIO_LCD_BLUE 102
+
+#define GPIO_BOARD_POWER 126
 
 #define BACKLIGHT_RED true, false, false
 #define BACKLIGHT_GREEN false, true, false
@@ -72,7 +76,15 @@ int main(void) {
 
     per_gpio_init();
 
+    // LEDs will not light unless this pin is high.
+    per_gpio_set_indexed(GPIO_BOARD_POWER, true); // Set GP7P13
+
     _set_backlight(BACKLIGHT_GREEN);
+
+    while (true) {
+
+        //
+    }
 
     return 0;
 }
