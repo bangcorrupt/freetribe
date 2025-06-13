@@ -126,7 +126,7 @@ static void _serial_init(void) {
 
 static void _serial_echo(void) {
 
-    uint8_t rx_byte = 0;
+    uint8_t rx_byte;
 
     // Block until byte received.
     per_uart_receive(TRS_UART, &rx_byte, 1);
