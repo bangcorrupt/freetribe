@@ -48,6 +48,10 @@ under the terms of the GNU Affero General Public License as published by
 #define BACKLIGHT_GREEN false, true, false
 #define BACKLIGHT_BLUE false, false, true
 
+#define BACKLIGHT_YELLOW true, true, false
+#define BACKLIGHT_CYAN false, true, true
+#define BACKLIGHT_MAGENTA true, false, true
+
 /*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
@@ -66,9 +70,10 @@ static void _set_backlight(bool red, bool green, bool blue);
  */
 int main(void) {
 
+    per_gpio_init();
+
     _set_backlight(BACKLIGHT_GREEN);
 
-    //
     return 0;
 }
 
