@@ -242,29 +242,8 @@ void Custom_Aleph_MonoVoice_set_res(Custom_Aleph_MonoVoice *const synth, fract32
     Aleph_FilterSVF_set_rq(&syn->filter, res);
 }
 
-void Custom_Aleph_MonoVoice_set_amp_slew(Custom_Aleph_MonoVoice *const synth,
-                                  fract32 amp_slew) {
 
-    t_Custom_Aleph_MonoVoice *syn = *synth;
 
-    Aleph_LPFOnePole_set_coeff(&syn->amp_slew, amp_slew);
-}
-
-void Custom_Aleph_MonoVoice_set_freq_slew(Custom_Aleph_MonoVoice *const synth,
-                                   fract32 freq_slew) {
-
-    t_Custom_Aleph_MonoVoice *syn = *synth;
-
-    Aleph_LPFOnePole_set_coeff(&syn->freq_slew, freq_slew);
-}
-
-void Custom_Aleph_MonoVoice_set_cutoff_slew(Custom_Aleph_MonoVoice *const synth,
-                                     fract32 cutoff_slew) {
-
-    t_Custom_Aleph_MonoVoice *syn = *synth;
-
-    Aleph_LPFOnePole_set_coeff(&syn->cutoff_slew, cutoff_slew);
-}
 
 /*----- Static function implementations ------------------------------*/
 

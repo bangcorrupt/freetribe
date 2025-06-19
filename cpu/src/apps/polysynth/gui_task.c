@@ -49,6 +49,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "ring_buffer.h"
 #include "ugui.h"
+#include "module_interface.h"
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -130,6 +131,7 @@ void gui_task(void) {
     }
 }
 
+
 /**
  * @brief   Print a string to the uGUI console.
  *
@@ -141,7 +143,14 @@ void gui_post(char *text) {
 
     event.type = GUI_POST_STRING;
 
-    strncpy(event.text, text, GUI_MAX_STRING_LEN);
+    // Clear the entire text buffer to avoid garbage data
+    memset(event.text, 0, GUI_MAX_STRING_LEN);
+    
+    // Copy the string, leaving space for newline
+    strncpy(event.text, text, GUI_MAX_STRING_LEN - 3);
+    
+    // Add newline at the end, just like gui_post_param does
+    strncat(event.text, "\n", 2);
 
     ring_buffer_put_force(g_gui_rbd, &event);
 }
@@ -322,6 +331,31 @@ t_status _parse_event(t_gui_event *event) {
 static void _put_pixel(UG_S16 x, UG_S16 y, UG_COLOR c) {
 
     ft_put_pixel(x, y, !c);
+}
+
+void gui_show_mod_type(uint8_t mod_type) {
+
+    char text[GUI_MAX_STRING_LEN];
+
+    switch (mod_type) {
+    case MOD_AMP_LFO:
+        strncpy(text, "Mod: Amp LFO", GUI_MAX_STRING_LEN);
+        break;
+
+    case MOD_FILTER_LFO:
+        strncpy(text, "Mod: Filter LFO", GUI_MAX_STRING_LEN);
+        break;
+
+    case MOD_PITCH_LFO:
+        strncpy(text, "Mod: Pitch LFO", GUI_MAX_STRING_LEN);
+        break;
+
+    default:
+        strncpy(text, "Mod: None", GUI_MAX_STRING_LEN);
+        break;
+    }
+
+    gui_post(text);
 }
 
 /*----- End of file --------------------------------------------------*/

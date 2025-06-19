@@ -349,7 +349,8 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
         }
 
         g_mod_type = mod_type;
-        gui_post_param("Mod Type: ", mod_type);
+        //gui_post_param("Mod Type: ", mod_type);
+        gui_show_mod_type(mod_type);
 
         break;
 
@@ -380,7 +381,7 @@ static void process_note_event(uint8_t note, uint8_t vel, bool state) {
         
         /* If no free voices, use voice stealing */
         if (voice_idx == INVALID_VOICE) {
-            ft_print("no free vices");
+            //ft_print("no free vices");
             return;
             voice_idx = voice_manager_get_oldest_voice();
             
@@ -446,21 +447,6 @@ process_note_event(note, vel, state);
 
 }
 
-/**
- * @brief Initialize the polyphonic system
- * 
- * Call this function during system initialization to set up
- * the voice management system.
- */
-void polyphonic_system_init(void) {
-    voice_manager_init();
-    ft_print("Polyphonic voice manager initialized (");
-    
-    char count_str[4];
-    itoa(MAX_VOICES, count_str, 10);
-    ft_print(count_str);
-    ft_print(" voices)\n");
-}
 
 
 /**
