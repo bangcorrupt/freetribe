@@ -143,7 +143,7 @@ void module_init(LEAF *leaf) {
 
 void module_process(void) {
 
-
+    // Process all voices.
     int voice_index;
     for (voice_index = 0; voice_index < MAX_VOICES; voice_index++) {
 
@@ -180,36 +180,26 @@ void module_process(void) {
             module_set_param_voice(voice_index,PARAM_AMP,clampled_amp);
         }
 
-        /// TODO: Should filter LFO follow the
-        ///       envelope, like the amp LFO?
+            // Filter cutoff modulation.
+            /// TODO: Should filter LFO follow the
+            ///       envelope, like the amp LFO?
+            filter_mod = g_module[voice_index].filter_cutoff;
+            filter_mod += tADSRT_tick(&g_module[voice_index].filter_env) * g_module[voice_index].filter_env_depth;
+            filter_mod += tTriLFO_tick(&g_module[voice_index].filter_lfo) * g_module[voice_index].filter_lfo_depth;
+            if (_cv_update(&g_module[voice_index].filter_cv, filter_mod)) {
+                module_set_param_voice(voice_index,PARAM_CUTOFF, clamp_value(filter_mod));
+            }
+ 
+            // Pitch modulation.
+            pitch_mod = g_module[voice_index].osc_freq;
+            pitch_mod += tADSRT_tick(&g_module[voice_index].pitch_env) * g_module[voice_index].pitch_env_depth;
+            pitch_mod += (tTriLFO_tick(&g_module[voice_index].pitch_lfo) * g_module[voice_index].pitch_lfo_depth);
+            if (_cv_update(&g_module[voice_index].pitch_cv, pitch_mod)) {
+                module_set_param_voice(voice_index,PARAM_FREQ, clamp_value(pitch_mod));
 
-        // Filter cutoff modulation.
-        //
-        filter_mod = g_module[voice_index].filter_cutoff;
-
-        filter_mod += tADSRT_tick(&g_module[voice_index].filter_env) * g_module[voice_index].filter_env_depth;
-
-        filter_mod += tTriLFO_tick(&g_module[voice_index].filter_lfo) * g_module[voice_index].filter_lfo_depth;
-
-        if (_cv_update(&g_module[voice_index].filter_cv, filter_mod)) {
-
-            module_set_param_voice(voice_index,PARAM_CUTOFF, clamp_value(filter_mod));
         }
 
-        // Pitch modulation.
-        //
-        pitch_mod = g_module[voice_index].osc_freq;
 
-        /// TODO: Add control for pitch envelope.
-        //
-        pitch_mod += tADSRT_tick(&g_module[voice_index].pitch_env) * g_module[voice_index].pitch_env_depth;
-
-        pitch_mod += (tTriLFO_tick(&g_module[voice_index].pitch_lfo) * g_module[voice_index].pitch_lfo_depth);
-
-        if (_cv_update(&g_module[voice_index].pitch_cv, pitch_mod)) {
-
-            module_set_param_voice(voice_index,PARAM_FREQ, clamp_value(pitch_mod));
-        }
     }
 }
 
