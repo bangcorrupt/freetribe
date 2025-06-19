@@ -115,8 +115,7 @@ fract32 Custom_Aleph_MonoVoice_next(Custom_Aleph_MonoVoice *const synth) {
 
     // Set oscillator frequency.
     Aleph_WaveformDual_set_freq_a(&syn->waveform, freq);
-    Aleph_WaveformDual_set_freq_b(&syn->waveform,
-                                  fix16_mul_fract(freq, syn->freq_offset));
+    Aleph_WaveformDual_set_freq_b(&syn->waveform, fix16_mul_fract(freq, syn->freq_offset));
 
     // Generate waveforms.
     output = Aleph_WaveformDual_next(&syn->waveform);
