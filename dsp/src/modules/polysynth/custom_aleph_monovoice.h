@@ -59,6 +59,7 @@ typedef struct {
 
     Aleph_FilterSVF filter;
     e_Aleph_FilterSVF_type filter_type;
+    fract32 (*filter_function)(Aleph_FilterSVF *const filter, fract32 in); // pointer to filter function
 
     Aleph_LPFOnePole amp_slew;
     Aleph_LPFOnePole freq_slew;
@@ -100,6 +101,7 @@ void Custom_Aleph_MonoVoice_set_res(Custom_Aleph_MonoVoice *const synth, fract32
 
 void _Aleph_WaveformDual_set_shape_a(Aleph_WaveformDual *const wave, e_Aleph_Waveform_shape shape) ;
 void _Aleph_WaveformDual_set_shape_b(Aleph_WaveformDual *const wave, e_Aleph_Waveform_shape shape) ;
+fract32 Custom_Aleph_MonoVoice_apply_filter(Custom_Aleph_MonoVoice *const synth, fract32 input_signal) ;
 
 #ifdef __cplusplus
 }

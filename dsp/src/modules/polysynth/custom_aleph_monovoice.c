@@ -64,6 +64,7 @@ void Custom_Aleph_MonoVoice_init_to_pool(Custom_Aleph_MonoVoice *const synth,
 
     syn->freq_offset = Custom_Aleph_MonoVoice_DEFAULT_FREQ_OFFSET;
     syn->filter_type = Custom_Aleph_MonoVoice_DEFAULT_FILTER_TYPE;
+    syn->filter_function = &Aleph_FilterSVF_lpf_next;
 
     Aleph_WaveformDual_init_to_pool(&syn->waveform, mempool);
 
@@ -106,7 +107,6 @@ fract32 Custom_Aleph_MonoVoice_next(Custom_Aleph_MonoVoice *const synth) {
 
     fract32 amp;
     fract32 freq;
-    fract32 cutoff;
 
     // Get slewed frequency.
     freq = Aleph_LPFOnePole_next(&syn->freq_slew);
@@ -130,38 +130,31 @@ fract32 Custom_Aleph_MonoVoice_next(Custom_Aleph_MonoVoice *const synth) {
     // Apply amp modulation.
     output = mult_fr1x32x32(output, amp);
 
+    // Apply filter to the generated signal
+    //output = Custom_Aleph_MonoVoice_apply_filter(synth, output);
+
+    // Block DC.
+    // output = Aleph_HPF_dc_block(&syn->dc_block, output); // ??
+
+    return output;
+}
+
+fract32 Custom_Aleph_MonoVoice_apply_filter(Custom_Aleph_MonoVoice *const synth, fract32 input_signal) {
+    t_Custom_Aleph_MonoVoice *syn = *synth;
+
+    fract32 output;
+    fract32 cutoff;
+    
     // Get slewed cutoff.
     cutoff = Aleph_LPFOnePole_next(&syn->cutoff_slew);
 
     // Set filter cutoff.
     Aleph_FilterSVF_set_coeff(&syn->filter, cutoff);
 
-    // Apply filter.
-    switch (syn->filter_type) {
-
-    case ALEPH_FILTERSVF_TYPE_LPF:
-        output = Aleph_FilterSVF_lpf_next(&syn->filter, output);
-        break;
-
-    case ALEPH_FILTERSVF_TYPE_BPF:
-        output = Aleph_FilterSVF_bpf_next(&syn->filter, output);
-        break;
-
-    case ALEPH_FILTERSVF_TYPE_HPF:
-        output = Aleph_FilterSVF_hpf_next(&syn->filter, output);
-        break;
-
-    default:
-        // Default to LPF.
-        output = Aleph_FilterSVF_lpf_next(&syn->filter, output);
-        break;
-    }    // Block DC.
-    output = Aleph_HPF_dc_block(&syn->dc_block, output);
-
+    output = syn->filter_function(&syn->filter, input_signal);
+    
     return output;
 }
-
-
 void _Aleph_WaveformDual_set_shape_a(Aleph_WaveformDual *const wave, e_Aleph_Waveform_shape shape) {
 
     t_Aleph_WaveformDual *wv = *wave;
@@ -225,7 +218,28 @@ void Custom_Aleph_MonoVoice_set_filter_type(Custom_Aleph_MonoVoice *const synth,
 
     t_Custom_Aleph_MonoVoice *syn = *synth;
 
-    syn->filter_type = type;
+    syn->filter_type = type; //filter function pointer
+    switch (syn->filter_type) {
+
+    case ALEPH_FILTERSVF_TYPE_LPF:
+        syn->filter_function = &Aleph_FilterSVF_lpf_next;
+        break;
+
+    case ALEPH_FILTERSVF_TYPE_BPF:
+        syn->filter_function = &Aleph_FilterSVF_bpf_next;
+        break;
+
+    case ALEPH_FILTERSVF_TYPE_HPF:
+        syn->filter_function = &Aleph_FilterSVF_hpf_next;
+        break;
+
+    default:
+        // Default to LPF.
+        syn->filter_function = &Aleph_FilterSVF_lpf_next;
+        break;
+    }    
+
+
 }
 
 void Custom_Aleph_MonoVoice_set_cutoff(Custom_Aleph_MonoVoice *const synth, fract32 cutoff) {
