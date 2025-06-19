@@ -49,7 +49,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "ring_buffer.h"
 #include "ugui.h"
-#include "module_interface.h"
+
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -334,28 +334,63 @@ static void _put_pixel(UG_S16 x, UG_S16 y, UG_COLOR c) {
 }
 
 void gui_show_mod_type(uint8_t mod_type) {
-
-    char text[GUI_MAX_STRING_LEN];
-
     switch (mod_type) {
-    case MOD_AMP_LFO:
-        strncpy(text, "Mod: Amp LFO", GUI_MAX_STRING_LEN);
-        break;
+        case MOD_AMP_LFO:
+            gui_post("A LFO");
+            break;
 
-    case MOD_FILTER_LFO:
-        strncpy(text, "Mod: Filter LFO", GUI_MAX_STRING_LEN);
-        break;
+        case MOD_FILTER_LFO:
+            gui_post("F LFO");
+            break;
 
-    case MOD_PITCH_LFO:
-        strncpy(text, "Mod: Pitch LFO", GUI_MAX_STRING_LEN);
-        break;
+        case MOD_PITCH_LFO:
+            gui_post("P LFO");
+            break;
 
-    default:
-        strncpy(text, "Mod: None", GUI_MAX_STRING_LEN);
-        break;
+        default:
+            break;
     }
+}
 
-    gui_post(text);
+void  gui_show_osc_type(uint8_t osc_number, uint8_t osc_type) {
+    switch (osc_number) {
+        case 1:
+            switch (osc_type) {
+                case OSC_TYPE_SINE:
+                    gui_post("O1: Sine");
+                    break;
+                case OSC_TYPE_SQUARE:
+                    gui_post("O1: Square");
+                    break;
+                case OSC_TYPE_TRI:
+                    gui_post("O1: Triangle");
+                    break;
+                case OSC_TYPE_SAW:
+                    gui_post("O1: Saw");
+                    break;
+            }
+            break;
+            
+        case 2:
+            switch (osc_type) {
+                case OSC_TYPE_SINE:
+                    gui_post("O2: Sine");
+                    break;
+                case OSC_TYPE_SQUARE:
+                    gui_post("O2: Square");
+                    break;
+                case OSC_TYPE_TRI:
+                    gui_post("O2: Triangle");
+                    break;
+                case OSC_TYPE_SAW:
+                    gui_post("O2: Saw");
+                    break;
+            }
+            break;
+            
+        default:
+            break;
+    }
 }
 
 /*----- End of file --------------------------------------------------*/

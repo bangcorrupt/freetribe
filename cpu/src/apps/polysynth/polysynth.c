@@ -50,7 +50,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "leaf.h"
 
-#include "module_interface.h"
+
 
 
 /*----- Macros -------------------------------------------------------*/
@@ -325,11 +325,12 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
         }
         if (g_shift_held) {
             module_set_param_all_voices(PARAM_OSC_2_TYPE, (1.0 / OSC_TYPE_COUNT) * osc_type);
-            gui_post_param("Osc 2 Type: ", osc_type);
+            gui_show_osc_type(2, osc_type);
         } else {
             module_set_param_all_voices(PARAM_OSC_TYPE, (1.0 / OSC_TYPE_COUNT) * osc_type);
-            gui_post_param("Osc 1 Type: ", osc_type);
+            gui_show_osc_type(1, osc_type);
         }
+        
         
 
         break;
@@ -349,7 +350,6 @@ static void _encoder_callback(uint8_t index, uint8_t value) {
         }
 
         g_mod_type = mod_type;
-        //gui_post_param("Mod Type: ", mod_type);
         gui_show_mod_type(mod_type);
 
         break;
@@ -562,7 +562,7 @@ static void _set_mod_depth(uint32_t mod_depth) {
         break;
 
     case MOD_PITCH_LFO:
-        module_set_param_all_voices(PARAM_PITCH_LFO_DEPTH, g_knob_cv_lut[mod_depth]);
+        module_set_param_all_voices(PARAM_PITCH_LFO_DEPTH, g_knob_cv_lut[mod_depth] / 4 ); // Divide by 4 to reduce pitch modulation range
         gui_post_param("P.LFO Dpt: ", mod_depth);
         break;
 

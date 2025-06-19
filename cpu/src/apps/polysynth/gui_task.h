@@ -45,6 +45,7 @@ extern "C" {
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "module_interface.h"
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -64,6 +65,7 @@ void gui_draw_line(uint8_t x_start, uint8_t y_start, uint8_t x_end,
 
 
 void gui_show_mod_type(uint8_t mod_type) ;
+void gui_show_osc_type(uint8_t osc_number,uint8_t osc_type) ;
 
 #ifdef __cplusplus
 }
