@@ -184,7 +184,7 @@ void module_process(fract32 *in, fract32 *out) {
     }
 
     // if global filter, use the first voice's filter.
-    output = Custom_Aleph_MonoVoice_apply_filter(&g_module.voice[0], output);
+    //output = Custom_Aleph_MonoVoice_apply_filter(&g_module.voice[0], output);
 
     // Set output.
     out[0] = output;

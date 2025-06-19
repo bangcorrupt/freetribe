@@ -130,7 +130,7 @@ fract32 Custom_Aleph_MonoVoice_next(Custom_Aleph_MonoVoice *const synth) {
     output = mult_fr1x32x32(output, amp);
 
     // Apply filter to the generated signal
-    //output = Custom_Aleph_MonoVoice_apply_filter(synth, output);
+    output = Custom_Aleph_MonoVoice_apply_filter(synth, output);
 
     // Block DC.
     // output = Aleph_HPF_dc_block(&syn->dc_block, output); // ??
