@@ -48,12 +48,13 @@ extern "C" {
 
 /*----- Macros -------------------------------------------------------*/
 
+#define DSP_CHANNEL_COUNT 2
+#define DSP_BLOCK_SIZE 16
+#define DSP_BUFFER_SIZE (DSP_BLOCK_SIZE * DSP_CHANNEL_COUNT)
+
 /*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
-
-extern fract32 in[2];
-extern fract32 out[2];
 
 /*----- Extern function prototypes -----------------------------------*/
 

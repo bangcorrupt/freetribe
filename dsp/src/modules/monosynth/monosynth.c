@@ -174,10 +174,8 @@ void module_process(fract32 *in, fract32 *out) {
         sample = mult_fr1x32x32(sample, g_module.amp_level);
 
         // Set output.
-        output[0] = sample;
-        output[1] = sample;
-
-        output++;
+        *output++ = sample;
+        *output++ = sample;
     }
 }
 
