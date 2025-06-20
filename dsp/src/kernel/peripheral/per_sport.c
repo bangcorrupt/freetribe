@@ -42,6 +42,7 @@ under the terms of the GNU Affero General Public License as published by
 #include <blackfin.h>
 #include <builtins.h>
 
+#include "defBF52x_base.h"
 #include "types.h"
 
 #include "per_sport.h"
@@ -63,10 +64,10 @@ typedef struct {
     void *next_desc;
     void *start_addr;
     uint16_t config;
-    uint8_t x_count;
-    uint8_t x_mod;
-    uint8_t y_count;
-    uint8_t y_mod;
+    uint16_t x_count;
+    uint16_t x_mod;
+    uint16_t y_count;
+    uint16_t y_mod;
 
 } t_dma_desc;
 
@@ -83,6 +84,22 @@ static fract32 g_codec_in[2];
 static fract32 g_codec_out[2];
 
 static bool g_sport0_frame_received = false;
+
+static t_dma_desc g_sport0_rx_dma = {
+    .next_desc = &g_sport0_rx_dma,
+    .start_addr = g_codec_rx_buffer,
+    .config = FLOW_LARGE | DI_EN | WDSIZE_32 | WNR | NDSIZE_7 | DMAEN,
+    .x_count = 2,
+    .x_mod = 4,
+};
+
+static t_dma_desc g_sport0_tx_dma = {
+    .next_desc = &g_sport0_tx_dma,
+    .start_addr = g_codec_tx_buffer,
+    .config = FLOW_LARGE | WDSIZE_32 | NDSIZE_7 | DMAEN,
+    .x_count = 2,
+    .x_mod = 4,
+};
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -111,26 +128,14 @@ void sport0_init(void) {
 
     // SPORT0 Rx DMA.
     *pDMA3_PERIPHERAL_MAP = PMAP_SPORT0RX;
-    /* *pDMA3_CONFIG = 0x108a; // 0x760a; */
-    *pDMA3_CONFIG = FLOW_AUTO | DI_EN | WDSIZE_32 | WNR;
-    // Start address of data buffer.
-    *pDMA3_START_ADDR = &g_codec_rx_buffer;
-    // DMA inner loop count.
-    *pDMA3_X_COUNT = 2; // 2 samples.
-    // Inner loop address increment.
-    *pDMA3_X_MODIFY = 4; // 32 bit.
+    *pDMA3_NEXT_DESC_PTR = &g_sport0_rx_dma;
+    *pDMA3_CONFIG = FLOW_LARGE | NDSIZE_7;
     ssync();
 
     // SPORT0 Tx DMA.
     *pDMA4_PERIPHERAL_MAP = PMAP_SPORT0TX;
-    /* *pDMA4_CONFIG = 0x1008; // 0x7608; */
-    *pDMA4_CONFIG = FLOW_AUTO | WDSIZE_32;
-    // Start address of data buffer
-    *pDMA4_START_ADDR = &g_codec_tx_buffer;
-    // DMA inner loop count
-    *pDMA4_X_COUNT = 2; // 2 samples.
-    // Inner loop address increment
-    *pDMA4_X_MODIFY = 4; // 32 bit.
+    *pDMA4_NEXT_DESC_PTR = &g_sport0_tx_dma;
+    *pDMA4_CONFIG = FLOW_LARGE | NDSIZE_7;
     ssync();
 
     // SPORT0 Rx DMA3 interrupt IVG9.
