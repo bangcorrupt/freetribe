@@ -53,6 +53,8 @@ under the terms of the GNU Affero General Public License as published by
 //
 #define DTYPE_SIGX 0x0004 /* SPORTx RCR1 Data Format Sign Extend */
 
+#define DSP_BLOCK_SIZE 16
+
 /*----- Typedefs -----------------------------------------------------*/
 
 typedef struct {
@@ -74,12 +76,12 @@ typedef struct {
 /*----- Static variable definitions ----------------------------------*/
 
 // SPORT0 DMA transmit buffer
-static fract32 g_codec_tx_buffer_a[2];
-static fract32 g_codec_tx_buffer_b[2];
+static fract32 g_codec_tx_buffer_a[DSP_BLOCK_SIZE];
+static fract32 g_codec_tx_buffer_b[DSP_BLOCK_SIZE];
 
 // SPORT0 DMA receive buffer
-static fract32 g_codec_rx_buffer_a[2];
-static fract32 g_codec_rx_buffer_b[2];
+static fract32 g_codec_rx_buffer_a[DSP_BLOCK_SIZE];
+static fract32 g_codec_rx_buffer_b[DSP_BLOCK_SIZE];
 
 // 2 channels of input from ADC.
 static fract32 *g_codec_in;
@@ -243,11 +245,11 @@ __attribute__((interrupt_handler)) static void _sport0_isr(void) {
 
     // Get input from codec.
     g_codec_in =
-        ((fract32 *)((t_dma_desc *)(*pDMA3_NEXT_DESC_PTR))->start_addr);
+        ((fract32 *)&(((t_dma_desc *)(*pDMA3_NEXT_DESC_PTR))->start_addr)[0]);
 
     // Send output to codec.
     g_codec_out =
-        ((fract32 *)((t_dma_desc *)(*pDMA4_NEXT_DESC_PTR))->start_addr);
+        ((fract32 *)&(((t_dma_desc *)(*pDMA4_NEXT_DESC_PTR))->start_addr)[0]);
 
     g_sport0_frame_received = true;
 }
@@ -258,26 +260,26 @@ static void _dma_desc_init(void) {
     g_sport0_rx_dma_a.start_addr = g_codec_rx_buffer_a;
     g_sport0_rx_dma_a.config =
         FLOW_LARGE | DI_EN | WDSIZE_32 | WNR | NDSIZE_7 | DMAEN;
-    g_sport0_rx_dma_a.x_count = 2;
+    g_sport0_rx_dma_a.x_count = DSP_BLOCK_SIZE;
     g_sport0_rx_dma_a.x_mod = 4;
 
     g_sport0_rx_dma_b.next_desc = &g_sport0_rx_dma_a;
     g_sport0_rx_dma_b.start_addr = g_codec_rx_buffer_b;
     g_sport0_rx_dma_b.config =
         FLOW_LARGE | DI_EN | WDSIZE_32 | WNR | NDSIZE_7 | DMAEN;
-    g_sport0_rx_dma_b.x_count = 2;
+    g_sport0_rx_dma_b.x_count = DSP_BLOCK_SIZE;
     g_sport0_rx_dma_b.x_mod = 4;
 
     g_sport0_tx_dma_a.next_desc = &g_sport0_tx_dma_b;
     g_sport0_tx_dma_a.start_addr = g_codec_tx_buffer_a;
     g_sport0_tx_dma_a.config = FLOW_LARGE | WDSIZE_32 | NDSIZE_7 | DMAEN;
-    g_sport0_tx_dma_a.x_count = 2;
+    g_sport0_tx_dma_a.x_count = DSP_BLOCK_SIZE;
     g_sport0_tx_dma_a.x_mod = 4;
 
     g_sport0_tx_dma_b.next_desc = &g_sport0_tx_dma_a;
     g_sport0_tx_dma_b.start_addr = g_codec_tx_buffer_b;
     g_sport0_tx_dma_b.config = FLOW_LARGE | WDSIZE_32 | NDSIZE_7 | DMAEN;
-    g_sport0_tx_dma_b.x_count = 2;
+    g_sport0_tx_dma_b.x_count = DSP_BLOCK_SIZE;
     g_sport0_tx_dma_b.x_mod = 4;
 }
 

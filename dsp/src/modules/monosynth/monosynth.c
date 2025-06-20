@@ -160,16 +160,25 @@ void module_init(void) {
  */
 void module_process(fract32 *in, fract32 *out) {
 
-    fract32 output;
+    fract32 sample;
 
-    output = Aleph_MonoVoice_next(&g_module.voice);
+    fract32 *input = in;
+    fract32 *output = out;
 
-    // Scale amplitude by level.
-    output = mult_fr1x32x32(output, g_module.amp_level);
+    int i;
+    for (i = 0; i < BLOCK_SIZE; i++) {
 
-    // Set output.
-    out[0] = output;
-    out[1] = output;
+        sample = Aleph_MonoVoice_next(&g_module.voice);
+
+        // Scale amplitude by level.
+        sample = mult_fr1x32x32(sample, g_module.amp_level);
+
+        // Set output.
+        output[0] = sample;
+        output[1] = sample;
+
+        output++;
+    }
 }
 
 /**
