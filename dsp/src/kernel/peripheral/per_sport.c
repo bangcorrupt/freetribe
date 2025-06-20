@@ -111,8 +111,6 @@ static void _sport0_isr(void) __attribute__((interrupt_handler));
 
 void sport0_init(void) {
 
-    /// TODO: Do we need secondary enabled?
-
     // Configure SPORT0 Rx.
     // Clock Falling Edge, Receive Frame Sync, Data Format Sign Extend.
     *pSPORT0_RCR1 = RCKFE | RFSR | DTYPE_SIGX;
@@ -124,16 +122,18 @@ void sport0_init(void) {
     *pSPORT0_TCR2 = TSFSE | SLEN(0x1f); // TXSE ;
     ssync();
 
-    /// TODO: DMA linked descriptor mode.
-
     // SPORT0 Rx DMA.
     *pDMA3_PERIPHERAL_MAP = PMAP_SPORT0RX;
+
+    // Linked descriptor mode.
     *pDMA3_NEXT_DESC_PTR = &g_sport0_rx_dma;
     *pDMA3_CONFIG = FLOW_LARGE | NDSIZE_7;
     ssync();
 
     // SPORT0 Tx DMA.
     *pDMA4_PERIPHERAL_MAP = PMAP_SPORT0TX;
+
+    // Linked descriptor mode.
     *pDMA4_NEXT_DESC_PTR = &g_sport0_tx_dma;
     *pDMA4_CONFIG = FLOW_LARGE | NDSIZE_7;
     ssync();
@@ -185,7 +185,6 @@ void sport1_init(void) {
     /// *pSPORT1_TCR2 = TSFSE | SLEN(0x1f); // TXSE  ;
     /// ssync();
     ///
-    /// /// TODO: DMA linked descriptor mode.
     ///
     /// // SPORT1 Rx DMA.
     /// *pDMA5_PERIPHERAL_MAP = PMAP_SPORT1RX;
