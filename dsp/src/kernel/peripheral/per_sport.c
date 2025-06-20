@@ -74,42 +74,39 @@ typedef struct {
 /*----- Static variable definitions ----------------------------------*/
 
 // SPORT0 DMA transmit buffer
-static fract32 g_codec_tx_buffer[2];
+static fract32 g_codec_tx_buffer_a[2];
+static fract32 g_codec_tx_buffer_b[2];
+
 // SPORT0 DMA receive buffer
-static fract32 g_codec_rx_buffer[2];
+static fract32 g_codec_rx_buffer_a[2];
+static fract32 g_codec_rx_buffer_b[2];
 
 // 2 channels of input from ADC.
-static fract32 g_codec_in[2];
+static fract32 *g_codec_in;
+
 // 2 channels of output to DAC.
-static fract32 g_codec_out[2];
+static fract32 *g_codec_out;
 
 static bool g_sport0_frame_received = false;
 
-static t_dma_desc g_sport0_rx_dma = {
-    .next_desc = &g_sport0_rx_dma,
-    .start_addr = g_codec_rx_buffer,
-    .config = FLOW_LARGE | DI_EN | WDSIZE_32 | WNR | NDSIZE_7 | DMAEN,
-    .x_count = 2,
-    .x_mod = 4,
-};
+static t_dma_desc g_sport0_rx_dma_a;
+static t_dma_desc g_sport0_rx_dma_b;
 
-static t_dma_desc g_sport0_tx_dma = {
-    .next_desc = &g_sport0_tx_dma,
-    .start_addr = g_codec_tx_buffer,
-    .config = FLOW_LARGE | WDSIZE_32 | NDSIZE_7 | DMAEN,
-    .x_count = 2,
-    .x_mod = 4,
-};
+static t_dma_desc g_sport0_tx_dma_a;
+static t_dma_desc g_sport0_tx_dma_b;
 
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
 
+static void _dma_desc_init(void);
 static void _sport0_isr(void) __attribute__((interrupt_handler));
 
 /*----- Extern function implementations ------------------------------*/
 
 void sport0_init(void) {
+
+    _dma_desc_init();
 
     // Configure SPORT0 Rx.
     // Clock Falling Edge, Receive Frame Sync, Data Format Sign Extend.
@@ -126,7 +123,7 @@ void sport0_init(void) {
     *pDMA3_PERIPHERAL_MAP = PMAP_SPORT0RX;
 
     // Linked descriptor mode.
-    *pDMA3_NEXT_DESC_PTR = &g_sport0_rx_dma;
+    *pDMA3_NEXT_DESC_PTR = &g_sport0_rx_dma_a;
     *pDMA3_CONFIG = FLOW_LARGE | NDSIZE_7;
     ssync();
 
@@ -134,7 +131,7 @@ void sport0_init(void) {
     *pDMA4_PERIPHERAL_MAP = PMAP_SPORT0TX;
 
     // Linked descriptor mode.
-    *pDMA4_NEXT_DESC_PTR = &g_sport0_tx_dma;
+    *pDMA4_NEXT_DESC_PTR = &g_sport0_tx_dma_a;
     *pDMA4_CONFIG = FLOW_LARGE | NDSIZE_7;
     ssync();
 
@@ -231,10 +228,11 @@ fract32 *sport0_get_rx_buffer(void) { return g_codec_in; }
 
 fract32 *sport0_get_tx_buffer(void) { return g_codec_out; }
 
-/// TODO: DMA ping-pong block buffer.
 bool sport0_frame_received(void) { return g_sport0_frame_received; }
 
 void sport0_frame_processed(void) { g_sport0_frame_received = false; }
+
+/*----- Static function implementations ------------------------------*/
 
 /// TODO: Block processing.  For now we process each frame as it arrives.
 __attribute__((interrupt_handler)) static void _sport0_isr(void) {
@@ -243,19 +241,44 @@ __attribute__((interrupt_handler)) static void _sport0_isr(void) {
     *pDMA3_IRQ_STATUS = DMA_DONE;
     ssync();
 
-    /// TODO: DMA ping-pong block buffer.
-
     // Get input from codec.
-    g_codec_in[0] = g_codec_rx_buffer[0];
-    g_codec_in[1] = g_codec_rx_buffer[1];
+    g_codec_in =
+        ((fract32 *)((t_dma_desc *)(*pDMA3_NEXT_DESC_PTR))->start_addr);
 
     // Send output to codec.
-    g_codec_tx_buffer[0] = g_codec_out[0];
-    g_codec_tx_buffer[1] = g_codec_out[1];
+    g_codec_out =
+        ((fract32 *)((t_dma_desc *)(*pDMA4_NEXT_DESC_PTR))->start_addr);
 
     g_sport0_frame_received = true;
 }
 
-/*----- Static function implementations ------------------------------*/
+static void _dma_desc_init(void) {
+
+    g_sport0_rx_dma_a.next_desc = &g_sport0_rx_dma_b;
+    g_sport0_rx_dma_a.start_addr = g_codec_rx_buffer_a;
+    g_sport0_rx_dma_a.config =
+        FLOW_LARGE | DI_EN | WDSIZE_32 | WNR | NDSIZE_7 | DMAEN;
+    g_sport0_rx_dma_a.x_count = 2;
+    g_sport0_rx_dma_a.x_mod = 4;
+
+    g_sport0_rx_dma_b.next_desc = &g_sport0_rx_dma_a;
+    g_sport0_rx_dma_b.start_addr = g_codec_rx_buffer_b;
+    g_sport0_rx_dma_b.config =
+        FLOW_LARGE | DI_EN | WDSIZE_32 | WNR | NDSIZE_7 | DMAEN;
+    g_sport0_rx_dma_b.x_count = 2;
+    g_sport0_rx_dma_b.x_mod = 4;
+
+    g_sport0_tx_dma_a.next_desc = &g_sport0_tx_dma_b;
+    g_sport0_tx_dma_a.start_addr = g_codec_tx_buffer_a;
+    g_sport0_tx_dma_a.config = FLOW_LARGE | WDSIZE_32 | NDSIZE_7 | DMAEN;
+    g_sport0_tx_dma_a.x_count = 2;
+    g_sport0_tx_dma_a.x_mod = 4;
+
+    g_sport0_tx_dma_b.next_desc = &g_sport0_tx_dma_a;
+    g_sport0_tx_dma_b.start_addr = g_codec_tx_buffer_b;
+    g_sport0_tx_dma_b.config = FLOW_LARGE | WDSIZE_32 | NDSIZE_7 | DMAEN;
+    g_sport0_tx_dma_b.x_count = 2;
+    g_sport0_tx_dma_b.x_mod = 4;
+}
 
 /*----- End of file --------------------------------------------------*/
