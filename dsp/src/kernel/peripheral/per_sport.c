@@ -58,6 +58,18 @@ typedef struct {
 
 } t_sport;
 
+// Large descriptor list mode.
+typedef struct {
+    void *next_desc;
+    void *start_addr;
+    uint16_t config;
+    uint8_t x_count;
+    uint8_t x_mod;
+    uint8_t y_count;
+    uint8_t y_mod;
+
+} t_dma_desc;
+
 /*----- Static variable definitions ----------------------------------*/
 
 // SPORT0 DMA transmit buffer
