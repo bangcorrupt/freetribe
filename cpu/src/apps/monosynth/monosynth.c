@@ -198,9 +198,9 @@ static void _profile_callback(uint32_t period, uint32_t cycles) {
 
     static uint32_t peak;
 
-    static char buf[12];
-
     uint32_t percent;
+
+    char buf[11] = {0};
 
     if (cycles > peak) {
         peak = cycles;
@@ -208,14 +208,26 @@ static void _profile_callback(uint32_t period, uint32_t cycles) {
 
     percent = (uint32_t)(((float)cycles / (float)period) * 100.0);
 
-    itoa(cycles, buf, 10);
-    gui_print(1, 55, buf);
+    // memset(buf, 0x20, sizeof(buf));
+    // gui_print(1, 55, buf);
 
-    itoa(period, buf, 10);
-    gui_print(52, 55, buf);
+    // itoa(cycles, buf, 10);
+    // gui_print(1, 55, buf);
+    //
+    // memset(buf, 0x20, sizeof(buf));
+    // gui_print(52, 55, buf);
+    // // ft_print(buf);
+    //
+    // itoa(period, buf, 10);
+    // gui_print(52, 55, buf);
+    // // ft_print(buf);
+    //
+    // memset(buf, 0x20, sizeof(buf));
+    // gui_print(107, 55, buf);
 
     itoa(percent, buf, 10);
-    gui_print(107, 55, buf);
+    gui_print(1, 55, buf);
+    // ft_print(buf);
 }
 
 /**
