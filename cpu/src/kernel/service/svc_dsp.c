@@ -240,7 +240,7 @@ void svc_dsp_set_module_param(uint16_t module_id, uint16_t param_index,
     _transmit_message(msg_type, msg_id, payload, sizeof(payload));
 }
 
-void svc_dsp_get_module_param(uint8_t module_id, uint16_t param_index) {
+void svc_dsp_get_module_param(uint16_t module_id, uint16_t param_index) {
 
     const uint8_t msg_type = MSG_TYPE_MODULE;
     const uint8_t msg_id = MODULE_GET_PARAM_VALUE;

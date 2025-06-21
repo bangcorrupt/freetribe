@@ -84,7 +84,7 @@ void svc_dsp_register_callback(uint8_t msg_type, uint8_t msg_id,
 void svc_dsp_set_module_param(uint16_t module_id, uint16_t param_index,
                               int32_t param_value);
 
-void svc_dsp_get_module_param(uint8_t module_id, uint16_t param_index);
+void svc_dsp_get_module_param(uint16_t module_id, uint16_t param_index);
 
 void svc_dsp_get_port_state(void);
 bool svc_dsp_ready(void);

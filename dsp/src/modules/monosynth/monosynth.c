@@ -46,6 +46,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "aleph_monovoice.h"
 
+#include "knl_profile.h"
+
 /*----- Macros -------------------------------------------------------*/
 
 #define MEMPOOL_SIZE (0x2000)
@@ -108,6 +110,9 @@ typedef enum {
     PARAM_PHASE_RESET,
     PARAM_RETRIGGER,
 
+    PARAM_CYCLES_MSW,
+    PARAM_CYCLES_LSW,
+
     PARAM_COUNT
 } e_param;
 
@@ -116,6 +121,9 @@ typedef struct {
     Aleph_MonoVoice voice;
     fract32 amp_level;
     fract32 velocity;
+
+    uint32_t cycles_msw;
+    uint32_t cycles_lsw;
 
 } t_module;
 
@@ -160,10 +168,16 @@ void module_init(void) {
  */
 void module_process(fract32 *in, fract32 *out) {
 
+    uint64_t start;
+    uint64_t stop;
+    uint64_t elapsed;
+
     fract32 sample;
 
     fract32 *input = in;
     fract32 *output = out;
+
+    start = cycles();
 
     int i;
     for (i = 0; i < BLOCK_SIZE; i++) {
@@ -177,6 +191,15 @@ void module_process(fract32 *in, fract32 *out) {
         *output++ = sample;
         *output++ = sample;
     }
+
+    stop = cycles();
+
+    elapsed = stop - start;
+
+    // g_module.cycles_msw = (elapsed >> 32);
+    // g_module.cycles_lsw = elapsed & 0xFFFFFFFF;
+    g_module.cycles_msw = 1;
+    g_module.cycles_lsw = 64;
 }
 
 /**
@@ -242,6 +265,14 @@ int32_t module_get_param(uint16_t param_index) {
     int32_t value = 0;
 
     switch (param_index) {
+
+    case PARAM_CYCLES_MSW:
+        value = g_module.cycles_msw;
+        break;
+
+    case PARAM_CYCLES_LSW:
+        value = g_module.cycles_lsw;
+        break;
 
     default:
         break;

@@ -117,6 +117,9 @@ typedef enum {
     PARAM_PHASE_RESET,
     PARAM_RETRIGGER,
 
+    PARAM_CYCLES_MSW,
+    PARAM_CYCLES_LSW,
+
     PARAM_COUNT
 } e_param;
 
@@ -154,7 +157,7 @@ typedef enum {
 void module_init(LEAF *leaf);
 void module_process(void);
 void module_set_param(uint16_t param_index, float value);
-float module_get_param(uint16_t param_index);
+void module_get_param(uint16_t param_index);
 
 #ifdef __cplusplus
 }

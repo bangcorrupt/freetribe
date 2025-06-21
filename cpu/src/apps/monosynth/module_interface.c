@@ -44,6 +44,7 @@ under the terms of the GNU Affero General Public License as published by
 #include "leaf-oscillators.h"
 
 #include "param_scale.h"
+#include <stdint.h>
 
 #include "module_interface.h"
 
@@ -380,17 +381,21 @@ void module_set_param(uint16_t param_index, float value) {
     }
 }
 
-float module_get_param(uint16_t param_index) {
-
-    float value = 0;
+void module_get_param(uint16_t param_index) {
 
     switch (param_index) {
+
+    case PARAM_CYCLES_MSW:
+        ft_get_module_param(0, PARAM_CYCLES_MSW);
+        break;
+
+    case PARAM_CYCLES_LSW:
+        ft_get_module_param(0, PARAM_CYCLES_LSW);
+        break;
 
     default:
         break;
     }
-
-    return value;
 }
 
 /*----- Static function implementations ------------------------------*/

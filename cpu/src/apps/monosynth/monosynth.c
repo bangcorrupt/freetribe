@@ -40,6 +40,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "freetribe.h"
 
+#include "ft_error.h"
 #include "keyboard.h"
 
 #include "leaf-config.h"
@@ -53,6 +54,8 @@ under the terms of the GNU Affero General Public License as published by
 #include "module_interface.h"
 
 /*----- Macros -------------------------------------------------------*/
+
+#define PROFILE_INTERVAL 1000
 
 #define CONTROL_RATE (1000)
 #define MEMPOOL_SIZE (0x1000)
@@ -106,6 +109,10 @@ static float g_midi_hz_lut[128];
 static float g_octave_tune_lut[256];
 static float g_filter_res_lut[256];
 
+static uint64_t g_cycles_msw;
+static uint64_t g_cycles_lsw;
+static uint64_t g_cycles;
+
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
@@ -121,6 +128,9 @@ static void _set_mod_depth(uint32_t mod_depth);
 static void _set_mod_speed(uint32_t mod_speed);
 
 static void _lut_init(void);
+
+static void _param_value_callback(uint16_t module_id, uint16_t param_index,
+                                  int32_t value);
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -153,6 +163,9 @@ t_status app_init(void) {
 
     ft_register_tick_callback(0, _tick_callback);
 
+    ft_register_dsp_callback(MSG_TYPE_MODULE, MODULE_PARAM_VALUE,
+                             _param_value_callback);
+
     // Initialise GUI.
     gui_task();
 
@@ -171,8 +184,46 @@ void app_run(void) { gui_task(); }
 /*----- Static function implementations ------------------------------*/
 
 static void _tick_callback(void) {
-    //
+
+    static uint32_t tick_count;
+
+    static char buf[10];
+
     module_process();
+
+    if (tick_count++ >= PROFILE_INTERVAL) {
+
+        module_get_param(PARAM_CYCLES_MSW);
+        module_get_param(PARAM_CYCLES_LSW);
+
+        g_cycles = (g_cycles_msw << 32) | g_cycles_lsw;
+
+        itoa(g_cycles, buf, 10);
+
+        gui_print(4, 55, buf);
+
+        tick_count = 0;
+    }
+}
+
+static void _param_value_callback(uint16_t module_id, uint16_t param_index,
+                                  int32_t value) {
+    switch (param_index) {
+
+    case PARAM_CYCLES_MSW:
+        g_cycles_msw = 1;
+        break;
+
+    case PARAM_CYCLES_LSW:
+        g_cycles_lsw = 64;
+        break;
+
+    default:
+        g_cycles_msw = 2;
+        g_cycles_lsw = 5;
+        break;
+    }
+    //
 }
 
 /**
