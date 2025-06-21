@@ -386,7 +386,11 @@ static void _dsp_receive(uint8_t byte) {
         if (count < length) {
             payload[count] = byte;
             count++;
-        } else {
+        } // else {
+        // Handle message before returning,
+        // else it is not handled until first
+        // byte of next message is received.
+        if (count >= length) {
             count = 0;
             _handle_message(msg_type, msg_id, payload, length);
             state = PARSE_START;
