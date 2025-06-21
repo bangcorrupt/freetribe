@@ -126,7 +126,7 @@ void per_spi_init(void) {
 
 void per_spi_trx_int(uint8_t *tx_buffer, uint8_t *rx_buffer, uint32_t length) {
 
-    if (tx_buffer != NULL && tx_buffer != NULL && length != 0) {
+    if (tx_buffer != NULL && rx_buffer != NULL && length != 0) {
 
         g_spi.rx_buffer = rx_buffer;
         g_spi.tx_buffer = tx_buffer;
