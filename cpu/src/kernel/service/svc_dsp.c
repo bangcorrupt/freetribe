@@ -187,8 +187,6 @@ void svc_dsp_task(void) {
             dev_dsp_spi_poll();
         }
 
-        // dev_dsp_spi_transfer();
-
         g_dsp_ready = true;
         break;
 
@@ -461,6 +459,8 @@ static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
 /// TODO: Test payload length.
 static t_status _handle_module_param_value(uint8_t *payload, uint8_t length) {
 
+    t_status result = ERROR;
+
     if (p_module_param_value_callback != NULL) {
 
         /// TODO: Union struct for message parsing.
@@ -473,9 +473,11 @@ static t_status _handle_module_param_value(uint8_t *payload, uint8_t length) {
                                (payload[5] << 8) | payload[4];
 
         p_module_param_value_callback(module_id, param_index, param_value);
+
+        result = SUCCESS;
     }
 
-    return SUCCESS;
+    return result;
 }
 
 static t_status _handle_system_ready(void) {
