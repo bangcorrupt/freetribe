@@ -209,6 +209,7 @@ void svc_dsp_register_callback(uint8_t msg_type, uint8_t msg_id,
     switch (msg_type) {
 
     case MSG_TYPE_MODULE:
+
         _register_module_callback(msg_id, callback);
         break;
 
@@ -404,7 +405,7 @@ static void _dsp_receive(uint8_t byte) {
 
 static void _handle_message(uint8_t msg_type, uint8_t msg_id, uint8_t *payload,
                             uint8_t length) {
-    // Switch message ID.
+
     switch (msg_type) {
 
     case MSG_TYPE_MODULE:
