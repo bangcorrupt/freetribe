@@ -45,6 +45,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "leaf-config.h"
 #include "param_scale.h"
+#include "svc_dsp.h"
 #include "svc_panel.h"
 
 #include "gui_task.h"
@@ -132,6 +133,9 @@ static void _lut_init(void);
 static void _param_value_callback(uint16_t module_id, uint16_t param_index,
                                   int32_t value);
 
+static void _port_state_callback(uint16_t port_f, uint16_t port_g,
+                                 uint16_t port_h);
+
 /*----- Extern function implementations ------------------------------*/
 
 /**
@@ -166,6 +170,9 @@ t_status app_init(void) {
     ft_register_dsp_callback(MSG_TYPE_MODULE, MODULE_PARAM_VALUE,
                              _param_value_callback);
 
+    ft_register_dsp_callback(MSG_TYPE_SYSTEM, SYSTEM_PORT_STATE,
+                             _port_state_callback);
+
     // Initialise GUI.
     gui_task();
 
@@ -192,6 +199,8 @@ static void _tick_callback(void) {
     module_process();
 
     if (tick_count++ >= PROFILE_INTERVAL) {
+
+        svc_dsp_get_port_state();
 
         module_get_param(PARAM_CYCLES_MSW);
         module_get_param(PARAM_CYCLES_LSW);
@@ -224,6 +233,13 @@ static void _param_value_callback(uint16_t module_id, uint16_t param_index,
         break;
     }
     //
+}
+
+static void _port_state_callback(uint16_t port_f, uint16_t port_g,
+                                 uint16_t port_h) {
+
+    g_cycles_msw = 4;
+    g_cycles_lsw = 32;
 }
 
 /**
