@@ -414,18 +414,24 @@ static void _handle_message(uint8_t msg_type, uint8_t msg_id, uint8_t *payload,
     case MSG_TYPE_SYSTEM:
         _handle_system_message(msg_id, payload, length);
         break;
+
+    default:
+        break;
     }
 }
 
 static t_status _handle_module_message(uint8_t msg_id, uint8_t *payload,
                                        uint8_t length) {
 
-    uint8_t result = ERROR;
+    t_status result = ERROR;
 
     switch (msg_id) {
 
     case MODULE_PARAM_VALUE:
         result = _handle_module_param_value(payload, length);
+        break;
+
+    default:
         break;
     }
 
@@ -440,7 +446,8 @@ static t_status _handle_module_message(uint8_t msg_id, uint8_t *payload,
 static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
                                        uint8_t length) {
 
-    uint8_t result = ERROR;
+    t_status result = ERROR;
+
     switch (msg_id) {
 
     case SYSTEM_READY:
@@ -449,6 +456,9 @@ static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
 
     case SYSTEM_PORT_STATE:
         result = _handle_system_port_state(payload, length);
+        break;
+
+    default:
         break;
     }
 
