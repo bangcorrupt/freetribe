@@ -234,7 +234,6 @@ void sport0_frame_processed(void) { g_sport0_frame_received = false; }
 
 /*----- Static function implementations ------------------------------*/
 
-/// TODO: Block processing.  For now we process each frame as it arrives.
 __attribute__((interrupt_handler)) static void _sport0_isr(void) {
 
     // Clear interrupt status.

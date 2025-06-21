@@ -275,6 +275,9 @@ static void _handle_message(uint8_t msg_type, uint8_t msg_id, uint8_t *payload,
     case MSG_TYPE_SYSTEM:
         _handle_system_message(msg_id, payload, length);
         break;
+
+    default:
+        break;
     }
 }
 
