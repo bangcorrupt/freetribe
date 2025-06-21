@@ -149,8 +149,6 @@ void per_spi_register_callback(t_spi_event event, void (*callback)()) {
         g_spi.error_callback = callback;
         break;
 
-        // case SPI_ERROR:
-
     default:
         break;
     }
