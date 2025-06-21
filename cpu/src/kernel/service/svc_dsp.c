@@ -88,8 +88,11 @@ typedef void (*t_module_param_value_callback)(uint16_t module_id,
 typedef void (*t_system_port_state_callback)(uint16_t port_f, uint16_t port_g,
                                              uint16_t port_h);
 
+typedef void (*t_system_profile_callback)(uint32_t period, uint32_t cycles);
+
 static t_module_param_value_callback p_module_param_value_callback;
 static t_system_port_state_callback p_system_port_state_callback;
+static t_system_profile_callback p_system_profile_callback;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -118,6 +121,8 @@ static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
 static t_status _handle_module_param_value(uint8_t *payload, uint8_t length);
 static t_status _handle_system_port_state(uint8_t *payload, uint8_t length);
 static t_status _handle_system_ready(void);
+
+static t_status _handle_system_profile(uint8_t *payload, uint8_t length);
 
 void _register_module_callback(uint8_t msg_id, void *callback);
 void _register_system_callback(uint8_t msg_id, void *callback);
@@ -266,6 +271,16 @@ void svc_dsp_get_port_state(void) {
     _transmit_message(msg_type, msg_id, NULL, 0);
 }
 
+void svc_dsp_get_profile(void) {
+
+    const uint8_t msg_type = MSG_TYPE_SYSTEM;
+    const uint8_t msg_id = SYSTEM_GET_PROFILE;
+
+    _dsp_response_required();
+
+    _transmit_message(msg_type, msg_id, NULL, 0);
+}
+
 bool svc_dsp_ready(void) { return g_dsp_ready; }
 
 /*----- Static function implementations ------------------------------*/
@@ -299,6 +314,10 @@ void _register_system_callback(uint8_t msg_id, void *callback) {
 
     case SYSTEM_PORT_STATE:
         p_system_port_state_callback = (t_system_port_state_callback)callback;
+        break;
+
+    case SYSTEM_PROFILE:
+        p_system_profile_callback = (t_system_profile_callback)callback;
         break;
 
     default:
@@ -459,6 +478,10 @@ static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
         result = _handle_system_port_state(payload, length);
         break;
 
+    case SYSTEM_PROFILE:
+        result = _handle_system_profile(payload, length);
+        break;
+
     default:
         break;
     }
@@ -511,6 +534,22 @@ static t_status _handle_system_port_state(uint8_t *payload, uint8_t length) {
         uint16_t port_h = (payload[5] << 8) | payload[4];
 
         p_system_port_state_callback(port_f, port_g, port_h);
+    }
+
+    return SUCCESS;
+}
+
+static t_status _handle_system_profile(uint8_t *payload, uint8_t length) {
+
+    if (p_system_profile_callback != NULL) {
+
+        uint32_t period = (payload[3] << 24 | payload[2] << 16 |
+                           payload[1] << 8 | payload[0]);
+
+        uint32_t cycles = (payload[7] << 24 | payload[6] << 16 |
+                           payload[5] << 8 | payload[4]);
+
+        p_system_profile_callback(period, cycles);
     }
 
     return SUCCESS;

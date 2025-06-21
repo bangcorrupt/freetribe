@@ -385,14 +385,6 @@ void module_get_param(uint16_t param_index) {
 
     switch (param_index) {
 
-    case PARAM_CYCLES_MSW:
-        ft_get_module_param(0, PARAM_CYCLES_MSW);
-        break;
-
-    case PARAM_CYCLES_LSW:
-        ft_get_module_param(0, PARAM_CYCLES_LSW);
-        break;
-
     default:
         break;
     }

@@ -53,10 +53,9 @@ under the terms of the GNU Affero General Public License as published by
 #include "leaf.h"
 
 #include "module_interface.h"
+#include "sys/types.h"
 
 /*----- Macros -------------------------------------------------------*/
-
-#define PROFILE_INTERVAL 1000
 
 #define CONTROL_RATE (1000)
 #define MEMPOOL_SIZE (0x1000)
@@ -85,6 +84,8 @@ under the terms of the GNU Affero General Public License as published by
 #define DEFAULT_SCALE_TONES 12
 #define DEFAULT_SCALE_MODE 0
 
+#define PROFILE_INTERVAL 100
+
 /*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
@@ -110,10 +111,6 @@ static float g_midi_hz_lut[128];
 static float g_octave_tune_lut[256];
 static float g_filter_res_lut[256];
 
-static uint64_t g_cycles_msw;
-static uint64_t g_cycles_lsw;
-static uint64_t g_cycles;
-
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
@@ -130,11 +127,7 @@ static void _set_mod_speed(uint32_t mod_speed);
 
 static void _lut_init(void);
 
-static void _param_value_callback(uint16_t module_id, uint16_t param_index,
-                                  int32_t value);
-
-static void _port_state_callback(uint16_t port_f, uint16_t port_g,
-                                 uint16_t port_h);
+static void _profile_callback(uint32_t period, uint32_t cycles);
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -167,11 +160,8 @@ t_status app_init(void) {
 
     ft_register_tick_callback(0, _tick_callback);
 
-    ft_register_dsp_callback(MSG_TYPE_MODULE, MODULE_PARAM_VALUE,
-                             _param_value_callback);
-
-    ft_register_dsp_callback(MSG_TYPE_SYSTEM, SYSTEM_PORT_STATE,
-                             _port_state_callback);
+    ft_register_dsp_callback(MSG_TYPE_SYSTEM, SYSTEM_PROFILE,
+                             _profile_callback);
 
     // Initialise GUI.
     gui_task();
@@ -194,52 +184,38 @@ static void _tick_callback(void) {
 
     static uint32_t tick_count;
 
-    static char buf[10];
-
     module_process();
 
     if (tick_count++ >= PROFILE_INTERVAL) {
 
-        svc_dsp_get_port_state();
-
-        module_get_param(PARAM_CYCLES_MSW);
-        module_get_param(PARAM_CYCLES_LSW);
-
-        g_cycles = (g_cycles_msw << 32) | g_cycles_lsw;
-
-        itoa(g_cycles, buf, 10);
-
-        gui_print(4, 55, buf);
+        svc_dsp_get_profile();
 
         tick_count = 0;
     }
 }
 
-static void _param_value_callback(uint16_t module_id, uint16_t param_index,
-                                  int32_t value) {
-    switch (param_index) {
+static void _profile_callback(uint32_t period, uint32_t cycles) {
 
-    case PARAM_CYCLES_MSW:
-        g_cycles_msw = 1;
-        break;
+    static uint32_t peak;
 
-    case PARAM_CYCLES_LSW:
-        g_cycles_lsw = 64;
-        break;
+    static char buf[12];
 
-    default:
-        g_cycles_msw = 2;
-        g_cycles_lsw = 5;
-        break;
+    uint32_t percent;
+
+    if (cycles > peak) {
+        peak = cycles;
     }
-    //
-}
 
-static void _port_state_callback(uint16_t port_f, uint16_t port_g,
-                                 uint16_t port_h) {
+    percent = (uint32_t)(((float)cycles / (float)period) * 100.0);
 
-    g_cycles_msw = 4;
-    g_cycles_lsw = 32;
+    itoa(cycles, buf, 10);
+    gui_print(1, 55, buf);
+
+    itoa(period, buf, 10);
+    gui_print(52, 55, buf);
+
+    itoa(percent, buf, 10);
+    gui_print(107, 55, buf);
 }
 
 /**

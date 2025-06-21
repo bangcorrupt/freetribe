@@ -117,9 +117,6 @@ typedef enum {
     PARAM_PHASE_RESET,
     PARAM_RETRIGGER,
 
-    PARAM_CYCLES_MSW,
-    PARAM_CYCLES_LSW,
-
     PARAM_COUNT
 } e_param;
 

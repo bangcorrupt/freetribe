@@ -45,6 +45,8 @@ under the terms of the GNU Affero General Public License as published by
 #include "defBF52x_base.h"
 #include "types.h"
 
+#include "knl_profile.h"
+
 #include "per_sport.h"
 
 /*----- Macros -------------------------------------------------------*/
@@ -94,6 +96,10 @@ static t_dma_desc g_sport0_rx_dma_b;
 
 static t_dma_desc g_sport0_tx_dma_a;
 static t_dma_desc g_sport0_tx_dma_b;
+
+static uint64_t g_start;
+static uint64_t g_stop;
+static uint64_t g_elapsed;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -232,9 +238,15 @@ bool sport0_frame_received(void) { return g_sport0_frame_received; }
 
 void sport0_frame_processed(void) { g_sport0_frame_received = false; }
 
+uint64_t sport0_period(void) { return g_elapsed; }
+
 /*----- Static function implementations ------------------------------*/
 
 __attribute__((interrupt_handler)) static void _sport0_isr(void) {
+
+    g_stop = cycles();
+
+    g_elapsed = g_stop - g_start;
 
     // Clear interrupt status.
     *pDMA3_IRQ_STATUS = DMA_DONE;
@@ -249,6 +261,8 @@ __attribute__((interrupt_handler)) static void _sport0_isr(void) {
         (fract32 *)(((t_dma_desc *)(*pDMA4_NEXT_DESC_PTR))->start_addr);
 
     g_sport0_frame_received = true;
+
+    g_start = cycles();
 }
 
 static void _dma_desc_init(void) {

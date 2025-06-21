@@ -67,7 +67,9 @@ enum e_system_msg_id {
     SYSTEM_READY,
     SYSTEM_GET_PORT_STATE,
     SYSTEM_SET_PORT_STATE,
-    SYSTEM_PORT_STATE
+    SYSTEM_PORT_STATE,
+    SYSTEM_GET_PROFILE,
+    SYSTEM_PROFILE,
 };
 
 /*----- Typedefs -----------------------------------------------------*/
@@ -88,6 +90,8 @@ void svc_dsp_get_module_param(uint16_t module_id, uint16_t param_index);
 
 void svc_dsp_get_port_state(void);
 bool svc_dsp_ready(void);
+
+void svc_dsp_get_profile(void);
 
 #ifdef __cplusplus
 }

@@ -57,7 +57,15 @@ extern "C" {
 
 /*----- Typedefs -----------------------------------------------------*/
 
+typedef struct {
+    uint32_t period;
+    uint32_t cycles;
+
+} t_profile;
+
 /*----- Extern variable declarations ---------------------------------*/
+
+extern uint64_t g_module_cycles;
 
 /*----- Extern function prototypes -----------------------------------*/
 
@@ -78,6 +86,8 @@ __inline__ __attribute__((always_inline)) static uint64_t cycles(void) {
 
     return ret;
 }
+
+t_profile knl_profile_stats(void);
 
 #ifdef __cplusplus
 }
