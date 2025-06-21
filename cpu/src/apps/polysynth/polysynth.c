@@ -562,7 +562,7 @@ static void _set_mod_depth(uint32_t mod_depth) {
         break;
 
     case MOD_PITCH_LFO:
-        module_set_param_all_voices(PARAM_PITCH_LFO_DEPTH, g_knob_cv_lut[mod_depth] / 4 ); // Divide by 4 to reduce pitch modulation range
+        module_set_param_all_voices(PARAM_PITCH_LFO_DEPTH, g_knob_cv_lut[mod_depth] / 8 ); // Divide by 8 to reduce pitch modulation range
         gui_post_param("P.LFO Dpt: ", mod_depth);
         break;
 

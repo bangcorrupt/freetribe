@@ -103,6 +103,7 @@ void _Aleph_WaveformDual_set_shape_a(Aleph_WaveformDual *const wave, e_Aleph_Wav
 void _Aleph_WaveformDual_set_shape_b(Aleph_WaveformDual *const wave, e_Aleph_Waveform_shape shape) ;
 fract32 Custom_Aleph_MonoVoice_apply_filter(Custom_Aleph_MonoVoice *const synth, fract32 input_signal) ;
 
+
 #ifdef __cplusplus
 }
 #endif

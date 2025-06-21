@@ -46,6 +46,7 @@ under the terms of the GNU Affero General Public License as published by
 #include "param_scale.h"
 
 #include "module_interface.h"
+#include "voice_manager.h"
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -147,6 +148,7 @@ void module_process(void) {
     int voice_index;
     for (voice_index = 0; voice_index < MAX_VOICES; voice_index++) {
 
+
         float amp_mod;
         float filter_mod;
         float pitch_mod;
@@ -166,19 +168,20 @@ void module_process(void) {
         //amp_mod += amp_mod * tTriLFO_tick(&g_module[voice_index].amp_lfo) * g_module[voice_index].amp_lfo_depth;
 
 
-
-
         // Only send parameters to DSP if they have changed.
         if (_cv_update(&g_module[voice_index].amp_cv, amp_mod)) {
             float clampled_amp = clamp_value(amp_mod);
-            
             if (clampled_amp <= 0.3f && voice_manager_is_voice_in_release_stage(voice_index)) {
                 voice_manager_release_voice(voice_index);
-            
             }
-
             module_set_param_voice(voice_index,PARAM_AMP,clampled_amp);
         }
+
+        // performance optimization: skip processing if voice is not active
+        if (!g_voice_manager.voices[voice_index].active){
+            continue;
+        }
+
 
             // Filter cutoff modulation.
             /// TODO: Should filter LFO follow the

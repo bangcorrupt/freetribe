@@ -45,6 +45,7 @@ under the terms of the GNU Affero General Public License as published by
 #include "aleph.h"
 
 #include "custom_aleph_monovoice.h"
+#include "config.h"
 
 void module_set_param_voice(uint16_t voice_index,uint16_t param_index, int32_t value);
 
@@ -184,7 +185,9 @@ void module_process(fract32 *in, fract32 *out) {
     }
 
     // if global filter, use the first voice's filter.
-    //output = Custom_Aleph_MonoVoice_apply_filter(&g_module.voice[0], output);
+    #ifdef VOICE_MODE_PARAPHONIC
+    output = Custom_Aleph_MonoVoice_apply_filter(&g_module.voice[0], output);
+    #endif
 
     // Set output.
     out[0] = output;

@@ -9,7 +9,7 @@
 #include <string.h>
 
 /* Global voice manager instance */
-static voice_manager_t g_voice_manager;
+voice_manager_t g_voice_manager;
 
 void voice_manager_init(void) {
     /* Clear entire structure */

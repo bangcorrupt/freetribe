@@ -23,7 +23,7 @@ extern "C" {
  * @defgroup Voice Manager Configuration
  * @{
  */
-#define MAX_VOICES 8       /**< Maximum number of simultaneous voices */
+#define MAX_VOICES 6       /**< Maximum number of simultaneous voices */
 #define INVALID_VOICE 0xFF /**< Invalid voice index indicator */
 #define INVALID_NOTE 0xFF  /**< Invalid MIDI note indicator */
 
@@ -49,6 +49,8 @@ typedef struct {
     voice_t voices[MAX_VOICES]; /**< Array of voice structures */
     uint32_t global_timestamp;  /**< Global timestamp counter */
 } voice_manager_t;
+
+extern voice_manager_t g_voice_manager;
 
 /**
  * @defgroup Voice Manager API

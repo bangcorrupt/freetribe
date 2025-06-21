@@ -34,6 +34,7 @@
 #include "aleph_waveform.h"
 
 #include "custom_aleph_monovoice.h"
+#include "config.h"
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -102,9 +103,7 @@ void Custom_Aleph_MonoVoice_free(Custom_Aleph_MonoVoice *const synth) {
 fract32 Custom_Aleph_MonoVoice_next(Custom_Aleph_MonoVoice *const synth) {
 
     t_Custom_Aleph_MonoVoice *syn = *synth;
-
     fract32 output;
-
     fract32 amp;
     fract32 freq;
 
@@ -125,12 +124,13 @@ fract32 Custom_Aleph_MonoVoice_next(Custom_Aleph_MonoVoice *const synth) {
 
     // Get slewed amplitude.
     amp = Aleph_LPFOnePole_next(&syn->amp_slew);
-
     // Apply amp modulation.
     output = mult_fr1x32x32(output, amp);
 
     // Apply filter to the generated signal
+    #ifdef VOICE_MODE_POLYPHONIC
     output = Custom_Aleph_MonoVoice_apply_filter(synth, output);
+    #endif
 
     // Block DC.
     // output = Aleph_HPF_dc_block(&syn->dc_block, output); // ??
