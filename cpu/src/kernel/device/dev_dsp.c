@@ -38,6 +38,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "per_gpio.h"
@@ -71,8 +72,8 @@ under the terms of the GNU Affero General Public License as published by
 #define DSP_SPI_CHAR_LENGTH 8
 #define DSP_SPI_ENA_TIMEOUT 0xff
 
-#define DSP_SPI_CSHOLD true
-#define DSP_SPI_COMMAND_CSHOLD true
+#define DSP_SPI_CSHOLD false
+#define DSP_SPI_COMMAND_CSHOLD false
 
 /// TODO: Centralised header for queue lengths.
 #define DSP_SPI_TX_BUF_LEN 0x100
