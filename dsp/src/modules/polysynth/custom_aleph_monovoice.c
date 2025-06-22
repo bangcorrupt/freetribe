@@ -34,7 +34,7 @@
 #include "aleph_waveform.h"
 
 #include "custom_aleph_monovoice.h"
-#include "config.h"
+#include "common/config.h"
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -67,7 +67,7 @@ void Custom_Aleph_MonoVoice_init_to_pool(Custom_Aleph_MonoVoice *const synth,
     syn->filter_type = Custom_Aleph_MonoVoice_DEFAULT_FILTER_TYPE;
     syn->filter_function = &Aleph_FilterSVF_lpf_next;
 
-    Aleph_WaveformDual_init_to_pool(&syn->waveform, mempool);
+    Aleph_WaveformDual_init_to_pool(&syn->waveformDual, mempool);
 
     Aleph_FilterSVF_init_to_pool(&syn->filter, mempool);
 
@@ -88,7 +88,7 @@ void Custom_Aleph_MonoVoice_free(Custom_Aleph_MonoVoice *const synth) {
 
     t_Custom_Aleph_MonoVoice *syn = *synth;
 
-    Aleph_WaveformDual_free(&syn->waveform);
+    Aleph_WaveformDual_free(&syn->waveformDual);
 
     Aleph_FilterSVF_free(&syn->filter);
 
@@ -113,11 +113,11 @@ fract32 Custom_Aleph_MonoVoice_next(Custom_Aleph_MonoVoice *const synth) {
     /// TODO: Set oscillator type (Dual, Unison, etc...).
 
     // Set oscillator frequency.
-    Aleph_WaveformDual_set_freq_a(&syn->waveform, freq);
-    Aleph_WaveformDual_set_freq_b(&syn->waveform, fix16_mul_fract(freq, syn->freq_offset));
+    Aleph_WaveformDual_set_freq_a(&syn->waveformDual, freq);
+    Aleph_WaveformDual_set_freq_b(&syn->waveformDual, fix16_mul_fract(freq, syn->freq_offset));
 
     // Generate waveforms.
-    output = Aleph_WaveformDual_next(&syn->waveform);
+    output = Aleph_WaveformDual_next(&syn->waveformDual);
 
     // Shift right to prevent clipping.
     output = shr_fr1x32(output, 1);
@@ -173,12 +173,12 @@ void _Aleph_WaveformDual_set_shape_b(Aleph_WaveformDual *const wave, e_Aleph_Wav
 void Custom_Aleph_MonoVoice_set_shape_a(Custom_Aleph_MonoVoice *const synth, e_Aleph_Waveform_shape shape) {
 
     t_Custom_Aleph_MonoVoice *syn = *synth;
-    _Aleph_WaveformDual_set_shape_a(&syn->waveform, shape);
+    _Aleph_WaveformDual_set_shape_a(&syn->waveformDual, shape);
 }
 void Custom_Aleph_MonoVoice_set_shape_b(Custom_Aleph_MonoVoice *const synth, e_Aleph_Waveform_shape shape) {
 
     t_Custom_Aleph_MonoVoice *syn = *synth;
-    _Aleph_WaveformDual_set_shape_b(&syn->waveform, shape);
+    _Aleph_WaveformDual_set_shape_b(&syn->waveformDual, shape);
 }
 
 
@@ -194,7 +194,7 @@ void Custom_Aleph_MonoVoice_set_phase(Custom_Aleph_MonoVoice *const synth, fract
 
     t_Custom_Aleph_MonoVoice *syn = *synth;
 
-    Aleph_WaveformDual_set_phase(&syn->waveform, phase);
+    Aleph_WaveformDual_set_phase(&syn->waveformDual, phase);
 }
 
 void Custom_Aleph_MonoVoice_set_freq(Custom_Aleph_MonoVoice *const synth, fract32 freq) {

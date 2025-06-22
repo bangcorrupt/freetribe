@@ -47,6 +47,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "module_interface.h"
 #include "voice_manager.h"
+#include "common/config.h"
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -159,12 +160,8 @@ void module_process(void) {
         }
 
         // Amplitude modulation.
-        //
         amp_mod = tADSRT_tick(&g_module[voice_index].amp_env);
-
         //amp_mod += amp_mod * tTriLFO_tick(&g_module[voice_index].amp_lfo) * g_module[voice_index].amp_lfo_depth;
-
-
         // Only send parameters to DSP if they have changed.
         if (_cv_update(&g_module[voice_index].amp_cv, amp_mod)) {
             float clampled_amp = clamp_value(amp_mod);
@@ -175,28 +172,32 @@ void module_process(void) {
         }
 
         // performance optimization: skip processing if voice is not active
-        if (!g_voice_manager.voices[voice_index].active){
+        if (!g_voice_manager.voices[voice_index].active && voice_index>0){ // > 0 avoid conflict with paraphonic mode
             continue;
         }
 
 
-            // Filter cutoff modulation.
-            /// TODO: Should filter LFO follow the
-            ///       envelope, like the amp LFO?
-            filter_mod = g_module[voice_index].filter_cutoff;
-            filter_mod += tADSRT_tick(&g_module[voice_index].filter_env) * g_module[voice_index].filter_env_depth;
-            filter_mod += tTriLFO_tick(&g_module[voice_index].filter_lfo) * g_module[voice_index].filter_lfo_depth;
-            if (_cv_update(&g_module[voice_index].filter_cv, filter_mod)) {
-                module_set_param_voice(voice_index,PARAM_CUTOFF, clamp_value(filter_mod));
+        #ifdef VOICE_MODE_PARAPHONIC
+            if (voice_index == 0) {
+        #endif
+        // Filter cutoff modulation.
+        filter_mod = g_module[voice_index].filter_cutoff;
+        filter_mod += tADSRT_tick(&g_module[voice_index].filter_env) * g_module[voice_index].filter_env_depth;
+        filter_mod += tTriLFO_tick(&g_module[voice_index].filter_lfo) * g_module[voice_index].filter_lfo_depth;
+        if (_cv_update(&g_module[voice_index].filter_cv, filter_mod)) {
+            module_set_param_voice(voice_index,PARAM_CUTOFF, clamp_value(filter_mod));
+        }
+        #ifdef VOICE_MODE_PARAPHONIC
             }
- 
-            // Pitch modulation.
-            pitch_mod = g_module[voice_index].osc_freq;
-            pitch_mod += tADSRT_tick(&g_module[voice_index].pitch_env) * g_module[voice_index].pitch_env_depth;
-            pitch_mod += (tTriLFO_tick(&g_module[voice_index].pitch_lfo) * g_module[voice_index].pitch_lfo_depth);
-            if (_cv_update(&g_module[voice_index].pitch_cv, pitch_mod)) {
-                module_set_param_voice(voice_index,PARAM_FREQ, clamp_value(pitch_mod));
+        #endif
 
+        // Pitch modulation.
+        pitch_mod = g_module[voice_index].osc_freq;
+        // todo add control for pitch env 
+        //pitch_mod += tADSRT_tick(&g_module[voice_index].pitch_env) * g_module[voice_index].pitch_env_depth;
+        pitch_mod += (tTriLFO_tick(&g_module[voice_index].pitch_lfo) * g_module[voice_index].pitch_lfo_depth);
+        if (_cv_update(&g_module[voice_index].pitch_cv, pitch_mod)) {
+            module_set_param_voice(voice_index,PARAM_FREQ, clamp_value(pitch_mod));
         }
 
 
