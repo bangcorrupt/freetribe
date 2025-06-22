@@ -1,0 +1,53 @@
+#ifndef PARAMS_H
+#define PARAMS_H
+
+#define DEFAULT_OSC_TYPE 2
+#define MAX_VOICES 8
+#define PARAM_VOICE_OFFSET(voice, param, paramCount) (param + (voice * paramCount))
+#define REMOVE_PARAM_OFFSET(param_index_with_offset,paramCount) ((param_index_with_offset) % paramCount)
+#define PARAM_VOICE_NUMBER(param_index_with_offset,paramCount) ((param_index_with_offset) / paramCount)
+
+typedef enum {
+    PARAM_AMP,
+    PARAM_FREQ,
+    PARAM_OSC_PHASE,
+    PARAM_LFO_PHASE,
+    PARAM_GATE,
+    PARAM_VEL,
+    PARAM_AMP_LEVEL,
+    PARAM_AMP_ENV_ATTACK,
+    PARAM_AMP_ENV_DECAY,
+    PARAM_AMP_ENV_SUSTAIN,
+    PARAM_AMP_ENV_RELEASE,
+    PARAM_AMP_ENV_DEPTH,
+    PARAM_FILTER_ENV_DEPTH,
+    PARAM_FILTER_ENV_ATTACK,
+    PARAM_FILTER_ENV_DECAY,
+    PARAM_FILTER_ENV_SUSTAIN,
+    PARAM_FILTER_ENV_RELEASE,
+    PARAM_PITCH_ENV_DEPTH,
+    PARAM_PITCH_ENV_ATTACK,
+    PARAM_PITCH_ENV_DECAY,
+    PARAM_PITCH_ENV_SUSTAIN,
+    PARAM_PITCH_ENV_RELEASE,
+    PARAM_CUTOFF,
+    PARAM_RES,
+    PARAM_TUNE,
+    PARAM_OSC_TYPE,
+    PARAM_OSC_2_TYPE,
+    PARAM_FILTER_TYPE,
+    PARAM_AMP_LFO_DEPTH,
+    PARAM_AMP_LFO_SPEED,
+    PARAM_FILTER_LFO_DEPTH,
+    PARAM_FILTER_LFO_SPEED,
+    PARAM_PITCH_LFO_DEPTH,
+    PARAM_PITCH_LFO_SPEED,
+    PARAM_OSC_BASE_FREQ,
+    PARAM_FILTER_BASE_CUTOFF,
+    PARAM_PHASE_RESET,
+    PARAM_RETRIGGER,
+
+    PARAM_COUNT
+} e_param;
+
+#endif // PARAMS_H

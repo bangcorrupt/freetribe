@@ -56,9 +56,6 @@ under the terms of the GNU Affero General Public License as published by
 #define GATE_CLOSED (0)
 #define GATE_THRESHOLD (0.2)
 
-#define PARAM_VOICE_OFFSET(voice, param, paramCount) (param + (voice * paramCount))
-#define REMOVE_PARAM_OFFSET(param_index_with_offset,paramCount) ((param_index_with_offset) % paramCount)
-#define PARAM_VOICE_NUMBER(param_index_with_offset,paramCount) ((param_index_with_offset) / paramCount)
 
 /*----- Typedefs -----------------------------------------------------*/
 

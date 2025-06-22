@@ -47,80 +47,19 @@ extern "C" {
 
 #include "leaf.h"
 #include "voice_manager.h"
+#include "common/params.h"
 
 /*----- Macros -------------------------------------------------------*/
 
 #define DEFAULT_CUTOFF 0x7f // Index in pitch LUT.
-#define DEFAULT_OSC_TYPE 2
 
 #define PARAM_MAX (PARAM_COUNT - 1)
 #define FILTER_TYPE_MAX (FILTER_TYPE_COUNT - 1)
 #define MOD_TYPE_MAX (MOD_TYPE_COUNT - 1)
 #define OSC_TYPE_MAX (OSC_TYPE_COUNT - 1)
 
-// #define DEFAULT_AMP_ENV_ATTACK SLEW_10MS
-// #define DEFAULT_AMP_ENV_DECAY SLEW_1S
-// #define DEFAULT_AMP_ENV_SUSTAIN FR32_MAX
-//
-// #define DEFAULT_FILTER_ENV_ATTACK SLEW_10MS
-// #define DEFAULT_FILTER_ENV_DECAY SLEW_1S
-// #define DEFAULT_FILTER_ENV_SUSTAIN FR32_MAX
-//
-// #define DEFAULT_AMP_LFO_DEPTH 0
-// #define DEFAULT_AMP_LFO_SPEED FIX16_ONE
-//
-// #define DEFAULT_FILTER_LFO_DEPTH 0
-// #define DEFAULT_FILTER_LFO_SPEED FIX16_ONE
-//
-// #define DEFAULT_PITCH_LFO_DEPTH 0
-// #define DEFAULT_PITCH_LFO_SPEED FIX16_ONE
-
 /*----- Typedefs -----------------------------------------------------*/
 
-/// TODO: Move to common location.
-//
-typedef enum {
-    PARAM_AMP,
-    PARAM_FREQ,
-    PARAM_OSC_PHASE,
-    PARAM_LFO_PHASE,
-    PARAM_GATE,
-    PARAM_VEL,
-    PARAM_AMP_LEVEL,
-    PARAM_AMP_ENV_ATTACK,
-    PARAM_AMP_ENV_DECAY,
-    PARAM_AMP_ENV_SUSTAIN,
-    PARAM_AMP_ENV_RELEASE,
-    PARAM_AMP_ENV_DEPTH,
-    PARAM_FILTER_ENV_DEPTH,
-    PARAM_FILTER_ENV_ATTACK,
-    PARAM_FILTER_ENV_DECAY,
-    PARAM_FILTER_ENV_SUSTAIN,
-    PARAM_FILTER_ENV_RELEASE,
-    PARAM_PITCH_ENV_DEPTH,
-    PARAM_PITCH_ENV_ATTACK,
-    PARAM_PITCH_ENV_DECAY,
-    PARAM_PITCH_ENV_SUSTAIN,
-    PARAM_PITCH_ENV_RELEASE,
-    PARAM_CUTOFF,
-    PARAM_RES,
-    PARAM_TUNE,
-    PARAM_OSC_TYPE,
-    PARAM_OSC_2_TYPE,
-    PARAM_FILTER_TYPE,
-    PARAM_AMP_LFO_DEPTH,
-    PARAM_AMP_LFO_SPEED,
-    PARAM_FILTER_LFO_DEPTH,
-    PARAM_FILTER_LFO_SPEED,
-    PARAM_PITCH_LFO_DEPTH,
-    PARAM_PITCH_LFO_SPEED,
-    PARAM_OSC_BASE_FREQ,
-    PARAM_FILTER_BASE_CUTOFF,
-    PARAM_PHASE_RESET,
-    PARAM_RETRIGGER,
-
-    PARAM_COUNT
-} e_param;
 
 typedef enum {
     OSC_TYPE_SINE,
