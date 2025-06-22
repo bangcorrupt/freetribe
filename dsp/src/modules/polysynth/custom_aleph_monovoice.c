@@ -112,6 +112,7 @@ fract32 Custom_Aleph_MonoVoice_next(Custom_Aleph_MonoVoice *const synth) {
     // Get slewed frequency.
     freq = Aleph_LPFOnePole_next(&syn->freq_slew);
 
+
     /// TODO: Set oscillator type (Dual, Unison, etc...).
 
     
@@ -131,7 +132,7 @@ fract32 Custom_Aleph_MonoVoice_next(Custom_Aleph_MonoVoice *const synth) {
 
 
     // Shift right to prevent clipping.
-    output = shr_fr1x32(output, 1);
+    output = shr_fr1x32(output, 4);
 
     // Get slewed amplitude.
     amp = Aleph_LPFOnePole_next(&syn->amp_slew);
