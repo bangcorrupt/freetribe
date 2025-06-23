@@ -39,6 +39,12 @@ under the terms of the GNU Affero General Public License as published by
 #include "cdefBF52x_base.h"
 #include "gcc.h"
 
+#include <stdint.h>
+
+#include "per_sport.h"
+
+#include "knl_profile.h"
+
 /*----- Macros -------------------------------------------------------*/
 
 /*----- Typedefs -----------------------------------------------------*/
@@ -47,9 +53,21 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Extern variable definitions ----------------------------------*/
 
+uint64_t g_module_cycles = 0;
+
 /*----- Static function prototypes -----------------------------------*/
 
 /*----- Extern function implementations ------------------------------*/
+
+t_profile knl_profile_stats(void) {
+
+    static t_profile stats;
+
+    stats.period = (uint32_t)sport0_period();
+    stats.cycles = (uint32_t)g_module_cycles;
+
+    return stats;
+}
 
 /*----- Static function implementations ------------------------------*/
 

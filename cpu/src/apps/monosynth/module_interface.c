@@ -44,6 +44,7 @@ under the terms of the GNU Affero General Public License as published by
 #include "leaf-oscillators.h"
 
 #include "param_scale.h"
+#include <stdint.h>
 
 #include "module_interface.h"
 
@@ -380,17 +381,13 @@ void module_set_param(uint16_t param_index, float value) {
     }
 }
 
-float module_get_param(uint16_t param_index) {
-
-    float value = 0;
+void module_get_param(uint16_t param_index) {
 
     switch (param_index) {
 
     default:
         break;
     }
-
-    return value;
 }
 
 /*----- Static function implementations ------------------------------*/

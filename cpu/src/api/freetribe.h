@@ -104,7 +104,9 @@ void ft_set_trigger_mode(uint8_t mode);
 void ft_set_module_param(uint16_t module_id, uint16_t param_index,
                          int32_t param_value);
 
-void ft_get_module_param(uint8_t module_id, uint16_t param_index);
+void ft_get_module_param(uint16_t module_id, uint16_t param_index);
+
+void ft_register_dsp_callback(uint8_t msg_type, uint8_t msg_id, void *callback);
 
 void ft_shutdown(void);
 
