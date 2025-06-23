@@ -133,10 +133,13 @@ void module_process(fract32 *in, fract32 *out) {
     fract32 output;
     //fract32 amp_level_scaled = ;///MAX_VOICES; // already scaled in _next
 
+    
+
     output = mult_fr1x32x32(Custom_Aleph_MonoVoice_next(&g_module.voice[0]), g_module.amp_level);
     int i;
     for (i = 1; i < MAX_VOICES; i++) {
-        output += mult_fr1x32x32(Custom_Aleph_MonoVoice_next(&g_module.voice[i]), g_module.amp_level);    
+        output = add_fr1x32(output, mult_fr1x32x32(Custom_Aleph_MonoVoice_next(&g_module.voice[i]), g_module.amp_level));
+        //output += mult_fr1x32x32(Custom_Aleph_MonoVoice_next(&g_module.voice[i]), g_module.amp_level);
     }
 
     // if global filter, use the first voice's filter.
