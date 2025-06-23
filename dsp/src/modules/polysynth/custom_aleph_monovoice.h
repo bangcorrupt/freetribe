@@ -48,6 +48,7 @@ extern "C" {
 #define Custom_Aleph_MonoVoice_DEFAULT_RES (FR32_MAX)
 #define Custom_Aleph_MonoVoice_DEFAULT_FILTER_TYPE ALEPH_FILTERSVF_TYPE_LPF
 
+#define MAX_UNISON_VOICES (5) // Maximum number of unison voices
 /*----- Typedefs -----------------------------------------------------*/
 
 typedef struct {
@@ -55,7 +56,7 @@ typedef struct {
     Mempool mempool;
 
     Aleph_WaveformDual waveformDual;
-    Aleph_Waveform  waveformSingle [2];
+    Aleph_Waveform  waveformSingle [MAX_UNISON_VOICES];
     fract32 freq_offset;
 
     Aleph_FilterSVF filter;

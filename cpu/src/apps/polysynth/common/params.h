@@ -2,7 +2,7 @@
 #define PARAMS_H
 
 #define DEFAULT_OSC_TYPE 2 // saw is the best waveform for a polysynth
-#define MAX_VOICES 8
+#define MAX_VOICES 6
 #define PARAM_VOICE_OFFSET(voice, param, paramCount) (param + (voice * paramCount))
 #define REMOVE_PARAM_OFFSET(param_index_with_offset,paramCount) ((param_index_with_offset) % paramCount)
 #define PARAM_VOICE_NUMBER(param_index_with_offset,paramCount) ((param_index_with_offset) / paramCount)
