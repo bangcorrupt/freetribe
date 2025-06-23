@@ -57,9 +57,6 @@ under the terms of the GNU Affero General Public License as published by
 
 static uint32_t g_saved_imask;
 
-static uint32_t g_audio_callback_time[CYCLE_LOG_LENGTH];
-static uint32_t g_cpu_task_time[CYCLE_LOG_LENGTH];
-
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
@@ -100,13 +97,12 @@ int main(void) {
     svc_cpu_task();
 
     sport0_init();
-    // sport1_init();
 
     module_init();
 
     while (true) {
 
-        if (sport0_frame_received()) {
+        if (sport0_block_received()) {
 
             start = cycles();
 
@@ -116,7 +112,7 @@ int main(void) {
             //
             module_process(sport0_get_rx_buffer(), sport0_get_tx_buffer());
 
-            sport0_frame_processed();
+            sport0_block_processed();
 
             stop = cycles();
 

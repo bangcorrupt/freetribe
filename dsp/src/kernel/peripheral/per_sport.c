@@ -90,7 +90,8 @@ static fract32 g_codec_rx_buffer_a[DSP_CHANNEL_COUNT][DSP_BLOCK_SIZE];
 static fract32 g_codec_rx_buffer_b[DSP_CHANNEL_COUNT][DSP_BLOCK_SIZE];
 static fract32 g_codec_rx_buffer_c[DSP_CHANNEL_COUNT][DSP_BLOCK_SIZE];
 
-static bool g_sport0_frame_received = false;
+static bool g_sport0_block_received = false;
+static bool g_sport0_overrun = false;
 
 static t_dma_desc g_sport0_rx_dma_a;
 static t_dma_desc g_sport0_rx_dma_b;
@@ -178,61 +179,6 @@ void sport0_init(void) {
     ssync();
 }
 
-void sport1_init(void) {
-
-    /// /// TODO: Do we need secondary enabled?
-    ///
-    /// // Configure SPORT1 Rx.
-    /// *pSPORT1_RCR1 = RCKFE | RFSR | DTYPE_SIGX;
-    /// *pSPORT1_RCR2 = RSFSE | SLEN(0x1f); // RXSE ;
-    ///
-    /// // Configure SPORT1 Tx.
-    /// *pSPORT1_TCR1 = TCKFE | TFSR;
-    /// *pSPORT1_TCR2 = TSFSE | SLEN(0x1f); // TXSE  ;
-    /// ssync();
-    ///
-    ///
-    /// // SPORT1 Rx DMA.
-    /// *pDMA5_PERIPHERAL_MAP = PMAP_SPORT1RX;
-    /// // Configure DMA.
-    /// *pDMA5_CONFIG = FLOW_AUTO | WDSIZE_32 | WNR;
-    /// // Start address of data buffer.
-    /// *pDMA5_START_ADDR = &g_cpu_rx_buffer;
-    /// // DMA inner loop count.
-    /// *pDMA5_X_COUNT = 2; // 2 samples.
-    /// // Inner loop address increment.
-    /// *pDMA5_X_MODIFY = 4; // 32 bit.
-    /// ssync();
-    ///
-    /// // SPORT1 Tx DMA.
-    /// *pDMA6_PERIPHERAL_MAP = PMAP_SPORT1TX;
-    /// // Configure DMA.
-    /// *pDMA6_CONFIG = FLOW_AUTO | WDSIZE_32;
-    /// // Start address of data buffer
-    /// *pDMA6_START_ADDR = &g_cpu_tx_buffer;
-    /// // DMA inner loop count
-    /// *pDMA6_X_COUNT = 2; // 2 samples.
-    /// // Inner loop address increment
-    /// *pDMA6_X_MODIFY = 4; // 32 bit.
-    /// ssync();
-    ///
-    /// // Enable SPORT1 Rx DMA.
-    /// *pDMA5_CONFIG |= DMAEN;
-    /// ssync();
-    ///
-    /// // Enable SPORT1 Tx DMA.
-    /// *pDMA6_CONFIG |= DMAEN;
-    /// ssync();
-    ///
-    /// // Enable SPORT1 Rx.
-    /// *pSPORT1_RCR1 |= RSPEN;
-    /// ssync();
-    ///
-    /// // Enable SPORT1 Tx.
-    /// *pSPORT1_TCR1 |= TSPEN;
-    /// ssync();
-}
-
 fract32 *sport0_get_rx_buffer(void) {
 
     return (fract32 *)&(((t_dma_desc *)(*pDMA3_NEXT_DESC_PTR))->start_addr)[0];
@@ -243,9 +189,11 @@ fract32 *sport0_get_tx_buffer(void) {
     return (fract32 *)&(((t_dma_desc *)(*pDMA4_NEXT_DESC_PTR))->start_addr)[0];
 }
 
-bool sport0_frame_received(void) { return g_sport0_frame_received; }
+bool sport0_block_received(void) { return g_sport0_block_received; }
 
-void sport0_frame_processed(void) { g_sport0_frame_received = false; }
+bool sport0_overrun(void) { return g_sport0_overrun; }
+
+void sport0_block_processed(void) { g_sport0_block_received = false; }
 
 uint64_t sport0_period(void) { return g_elapsed; }
 
@@ -257,11 +205,16 @@ __attribute__((interrupt_handler)) static void _sport0_isr(void) {
 
     g_elapsed = g_stop - g_start;
 
+    if (g_sport0_block_received) {
+
+        g_sport0_overrun = true;
+    }
+
     // Clear interrupt status.
     *pDMA3_IRQ_STATUS = DMA_DONE;
     ssync();
 
-    g_sport0_frame_received = true;
+    g_sport0_block_received = true;
 
     g_start = cycles();
 }

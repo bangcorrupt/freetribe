@@ -60,8 +60,9 @@ extern "C" {
 /*----- Extern function prototypes -----------------------------------*/
 
 void sport0_init(void);
-bool sport0_frame_received(void);
-void sport0_frame_processed(void);
+bool sport0_block_received(void);
+void sport0_block_processed(void);
+bool sport0_overrun(void);
 
 fract32 *sport0_get_rx_buffer(void);
 fract32 *sport0_get_tx_buffer(void);
