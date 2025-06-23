@@ -43,8 +43,13 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
+#include <stdint.h>
+
 #include <blackfin.h>
-#include <builtins.h>
+
+/// TODO: Including builtins.h breaks build.
+//
+// #include <builtins.h>
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -52,18 +57,37 @@ extern "C" {
 
 /*----- Typedefs -----------------------------------------------------*/
 
+typedef struct {
+    uint32_t period;
+    uint32_t cycles;
+
+} t_profile;
+
 /*----- Extern variable declarations ---------------------------------*/
+
+extern uint64_t g_module_cycles;
 
 /*----- Extern function prototypes -----------------------------------*/
 
-__inline__ __attribute__((always_inline)) static int cycles() {
+// __inline__ __attribute__((always_inline)) static int cycles() {
+//
+//     volatile long int ret;
+//
+//     __asm__ __volatile__("%0 = CYCLES;\n\t" : "=&d"(ret) : : "R1");
+//
+//     return ret;
+// }
 
-    volatile long int ret;
+__inline__ __attribute__((always_inline)) static uint64_t cycles(void) {
 
-    __asm__ __volatile__("%0 = CYCLES;\n\t" : "=&d"(ret) : : "R1");
+    uint64_t ret;
+
+    asm volatile("%0=cycles; %H0=cycles2;" : "=d"(ret));
 
     return ret;
 }
+
+t_profile knl_profile_stats(void);
 
 #ifdef __cplusplus
 }
