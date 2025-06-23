@@ -36,15 +36,19 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
+#include <stddef.h>
 #include <stdint.h>
 
 #include "module.h"
+#include "per_sport.h"
 #include "types.h"
 #include "utils.h"
 
 #include "aleph.h"
 
 #include "aleph_monovoice.h"
+
+#include "knl_profile.h"
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -160,16 +164,20 @@ void module_init(void) {
  */
 void module_process(fract32 *in, fract32 *out) {
 
-    fract32 output;
+    fract32 *outl = out;
+    fract32 *outr = out + BLOCK_SIZE;
 
-    output = Aleph_MonoVoice_next(&g_module.voice);
+    Aleph_MonoVoice_next_block(&g_module.voice, outl, BLOCK_SIZE);
 
-    // Scale amplitude by level.
-    output = mult_fr1x32x32(output, g_module.amp_level);
+    int i;
+    for (i = 0; i < BLOCK_SIZE; i++) {
 
-    // Set output.
-    out[0] = output;
-    out[1] = output;
+        // Scale amplitude by level.
+        outl[i] = mult_fr1x32x32(outl[i], g_module.amp_level);
+
+        // Set output.
+        outr[i] = outl[i];
+    }
 }
 
 /**

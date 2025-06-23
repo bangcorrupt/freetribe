@@ -48,12 +48,14 @@ extern "C" {
 
 /*----- Macros -------------------------------------------------------*/
 
+#define DSP_CHANNEL_COUNT 2
+#define DSP_BLOCK_SIZE 16
+#define DSP_BUFFER_SIZE (DSP_BLOCK_SIZE * DSP_CHANNEL_COUNT)
+#define DSP_WORD_SIZE 4
+
 /*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
-
-extern fract32 in[2];
-extern fract32 out[2];
 
 /*----- Extern function prototypes -----------------------------------*/
 
@@ -63,6 +65,8 @@ void sport0_frame_processed(void);
 
 fract32 *sport0_get_rx_buffer(void);
 fract32 *sport0_get_tx_buffer(void);
+
+uint64_t sport0_period(void);
 
 #ifdef __cplusplus
 }

@@ -81,6 +81,9 @@ inline void enable_interrupts(void) {
 
 int main(void) {
 
+    uint64_t start;
+    uint64_t stop;
+
     *pPORTGIO_SET = HWAIT;
 
     /// TODO: Move to initcode, before main.
@@ -105,6 +108,8 @@ int main(void) {
 
         if (sport0_frame_received()) {
 
+            start = cycles();
+
             // disable_interrupts();
 
             /// TODO: Maybe disable interrupts while processing audio.
@@ -112,6 +117,10 @@ int main(void) {
             module_process(sport0_get_rx_buffer(), sport0_get_tx_buffer());
 
             sport0_frame_processed();
+
+            stop = cycles();
+
+            g_module_cycles = stop - start;
 
             // enable_interrupts();
         }

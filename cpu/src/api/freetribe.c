@@ -41,6 +41,7 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Includes -----------------------------------------------------*/
 
 #include "freetribe.h"
+#include <stdint.h>
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -252,9 +253,15 @@ void ft_set_module_param(uint16_t module_id, uint16_t param_index,
  * @param[in]   param_index Index of parameter to get.
  *
  */
-void ft_get_module_param(uint8_t module_id, uint16_t param_index) {
+void ft_get_module_param(uint16_t module_id, uint16_t param_index) {
 
     svc_dsp_get_module_param(module_id, param_index);
+}
+
+void ft_register_dsp_callback(uint8_t msg_type, uint8_t msg_id,
+                              void *callback) {
+
+    svc_dsp_register_callback(msg_type, msg_id, callback);
 }
 
 /**

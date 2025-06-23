@@ -154,7 +154,7 @@ typedef enum {
 void module_init(LEAF *leaf);
 void module_process(void);
 void module_set_param(uint16_t param_index, float value);
-float module_get_param(uint16_t param_index);
+void module_get_param(uint16_t param_index);
 
 #ifdef __cplusplus
 }

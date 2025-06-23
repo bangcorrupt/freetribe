@@ -45,6 +45,7 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
+#include "per_sport.h"
 #include "types.h"
 
 /*----- Macros -------------------------------------------------------*/
@@ -52,6 +53,8 @@ extern "C" {
 #ifndef SAMPLERATE
 #define SAMPLERATE 48000
 #endif
+
+#define BLOCK_SIZE DSP_BLOCK_SIZE
 
 #define MAX_PARAM_NAME_LENGTH 16
 
