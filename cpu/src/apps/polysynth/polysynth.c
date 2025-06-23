@@ -164,8 +164,7 @@ voice_manager_init();
     // Initialise GUI.
     gui_task();
 
-    ft_print("PolySynth Example");
-    gui_print(4, 7, "PolySynth Example");
+    gui_print(4, 7, "P o l y T r i b e");
 
     status = SUCCESS;
     return status;
