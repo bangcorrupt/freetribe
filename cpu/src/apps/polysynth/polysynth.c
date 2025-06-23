@@ -194,7 +194,9 @@ static void _knob_callback(uint8_t index, uint8_t value) {
     switch (index) {
 
     case KNOB_PITCH:
-        module_set_param_all_voices(PARAM_TUNE, g_octave_tune_lut[value] / 2.0);
+        //module_set_param_all_voices(PARAM_TUNE, g_octave_tune_lut[value] );
+        // if osc type is unison attenuate unison detune
+        module_set_param_all_voices(PARAM_TUNE, g_octave_tune_lut[value] );
         gui_post_param("Pitch: ", value);
         break;
 

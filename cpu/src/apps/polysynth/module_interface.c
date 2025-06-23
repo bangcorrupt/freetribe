@@ -343,7 +343,7 @@ void module_set_param_voice(uint16_t voice_index,uint16_t param_index_without_of
         break;
 
     case PARAM_TUNE:
-        ft_set_module_param(0, param_index, float_to_fix16(value * 2.0));
+        ft_set_module_param(0, param_index, float_to_fix16(value));
         break;
 
     case PARAM_OSC_TYPE:
