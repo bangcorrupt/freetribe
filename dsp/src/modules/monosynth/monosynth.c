@@ -36,6 +36,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
+#include <stddef.h>
 #include <stdint.h>
 
 #include "module.h"
@@ -163,22 +164,19 @@ void module_init(void) {
  */
 void module_process(fract32 *in, fract32 *out) {
 
-    fract32 sample;
+    fract32 *outl = out;
+    fract32 *outr = out + BLOCK_SIZE;
 
-    fract32 *input = in;
-    fract32 *output = out;
+    Aleph_MonoVoice_next_block(&g_module.voice, outl, BLOCK_SIZE);
 
     int i;
     for (i = 0; i < BLOCK_SIZE; i++) {
 
-        sample = Aleph_MonoVoice_next(&g_module.voice);
-
         // Scale amplitude by level.
-        sample = mult_fr1x32x32(sample, g_module.amp_level);
+        outl[i] = mult_fr1x32x32(outl[i], g_module.amp_level);
 
         // Set output.
-        *output++ = sample;
-        *output++ = sample;
+        outr[i] = outl[i];
     }
 }
 

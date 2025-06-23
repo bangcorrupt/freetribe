@@ -51,6 +51,7 @@ extern "C" {
 #define DSP_CHANNEL_COUNT 2
 #define DSP_BLOCK_SIZE 16
 #define DSP_BUFFER_SIZE (DSP_BLOCK_SIZE * DSP_CHANNEL_COUNT)
+#define DSP_WORD_SIZE 4
 
 /*----- Typedefs -----------------------------------------------------*/
 
