@@ -198,6 +198,9 @@ void module_process(void) {
         pitch_mod += (tTriLFO_tick(&g_module[voice_index].pitch_lfo) * g_module[voice_index].pitch_lfo_depth);
         if (_cv_update(&g_module[voice_index].pitch_cv, pitch_mod)) {
             module_set_param_voice(voice_index,PARAM_FREQ, clamp_value(pitch_mod));
+            // might be useful for modulating "ring modulation" frequency
+            //module_set_param_voice(voice_index,PARAM_TUNE, clamp_value(pitch_mod));
+            
         }
 
 

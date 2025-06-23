@@ -66,6 +66,7 @@ typedef enum {
     OSC_TYPE_TRI,
     OSC_TYPE_SAW,
     OSC_TYPE_SQUARE,
+    OSC_TYPE_NONE,
 
     OSC_TYPE_COUNT
 } e_osc_type;

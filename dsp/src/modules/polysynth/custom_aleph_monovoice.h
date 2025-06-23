@@ -55,7 +55,7 @@ typedef struct {
     Mempool mempool;
 
     Aleph_WaveformDual waveformDual;
-    Aleph_Waveform waveformSingle;
+    Aleph_Waveform  waveformSingle [2];
     fract32 freq_offset;
 
     Aleph_FilterSVF filter;
