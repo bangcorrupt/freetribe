@@ -124,29 +124,37 @@ void module_init(void) {
  */
 void module_process(fract32 *in, fract32 *out) {
 
-    fract32 output;
-    // fract32 amp_level_scaled = ;///MAX_VOICES; // already scaled in _next
+    fract32 *outl = out;
+    fract32 *outr = out + BLOCK_SIZE;
 
-    output = mult_fr1x32x32(Custom_Aleph_MonoVoice_next(&g_module.voice[0]),
-                            g_module.amp_level);
     int i;
-    for (i = 1; i < MAX_VOICES; i++) {
-        output = add_fr1x32(output, mult_fr1x32x32(Custom_Aleph_MonoVoice_next(
-                                                       &g_module.voice[i]),
-                                                   g_module.amp_level));
-        // output +=
-        // mult_fr1x32x32(Custom_Aleph_MonoVoice_next(&g_module.voice[i]),
-        // g_module.amp_level);
-    }
+    for (i = 0; i < BLOCK_SIZE; i++) {
+
+        // fract32 amp_level_scaled = ;///MAX_VOICES; // already scaled in _next
+
+        outl[i] =
+            mult_fr1x32x32(Custom_Aleph_MonoVoice_next(&g_module.voice[0]),
+                           g_module.amp_level);
+        int j;
+        for (j = 1; j < MAX_VOICES; j++) {
+            outl[i] = add_fr1x32(
+                outl[i],
+                mult_fr1x32x32(Custom_Aleph_MonoVoice_next(&g_module.voice[j]),
+                               g_module.amp_level));
+            // outl[i] +=
+            // mult_fr1x32x32(Custom_Aleph_MonoVoice_next(&g_module.voice[j]),
+            // g_module.amp_level);
+        }
 
 // if global filter, use the first voice's filter.
 #ifdef VOICE_MODE_PARAPHONIC
-    output = Custom_Aleph_MonoVoice_apply_filter(&g_module.voice[0], output);
+        outl[i] =
+            Custom_Aleph_MonoVoice_apply_filter(&g_module.voice[0], outl[i]);
 #endif
 
-    // Set output.
-    out[0] = output;
-    out[1] = output;
+        // Set output.
+        outr[i] = outl[i];
+    }
 }
 
 void module_set_param_voice(uint16_t voice_index, uint16_t param_index,
