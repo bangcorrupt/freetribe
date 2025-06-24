@@ -54,7 +54,6 @@ under the terms of the GNU Affero General Public License as published by
 #include "leaf.h"
 
 #include "module_interface.h"
-#include "sys/types.h"
 
 /*----- Macros -------------------------------------------------------*/
 
