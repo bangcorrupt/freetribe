@@ -1,12 +1,12 @@
 [submodule "cpu/lib/am1802-csl"]
 	path = cpu/lib/am1802-csl
-	url = ../am1802-csl
+	url = https://github.com/bangcorrupt/am1802-csl.git
 [submodule "cpu/src/lib/UGUI"]
 	path = cpu/lib/UGUI
-	url = ../UGUI.git
+	url = https://github.com/bangcorrupt/UGUI.git
 [submodule "dsp/src/lib/aleph-dsp"]
 	path = dsp/lib/aleph-dsp
-	url = ../aleph-dsp.git
+	url = https://github.com/bangcorrupt/aleph-dsp.git
 [submodule "cpu/lib/LEAF"]
 	path = cpu/lib/LEAF
-	url = ../LEAF.git
+	url = https://github.com/bangcorrupt/LEAF.git

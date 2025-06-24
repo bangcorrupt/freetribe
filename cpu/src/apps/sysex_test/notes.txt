@@ -1,0 +1,21 @@
+Primeros 16 bytes: ['0xf0', '0x7d', '0x12', '0x13', '0x3f', '0x15', '0xf7']
+Primeros 16 bytes: ['0xf0', '0x7d', '0x12', '0x13', '0x3f', '0x1', '0x7f', '0xf7']
+
+
+        /// TODO: Add control for pitch envelope.
+        //
+        pitch_mod += tADSRT_tick(&g_module[voice_index].pitch_env) * g_module[voice_index].pitch_env_depth;
+
+        pitch_mod += (tTriLFO_tick(&g_module[voice_index].pitch_lfo) * g_module[voice_index].pitch_lfo_depth);
+
+        if (_cv_update(&g_module[voice_index].pitch_cv, pitch_mod)) {
+
+
+// pitch lfo on cpu code
+            module_set_param_voice(voice_index,PARAM_FREQ, clamp_value(pitch_mod));
+        }
+
+
+ver que valores envia cutoff
+
+probar con ft_set_module_param(0, param_index,float_to_fix16(cv_to_osc_freq(value)));
