@@ -60,6 +60,12 @@ static void _dma_error_isr(void) __attribute__((interrupt_handler));
 
 /*----- Extern function implementations ------------------------------*/
 
+void syscfg_init(void) {
+
+    //
+    *pSYSCR |= SYSCFG_CCEN;
+}
+
 /// TODO: Can incorrect clock configuration damage processor?
 //
 // Initialize clocks

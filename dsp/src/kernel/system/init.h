@@ -43,7 +43,7 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
-#include <blackfin.h>
+// #include <blackfin.h>
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -56,6 +56,7 @@ void ebiu_init(void);
 void sysint_init(void);
 void gpio_init(void);
 void dma_init(void);
+void syscfg_init(void);
 
 /*----- Extern function prototypes -----------------------------------*/
 

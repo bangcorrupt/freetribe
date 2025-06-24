@@ -86,6 +86,7 @@ int main(void) {
     /// TODO: Move to initcode, before main.
     pll_init();
     ebiu_init();
+    syscfg_init();
 
     per_gpio_init();
 

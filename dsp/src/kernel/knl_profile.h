@@ -47,7 +47,7 @@ extern "C" {
 
 #include <blackfin.h>
 
-/// TODO: Including builtins.h breaks build.
+/// TODO: Why does including builtins.h break build?
 //
 // #include <builtins.h>
 
