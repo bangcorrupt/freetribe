@@ -5,7 +5,7 @@
 OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 
-HEAP_SIZE = 0x800;
+HEAP_SIZE = 0x0;
 STACK_SIZE = 0x1f80;
 VECTOR_TABLE_SIZE = 0x80;
 
