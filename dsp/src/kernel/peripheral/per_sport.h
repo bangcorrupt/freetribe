@@ -64,6 +64,8 @@ void sport0_frame_processed(void);
 fract32 *sport0_get_rx_buffer(void);
 fract32 *sport0_get_tx_buffer(void);
 
+uint64_t sport0_period(void);
+
 #ifdef __cplusplus
 }
 #endif

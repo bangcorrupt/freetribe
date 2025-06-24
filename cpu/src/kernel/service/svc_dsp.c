@@ -88,8 +88,11 @@ typedef void (*t_module_param_value_callback)(uint16_t module_id,
 typedef void (*t_system_port_state_callback)(uint16_t port_f, uint16_t port_g,
                                              uint16_t port_h);
 
+typedef void (*t_system_profile_callback)(uint32_t period, uint32_t cycles);
+
 static t_module_param_value_callback p_module_param_value_callback;
 static t_system_port_state_callback p_system_port_state_callback;
+static t_system_profile_callback p_system_profile_callback;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -118,6 +121,8 @@ static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
 static t_status _handle_module_param_value(uint8_t *payload, uint8_t length);
 static t_status _handle_system_port_state(uint8_t *payload, uint8_t length);
 static t_status _handle_system_ready(void);
+
+static t_status _handle_system_profile(uint8_t *payload, uint8_t length);
 
 void _register_module_callback(uint8_t msg_id, void *callback);
 void _register_system_callback(uint8_t msg_id, void *callback);
@@ -187,8 +192,6 @@ void svc_dsp_task(void) {
             dev_dsp_spi_poll();
         }
 
-        // dev_dsp_spi_transfer();
-
         g_dsp_ready = true;
         break;
 
@@ -211,6 +214,7 @@ void svc_dsp_register_callback(uint8_t msg_type, uint8_t msg_id,
     switch (msg_type) {
 
     case MSG_TYPE_MODULE:
+
         _register_module_callback(msg_id, callback);
         break;
 
@@ -240,7 +244,7 @@ void svc_dsp_set_module_param(uint16_t module_id, uint16_t param_index,
     _transmit_message(msg_type, msg_id, payload, sizeof(payload));
 }
 
-void svc_dsp_get_module_param(uint8_t module_id, uint16_t param_index) {
+void svc_dsp_get_module_param(uint16_t module_id, uint16_t param_index) {
 
     const uint8_t msg_type = MSG_TYPE_MODULE;
     const uint8_t msg_id = MODULE_GET_PARAM_VALUE;
@@ -261,6 +265,16 @@ void svc_dsp_get_port_state(void) {
 
     const uint8_t msg_type = MSG_TYPE_SYSTEM;
     const uint8_t msg_id = SYSTEM_GET_PORT_STATE;
+
+    _dsp_response_required();
+
+    _transmit_message(msg_type, msg_id, NULL, 0);
+}
+
+void svc_dsp_get_profile(void) {
+
+    const uint8_t msg_type = MSG_TYPE_SYSTEM;
+    const uint8_t msg_id = SYSTEM_GET_PROFILE;
 
     _dsp_response_required();
 
@@ -300,6 +314,10 @@ void _register_system_callback(uint8_t msg_id, void *callback) {
 
     case SYSTEM_PORT_STATE:
         p_system_port_state_callback = (t_system_port_state_callback)callback;
+        break;
+
+    case SYSTEM_PROFILE:
+        p_system_profile_callback = (t_system_profile_callback)callback;
         break;
 
     default:
@@ -388,7 +406,11 @@ static void _dsp_receive(uint8_t byte) {
         if (count < length) {
             payload[count] = byte;
             count++;
-        } else {
+        } // else {
+        // Handle message before returning,
+        // else it is not handled until first
+        // byte of next message is received.
+        if (count >= length) {
             count = 0;
             _handle_message(msg_type, msg_id, payload, length);
             state = PARSE_START;
@@ -402,7 +424,7 @@ static void _dsp_receive(uint8_t byte) {
 
 static void _handle_message(uint8_t msg_type, uint8_t msg_id, uint8_t *payload,
                             uint8_t length) {
-    // Switch message ID.
+
     switch (msg_type) {
 
     case MSG_TYPE_MODULE:
@@ -412,18 +434,24 @@ static void _handle_message(uint8_t msg_type, uint8_t msg_id, uint8_t *payload,
     case MSG_TYPE_SYSTEM:
         _handle_system_message(msg_id, payload, length);
         break;
+
+    default:
+        break;
     }
 }
 
 static t_status _handle_module_message(uint8_t msg_id, uint8_t *payload,
                                        uint8_t length) {
 
-    uint8_t result = ERROR;
+    t_status result = ERROR;
 
     switch (msg_id) {
 
     case MODULE_PARAM_VALUE:
         result = _handle_module_param_value(payload, length);
+        break;
+
+    default:
         break;
     }
 
@@ -438,7 +466,8 @@ static t_status _handle_module_message(uint8_t msg_id, uint8_t *payload,
 static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
                                        uint8_t length) {
 
-    uint8_t result = ERROR;
+    t_status result = ERROR;
+
     switch (msg_id) {
 
     case SYSTEM_READY:
@@ -447,6 +476,13 @@ static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
 
     case SYSTEM_PORT_STATE:
         result = _handle_system_port_state(payload, length);
+        break;
+
+    case SYSTEM_PROFILE:
+        result = _handle_system_profile(payload, length);
+        break;
+
+    default:
         break;
     }
 
@@ -461,6 +497,8 @@ static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
 /// TODO: Test payload length.
 static t_status _handle_module_param_value(uint8_t *payload, uint8_t length) {
 
+    t_status result = ERROR;
+
     if (p_module_param_value_callback != NULL) {
 
         /// TODO: Union struct for message parsing.
@@ -473,9 +511,11 @@ static t_status _handle_module_param_value(uint8_t *payload, uint8_t length) {
                                (payload[5] << 8) | payload[4];
 
         p_module_param_value_callback(module_id, param_index, param_value);
+
+        result = SUCCESS;
     }
 
-    return SUCCESS;
+    return result;
 }
 
 static t_status _handle_system_ready(void) {
@@ -494,6 +534,22 @@ static t_status _handle_system_port_state(uint8_t *payload, uint8_t length) {
         uint16_t port_h = (payload[5] << 8) | payload[4];
 
         p_system_port_state_callback(port_f, port_g, port_h);
+    }
+
+    return SUCCESS;
+}
+
+static t_status _handle_system_profile(uint8_t *payload, uint8_t length) {
+
+    if (p_system_profile_callback != NULL) {
+
+        uint32_t period = (payload[3] << 24 | payload[2] << 16 |
+                           payload[1] << 8 | payload[0]);
+
+        uint32_t cycles = (payload[7] << 24 | payload[6] << 16 |
+                           payload[5] << 8 | payload[4]);
+
+        p_system_profile_callback(period, cycles);
     }
 
     return SUCCESS;

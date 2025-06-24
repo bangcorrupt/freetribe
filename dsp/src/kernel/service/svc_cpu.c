@@ -48,6 +48,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "module.h"
 
+#include "knl_profile.h"
+
 /*----- Macros -------------------------------------------------------*/
 
 #define MSG_START 0xf0
@@ -73,7 +75,7 @@ enum e_module_msg_id {
     MODULE_SET_PARAM_VALUE,
     MODULE_PARAM_VALUE,
     MODULE_GET_PARAM_NAME,
-    MODULE_PARAM_NAME
+    MODULE_PARAM_NAME,
 };
 
 enum e_system_msg_id {
@@ -81,7 +83,9 @@ enum e_system_msg_id {
     SYSTEM_READY,
     SYSTEM_GET_PORT_STATE,
     SYSTEM_SET_PORT_STATE,
-    SYSTEM_PORT_STATE
+    SYSTEM_PORT_STATE,
+    SYSTEM_GET_PROFILE,
+    SYSTEM_PROFILE,
 };
 
 /*----- Static variable definitions ----------------------------------*/
@@ -119,6 +123,8 @@ static t_status _handle_system_check_ready(void);
 static t_status _handle_system_get_port_state(void);
 static t_status _handle_system_set_port_state(uint8_t *payload, uint8_t length);
 
+static t_status _handle_system_get_profile(void);
+
 static t_status _respond_module_param_value(uint16_t module_id,
                                             uint16_t param_index,
                                             int32_t param_value);
@@ -130,6 +136,8 @@ static t_status _respond_module_param_name(uint16_t module_id,
 static t_status _respond_system_check_ready(void);
 static t_status _respond_system_port_state(uint16_t port_f, uint16_t port_g,
                                            uint16_t port_h);
+
+static t_status _respond_system_profile(t_profile stats);
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -275,6 +283,9 @@ static void _handle_message(uint8_t msg_type, uint8_t msg_id, uint8_t *payload,
     case MSG_TYPE_SYSTEM:
         _handle_system_message(msg_id, payload, length);
         break;
+
+    default:
+        break;
     }
 }
 
@@ -320,6 +331,10 @@ static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
 
     case SYSTEM_SET_PORT_STATE:
         // result = _handle_system_set_port_state(payload, length);
+        break;
+
+    case SYSTEM_GET_PROFILE:
+        result = _handle_system_get_profile();
         break;
 
     default:
@@ -418,6 +433,16 @@ static t_status _handle_system_get_port_state(void) {
     return SUCCESS;
 }
 
+static t_status _handle_system_get_profile(void) {
+
+    t_profile stats = knl_profile_stats();
+
+    _respond_system_profile(stats);
+
+    /// TODO: Error handling and protocol reset.
+    return SUCCESS;
+}
+
 static t_status _respond_module_param_value(uint16_t module_id,
                                             uint16_t param_index,
                                             int32_t param_value) {
@@ -467,6 +492,21 @@ static t_status _respond_system_port_state(uint16_t port_f, uint16_t port_g,
                          port_h & 0xff, (port_h >> 8) & 0xff};
 
     _transmit_message(MSG_TYPE_SYSTEM, SYSTEM_PORT_STATE, payload,
+                      sizeof(payload));
+
+    return SUCCESS;
+}
+
+static t_status _respond_system_profile(t_profile stats) {
+
+    uint8_t payload[] = {
+        stats.period & 0xff,         (stats.period >> 8) & 0xff,
+        (stats.period >> 16) & 0xff, (stats.period >> 24) & 0xff,
+        stats.cycles & 0xff,         (stats.cycles >> 8) & 0xff,
+        (stats.cycles >> 16) & 0xff, (stats.cycles >> 24) & 0xff,
+    };
+
+    _transmit_message(MSG_TYPE_SYSTEM, SYSTEM_PROFILE, payload,
                       sizeof(payload));
 
     return SUCCESS;

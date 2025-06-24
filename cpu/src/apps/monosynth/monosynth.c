@@ -37,13 +37,16 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Includes -----------------------------------------------------*/
 
 #include <stdint.h>
+#include <string.h>
 
 #include "freetribe.h"
 
+#include "ft_error.h"
 #include "keyboard.h"
 
 #include "leaf-config.h"
 #include "param_scale.h"
+#include "svc_dsp.h"
 #include "svc_panel.h"
 
 #include "gui_task.h"
@@ -80,6 +83,8 @@ under the terms of the GNU Affero General Public License as published by
 #define DEFAULT_SCALE_NOTES NOTES_PHRYGIAN_DOMINANT
 #define DEFAULT_SCALE_TONES 12
 #define DEFAULT_SCALE_MODE 0
+
+#define PROFILE_INTERVAL 100
 
 /*----- Typedefs -----------------------------------------------------*/
 
@@ -122,6 +127,8 @@ static void _set_mod_speed(uint32_t mod_speed);
 
 static void _lut_init(void);
 
+static void _profile_callback(uint32_t period, uint32_t cycles);
+
 /*----- Extern function implementations ------------------------------*/
 
 /**
@@ -153,6 +160,9 @@ t_status app_init(void) {
 
     ft_register_tick_callback(0, _tick_callback);
 
+    ft_register_dsp_callback(MSG_TYPE_SYSTEM, SYSTEM_PROFILE,
+                             _profile_callback);
+
     // Initialise GUI.
     gui_task();
 
@@ -171,8 +181,40 @@ void app_run(void) { gui_task(); }
 /*----- Static function implementations ------------------------------*/
 
 static void _tick_callback(void) {
-    //
+
+    static uint32_t tick_count;
+
     module_process();
+
+    if (tick_count++ >= PROFILE_INTERVAL) {
+
+        svc_dsp_get_profile();
+
+        tick_count = 0;
+    }
+}
+
+static void _profile_callback(uint32_t period, uint32_t cycles) {
+
+    uint32_t percent;
+
+    char buf[4] = {0};
+
+    // Clear display.
+    memset(buf, 0x20, sizeof(buf) - 1);
+    gui_print(1, 55, buf);
+
+    percent = (uint32_t)(((float)cycles / (float)period) * 100.0);
+
+    if (percent < 1000) {
+
+        itoa(percent, buf, 10);
+
+    } else {
+        strncpy(buf, "ERR", sizeof(buf));
+    }
+
+    gui_print(1, 55, buf);
 }
 
 /**
