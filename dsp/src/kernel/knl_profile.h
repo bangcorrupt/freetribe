@@ -47,11 +47,7 @@ extern "C" {
 
 #include <blackfin.h>
 
-<<<<<<< HEAD
 /// TODO: Why does including builtins.h break build?
-=======
-/// TODO: Including builtins.h breaks build.
->>>>>>> profile
 //
 // #include <builtins.h>
 
@@ -73,26 +69,10 @@ extern uint64_t g_module_cycles;
 
 /*----- Extern function prototypes -----------------------------------*/
 
-<<<<<<< HEAD
-// __inline__ __attribute__((always_inline)) static int cycles() {
-//
-//     volatile long int ret;
-//
-//     __asm__ __volatile__("%0 = CYCLES;\n\t" : "=&d"(ret) : : "R1");
-//
-//     return ret;
-// }
-
 __inline__ __attribute__((always_inline)) static uint64_t cycles(void) {
 
     uint64_t ret;
 
-=======
-__inline__ __attribute__((always_inline)) static uint64_t cycles(void) {
-
-    uint64_t ret;
-
->>>>>>> profile
     asm volatile("%0=cycles; %H0=cycles2;" : "=d"(ret));
 
     return ret;
