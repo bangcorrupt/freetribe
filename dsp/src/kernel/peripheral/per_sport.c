@@ -49,6 +49,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "per_sport.h"
 
+#include "knl_profile.h"
+
 /*----- Macros -------------------------------------------------------*/
 
 /// TODO: Add this to defBF52x_base.h and rebuild toolchain.
@@ -100,6 +102,10 @@ static t_dma_desc g_sport0_rx_dma_c;
 static t_dma_desc g_sport0_tx_dma_a;
 static t_dma_desc g_sport0_tx_dma_b;
 static t_dma_desc g_sport0_tx_dma_c;
+
+static uint64_t g_start;
+static uint64_t g_stop;
+static uint64_t g_elapsed;
 
 static uint64_t g_start;
 static uint64_t g_stop;

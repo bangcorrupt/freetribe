@@ -107,6 +107,8 @@ int main(void) {
 
             start = cycles();
 
+            start = cycles();
+
             // disable_interrupts();
 
             /// TODO: Maybe disable interrupts while processing audio.
@@ -114,6 +116,10 @@ int main(void) {
             module_process(sport0_get_rx_buffer(), sport0_get_tx_buffer());
 
             sport0_block_processed();
+
+            stop = cycles();
+
+            g_module_cycles = stop - start;
 
             stop = cycles();
 

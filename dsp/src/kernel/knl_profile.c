@@ -36,8 +36,11 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
-#include "cdefBF52x_base.h"
-#include "gcc.h"
+#include <stdint.h>
+
+#include "per_sport.h"
+
+#include "knl_profile.h"
 
 #include <stdint.h>
 
