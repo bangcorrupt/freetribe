@@ -37,6 +37,7 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Includes -----------------------------------------------------*/
 
 #include <stdint.h>
+#include <string.h>
 
 #include "freetribe.h"
 
@@ -196,38 +197,25 @@ static void _tick_callback(void) {
 
 static void _profile_callback(uint32_t period, uint32_t cycles) {
 
-    static uint32_t peak;
-
     uint32_t percent;
 
-    char buf[11] = {0};
+    char buf[4] = {0};
 
-    if (cycles > peak) {
-        peak = cycles;
-    }
+    // Clear display.
+    memset(buf, 0x20, sizeof(buf) - 1);
+    gui_print(1, 55, buf);
 
     percent = (uint32_t)(((float)cycles / (float)period) * 100.0);
 
-    // memset(buf, 0x20, sizeof(buf));
-    // gui_print(1, 55, buf);
+    if (percent < 1000) {
 
-    // itoa(cycles, buf, 10);
-    // gui_print(1, 55, buf);
-    //
-    // memset(buf, 0x20, sizeof(buf));
-    // gui_print(52, 55, buf);
-    // // ft_print(buf);
-    //
-    // itoa(period, buf, 10);
-    // gui_print(52, 55, buf);
-    // // ft_print(buf);
-    //
-    // memset(buf, 0x20, sizeof(buf));
-    // gui_print(107, 55, buf);
+        itoa(percent, buf, 10);
 
-    itoa(percent, buf, 10);
+    } else {
+        strncpy(buf, "ERR", sizeof(buf));
+    }
+
     gui_print(1, 55, buf);
-    // ft_print(buf);
 }
 
 /**
