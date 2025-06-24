@@ -44,15 +44,16 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "aleph.h"
 
-#include "custom_aleph_monovoice.h"
 #include "common/config.h"
 #include "common/params.h"
+#include "custom_aleph_monovoice.h"
 
-void module_set_param_voice(uint16_t voice_index,uint16_t param_index, int32_t value);
+void module_set_param_voice(uint16_t voice_index, uint16_t param_index,
+                            int32_t value);
 
 /*----- Macros -------------------------------------------------------*/
 
-#define MEMPOOL_SIZE (0x2000)
+#define MEMPOOL_SIZE (0x1000)
 
 /// TODO: Struct for parameter type.
 ///         scaler,
@@ -63,7 +64,6 @@ void module_set_param_voice(uint16_t voice_index,uint16_t param_index, int32_t v
 
 // #define DEFAULT_CUTOFF 0x7f // Index in pitch LUT.
 
-
 /// TODO: Move to common location.
 /**
  * @brief   Enumeration of module parameters.
@@ -72,8 +72,6 @@ void module_set_param_voice(uint16_t voice_index,uint16_t param_index, int32_t v
  */
 
 /*----- Typedefs -----------------------------------------------------*/
-
-
 
 typedef struct {
 
@@ -107,19 +105,16 @@ void module_init(void) {
     int i;
     for (i = 0; i < MAX_VOICES; i++) {
         Custom_Aleph_MonoVoice_init(&g_module.voice[i], &g_aleph);
-    
-        module_set_param_voice(i,PARAM_AMP_LEVEL, FR32_MAX);
-        module_set_param_voice(i,PARAM_OSC_TYPE, 2);
-        module_set_param_voice(i,PARAM_OSC_2_TYPE, 2);
-        module_set_param_voice(i,PARAM_FREQ, 220 << 16);
-        module_set_param_voice(i,PARAM_TUNE, FIX16_ONE);
-        module_set_param_voice(i,PARAM_CUTOFF, 0x326f6abb);
-        module_set_param_voice(i,PARAM_RES, FR32_MAX);
+
+        module_set_param_voice(i, PARAM_AMP_LEVEL, FR32_MAX);
+        module_set_param_voice(i, PARAM_OSC_TYPE, 2);
+        module_set_param_voice(i, PARAM_OSC_2_TYPE, 2);
+        module_set_param_voice(i, PARAM_FREQ, 220 << 16);
+        module_set_param_voice(i, PARAM_TUNE, FIX16_ONE);
+        module_set_param_voice(i, PARAM_CUTOFF, 0x326f6abb);
+        module_set_param_voice(i, PARAM_RES, FR32_MAX);
     }
 }
-
-
-
 
 /**
  * @brief   Process audio.
@@ -129,32 +124,35 @@ void module_init(void) {
  */
 void module_process(fract32 *in, fract32 *out) {
 
-    
     fract32 output;
-    //fract32 amp_level_scaled = ;///MAX_VOICES; // already scaled in _next
+    // fract32 amp_level_scaled = ;///MAX_VOICES; // already scaled in _next
 
-    
-
-    output = mult_fr1x32x32(Custom_Aleph_MonoVoice_next(&g_module.voice[0]), g_module.amp_level);
+    output = mult_fr1x32x32(Custom_Aleph_MonoVoice_next(&g_module.voice[0]),
+                            g_module.amp_level);
     int i;
     for (i = 1; i < MAX_VOICES; i++) {
-        output = add_fr1x32(output, mult_fr1x32x32(Custom_Aleph_MonoVoice_next(&g_module.voice[i]), g_module.amp_level));
-        //output += mult_fr1x32x32(Custom_Aleph_MonoVoice_next(&g_module.voice[i]), g_module.amp_level);
+        output = add_fr1x32(output, mult_fr1x32x32(Custom_Aleph_MonoVoice_next(
+                                                       &g_module.voice[i]),
+                                                   g_module.amp_level));
+        // output +=
+        // mult_fr1x32x32(Custom_Aleph_MonoVoice_next(&g_module.voice[i]),
+        // g_module.amp_level);
     }
 
-    // if global filter, use the first voice's filter.
-    #ifdef VOICE_MODE_PARAPHONIC
+// if global filter, use the first voice's filter.
+#ifdef VOICE_MODE_PARAPHONIC
     output = Custom_Aleph_MonoVoice_apply_filter(&g_module.voice[0], output);
-    #endif
+#endif
 
     // Set output.
     out[0] = output;
     out[1] = output;
 }
 
-
-void module_set_param_voice(uint16_t voice_index,uint16_t param_index, int32_t value) {
-    uint16_t paramWithOffset = PARAM_VOICE_OFFSET(voice_index, param_index, PARAM_COUNT);
+void module_set_param_voice(uint16_t voice_index, uint16_t param_index,
+                            int32_t value) {
+    uint16_t paramWithOffset =
+        PARAM_VOICE_OFFSET(voice_index, param_index, PARAM_COUNT);
     module_set_param(paramWithOffset, value);
 }
 
@@ -166,9 +164,10 @@ void module_set_param_voice(uint16_t voice_index,uint16_t param_index, int32_t v
  */
 void module_set_param(uint16_t param_index_with_offset, int32_t value) {
 
-    uint16_t param_index =  REMOVE_PARAM_OFFSET(param_index_with_offset,PARAM_COUNT);
-    int voice_number = PARAM_VOICE_NUMBER(param_index_with_offset,PARAM_COUNT);
-    //voice_number = 1;
+    uint16_t param_index =
+        REMOVE_PARAM_OFFSET(param_index_with_offset, PARAM_COUNT);
+    int voice_number = PARAM_VOICE_NUMBER(param_index_with_offset, PARAM_COUNT);
+    // voice_number = 1;
 
     switch (param_index) {
 
@@ -185,7 +184,8 @@ void module_set_param(uint16_t param_index_with_offset, int32_t value) {
         break;
 
     case PARAM_TUNE:
-        Custom_Aleph_MonoVoice_set_freq_offset(&g_module.voice[voice_number], value);
+        Custom_Aleph_MonoVoice_set_freq_offset(&g_module.voice[voice_number],
+                                               value);
         break;
 
     case PARAM_AMP_LEVEL:
@@ -201,15 +201,18 @@ void module_set_param(uint16_t param_index_with_offset, int32_t value) {
         break;
 
     case PARAM_OSC_TYPE:
-        Custom_Aleph_MonoVoice_set_shape_a(&g_module.voice[voice_number], value);
+        Custom_Aleph_MonoVoice_set_shape_a(&g_module.voice[voice_number],
+                                           value);
         break;
 
     case PARAM_OSC_2_TYPE:
-        Custom_Aleph_MonoVoice_set_shape_b(&g_module.voice[voice_number], value);
+        Custom_Aleph_MonoVoice_set_shape_b(&g_module.voice[voice_number],
+                                           value);
         break;
 
     case PARAM_FILTER_TYPE:
-        Custom_Aleph_MonoVoice_set_filter_type(&g_module.voice[voice_number], value);
+        Custom_Aleph_MonoVoice_set_filter_type(&g_module.voice[voice_number],
+                                               value);
         break;
 
     default:
