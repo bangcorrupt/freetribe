@@ -444,7 +444,7 @@ static void _set_filter_type(uint8_t filter_type) {
         ft_set_led(LED_HPF, 0);
 
         module_set_param(PARAM_FILTER_TYPE,
-                         (1.0 / OSC_TYPE_COUNT) * FILTER_TYPE_LPF);
+                         (1.0 / FILTER_TYPE_COUNT) * FILTER_TYPE_LPF);
         break;
 
     case FILTER_TYPE_BPF:
@@ -453,7 +453,7 @@ static void _set_filter_type(uint8_t filter_type) {
         ft_set_led(LED_HPF, 0);
 
         module_set_param(PARAM_FILTER_TYPE,
-                         (1.0 / OSC_TYPE_COUNT) * FILTER_TYPE_BPF);
+                         (1.0 / FILTER_TYPE_COUNT) * FILTER_TYPE_BPF);
         break;
 
     case FILTER_TYPE_HPF:
@@ -462,7 +462,7 @@ static void _set_filter_type(uint8_t filter_type) {
         ft_set_led(LED_HPF, 1);
 
         module_set_param(PARAM_FILTER_TYPE,
-                         (1.0 / OSC_TYPE_COUNT) * FILTER_TYPE_HPF);
+                         (1.0 / FILTER_TYPE_COUNT) * FILTER_TYPE_HPF);
         break;
 
     default:
