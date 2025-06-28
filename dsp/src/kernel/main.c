@@ -57,9 +57,6 @@ under the terms of the GNU Affero General Public License as published by
 
 static uint32_t g_saved_imask;
 
-static uint32_t g_audio_callback_time[CYCLE_LOG_LENGTH];
-static uint32_t g_cpu_task_time[CYCLE_LOG_LENGTH];
-
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
@@ -81,6 +78,9 @@ inline void enable_interrupts(void) {
 
 int main(void) {
 
+    uint64_t start;
+    uint64_t stop;
+
     *pPORTGIO_SET = HWAIT;
 
     /// TODO: Move to initcode, before main.
@@ -97,13 +97,14 @@ int main(void) {
     svc_cpu_task();
 
     sport0_init();
-    // sport1_init();
 
     module_init();
 
     while (true) {
 
         if (sport0_frame_received()) {
+
+            start = cycles();
 
             // disable_interrupts();
 
@@ -112,6 +113,10 @@ int main(void) {
             module_process(sport0_get_rx_buffer(), sport0_get_tx_buffer());
 
             sport0_frame_processed();
+
+            stop = cycles();
+
+            g_module_cycles = stop - start;
 
             // enable_interrupts();
         }

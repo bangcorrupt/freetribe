@@ -46,6 +46,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "per_sport.h"
 
+#include "knl_profile.h"
+
 /*----- Macros -------------------------------------------------------*/
 
 /// TODO: Add this to defBF52x_base.h and rebuild toolchain.
@@ -71,6 +73,10 @@ static fract32 g_codec_in[2];
 static fract32 g_codec_out[2];
 
 static bool g_sport0_frame_received = false;
+
+static uint64_t g_start;
+static uint64_t g_stop;
+static uint64_t g_elapsed;
 
 /*----- Extern variable definitions ----------------------------------*/
 
@@ -220,12 +226,18 @@ bool sport0_frame_received(void) { return g_sport0_frame_received; }
 
 void sport0_frame_processed(void) { g_sport0_frame_received = false; }
 
+uint64_t sport0_period(void) { return g_elapsed; }
+
 /// TODO: Block processing.  For now we process each frame as it arrives.
 __attribute__((interrupt_handler)) static void _sport0_isr(void) {
 
     // Clear interrupt status.
     *pDMA3_IRQ_STATUS = DMA_DONE;
     ssync();
+
+    g_stop = cycles();
+
+    g_elapsed = g_stop - g_start;
 
     /// TODO: DMA ping-pong block buffer.
 
@@ -238,6 +250,8 @@ __attribute__((interrupt_handler)) static void _sport0_isr(void) {
     g_codec_tx_buffer[1] = g_codec_out[1];
 
     g_sport0_frame_received = true;
+
+    g_start = cycles();
 }
 
 /*----- Static function implementations ------------------------------*/
