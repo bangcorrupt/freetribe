@@ -19,3 +19,5 @@ compile_commands.json
 *.out
 cpu/src/resources/bfin_ldr.h
 run.sh
+freetribe.code-workspace
+.vscode

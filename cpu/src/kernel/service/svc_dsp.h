@@ -59,7 +59,8 @@ enum e_module_msg_id {
     MODULE_SET_PARAM_VALUE,
     MODULE_PARAM_VALUE,
     MODULE_GET_PARAM_NAME,
-    MODULE_PARAM_NAME
+    MODULE_PARAM_NAME,
+    MODULE_TRANSMIT_BUFFER,
 };
 
 enum e_system_msg_id {
@@ -70,6 +71,9 @@ enum e_system_msg_id {
     SYSTEM_PORT_STATE,
     SYSTEM_GET_PROFILE,
     SYSTEM_PROFILE,
+    SYSTEM_REQUEST_HOSTDMA_CONFIG,
+    SYSTEM_AWAIT_HOSTDMA_HANDSHAKE,
+    SYSTEM_CONFIRM_HOSTDMA_HANDSHAKE,
 };
 
 /*----- Typedefs -----------------------------------------------------*/

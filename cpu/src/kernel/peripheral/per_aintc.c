@@ -36,9 +36,12 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
+#include "soc_AM1808.h"
 #include "csl_interrupt.h"
+#include "csl_gpio.h"
 
 #include "per_aintc.h"
+#include "per_gpio.h"
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -70,6 +73,33 @@ void per_aintc_init(void) {
 
     // Enable host interrupts in AINTC.
     IntIRQEnable();
+}
+
+void per_aintc_register_gpio_interrupt(uint8_t channel,
+                                       uint8_t pin,
+                                       uint8_t int_type,
+                                       void (*isr)(void)) {
+
+    uint8_t bank = per_gpio_bank_from_pin(pin);
+    uint8_t system_int = SYS_INT_GPIOB0 + bank;
+    
+    GPIODirModeSet(SOC_GPIO_0_REGS, pin, GPIO_DIR_INPUT);
+    GPIOIntTypeSet(SOC_GPIO_0_REGS, pin, int_type);
+    GPIOBankIntEnable(SOC_GPIO_0_REGS, bank);
+
+    IntChannelSet(system_int, channel);
+    IntRegister(system_int, isr);
+    IntSystemEnable(system_int);
+
+}
+
+void per_aintc_clear_status_gpio(uint8_t pin) {
+    IntSystemStatusClear(SYS_INT_GPIOB0 + per_gpio_bank_from_pin(pin));
+    GPIOPinIntClear(SOC_GPIO_0_REGS, pin);
+}
+
+void per_aintc_change_gpio_int_type(uint8_t pin, uint8_t int_type) {
+    GPIOIntTypeSet(SOC_GPIO_0_REGS, pin, int_type);
 }
 
 /*----- Static function implementations ------------------------------*/

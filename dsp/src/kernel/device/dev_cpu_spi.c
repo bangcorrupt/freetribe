@@ -65,14 +65,14 @@ static uint8_t g_spi_tx_rbmem[SPI_TX_BUF_LEN];
 static uint8_t g_cpu_spi_rx_byte;
 static uint8_t g_cpu_spi_tx_byte;
 
-static bool g_spi_tx_complete = true;
+// static bool g_spi_tx_complete = true; // NOTE: was never used
 
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
 
 static int _cpu_spi_tx_dequeue(uint8_t *spi_byte);
-static void _cpu_spi_rx_enqueue(uint8_t *spi_byte);
+static int _cpu_spi_rx_enqueue(uint8_t *spi_byte);
 
 static void _cpu_spi_trx_byte(uint8_t *tx_byte, uint8_t *rx_byte);
 
@@ -122,11 +122,10 @@ static int _cpu_spi_tx_dequeue(uint8_t *spi_byte) {
     return ring_buffer_get(g_spi_tx_rbd, spi_byte);
 }
 
-/// TODO: Check/return status.
-static void _cpu_spi_rx_enqueue(uint8_t *spi_byte) {
+static int _cpu_spi_rx_enqueue(uint8_t *spi_byte) {
 
     // Overwrite on overflow?
-    ring_buffer_put_force(g_spi_rx_rbd, spi_byte);
+    return ring_buffer_put_force(g_spi_rx_rbd, spi_byte);
 }
 
 static void _cpu_spi_trx_byte(uint8_t *tx_byte, uint8_t *rx_byte) {

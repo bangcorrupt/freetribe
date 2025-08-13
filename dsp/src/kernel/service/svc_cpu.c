@@ -45,6 +45,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "per_gpio.h"
 #include "per_spi.h"
+#include "per_hostdma.h"
+#include "dev_cpu_spi.h"
 
 #include "module.h"
 
@@ -56,7 +58,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Typedefs -----------------------------------------------------*/
 
-typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } t_cpu_task_state;
+typedef enum { STATE_INIT, STATE_RUN, STATE_HANDSHAKE, STATE_ERROR } t_cpu_task_state;
 
 typedef enum {
     PARSE_START,
@@ -86,6 +88,9 @@ enum e_system_msg_id {
     SYSTEM_PORT_STATE,
     SYSTEM_GET_PROFILE,
     SYSTEM_PROFILE,
+    SYSTEM_REQUEST_HOSTDMA_CONFIG,
+    SYSTEM_AWAIT_HOSTDMA_HANDSHAKE,
+    SYSTEM_CONFIRM_HOSTDMA_HANDSHAKE,
 };
 
 /*----- Static variable definitions ----------------------------------*/
@@ -121,7 +126,7 @@ static t_status _handle_module_get_param_name(uint8_t *payload, uint8_t length);
 static t_status _handle_system_check_ready(void);
 
 static t_status _handle_system_get_port_state(void);
-static t_status _handle_system_set_port_state(uint8_t *payload, uint8_t length);
+// static t_status _handle_system_set_port_state(uint8_t *payload, uint8_t length);
 
 static t_status _handle_system_get_profile(void);
 
@@ -139,6 +144,7 @@ static t_status _respond_system_port_state(uint16_t port_f, uint16_t port_g,
 
 static t_status _respond_system_profile(t_profile stats);
 
+static int32_t g_test;
 /*----- Extern function implementations ------------------------------*/
 
 void svc_cpu_task(void) {
@@ -150,6 +156,7 @@ void svc_cpu_task(void) {
     switch (state) {
 
     case STATE_INIT:
+        g_test = 80000;
         if (_cpu_init() == SUCCESS) {
             state = STATE_RUN;
         }
@@ -160,7 +167,13 @@ void svc_cpu_task(void) {
         /// TODO: case STATE_HANDSHAKE:
 
     case STATE_RUN:
-
+        
+        if (g_test <= 0) {
+            per_hostdma_transfer(0xC0000000, (uint16_t*)0x00000010, 12);
+            g_test = 800000;
+        } else {
+            g_test--;
+        }
         // Handle received bytes.
         if (dev_cpu_spi_rx_dequeue(&cpu_byte) == SUCCESS) {
             _cpu_receive(cpu_byte);
@@ -189,9 +202,13 @@ static t_status _cpu_init(void) {
     // Initialise CPU SPI device driver.
     dev_cpu_spi_init();
 
+    per_hostdma_init();
+    // _transmit_message(MSG_TYPE_SYSTEM, SYSTEM_REQUEST_HOSTDMA_CONFIG, NULL, 0); // @TODO: maybe we can do without and rely on timing
+
     // _transmit_message(MSG_TYPE_SYSTEM, SYSTEM_READY, NULL, 0);
 
     /// TODO: Handhsake.
+
 
     result = SUCCESS;
 
@@ -336,6 +353,11 @@ static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
     case SYSTEM_GET_PROFILE:
         result = _handle_system_get_profile();
         break;
+    
+    case SYSTEM_AWAIT_HOSTDMA_HANDSHAKE:
+        // per_hostdma_send_delayed_handshake_signal();
+        result = SUCCESS;
+        break;
 
     default:
         result = ERROR;
@@ -367,8 +389,9 @@ static t_status _handle_module_get_param_value(uint8_t *payload,
 static t_status _handle_module_set_param_value(uint8_t *payload,
                                                uint8_t length) {
 
+                                                
     /// TODO: Union struct for message parsing.
-    int16_t module_id = (payload[1] << 8) | payload[0];
+    // int16_t module_id = (payload[1] << 8) | payload[0];
 
     uint16_t param_index = (payload[3] << 8) | payload[2];
 

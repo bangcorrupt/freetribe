@@ -42,6 +42,7 @@ under the terms of the GNU Affero General Public License as published by
 #include "per_pinmux.h"
 #include "per_spi.h"
 #include "per_uart.h"
+#include "per_emifa.h"
 
 #include "dev_board.h"
 
@@ -93,49 +94,51 @@ void dev_board_init(void) {
 
     /// TODO: Move up to svc_system.
     dev_flash_init();
+
+    per_emifa_init();
 }
 
-/*----- Static function implementations ------------------------------*/
-
 /*
- * @brief   Shut down periperals.
- *
- *          Returns main board to unitialised state,
- *          allowing factory SBL and APP to boot.
- *
- * @param  none
- *
- * @return none
- *
- */
+* @brief   Shut down periperals.
+*
+*          Returns main board to unitialised state,
+*          allowing factory SBL and APP to boot.
+*
+* @param  none
+*
+* @return none
+*
+*/
 void dev_board_terminate(void) {
     // Allows handing off to factory bootloader.
     // Factory SBL will hang if DDR already initialised.
     per_ddr_terminate();
-
+    
     // Flush TRS MIDI before terminating MCU.
     per_uart_terminate(1);
     per_uart_terminate(0);
-
+    
     _hardware_terminate();
 }
 
 void dev_board_power_off(void) { per_gpio_set(7, 14, 0); }
 
+/*----- Static function implementations ------------------------------*/
+
 /*
- * @brief   Set GPIO to initialise board hardware?
- *
- * @param   none
- *
- * @return  none
- */
+* @brief   Set GPIO to initialise board hardware?
+*
+* @param   none
+*
+* @return  none
+*/
 static void _hardware_init(void) {
-
+    
     /// TODO: What does each pin represent?
-
+    
     // MCU out of reset.
     per_gpio_set_indexed(105, 1); // Set GP6P8
-
+    
     per_gpio_set_indexed(103, 1); // Set GP6P6
 
     // Only red lights if not set.

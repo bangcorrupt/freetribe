@@ -43,6 +43,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "per_gpio.h"
 #include "per_spi.h"
+#include "per_emifa.h"
 
 #include "dev_dsp.h"
 
@@ -127,8 +128,6 @@ void dev_dsp_init(void) {
     //
     _dsp_spi_init();
 
-    /// TODO: EMIFA driver.
-    //
     // _dsp_emifa_init();
 }
 

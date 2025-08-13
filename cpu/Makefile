@@ -31,10 +31,11 @@ BIN=$(PREFIX)objcopy
 
 # C compilation options.
 NEST_INT ?= 0
-OPTIMISE ?= -g3 -Og
+# OPTIMISE ?= -g3 -Og
 # OPTIMISE ?= -O3
+OPTIMISE ?= -Os
 CPU ?= arm926ej-s
-CFLAGS := -mcpu=$(CPU) $(OPTIMISE)  -fdata-sections -ffunction-sections -fanalyzer -fstack-usage -Wstack-usage=128 -Wall
+CFLAGS := -mcpu=$(CPU) $(OPTIMISE)  -fdata-sections -ffunction-sections -fanalyzer -fstack-usage -Wstack-usage=128 -Wall -Wno-unused
 
 # Assembly compilation options.
 ASM_FLAGS := -x assembler-with-cpp
