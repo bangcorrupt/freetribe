@@ -48,6 +48,12 @@ extern "C" {
 
 /*----- Macros -------------------------------------------------------*/
 
+/** @brief Get the bank number corresponding to pin number. */
+static inline uint8_t per_gpio_bank_from_pin(uint8_t pin_index) {
+    uint8_t bank_index = ((pin_index - 1) >> 4) * !!pin_index;
+    return bank_index;
+}
+
 /*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
