@@ -449,7 +449,8 @@ static t_status _respond_module_param_value(uint16_t module_id,
 
     uint8_t payload[] = {module_id & 0xff,   (module_id >> 8) & 0xff,
                          param_index & 0xff, (param_index >> 8) & 0xff,
-                         param_value & 0xff, (param_value >> 8 & 0xff)};
+                         param_value & 0xff, (param_value >> 8 & 0xff),
+                         (param_value >> 16 & 0xff), (param_value >> 24 & 0xff)};
 
     _transmit_message(MSG_TYPE_MODULE, MODULE_PARAM_VALUE, payload,
                       sizeof(payload));
