@@ -86,6 +86,7 @@ int8_t ft_fill_frame(uint16_t x_start, uint16_t y_start, uint16_t x_end,
 
 void ft_register_print_callback(void (*callback)(char *));
 void ft_print(char *text);
+void ft_printf(const char *format, ...);
 
 void ft_register_midi_callback(event_type event,
                                t_midi_event_callback callback);

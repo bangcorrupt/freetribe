@@ -45,6 +45,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "dev_board.h"
 #include "dev_flash.h"
+#include "dev_dsp_ipc.h"
 
 #include "ft_error.h"
 
@@ -127,6 +128,8 @@ static t_status _system_init(void) {
 
     // Initialise hardware.
     dev_board_init();
+
+    dev_dsp_ipc_init();
 
     /// TODO: How long is necessary?
     ///          Are there signals we can test?

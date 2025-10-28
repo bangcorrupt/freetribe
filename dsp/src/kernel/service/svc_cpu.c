@@ -45,6 +45,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "per_gpio.h"
 #include "per_spi.h"
+#include "dev_cpu_spi.h"
+#include "dev_cpu_ipc.h"
 
 #include "module.h"
 
@@ -56,7 +58,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Typedefs -----------------------------------------------------*/
 
-typedef enum { STATE_INIT, STATE_RUN, STATE_ERROR } t_cpu_task_state;
+typedef enum { STATE_INIT, STATE_RUN, STATE_HANDSHAKE, STATE_ERROR } t_cpu_task_state;
 
 typedef enum {
     PARSE_START,
@@ -121,7 +123,7 @@ static t_status _handle_module_get_param_name(uint8_t *payload, uint8_t length);
 static t_status _handle_system_check_ready(void);
 
 static t_status _handle_system_get_port_state(void);
-static t_status _handle_system_set_port_state(uint8_t *payload, uint8_t length);
+// static t_status _handle_system_set_port_state(uint8_t *payload, uint8_t length);
 
 static t_status _handle_system_get_profile(void);
 
@@ -139,6 +141,7 @@ static t_status _respond_system_port_state(uint16_t port_f, uint16_t port_g,
 
 static t_status _respond_system_profile(t_profile stats);
 
+static uint32_t g_test;
 /*----- Extern function implementations ------------------------------*/
 
 void svc_cpu_task(void) {
@@ -150,6 +153,7 @@ void svc_cpu_task(void) {
     switch (state) {
 
     case STATE_INIT:
+        // g_test = 70;
         if (_cpu_init() == SUCCESS) {
             state = STATE_RUN;
         }
@@ -160,7 +164,16 @@ void svc_cpu_task(void) {
         /// TODO: case STATE_HANDSHAKE:
 
     case STATE_RUN:
-
+        
+        dev_cpu_ipc_tick();
+        // g_test++;
+        // if (g_test > 10000000) {
+        //     g_test = 0;
+        // }
+        // if (g_test == 0) {
+        //     dev_cpu_ipc_transfer(0xC0000000, (uint32_t*)0x00000060, 15, NULL, NULL);
+        // }
+        
         // Handle received bytes.
         if (dev_cpu_spi_rx_dequeue(&cpu_byte) == SUCCESS) {
             _cpu_receive(cpu_byte);
@@ -189,9 +202,12 @@ static t_status _cpu_init(void) {
     // Initialise CPU SPI device driver.
     dev_cpu_spi_init();
 
+    dev_cpu_ipc_init();
+
     // _transmit_message(MSG_TYPE_SYSTEM, SYSTEM_READY, NULL, 0);
 
     /// TODO: Handhsake.
+
 
     result = SUCCESS;
 
@@ -336,7 +352,7 @@ static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
     case SYSTEM_GET_PROFILE:
         result = _handle_system_get_profile();
         break;
-
+    
     default:
         result = ERROR;
         break;
@@ -367,8 +383,9 @@ static t_status _handle_module_get_param_value(uint8_t *payload,
 static t_status _handle_module_set_param_value(uint8_t *payload,
                                                uint8_t length) {
 
+                                                
     /// TODO: Union struct for message parsing.
-    int16_t module_id = (payload[1] << 8) | payload[0];
+    // int16_t module_id = (payload[1] << 8) | payload[0];
 
     uint16_t param_index = (payload[3] << 8) | payload[2];
 

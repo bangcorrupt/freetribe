@@ -29,13 +29,13 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    per_gpio.h
+ * @file    macros.h
  *
- * @brief   Public API for GPIO peripheral driver.
+ * @brief   Macros that could be included in utils.h
  */
 
-#ifndef PER_GPIO_H
-#define PER_GPIO_H
+#ifndef MACROS_H
+#define MACROS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,31 +43,44 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
-#include <stdbool.h>
 #include <stdint.h>
 
 /*----- Macros -------------------------------------------------------*/
 
-/** @brief Get the bank number corresponding to pin number. */
-static inline uint8_t per_gpio_bank_from_pin(uint8_t pin_index) {
-    uint8_t bank_index = ((pin_index - 1) >> 4) * !!pin_index;
-    return bank_index;
-}
+//
+// Debugging helpers
+// @TODO: refactor this bitch (would be cool to have a logging pipe
+//        from DSP to CPU... I'm still debugging with sysex&print, haha)
+//                                                             kill me
+//
+#ifdef DEBUG
+#   ifndef BLACKFIN
+#      include "freetribe.h" // ft_print, ft_printf
+#   endif
+#   define DEBUG_LOG(fmt, ...)  ft_printf(fmt, ##__VA_ARGS__)
+#else
+#   define DEBUG_LOG(...)
+#endif
 
-/*----- Typedefs -----------------------------------------------------*/
+#ifdef BLACKFIN
+#define STATIC_ASSERT(cond, msg) \
+    typedef char static_assertion_##msg[(cond) ? 1 : -1]
+#endif
 
-/*----- Extern variable declarations ---------------------------------*/
+// Bit operations
+#define HI16(x)              ((uint16_t)((((uint32_t)(x)) >> 16) & 0xFFFF))
+#define LO16(x)              ((uint16_t)(((uint32_t)(x)) & 0xFFFF))
+#define COMBINE16(high, low) (((uint32_t)(high) << 16) | ((uint32_t)(low) & 0xFFFF))
 
-/*----- Extern function prototypes -----------------------------------*/
+// `*(to_struct*)&my_struct` is undefined behavior with strict aliasing
+#define STRUCT_CAST(to_type, from_val) \
+    ((union { __typeof__(from_val) f; to_type t; }){ .f = (from_val) }).t
 
-void per_gpio_init(void);
-bool per_gpio_get(uint8_t bank, uint8_t pin);
-void per_gpio_set(uint8_t bank, uint8_t pin, bool state);
-void per_gpio_toggle(uint8_t bank, uint8_t pin);
+// Math helpers
+#ifndef MIN
+#   define MIN(A,B) ((A) < (B) ? (A) : (B))
+#endif
 
-bool per_gpio_get_indexed(uint8_t pin_index);
-void per_gpio_set_indexed(uint8_t pin_index, bool state);
-void per_gpio_toggle_indexed(uint8_t pin_index);
 
 #ifdef __cplusplus
 }

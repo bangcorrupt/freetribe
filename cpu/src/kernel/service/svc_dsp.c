@@ -39,6 +39,8 @@ under the terms of the GNU Affero General Public License as published by
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "per_emifa.h"
+
 #include "dev_dsp.h"
 
 #include "ft_error.h"
@@ -179,6 +181,9 @@ void svc_dsp_task(void) {
         break;
 
     case STATE_RUN:
+    
+        per_emifa_task();
+
         // Handle received bytes.
         if (dev_dsp_spi_rx_dequeue(&dsp_byte) == SUCCESS) {
             _dsp_receive(dsp_byte);
