@@ -13,6 +13,7 @@ MEMORY
 {
     OC_RAM (rwx)    : ORIGIN = 0x80000000, LENGTH = 0x20000
     ARM_RAM (rwx)   : ORIGIN = 0xFFFF0000, LENGTH = 0x2000
+    DDR2_RAM (rw)   : ORIGIN = 0xc0000000, LENGTH = 64M /* sk hynix h5ps5162kfr-s5c chip maximum is 64MB */
 }
 
 SECTIONS
@@ -93,5 +94,9 @@ SECTIONS
 
         _stack = .;
 	} > ARM_RAM
+
+
+	_ddr2_start = ORIGIN(DDR2_RAM);
+	_ddr2_end = ORIGIN(DDR2_RAM) + LENGTH(DDR2_RAM);
 
 }

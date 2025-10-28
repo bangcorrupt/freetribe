@@ -22,6 +22,7 @@ MEMORY
   MEM_L1_DATA_B : ORIGIN = 0xFF900000, LENGTH = 0x8000
   MEM_L1_DATA_A : ORIGIN = 0xFF800000, LENGTH = 0x8000
   MEM_L2 : ORIGIN = 0xFEB00000, LENGTH = 0x0
+  MEM_SDRAM : ORIGIN = 0x00000000, LENGTH = 32M
 }
 
 OUTPUT_FORMAT("elf32-bfin", "elf32-bfin",
@@ -257,6 +258,9 @@ SECTIONS
   .debug_varnames  0 : { *(.debug_varnames) }
 
   __stack_end = ORIGIN(MEM_L1_SCRATCH) + LENGTH(MEM_L1_SCRATCH);
+
+  _sdram_start = ORIGIN(MEM_SDRAM);
+  _sdram_end = ORIGIN(MEM_SDRAM) + LENGTH(MEM_SDRAM);
 
   /DISCARD/ : { *(.note.GNU-stack) }
 }

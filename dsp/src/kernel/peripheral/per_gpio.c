@@ -68,6 +68,8 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Static function prototypes -----------------------------------*/
 
+void _test_output(void); // for probing which pins are connected
+
 /*----- Extern function implementations ------------------------------*/
 
 void per_gpio_init(void) {
@@ -136,6 +138,25 @@ void per_gpio_set_port(uint8_t port, uint16_t value) {
 
     case PORT_G:
         *pPORTGIO = value;
+        break;
+
+    default:
+        break;
+    }
+}
+
+void per_gpio_set_dir(uint8_t port, uint8_t pin, bool output) {
+
+    switch (port) {
+
+    case PORT_F:
+        *pPORTFIO_DIR |= pin & output;
+        break;
+    case PORT_G:
+        *pPORTGIO_DIR |= pin & output;
+        break;
+    case PORT_H:
+        *pPORTGIO_DIR |= pin & output;
         break;
 
     default:

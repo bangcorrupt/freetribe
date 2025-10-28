@@ -44,6 +44,7 @@ extern "C" {
 /*----- Includes -----------------------------------------------------*/
 
 #include <stdint.h>
+#include <stdbool.h>
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -61,6 +62,7 @@ typedef enum { PORT_F, PORT_G, PORT_H } e_port;
 void per_gpio_init(void);
 uint16_t per_gpio_get_port(uint8_t port);
 void per_gpio_set_port(uint8_t port, uint16_t value);
+void per_gpio_set_dir(uint8_t port, uint8_t pin, bool output);
 
 #ifdef __cplusplus
 }

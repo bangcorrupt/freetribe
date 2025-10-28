@@ -29,13 +29,14 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    per_gpio.h
+ * @file    dev_shared_mem.h
  *
- * @brief   Public API for GPIO peripheral driver.
+ * @brief   Handles communication between EMIFA and HostDMA
+ *
  */
 
-#ifndef PER_GPIO_H
-#define PER_GPIO_H
+#ifndef DEV_SHARED_MEM_H
+#define DEV_SHARED_MEM_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,31 +44,22 @@ extern "C" {
 
 /*----- Includes -----------------------------------------------------*/
 
-#include <stdbool.h>
 #include <stdint.h>
 
 /*----- Macros -------------------------------------------------------*/
 
-/** @brief Get the bank number corresponding to pin number. */
-static inline uint8_t per_gpio_bank_from_pin(uint8_t pin_index) {
-    uint8_t bank_index = ((pin_index - 1) >> 4) * !!pin_index;
-    return bank_index;
-}
-
 /*----- Typedefs -----------------------------------------------------*/
+
+enum e_shared_mem_state {
+    SHARED_MEM_STATE_AWAIT_CONFIG,
+    SHARED_MEM_STATE_WAIT_DMA_RDY,
+};
 
 /*----- Extern variable declarations ---------------------------------*/
 
 /*----- Extern function prototypes -----------------------------------*/
 
-void per_gpio_init(void);
-bool per_gpio_get(uint8_t bank, uint8_t pin);
-void per_gpio_set(uint8_t bank, uint8_t pin, bool state);
-void per_gpio_toggle(uint8_t bank, uint8_t pin);
-
-bool per_gpio_get_indexed(uint8_t pin_index);
-void per_gpio_set_indexed(uint8_t pin_index, bool state);
-void per_gpio_toggle_indexed(uint8_t pin_index);
+void dev_shared_mem_init();
 
 #ifdef __cplusplus
 }

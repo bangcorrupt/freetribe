@@ -1,0 +1,432 @@
+/*----------------------------------------------------------------------
+
+                     This file is part of Freetribe
+
+                https://github.com/bangcorrupt/freetribe
+
+                                License
+
+                   GNU AFFERO GENERAL PUBLIC LICENSE
+                      Version 3, 19 November 2007
+
+                           AGPL-3.0-or-later
+
+ Freetribe is free software: you can redistribute it and/or modify it
+under the terms of the GNU Affero General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+                  (at your option) any later version.
+
+     Freetribe is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty
+        of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+          See the GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+ along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+                       Copyright bangcorrupt 2023
+
+----------------------------------------------------------------------*/
+
+/**
+ * @file    per_emifa.c.
+ *
+ * @brief   Configuration and handling of EMIFA peripheral.
+ *          EMIFA communicates with the DSP's HostDMA engine and has the
+ *          highest bandwidth for transmitting data between CPU and DSP.
+ */
+
+/*----- Includes -----------------------------------------------------*/
+
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "soc_AM1808.h"
+#include "csl_interrupt.h"
+#include "csl_gpio.h"
+#include "csl_emifa.h"
+#include "hw_emifa2.h"
+#include "hw_types.h"
+#include "hw_syscfg0_AM1808.h"
+#include "per_emifa.h"
+#include "per_aintc.h"
+#include "per_gpio.h"
+#include "freetribe.h" // ft_printf
+
+/*----- Macros -------------------------------------------------------*/
+
+#ifndef MIN
+#define MIN(A,B) ((A) < (B) ? (A) : (B))
+#endif
+
+#define EMIFA_ASYNC_CFG2 HWREG(SOC_EMIFA_0_REGS + EMIFA_CE2CFG)
+
+#define HDMA_DATA_PORT ((volatile uint16_t*)(SOC_EMIFA_CS2_ADDR + 0x00))
+#define HDMA_CONFIG_PORT ((volatile uint16_t*)(SOC_EMIFA_CS2_ADDR + 0x02))
+
+#define HOST_STATUS_DMA_RDY (1 << 0)
+#define HOST_STATUS_FIFOFULL (1 << 1)
+#define HOST_STATUS_FIFOEMPTY (1 << 2)
+#define HOST_STATUS_DMA_CMPLT (1 << 3)
+#define HOST_STATUS_HSHK (1 << 4)
+#define HOST_STATUS_HOSTDP_TOUT (1 << 5)
+#define HOST_STATUS_HIRQ (1 << 6)
+#define HOST_STATUS_ALLOW_CNFG (1 << 7)
+#define HOST_STATUS_DMA_DIR (1 << 8)
+
+#define HOST_CONFIG_WNR (1 << 1)   // 0=Host read, 1=Host write
+#define HOST_CONFIG_DMA2D (1 << 4) // 0=Linear   , 1=Two-dimensional
+#define HOST_CONFIG_FLOW (1 << 12) // 0=Stop mode, 1=Autobuffer mode
+
+#define HDMA_MODE_HOST_READ false
+#define HDMA_MODE_HOST_WRITE true
+
+// #define PIN_EMA_D_15       56 // GP3[7]  <-> PH15
+// #define PIN_EMA_D_14       55 // GP3[6]  <-> PH14
+// #define PIN_EMA_D_13       54 // GP3[5]  <-> PH13
+// #define PIN_EMA_D_12       53 // GP3[4]  <-> PH12
+// #define PIN_EMA_D_11       52 // GP3[3]  <-> PH11
+// #define PIN_EMA_D_10       51 // GP3[2]  <-> PH10
+// #define PIN_EMA_D_9        50 // GP3[1]  <-> PH9
+// #define PIN_EMA_D_8        49 // GP3[0]  <-> PH8
+// #define PIN_EMA_D_7        80 // GP4[15] <-> PH7
+// #define PIN_EMA_D_6        79 // GP4[14] <-> PH6
+// #define PIN_EMA_D_5        78 // GP4[13] <-> PH5
+// #define PIN_EMA_D_4        77 // GP4[12] <-> PH4
+// #define PIN_EMA_D_3        76 // GP4[11] <-> PH3
+// #define PIN_EMA_D_2        75 // GP4[10] <-> PH2
+// #define PIN_EMA_D_1        74 // GP4[9]  <-> PH1
+// #define PIN_EMA_D_0        73 // GP4[8]  <-> PH0
+// #define PIN_EMA_A_22       71 // GP4[6]
+// #define PIN_EMA_A_21       70 // GP4[5]
+// #define PIN_EMA_A_20       69 // GP4[4]
+// #define PIN_EMA_A_19       68 // GP4[3]
+// #define PIN_EMA_A_18       67 // GP4[2]
+// #define PIN_EMA_A_17       66 // GP4[1]
+// #define PIN_EMA_A_16       65 // GP4[0]
+// #define PIN_EMA_A_15       96 // GP5[15]
+// #define PIN_EMA_A_14       95 // GP5[14]
+// #define PIN_EMA_A_13       94 // GP5[13]
+// #define PIN_EMA_A_12       93 // GP5[12]
+// #define PIN_EMA_A_11       92 // GP5[11]
+// #define PIN_EMA_A_10       91 // GP5[10]
+// #define PIN_EMA_A_9        90 // GP5[9]
+// #define PIN_EMA_A_8        89 // GP5[8]
+// #define PIN_EMA_A_7        88 // GP5[7]
+// #define PIN_EMA_A_6        87 // GP5[6]
+// #define PIN_EMA_A_5        86 // GP5[5]
+// #define PIN_EMA_A_4        85 // GP5[4]
+// #define PIN_EMA_A_3        84 // GP5[3]
+// #define PIN_EMA_A_2        83 // GP5[2]
+// #define PIN_EMA_A_1        82 // GP5[1]
+// #define PIN_EMA_A_0        81 // GP5[0]
+// #define PIN_EMA_BA_0       41 // GP2[8]
+// #define PIN_EMA_BA_1       42 // GP2[9]
+// #define PIN_EMA_CLK        40 // GP2[7]
+// #define PIN_EMA_SDCKE      39 // GP2[6]
+// #define PIN_EMA_RAS        38 // GP2[5]
+// #define PIN_EMA_CAS        37 // GP2[4]
+// #define PIN_EMA_CS_0       33 // GP2[0]
+// #define PIN_EMA_CS_2       64 // GP3[15]
+// #define PIN_EMA_CS_3       63 // GP3[14]
+// #define PIN_EMA_CS_4       62 // GP3[13]
+// #define PIN_EMA_CS_5       61 // GP3[12]
+// #define PIN_EMA_A_RW       58 // GP3[9]
+// #define PIN_EMA_WE         60 // GP3[11] (can be used for interrupt!)
+// #define PIN_EMA_WEN_DQM_1  35 // GP2[2]
+// #define PIN_EMA_WEN_DQM_0  36 // GP2[3]
+// #define PIN_EMA_OE         59 // GP3[10] (can be used for interrupt!)
+// #define PIN_EMA_WAIT_0     57 // GP3[8]
+// #define PIN_EMA_WAIT_1     34 // GP2[1]
+
+// #define HRDY_PIN PIN_EMA_WAIT_0
+// #define EMIFA_GPIO_INT_CHANNEL 9
+
+/*----- Typedefs -----------------------------------------------------*/
+
+/*----- Static function prototypes -----------------------------------*/
+
+static t_emifa_status _emifa_config(uint32_t start_address, int word_count, uint16_t extra_flags);
+static inline bool _is_dma_ready();
+static inline bool _is_fifo_full();
+static inline bool _is_fifo_empty();
+static inline bool _is_dma_complete();
+static inline bool _is_handshake_bit_set();
+static inline bool _is_allow_config_bit_set();
+static inline bool _was_hostdma_initialized();
+static void _request_host_status_interrupt();
+
+/*----- Static variable definitions ----------------------------------*/
+
+static bool g_hostdma_started = false;
+
+/*----- Extern variable definitions ----------------------------------*/
+
+/*----- Extern function implementations ------------------------------*/
+
+/**
+ * @brief   Sets up the EMIFA engine.
+ */
+void per_emifa_init() {
+
+    // EMA_CLK is 10~ ns per cycle?
+    // @TODO: Calculate and adjust faster values
+    EMIFAWaitTimingConfig(SOC_EMIFA_0_REGS, EMIFA_CHIP_SELECT_2, EMIFA_ASYNC_WAITTIME_CONFIG(
+        40, // 2, // wset   Write setup time or width in EMA_CLK cycles
+        40, //  , // wstb   Write strobe time or width in EMA_CLK cycles
+        40, // 2, // whld   Write hold time or width in EMA_CLK cycles
+        40, //  , // rset   Read setup time or width in EMA_CLK cycles
+        40, //  , // rstb   Read strobe time or width in EMA_CLK cycles
+        40, // 2, // rhld   Read hold time or width in EMA_CLK cycles
+        40  //    // ta     Minimum Turn-Around time
+    ));
+    EMIFAAsyncDevOpModeSelect(SOC_EMIFA_0_REGS, EMIFA_CHIP_SELECT_2, EMIFA_ASYNC_INTERFACE_NORMAL_MODE);
+    EMIFAAsyncDevDataBusWidthSelect(SOC_EMIFA_0_REGS, EMIFA_CHIP_SELECT_2, EMIFA_DATA_BUSWITTH_16BIT);
+    EMIFAExtendedWaitConfig(SOC_EMIFA_0_REGS, EMIFA_CHIP_SELECT_2, EMIFA_EXTENDED_WAIT_DISABLE);
+    
+    // Configure EMIFA interrupts
+    EMIFAMskedIntDisable(SOC_EMIFA_0_REGS, EMIFA_ASYNC_TIMOUT_INT);
+    EMIFAMskedIntDisable(SOC_EMIFA_0_REGS, EMIFA_LINE_TRAP_INT);
+    EMIFAMskedIntDisable(SOC_EMIFA_0_REGS, EMIFA_WAIT_RISE_INT);
+
+    // Dummy data for debugging
+    uint16_t *ptr = (uint16_t*)0xC0000000;
+    for (int i = 0; i < 64; i++) {
+        *ptr++ = i;
+    }
+
+}
+
+/**
+ * @brief   Poll for incoming HostDMA requests. When the bus is occupied
+ *          nothing is able to come through. When the HostDMA connection
+ *          has not been initialised we will wait for it to do so.
+ */
+void per_emifa_poll() {
+
+    if (!g_hostdma_started) {
+        if (!_was_hostdma_initialized()) {
+            return;
+        }
+        ft_print("HostDMA started!");
+        g_hostdma_started = true;
+    }
+    
+
+    // Poll for incoming transmissions; The DSP requests a host read by
+    // setting the handshake bit.
+    if (_is_handshake_bit_set()) {
+
+        ft_print("per_emifa_poll() START HOST READ");
+
+        // Read header:
+        // 1. Send the 7 configuration words
+        // 2. Wait for config descriptor to initialize DMA engine
+        // 3. Send host status IRQ to DSP to clear handshake bit (acknowledges request)
+        // 4. Wait for DMA transaction to complete.
+        _emifa_config(0x00000000, 6, 0x0000);
+        uint16_t word_count      = *HDMA_DATA_PORT;
+        uint16_t block_count     = *HDMA_DATA_PORT;
+        uint16_t host_address_lo = *HDMA_DATA_PORT;
+        uint16_t host_address_hi = *HDMA_DATA_PORT;
+        uint16_t dsp_address_lo  = *HDMA_DATA_PORT;
+        uint16_t dsp_address_hi  = *HDMA_DATA_PORT;
+
+        // ... The handshake bit has been automatically cleared now that we
+        //     read the last header word ...
+
+        while (!_is_dma_complete()) {
+            // @TODO: Raise error if handshake bit is set again by ISR (indicating error)!
+            ft_print("per_emifa_poll() waiting for completion of DMA transfer");
+        }
+
+        uint16_t *host_address = (uint16_t*)(host_address_lo | (host_address_hi << 16));
+        uint32_t dsp_address = (uint32_t)(dsp_address_lo | (dsp_address_hi << 16));
+        
+        ft_printf("per_emifa_poll()   header ready: %i %i %p %p",
+            (int)word_count, (int)block_count, (void*)host_address, (void*)dsp_address);
+        
+        uint16_t words_remaining = word_count;
+
+        while (words_remaining != 0) {
+
+            uint16_t num_block_words = (words_remaining < 16) ? words_remaining : 16;
+            ft_printf("per_emifa_poll()   reading %i words of remaining %i", (int)num_block_words, (int)words_remaining);
+            _emifa_config(dsp_address, num_block_words, 0x0000);
+
+            for (int i = 0; i < num_block_words; i++) {
+                // ft_printf("per_emifa_poll() reading word:%i num_block_words:%i remaining:%i", i, num_block_words, words_remaining);
+                *host_address++ = *HDMA_DATA_PORT;
+            }
+
+            words_remaining -= num_block_words;
+            dsp_address += 16 * sizeof(uint16_t); // increment up by an entire FIFO, actually
+                                                  // should be num_block_words, but once we
+                                                  // reach this after last block is received
+                                                  // we exit the loop anyway and dsp_address
+                                                  // variable won't be needed anymore.
+
+            while (!_is_dma_complete()) {
+                // @TODO: Raise error if handshake bit is set again by ISR (indicating error)!
+                ft_print("per_emifa_poll() waiting for block transaction to complete...");
+            }
+            
+        }
+
+        // ft_print("== HOST RECEIVE COMPLETE ==");
+        // host_address = (uint16_t*)(host_address_lo | (host_address_hi << 16));
+        // for (int i = 0; i < word_count; i++) {
+        //     ft_printf("%04X", *host_address++);
+        // }
+        ft_print("per_emifa_poll() END HOST READ");
+
+    }
+
+}
+
+/**
+ * @brief   Perform a blocking transfer.
+ *          @TODO: MUST BE 32-BIT INTS!
+ * 
+ * @param   dsp_address   Address in the DSP's virtual memory map to write to.
+ * @param   words         Pointer to the buffer of 16-bit words to write
+ * @param   word_count    Number of 16-bit words to write. Cannot be uneven amount!
+ */
+t_emifa_status per_emifa_transfer(uint32_t dsp_address, uint16_t *words, uint16_t word_count) {
+
+    if (!g_hostdma_started) {
+        // ft_print("per_emifa_transfer() HostDMA uninitialized: cancelling transfer.");
+        return EMIFA_UNINITIALISED;
+    }
+
+    // Check if host bit is set indicating it is waiting for us to acknowledge
+    // a transfer. Since this is a blocking operation on the DSP side, we want
+    // acknowledge it as fast as possible, this means the DSP's request needs
+    // to be prioritised over the host's.
+    if (_is_handshake_bit_set()) {
+        // ft_print("per_emifa_transfer() DSP wants request: cancelling transfer!");
+        return EMIFA_BUS_OCCUPIED; // prioritises the DSP over host
+    }
+
+    int32_t words_remaining = word_count;
+    while (words_remaining > 0) {
+
+        // ft_printf("per_emifa_transfer() words remaining: %i", (int)words_remaining);
+        int32_t num_words = MIN(words_remaining, 16);
+
+        _emifa_config(dsp_address, num_words, HOST_CONFIG_WNR);
+        if (_is_handshake_bit_set()) {
+            _request_host_status_interrupt();
+        }
+        
+        for (int i = 0; i < num_words; i++) {
+            *HDMA_DATA_PORT = *words++;
+        }
+        
+        words_remaining -= num_words;
+        dsp_address += num_words * sizeof(uint16_t);
+    }
+
+    // ft_print("per_emifa_transfer() end ...");
+    return EMIFA_SUCCESS;
+
+}
+
+/**
+ * @brief   Whenever the EMIFA bus is occupied it's impossible for any new
+ *          transmissions to happen.
+ * 
+ * @return  True if EMIFA bus currently occupied transferring or receiving.
+ */
+bool per_emifa_is_bus_available() {
+    uint16_t status = *HDMA_CONFIG_PORT;
+    return !(status & HOST_STATUS_HSHK) && !(status & HOST_STATUS_DMA_RDY) && (status & HOST_STATUS_ALLOW_CNFG);
+}
+
+/*----- Static function implementations ------------------------------*/
+
+/**
+ * @brief   Configure HostDMA for reading/writing.
+ * 
+ * @param   start_address Address in the DSP's virtual memory map to read/write to.
+ * @param   word_count    Max 16, since the FIFO size is 16 16-bit words.
+ *                        MUST be atleast 2, otherwise burst mode breaks by causing
+ *                        infinite wait for DMA_RDY.
+ * @param   extra_flags   HOST_CONFIG flags. use HOST_CONFIG_WNR for host write mode.
+ */
+static t_emifa_status _emifa_config(uint32_t start_address, int word_count, uint16_t extra_flags) {
+
+    if (!_is_allow_config_bit_set()) {
+        ft_print("_emifa_config _is_allow_config_bit_set() FALSE!!!");
+        return EMIFA_BUS_OCCUPIED; // this should never happen
+    }
+    
+    *HDMA_CONFIG_PORT = 0x00A9 | extra_flags;
+    *HDMA_CONFIG_PORT =  start_address        & 0xFFFF;
+    *HDMA_CONFIG_PORT = (start_address >> 16) & 0xFFFF;
+    *HDMA_CONFIG_PORT = word_count; // XCOUNT
+    *HDMA_CONFIG_PORT = 2;          // XMODIFY
+    *HDMA_CONFIG_PORT = 1;          // YCOUNT
+    *HDMA_CONFIG_PORT = 1;          // YMODIFY
+
+    while (!_is_dma_ready()) {
+        ft_printf("_emifa_config waiting for configuration: allow_cfg:%i dma_cmplt:%i hshk:%i",
+            (int)_is_allow_config_bit_set(),
+            (int)_is_dma_complete(),
+            (int)_is_handshake_bit_set()
+        );
+    }
+
+    return EMIFA_SUCCESS;
+    
+}
+
+static inline bool _is_dma_ready() {
+    return (*HDMA_CONFIG_PORT & HOST_STATUS_DMA_RDY);
+}
+
+static inline bool _is_fifo_full() {
+    return (*HDMA_CONFIG_PORT & HOST_STATUS_FIFOFULL);
+}
+
+static inline bool _is_fifo_empty() {
+    return (*HDMA_CONFIG_PORT & HOST_STATUS_FIFOEMPTY);
+}
+
+static inline bool _is_dma_complete() {
+    return (*HDMA_CONFIG_PORT & HOST_STATUS_DMA_CMPLT);
+}
+
+static inline bool _is_handshake_bit_set() {
+    return (*HDMA_CONFIG_PORT & HOST_STATUS_HSHK);
+}
+
+static inline bool _is_allow_config_bit_set() {
+    return (*HDMA_CONFIG_PORT & HOST_STATUS_ALLOW_CNFG);
+}
+
+/**
+ * @brief   This is a trick; Before the HostDMA peripheral is initialized on the
+ *          DSP side, the FIFOFULL and FIFOEMPTY in HOST_STATUS are both set.
+ *          Ofcourse this is an invalid state and from this we can deduce that
+ *          the HostDMA peripheral has yet to be initialized by the DSP.
+ * 
+ * @returns True if HostDMA peripheral has been initialized by the DSP.
+ */
+static inline bool _was_hostdma_initialized() {
+    uint16_t status = *HDMA_CONFIG_PORT;
+    return !((status & HOST_STATUS_FIFOFULL) && (status & HOST_STATUS_FIFOEMPTY));
+}
+
+/**
+ * @brief   Signals IRQ to DSP to clear handshake bit. This is to acknowledge
+ *          the DSP's request for a host read operation.
+ *          Note that this can only be called after DMA_RDY is set.
+ */
+static void _request_host_status_interrupt() {
+    // *(volatile uint8_t*)HDMA_CONFIG_PORT = 0x1C; // HOST IRQ
+    // *(volatile uint8_t*)HDMA_CONFIG_PORT = 0x1C; // HOST IRQ
+    *(volatile uint16_t*)HDMA_CONFIG_PORT = 0x1C; // HOST IRQ
+}
+
+

@@ -39,9 +39,12 @@ under the terms of the GNU Affero General Public License as published by
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "per_emifa.h"
+
 #include "dev_dsp.h"
 
 #include "ft_error.h"
+#include "freetribe.h" // ft_printf
 
 #include "svc_delay.h"
 #include "svc_dsp.h"
@@ -124,9 +127,12 @@ static t_status _handle_system_ready(void);
 
 static t_status _handle_system_profile(uint8_t *payload, uint8_t length);
 
+// static t_status _handle_request_hostdma_config(void);
+
 void _register_module_callback(uint8_t msg_id, void *callback);
 void _register_system_callback(uint8_t msg_id, void *callback);
 
+static int g_test = 1;
 /*----- Extern function implementations ------------------------------*/
 
 void svc_dsp_task(void) {
@@ -179,6 +185,14 @@ void svc_dsp_task(void) {
         break;
 
     case STATE_RUN:
+        if (g_test <= 0) {
+            per_emifa_transfer(0x00000010, (uint16_t*)0xC0000000, 32);
+            g_test = 4;
+        } else {
+            g_test--;
+        }
+        per_emifa_poll();
+
         // Handle received bytes.
         if (dev_dsp_spi_rx_dequeue(&dsp_byte) == SUCCESS) {
             _dsp_receive(dsp_byte);
@@ -481,6 +495,10 @@ static t_status _handle_system_message(uint8_t msg_id, uint8_t *payload,
     case SYSTEM_PROFILE:
         result = _handle_system_profile(payload, length);
         break;
+    
+    // case SYSTEM_REQUEST_HOSTDMA_CONFIG:
+    //     result = _handle_request_hostdma_config();
+    //     break;
 
     default:
         break;
@@ -554,6 +572,12 @@ static t_status _handle_system_profile(uint8_t *payload, uint8_t length) {
 
     return SUCCESS;
 }
+
+// static t_status _handle_request_hostdma_config(void) {
+//     // per_emifa_config_host_read(0x00000000, 1); // @TODO: Must be handled by device layer IPC (default state)
+//     // _transmit_message(MSG_TYPE_SYSTEM, SYSTEM_AWAIT_HOSTDMA_HANDSHAKE, NULL, 0);
+//     return SUCCESS;
+// }
 
 static void _dsp_response_required(void) { g_pending_response++; }
 

@@ -29,13 +29,15 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    per_gpio.h
+ * @file    per_emifa.h
  *
- * @brief   Public API for GPIO peripheral driver.
+ * @brief   Public API for EMIFA peripheral driver.
+ *          EMIFA communicates with the DSP's HostDMA engine and has the
+ *          highest bandwidth for transmitting data between CPU and DSP.
  */
 
-#ifndef PER_GPIO_H
-#define PER_GPIO_H
+#ifndef PER_EMIFA_H
+#define PER_EMIFA_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,32 +48,47 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
-/*----- Macros -------------------------------------------------------*/
-
-/** @brief Get the bank number corresponding to pin number. */
-static inline uint8_t per_gpio_bank_from_pin(uint8_t pin_index) {
-    uint8_t bank_index = ((pin_index - 1) >> 4) * !!pin_index;
-    return bank_index;
-}
-
 /*----- Typedefs -----------------------------------------------------*/
 
-/*----- Extern variable declarations ---------------------------------*/
+typedef enum {
+    EMIFA_SUCCESS = 0,
+    EMIFA_UNINITIALISED,
+    EMIFA_BUS_OCCUPIED,
+} t_emifa_status;
 
 /*----- Extern function prototypes -----------------------------------*/
 
-void per_gpio_init(void);
-bool per_gpio_get(uint8_t bank, uint8_t pin);
-void per_gpio_set(uint8_t bank, uint8_t pin, bool state);
-void per_gpio_toggle(uint8_t bank, uint8_t pin);
+/**
+ * @brief   Sets up the EMIFA engine.
+ */
+void per_emifa_init();
 
-bool per_gpio_get_indexed(uint8_t pin_index);
-void per_gpio_set_indexed(uint8_t pin_index, bool state);
-void per_gpio_toggle_indexed(uint8_t pin_index);
+/**
+ * @brief   Poll for incoming HostDMA requests. When the bus is occupied
+ *          nothing is able to come through. When the HostDMA connection
+ *          has not been initialised we will wait for it to do so.
+ */
+void per_emifa_poll();
+
+/**
+ * @brief   Perform a blocking transfer.
+ * 
+ * @param   dsp_address   Address in the DSP's virtual memory map to write to.
+ * @param   words         Pointer to the buffer of 16-bit words to write
+ * @param   word_count    Number of 16-bit words to write. Cannot be 1.
+ */
+t_emifa_status per_emifa_transfer(uint32_t dsp_address, uint16_t *words, uint16_t word_count);
+
+/**
+ * @brief   Whenever the EMIFA bus is occupied it's impossible for any new
+ *          transmissions to happen.
+ * 
+ * @return  True if EMIFA bus currently occupied transferring or receiving.
+ */
+bool per_emifa_is_bus_available();
 
 #ifdef __cplusplus
 }
 #endif
 #endif
-
 /*----- End of file --------------------------------------------------*/

@@ -40,8 +40,12 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
+#define TINYPRINTF_DEFINE_TFP_PRINTF 0
+#define TINYPRINTF_OVERRIDE_LIBC 0
+#include "utils/tinyprintf.h"
 #include "freetribe.h"
 #include <stdint.h>
+#include <stdarg.h>
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -132,6 +136,20 @@ void ft_register_print_callback(void (*callback)(char *)) {
  *
  */
 void ft_print(char *text) { svc_midi_send_string(text); }
+
+/**
+ * @brief   Literally printf girl
+ */
+void ft_printf(const char *format, ...)
+{
+    va_list ap;
+    static char str[256];
+
+    va_start(ap, format);
+    tfp_vsprintf(str, format, ap);
+    svc_midi_send_string(str);
+    va_end(ap);
+}
 
 // Panel API
 //

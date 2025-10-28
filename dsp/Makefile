@@ -28,7 +28,8 @@ BIN := $(BFIN_TOOLCHAIN)$(PREFIX)objcopy
 CPU := bf527
 
 # C compilation options
-OPTIMISE = -g -O3
+# OPTIMISE = -g -O3
+OPTIMISE = -Os
 CFLAGS := -mcpu=$(CPU) $(OPTIMISE) -mfast-fp  -fdata-sections -ffunction-sections -Wall 
 # Assembly compilation options
 ASM_FLAGS := -x assembler-with-cpp

@@ -56,7 +56,7 @@ extern "C" {
 
 void dev_cpu_spi_init(void);
 int dev_cpu_spi_rx_dequeue(uint8_t *spi_byte);
-void dev_cpu_spi_tx_enqueue(uint8_t *spi_byte);
+int dev_cpu_spi_tx_enqueue(uint8_t *spi_byte);
 
 #ifdef __cplusplus
 }
