@@ -67,7 +67,7 @@ t_status test_template(void) {
     // Initialise test.
     case STATE_INIT:
 
-        // ft_print("Press [Play].");
+        // ft_printf("Press [Play].");
         // gui_print(8, 32, "Press [Play].");
 
         state = STATE_RUN;
