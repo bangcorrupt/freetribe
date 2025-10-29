@@ -159,7 +159,7 @@ static t_status _init(void) {
 
     ft_register_panel_callback(BUTTON_EVENT, _button_callback);
 
-    ft_print("Freetribe Test");
+    ft_printf("Freetribe Test");
 
     result = SUCCESS;
     return result;
@@ -187,7 +187,7 @@ static void _button_callback(uint8_t button, bool state) {
 
 static t_status _test_print(void) {
 
-    ft_print("Print test passed.");
+    ft_printf("Print test passed.");
 
     // Assume success to move on to next test.
     return SUCCESS;
@@ -195,8 +195,8 @@ static t_status _test_print(void) {
 
 static t_status _test_shutdown(void) {
 
-    ft_print("Test complete.");
-    ft_print("Press [Exit] to power off.");
+    ft_printf("Test complete.");
+    ft_printf("Press [Exit] to power off.");
 
     return ERROR;
 }
