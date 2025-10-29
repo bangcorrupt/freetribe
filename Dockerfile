@@ -8,6 +8,7 @@ RUN apt-get update && \
     gdb-arm-none-eabi \
     binutils-arm-none-eabi \
     libnewlib-arm-none-eabi \
+    picolibc-arm-none-eabi \
     openocd \
     python3 \
     python3-pip \

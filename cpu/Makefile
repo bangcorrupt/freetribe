@@ -34,15 +34,15 @@ NEST_INT ?= 0
 OPTIMISE ?= -g3 -Og
 # OPTIMISE ?= -O3
 CPU ?= arm926ej-s
-CFLAGS := -mcpu=$(CPU) $(OPTIMISE)  -fdata-sections -ffunction-sections -fanalyzer -fstack-usage -Wstack-usage=128 -Wall
+CFLAGS := -mcpu=$(CPU) $(OPTIMISE) -fdata-sections -ffunction-sections -fanalyzer -fstack-usage -Wstack-usage=128 -Wall 
 
 # Assembly compilation options.
 ASM_FLAGS := -x assembler-with-cpp
 
 # Linker options.
 LDFLAGS := -e start -u start -u __aeabi_uidiv -u __aeabi_idiv $(LPATH) -lm -lc -lgcc  \
-					 -T cpu.lds -Map $(BUILD_DIR)/boot.map \
-					 --gc-sections --print-memory-usage --no-warn-rwx-segments 
+					 -T cpu.lds -Xlinker -Map -Xlinker $(BUILD_DIR)/boot.map -specs=picolibc.specs \
+					 -Wl,--gc-sections,--print-memory-usage,--no-warn-rwx-segments 
 # Binary options.
 BIN_FLAGS := -O binary
 
@@ -95,7 +95,8 @@ $(BUILD_DIR)/$(TARGET_BIN): $(BUILD_DIR)/$(TARGET_EXEC)
 
 # Link.
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	$(LD) $(OBJS) -o $@ $(LDFLAGS)
+	# $(LD) $(OBJS) -o $@ $(LDFLAGS)
+	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
 
 # Build step ASM source.
 $(BUILD_DIR)/%.S.o: %.S

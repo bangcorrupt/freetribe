@@ -43,9 +43,15 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "svc_midi.h"
 
-#include <errno.h>
 #include <unistd.h>
-#undef errno
+
+#include <errno.h>
+
+/// TODO: This is suggested Embcosm docs, but breaks build in Debian container.
+/// https://www.embecosm.com/appnotes/ean9/ean9-howto-newlib-1.0.html
+//
+// #undef errno
+// extern int errno;
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -54,8 +60,6 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Static variable definitions ----------------------------------*/
 
 /*----- Extern variable definitions ----------------------------------*/
-
-extern int errno;
 
 /*----- Static function prototypes -----------------------------------*/
 
