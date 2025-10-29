@@ -29,7 +29,7 @@ under the terms of the GNU Affero General Public License as published by
 ----------------------------------------------------------------------*/
 
 /**
- * @file    syscalls.c
+ * @file    libc_syscalls.c
  *
  * @brief   Implementation of Newlib stub functions.
  */
@@ -44,6 +44,7 @@ under the terms of the GNU Affero General Public License as published by
 #include "svc_midi.h"
 
 #include <errno.h>
+#include <unistd.h>
 #undef errno
 
 /*----- Macros -------------------------------------------------------*/
@@ -87,13 +88,22 @@ void *_sbrk(int incr) {
 
 int _write(int file, char *buffer, int length) {
 
-    if (file == 0) {
-        while (length--) {
+    int result = 0;
 
-            svc_midi_send_byte(*buffer++);
-        }
+    // We only handle stdout and stderr.
+    if ((file != STDOUT_FILENO) && (file != STDERR_FILENO)) {
+
+        errno = EBADF;
+        result = -1;
     }
-    return length;
+
+    while (length--) {
+
+        svc_midi_send_byte(*buffer++);
+        result++;
+    }
+
+    return result;
 }
 
 int _close(int file) { return -1; }
