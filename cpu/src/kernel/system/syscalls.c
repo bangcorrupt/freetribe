@@ -87,11 +87,12 @@ void *_sbrk(int incr) {
 
 int _write(int file, char *buffer, int length) {
 
-    while (length--) {
+    if (file == 0) {
+        while (length--) {
 
-        svc_midi_send_byte(*buffer++);
+            svc_midi_send_byte(*buffer++);
+        }
     }
-
     return length;
 }
 
