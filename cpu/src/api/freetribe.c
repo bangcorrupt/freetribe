@@ -40,8 +40,11 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
-#include "freetribe.h"
+#include <stdarg.h>
 #include <stdint.h>
+#include <stdio.h>
+
+#include "freetribe.h"
 
 /*----- Macros -------------------------------------------------------*/
 
@@ -132,6 +135,22 @@ void ft_register_print_callback(void (*callback)(char *)) {
  *
  */
 void ft_print(char *text) { svc_midi_send_string(text); }
+
+/**
+ * @brief   Libc formatted print.
+ */
+void ft_printf(const char *format, ...) {
+
+    va_list ap;
+    static char str[256];
+
+    va_start(ap, format);
+
+    vsprintf(str, format, ap);
+    svc_midi_send_string(str);
+
+    va_end(ap);
+}
 
 // Panel API
 //
