@@ -36,23 +36,22 @@ under the terms of the GNU Affero General Public License as published by
 
 /*----- Includes -----------------------------------------------------*/
 
+#include "per_gpio.h"
+
 #include "freetribe.h"
 
 /*----- Macros -------------------------------------------------------*/
 
-#define BUTTON_EXIT 0x0d
+// Bank 7 pin 15.
+#define GPIO_POWER_BUTTON 128
 
 /*----- Typedefs -----------------------------------------------------*/
 
 /*----- Static variable definitions ----------------------------------*/
 
-static bool g_shutdown = false;
-
 /*----- Extern variable definitions ----------------------------------*/
 
 /*----- Static function prototypes -----------------------------------*/
-
-void _button_callback(uint8_t index, bool state);
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -68,7 +67,7 @@ t_status app_init(void) {
 
     t_status status = ERROR;
 
-    ft_register_panel_callback(BUTTON_EVENT, _button_callback);
+    // Nothing to do here.
 
     status = SUCCESS;
     return status;
@@ -76,10 +75,12 @@ t_status app_init(void) {
 
 /**
  * @brief   Run application.
+ *
+ * Test if GPIO index 128 (bank 7 pin 15) is low, if so, shutdown.
  */
 void app_run(void) {
 
-    if (g_shutdown) {
+    if (per_gpio_get_indexed(GPIO_POWER_BUTTON) == 0) {
 
         ft_shutdown();
 
@@ -88,26 +89,5 @@ void app_run(void) {
 }
 
 /*----- Static function implementations ------------------------------*/
-
-/**
- * @brief   Callback triggered by panel button events.
- *
- * @param[in]   index   Index of button.
- * @param[in]   state   State of button.
- */
-void _button_callback(uint8_t index, bool state) {
-
-    switch (index) {
-
-    case BUTTON_EXIT:
-        if (state == 1) {
-            g_shutdown = true;
-        }
-        break;
-
-    default:
-        break;
-    }
-}
 
 /*----- End of file --------------------------------------------------*/
