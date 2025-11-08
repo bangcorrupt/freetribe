@@ -240,11 +240,12 @@ void ft_toggle_led(t_led_index led_index) { svc_panel_toggle_led(led_index); }
 /**
  * @brief   Set LED.
  *
- * @param[in]   led_index   Index of LED to toggle.
+ * @param[in]   led_index   Index of LED to set.
+ * @param[in]   brightness  Brightness of LED 0-255.
  *
  */
-void ft_set_led(t_led_index led_index, bool state) {
-    svc_panel_set_led(led_index, state);
+void ft_set_led(t_led_index led_index, uint8_t brightness) {
+    svc_panel_set_led(led_index, brightness);
 }
 
 // DSP Command API

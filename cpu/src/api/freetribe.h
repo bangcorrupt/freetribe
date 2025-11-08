@@ -68,6 +68,9 @@ extern "C" {
 
 /*----- Macros -------------------------------------------------------*/
 
+#define LED_ON 0xff
+#define LED_OFF 0x0
+
 /*----- Typedefs -----------------------------------------------------*/
 
 /*----- Extern variable declarations ---------------------------------*/
@@ -95,11 +98,9 @@ void ft_send_note_on(char chan, char note, char vel);
 void ft_send_note_off(char chan, char note, char vel);
 void ft_send_cc(char chan, char index, char val);
 
-/// TODO: Cast void pointers to typedef function pointers.
-//
 void ft_register_panel_callback(t_panel_event event, void *callback);
 void ft_toggle_led(t_led_index led_index);
-void ft_set_led(t_led_index led_index, bool state);
+void ft_set_led(t_led_index led_index, uint8_t brightness);
 void ft_set_trigger_mode(uint8_t mode);
 
 void ft_set_module_param(uint16_t module_id, uint16_t param_index,
