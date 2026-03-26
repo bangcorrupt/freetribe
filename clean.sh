@@ -1,0 +1,1 @@
+sudo docker-compose exec freetribe make clean
