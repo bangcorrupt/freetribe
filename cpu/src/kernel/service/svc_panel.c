@@ -72,6 +72,27 @@ typedef void (*t_xy_pad_callback)(uint32_t x_val, uint32_t y_val);
 typedef void (*t_panel_ack_callback)(uint32_t version);
 typedef void (*t_held_buttons_callback)(uint32_t *held_buttons);
 
+typedef struct __attribute__((packed)) {
+    uint8_t id;
+    uint8_t index;
+    uint8_t reserved;
+    uint8_t value;
+    uint8_t state;
+} t_panel_control_msg;
+
+typedef struct __attribute__((packed)) {
+    uint8_t id;
+    uint8_t value_msb;
+    uint8_t value_lsb;
+    uint8_t reserved_msb;
+    uint8_t reserved_lsb;
+} t_panel_xy_msg;
+
+typedef struct __attribute__((packed)) {
+    uint8_t id;
+    uint8_t value[4];
+} t_panel_word_msg;
+
 /*----- Static variable definitions ----------------------------------*/
 
 static uint8_t g_led_current_brightness[LED_COUNT] = {0};
@@ -91,6 +112,7 @@ static t_held_buttons_callback p_held_buttons_callback = NULL;
 
 static t_status _panel_init(void);
 static t_status _panel_parse(uint8_t *msg);
+static uint32_t _read_u32_be(const uint8_t *value);
 
 /*----- Extern function implementations ------------------------------*/
 
@@ -283,34 +305,38 @@ static t_status _panel_parse(uint8_t *msg) {
 
     t_status result = PANEL_PARSE_ERROR;
     static uint32_t held_buttons[2];
-    uint32_t version;
+    t_panel_control_msg *control_msg = (t_panel_control_msg *)msg;
+    t_panel_xy_msg *xy_msg = (t_panel_xy_msg *)msg;
+    t_panel_word_msg *word_msg = (t_panel_word_msg *)msg;
 
     switch (msg[0]) {
 
     case BUTTON_EVENT:
         if (p_button_callback != NULL) {
-            (p_button_callback)(msg[1], (bool)msg[2]);
+            (p_button_callback)(control_msg->index, (bool)control_msg->reserved);
         }
         result = SUCCESS;
         break;
 
     case ENCODER_EVENT:
         if (p_encoder_callback != NULL) {
-            (p_encoder_callback)(msg[1], (int8_t)(msg[3]));
+            (p_encoder_callback)(control_msg->index,
+                                 (int8_t)(control_msg->value));
         }
         result = SUCCESS;
         break;
 
     case KNOB_EVENT:
         // In continuous mode, trigger pads use KNOB_EVENT message ID.
-        if (msg[1] >= 0x11) {
+        if (control_msg->index >= 0x11) {
             if (p_trigger_callback != NULL) {
-                (p_trigger_callback)(msg[1], msg[3], (bool)msg[4]);
+                (p_trigger_callback)(control_msg->index, control_msg->value,
+                                     (bool)control_msg->state);
             }
 
         } else {
             if (p_knob_callback != NULL) {
-                (p_knob_callback)(msg[1], msg[3]);
+                (p_knob_callback)(control_msg->index, control_msg->value);
             }
         }
         result = SUCCESS;
@@ -325,15 +351,17 @@ static t_status _panel_parse(uint8_t *msg) {
 
     case TRIGGER_EVENT:
         if (p_trigger_callback != NULL) {
-            (p_trigger_callback)(msg[1], msg[3], (bool)msg[4]);
+            (p_trigger_callback)(control_msg->index, control_msg->value,
+                                 (bool)control_msg->state);
         }
         result = SUCCESS;
         break;
 
     case XY_PAD_EVENT:
         if (p_xy_pad_callback != NULL) {
-            uint32_t x = msg[1] << 8 | msg[2];
-            uint32_t y = msg[3] << 8 | msg[4];
+            uint32_t x = (uint32_t)xy_msg->value_msb << 8 | xy_msg->value_lsb;
+            uint32_t y = (uint32_t)xy_msg->reserved_msb << 8 |
+                         xy_msg->reserved_lsb;
             (p_xy_pad_callback)(x, y);
         }
         result = SUCCESS;
@@ -341,24 +369,20 @@ static t_status _panel_parse(uint8_t *msg) {
 
     case MSG_ID_ACK:
         /// TODO: Is this actually version number?
-        version = msg[1] << 0x18 | msg[2] << 0x10 | msg[3] << 0x8 | msg[4];
-
         if (p_panel_ack_callback != NULL) {
-            p_panel_ack_callback(version);
+            p_panel_ack_callback(_read_u32_be(word_msg->value));
         }
         result = SUCCESS;
         break;
 
     case MSG_ID_BUTTONS_LSW:
-        held_buttons[0] =
-            msg[1] << 0x18 | msg[2] << 0x10 | msg[3] << 0x8 | msg[4];
+        held_buttons[0] = _read_u32_be(word_msg->value);
         // Callback not triggered until MSW received.
         result = SUCCESS;
         break;
 
     case MSG_ID_BUTTONS_MSW:
-        held_buttons[1] =
-            msg[1] << 0x18 | msg[2] << 0x10 | msg[3] << 0x8 | msg[4];
+        held_buttons[1] = _read_u32_be(word_msg->value);
 
         if (p_held_buttons_callback != NULL) {
             p_held_buttons_callback(held_buttons);
@@ -378,6 +402,12 @@ static t_status _panel_parse(uint8_t *msg) {
     }
 
     return result;
+}
+
+static uint32_t _read_u32_be(const uint8_t *value) {
+
+    return ((uint32_t)value[0] << 24) | ((uint32_t)value[1] << 16) |
+           ((uint32_t)value[2] << 8) | (uint32_t)value[3];
 }
 
 /*----- End of file --------------------------------------------------*/
