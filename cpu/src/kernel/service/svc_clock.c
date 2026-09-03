@@ -45,6 +45,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "per_timer.h"
 
+#include "config.h"
+
 /*----- Macros -------------------------------------------------------*/
 
 #define CLOCK_TIMER SOC_TMR_2_REGS
@@ -54,7 +56,7 @@ under the terms of the GNU Affero General Public License as published by
     TMR_CFG_32BIT_UNCH_CLK_BOTH_INT & ~TMR_TGCR_TIM34RS & ~TMR_TGCR_PLUSEN
 
 #define CLOCK_INT TMR_INT_TMR12_NON_CAPT_MODE
-#define CLOCK_INT_CHAN 5
+#define CLOCK_INT_CHAN FREETRIBE_CLOCK_INT_CHANNEL
 
 /*----- Typedefs -----------------------------------------------------*/
 

@@ -43,6 +43,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "per_uart.h"
 
+#include "config.h"
+
 #include "ring_buffer.h"
 
 /*----- Macros -------------------------------------------------------*/
@@ -50,7 +52,7 @@ under the terms of the GNU Affero General Public License as published by
 /// TODO: Centralised header for interrupt priorities and queue sizes.
 
 #define TRS_UART UART_1
-#define TRS_UART_INT_CHANNEL 6
+#define TRS_UART_INT_CHANNEL FREETRIBE_TRS_UART_INT_CHANNEL
 
 #define TRS_TX_BUF_LEN 0x200
 #define TRS_RX_BUF_LEN 0x200

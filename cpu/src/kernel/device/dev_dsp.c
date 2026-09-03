@@ -46,6 +46,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "dev_dsp.h"
 
+#include "config.h"
+
 #include "ring_buffer.h"
 
 /*----- Macros -------------------------------------------------------*/
@@ -57,7 +59,7 @@ under the terms of the GNU Affero General Public License as published by
 
 /// TODO: Centralised header for interrupt priorities.
 //          This should probably be lower priority than UART control input.
-#define DSP_SPI_INT_CHANNEL 5
+#define DSP_SPI_INT_CHANNEL FREETRIBE_DSP_SPI_INT_CHANNEL
 
 #define DSP_SPI_INT_LEVEL SPI_INT_LEVEL_TX_RX_TIMEOUT_DESYNC
 

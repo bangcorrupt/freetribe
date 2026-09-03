@@ -44,6 +44,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "per_timer.h"
 
+#include "config.h"
+
 /*----- Macros -------------------------------------------------------*/
 
 #define SYSTICK_TIMER SOC_TMR_0_REGS
@@ -57,7 +59,7 @@ under the terms of the GNU Affero General Public License as published by
 /// TODO: Single header file with interrupt priorities.
 //
 //  Lowest priority. SPI0 is 8.
-#define SYSTICK_INT_CHAN 9 // 8
+#define SYSTICK_INT_CHAN FREETRIBE_SYSTICK_INT_CHANNEL
 
 /*----- Typedefs -----------------------------------------------------*/
 

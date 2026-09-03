@@ -45,13 +45,15 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "dev_lcd.h"
 
+#include "config.h"
+
 #include "svc_delay.h"
 
 /*----- Macros -------------------------------------------------------*/
 
 #define LCD_SPI 0
 
-#define LCD_SPI_INT_CHANNEL 8
+#define LCD_SPI_INT_CHANNEL FREETRIBE_LCD_SPI_INT_CHANNEL
 #define LCD_SPI_INT_LEVEL SPI_INT_LEVEL_TX
 #define LCD_SPI_PIN_FUNC SPI_PIN_SIMO | SPI_PIN_CLK | SPI_PIN_CS0
 

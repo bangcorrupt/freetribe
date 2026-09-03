@@ -45,6 +45,8 @@ under the terms of the GNU Affero General Public License as published by
 
 #include "dev_mcu.h"
 
+#include "config.h"
+
 #include "ring_buffer.h"
 
 /*----- Macros -------------------------------------------------------*/
@@ -53,7 +55,7 @@ under the terms of the GNU Affero General Public License as published by
 
 #define MCU_UART UART_0
 
-#define MCU_UART_INT_CHANNEL 7
+#define MCU_UART_INT_CHANNEL FREETRIBE_MCU_UART_INT_CHANNEL
 
 #define MCU_TX_BUF_LEN 0x200
 #define MCU_RX_BUF_LEN 0x200
