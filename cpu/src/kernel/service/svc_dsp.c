@@ -53,6 +53,7 @@ under the terms of the GNU Affero General Public License as published by
 /*----- Macros -------------------------------------------------------*/
 
 #define MSG_START 0xf0
+#define SYSTEM_PROFILE_PAYLOAD_LENGTH 12
 
 /*----- Typedefs -----------------------------------------------------*/
 
@@ -88,7 +89,7 @@ typedef void (*t_module_param_value_callback)(uint16_t module_id,
 typedef void (*t_system_port_state_callback)(uint16_t port_f, uint16_t port_g,
                                              uint16_t port_h);
 
-typedef void (*t_system_profile_callback)(uint32_t period, uint32_t cycles);
+typedef void (*t_system_profile_callback)(uint32_t period, uint64_t cycles);
 
 static t_module_param_value_callback p_module_param_value_callback;
 static t_system_port_state_callback p_system_port_state_callback;
@@ -541,13 +542,23 @@ static t_status _handle_system_port_state(uint8_t *payload, uint8_t length) {
 
 static t_status _handle_system_profile(uint8_t *payload, uint8_t length) {
 
+    if (length < SYSTEM_PROFILE_PAYLOAD_LENGTH) {
+        return ERROR;
+    }
+
     if (p_system_profile_callback != NULL) {
 
-        uint32_t period = (payload[3] << 24 | payload[2] << 16 |
-                           payload[1] << 8 | payload[0]);
+        uint32_t period = (uint32_t)payload[3] << 24 |
+                  (uint32_t)payload[2] << 16 |
+                  (uint32_t)payload[1] << 8 | payload[0];
 
-        uint32_t cycles = (payload[7] << 24 | payload[6] << 16 |
-                           payload[5] << 8 | payload[4]);
+        uint64_t cycles = (uint64_t)payload[11] << 56 |
+                  (uint64_t)payload[10] << 48 |
+                  (uint64_t)payload[9] << 40 |
+                  (uint64_t)payload[8] << 32 |
+                  (uint64_t)payload[7] << 24 |
+                  (uint64_t)payload[6] << 16 |
+                  (uint64_t)payload[5] << 8 | payload[4];
 
         p_system_profile_callback(period, cycles);
     }

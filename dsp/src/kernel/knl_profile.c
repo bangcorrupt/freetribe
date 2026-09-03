@@ -61,7 +61,7 @@ t_profile knl_profile_stats(void) {
     static t_profile stats;
 
     stats.period = (uint32_t)sport0_period();
-    stats.cycles = (uint32_t)g_module_cycles;
+    stats.cycles = g_module_cycles;
 
     return stats;
 }

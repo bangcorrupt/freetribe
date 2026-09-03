@@ -59,7 +59,7 @@ extern "C" {
 
 typedef struct {
     uint32_t period;
-    uint32_t cycles;
+    uint64_t cycles;
 
 } t_profile;
 
